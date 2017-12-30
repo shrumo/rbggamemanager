@@ -1,0 +1,106 @@
+#game = "Reversi"
+
+#row = [empty,empty,empty,empty,empty,empty,empty,empty]
+
+#board = row
+         row
+         row
+         [empty,empty,empty,wpiece,bpiece,empty,empty,empty]
+         [empty,empty,empty,bpiece,wpiece,empty,empty,empty]
+         row
+         row
+         row
+
+#players = wplayer, bplayer
+
+#pieces = empty, wpiece, bpiece, wplaceholder, bplaceholder
+#variables = wswapped, bswapped
+
+#anySquare =
+    (
+        ( 1, 0)
+      + ( 0, 1)
+      + (-1, 0)
+      + ( 0,-1)
+    )^*
+
+#swapdirection (pla; opp; direction; oppositedirection) =
+    (
+        [wplaceholder]
+        (
+            direction
+            (opp~piece)
+            [pla~piece]
+            [$pla~swapped=1]
+            ->
+        )^*
+        direction 
+        (pla~piece)
+        (oppositedirection)^*
+        (wplaceholder)
+        [pla~piece]
+    )
+
+#place (pla; opp) =
+    (
+        anySquare
+        (empty)
+        [pla~piece]
+        swapdirection(pla; opp; (-1,0); (1,0))
+        swapdirection(pla;opp;(1,0);(-1,0))
+        swapdirection(pla;opp;(0,1);(0,-1))
+        swapdirection(pla;opp;(0,-1);(0,1))
+        (? $pla~swapped == 1)
+    )
+
+#canswapdirection (pla; opp; direction; oppositedirection) =
+    (
+        direction
+        (opp~piece)
+        direction^*
+        (pla~piece)
+    )
+
+#canplace (pla; opp) =
+    (
+        anySquare
+        (empty)
+        (canswapdirection(pla;opp;(-1,0);(1,0)) +
+        canswapdirection(pla;opp;(1,0);(-1,0)) +
+        canswapdirection(pla;opp;(0,1);(0,-1)) +
+        canswapdirection(pla;opp;(0,-1);(0,1))
+        )
+    )
+
+#reset =
+    (
+        [$wswapped = 0, $bswapped = 0]
+    )
+
+#move (pla; opp) =
+    (
+        place(pla;opp)
+    )  
+
+#rules = 
+    (
+        (move(w; b) + (? not (!canplace(w;b))))
+        reset
+        ->bplayer
+        (move(b; w) + (? not (!canplace(b;w))))
+        reset
+        ->wplayer
+    )^*
+    (
+    (? $wpiece > $bpiece) [$wplayer = 100]
+    )
+    +
+    (
+    (? $wpiece < $bpiece) [$bplayer = 100]
+    )
+    +
+    (
+    (? $wpiece == $bpiece) [$bplayer = 50][$wplayer = 50]
+    )
+
+
