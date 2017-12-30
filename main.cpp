@@ -65,13 +65,14 @@ int main(int argc, char *argv[])
 //    tcp::resolver::query q{"theboostcpplibraries.com", "80"};
 //    resolv.async_resolve(q, resolve_handler);
 //    ioservice.run();
-    messages_container msg;
+    rbg_parser::messages_container msg;
     std::string input_file_name(argv[argc-1]);
     std::ifstream t(input_file_name);
     std::stringstream buffer;
     buffer << t.rdbuf();
-    std::vector<token> result = tokenize(buffer.str(),msg);
-    game_items g = input_tokens(result,msg);
-    parsed_game pg = g.parse_game(msg);
+    std::vector<rbg_parser::token> result = tokenize(buffer.str(),msg);
+    rbg_parser::game_items g = input_tokens(result,msg);
+    rbg_parser::parsed_game pg = g.parse_game(msg);
     game_description gd(pg);
+    std::cout << "LINE" << std::endl;
 }

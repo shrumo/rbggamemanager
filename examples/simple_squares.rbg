@@ -1,0 +1,28 @@
+#game = "SimpleSquares"
+
+#board = [empty, empty, empty]
+         [empty, empty, empty]
+         [empty, empty, empty]
+
+#players = sad
+#pieces = empty, piece
+#variables =
+
+#anySquare =
+    (
+            ( 1, 0)
+          + ( 0, 1)
+          + (-1, 0)
+          + ( 0,-1)
+    )^*
+
+#rules =
+    (
+        anySquare
+        (empty)
+        [piece]
+        ->sad
+    )^* [@ $sad = 100]
+
+
+

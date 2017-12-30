@@ -8,7 +8,7 @@
 #include <vector>
 #include <unordered_set>
 #include <memory>
-#include "rbg2gdl/src/abstract_dispatcher.cpp"
+#include "rbg2gdl/src/abstract_dispatcher.hpp"
 
 #include "action.h"
 class name_resolver;
@@ -30,6 +30,21 @@ namespace fsm {
                 : target_id(target_id), epsilon(false), move(ptr)
         {
         }
+
+        bool is_epsilon() const
+        {
+            return epsilon;
+        }
+
+        int target_state_id() const
+        {
+            return target_id;
+        }
+
+        action* get_action() const
+        {
+            return move.get();
+        }
     };
 
     class state {
@@ -38,6 +53,11 @@ namespace fsm {
     public:
         state(int id)
                 : id(id) {}
+
+        const std::vector<transition>& get_transitions() const
+        {
+            return transitions;
+        }
 
         void add_transition(int target_id) {
             transitions.emplace_back(target_id);
@@ -69,7 +89,7 @@ namespace fsm {
         nfa(state_register* reg) : initial_state_id(-1), final_state_id(-1), states(reg)
         {}
 
-        nfa(const nfa& a) = delete;
+        nfa(const nfa& a) = default;
 
         state& operator[](int id)
         {
@@ -120,7 +140,7 @@ namespace fsm {
     };
 }
 
-class game_nfa_creator : public abstract_dispatcher{
+class game_nfa_creator : public rbg_parser::abstract_dispatcher{
     int counter;
     fsm::nfa result;
     const name_resolver& resolver;
@@ -141,23 +161,23 @@ public:
         return result;
     }
 
-    void dispatch(const sum&) override;
-    void dispatch(const pure_sum&) override;
-    void dispatch(const concatenation&) override;
-    void dispatch(const pure_concatenation&) override;
-    void dispatch(const bracketed_move&) override;
-    void dispatch(const pure_bracketed_move&) override;
-    void dispatch(const shift&) override;
-    void dispatch(const ons&) override;
-    void dispatch(const off&) override;
-    void dispatch(const assignment&) override;
-    void dispatch(const player_switch&) override;
-    void dispatch(const condition_check&) override;
-    void dispatch(const conjunction&) override;
-    void dispatch(const alternative&) override;
-    void dispatch(const negatable_condition&) override;
-    void dispatch(const comparison&) override;
-    void dispatch(const move_condition&) override;
+    void dispatch(const rbg_parser::sum&) override;
+    void dispatch(const rbg_parser::pure_sum&) override;
+    void dispatch(const rbg_parser::concatenation&) override;
+    void dispatch(const rbg_parser::pure_concatenation&) override;
+    void dispatch(const rbg_parser::bracketed_move&) override;
+    void dispatch(const rbg_parser::pure_bracketed_move&) override;
+    void dispatch(const rbg_parser::shift&) override;
+    void dispatch(const rbg_parser::ons&) override;
+    void dispatch(const rbg_parser::off&) override;
+    void dispatch(const rbg_parser::assignment&) override;
+    void dispatch(const rbg_parser::player_switch&) override;
+    void dispatch(const rbg_parser::condition_check&) override;
+    void dispatch(const rbg_parser::conjunction&) override;
+    void dispatch(const rbg_parser::alternative&) override;
+    void dispatch(const rbg_parser::negatable_condition&) override;
+    void dispatch(const rbg_parser::comparison&) override;
+    void dispatch(const rbg_parser::move_condition&) override;
 };
 
 
