@@ -28,23 +28,26 @@ void find_all_moves_rec(game_state *state, move *current_move, std::vector<move>
         }
         else
         {
-
-
             int previous_state = state->current_nfa_state;
             if(x.get_action()->apply(state)) {
+                std::unordered_set<long long> new_visited;
+                std::unordered_set<long long>* vis_ptr = visited;
                 if(x.get_action()->is_modifier())
                 {
                     current_move->move_actions.emplace_back(state->board_x,state->board_y,x.get_action()->get_index());
+                    vis_ptr = &new_visited;
                 }
                 if (x.get_action()->is_switch()) {
                     result->emplace_back(*current_move);
 
                     x.get_action()->revert(state);
                     state->current_nfa_state = previous_state;
+
+                    current_move->move_actions.pop_back();
                     return;
                 }
                 state->current_nfa_state = x.target_state_id();
-                find_all_moves_rec(state, current_move, result, visited);
+                find_all_moves_rec(state, current_move, result, vis_ptr);
 
                 if (x.get_action()->is_modifier()) {
                     current_move->move_actions.pop_back();
