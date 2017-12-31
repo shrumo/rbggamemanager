@@ -8,7 +8,7 @@
 bool actions::shift::apply(game_state *b) {
     b->board_x += dx;
     b->board_y += dy;
-    return 0 <= b->board_x < b->current_board.width() && 0 <= b->board_y < b->current_board.height();
+    return 0 <= b->board_x && b->board_x < b->current_board.width() && 0 <= b->board_y && b->board_y < b->current_board.height();
 }
 
 void actions::shift::revert(game_state *b) {
@@ -23,6 +23,7 @@ bool actions::on::apply(game_state *b) {
 void actions::on::revert(game_state *b) {}
 
 bool actions::condition_action::apply(game_state *b) {
+    /* Move patterns are not yet implemented */
     return cond->check(b);
 }
 
@@ -99,6 +100,7 @@ void actions::modifiers::player_switch::revert(game_state *b) {
 }
 
 bool actions::modifiers::semi_switch::apply(game_state *b) {
+    /* TODO(shrum): Impl */
     return modifier::apply(b);
 }
 

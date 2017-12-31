@@ -26,6 +26,8 @@ public:
     {
         return index;
     }
+    virtual bool is_modifier() { return false; }
+    virtual bool is_switch() { return false; }
 };
 
 namespace actions
@@ -133,6 +135,10 @@ namespace actions
         {}
         virtual bool apply(game_state *b) override;
         virtual void revert(game_state *b) override;
+        bool is_modifier() override
+        {
+            return true;
+        }
     };
 
     namespace modifiers
@@ -154,6 +160,10 @@ namespace actions
             player_switch(int index, int player_id) : modifier(index), player_id(player_id) {}
             bool apply(game_state *b) override;
             void revert(game_state *b) override;
+            bool is_switch() override
+            {
+                return true;
+            }
         };
 
         class semi_switch : public modifier {
@@ -161,6 +171,10 @@ namespace actions
             semi_switch(int index) : modifier(index) {}
             bool apply(game_state *b) override;
             void revert(game_state *b) override;
+            bool is_switch() override
+            {
+                return true;
+            }
         };
 
         class assignment : public modifier {

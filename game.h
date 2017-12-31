@@ -9,6 +9,7 @@
 #include "automaton.h"
 #include "rbg2gdl/src/parsed_game.hpp"
 #include <unordered_map>
+#include "action.h"
 
 class name_resolver
 {
@@ -84,7 +85,7 @@ public:
     game_description(const rbg_parser::parsed_game& parsed_game)
         : resolver(parsed_game), state_register(new fsm::state_register()),
           game_nfa(state_register.get()), initial_board(parsed_game.get_board(),resolver),
-          starting_player_id(0)
+          starting_player_id(resolver.players_ids[parsed_game.get_declarations().get_first_player().to_string()])
     {
         game_nfa_creator creator(state_register.get(),resolver);
         parsed_game.get_moves()->accept(creator);
@@ -116,12 +117,14 @@ public:
               board_y(0),
               index(0),
               sigma(parent.resolver.variables.size()),
-              current_player(0),
+              current_player(parent.starting_player_id),
               turn(0),
               lazy_actions(),
               lazy_ptr(0),
               current_nfa_state(parent.game_nfa.get_initial_id())
     {}
+
+    game_state(const game_state& g) = delete;
 
     int current_piece() const
     {
@@ -162,21 +165,28 @@ public:
     }
 };
 
-class block_action
+class modifier_action
 {
-    int first_modifier_index;
+public:
     int board_position_x;
     int board_position_y;
+    int modifier_index;
+
+    modifier_action(int bx, int by, int in)
+            : board_position_x(bx), board_position_y(by), modifier_index(in)
+    {}
 };
 
 class move
 {
-    std::vector<block_action> move_actions;
+public:
+    std::vector<modifier_action> move_actions;
 };
 
-std::vector<move> find_all_moves(game_state current);
+std::vector<move> find_all_moves(game_state* current);
 
-void find_all_moves_rec(game_state* state,move* current_move, std::vector<move>* result, const std::unordered_set<long long> visited);
+void find_all_moves_rec(game_state* state,move* current_move, std::vector<move>* result, std::unordered_set<long long>* visited);
 
+void make_move(game_state* state,move move);
 
 #endif //RBGGAMEMANAGER_GAME_H

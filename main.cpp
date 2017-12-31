@@ -1,7 +1,7 @@
-#include <boost/asio/io_service.hpp>
-#include <boost/asio/write.hpp>
-#include <boost/asio/buffer.hpp>
-#include <boost/asio/ip/tcp.hpp>
+//#include <boost/asio/io_service.hpp>
+//#include <boost/asio/write.hpp>
+//#include <boost/asio/buffer.hpp>
+//#include <boost/asio/ip/tcp.hpp>
 #include <array>
 #include <string>
 #include <iostream>
@@ -21,44 +21,44 @@
 #include "game.h"
 
 
-using namespace boost::asio;
-using namespace boost::asio::ip;
-
-io_service ioservice;
-tcp::resolver resolv{ioservice};
-tcp::socket tcp_socket{ioservice};
-std::array<char, 4096> bytes;
-
-void read_handler(const boost::system::error_code &ec,
-                  std::size_t bytes_transferred)
-{
-    if (!ec)
-    {
-        std::cout.write(bytes.data(), bytes_transferred);
-        tcp_socket.async_read_some(buffer(bytes), read_handler);
-    }
-}
-
-void connect_handler(const boost::system::error_code &ec)
-{
-    if (!ec)
-    {
-        std::string r =
-                "GET / HTTP/1.1\r\nHost: theboostcpplibraries.com\r\n\r\n";
-        write(tcp_socket, buffer(r));
-        tcp_socket.async_read_some(buffer(bytes), read_handler);
-    }
-}
-
-void resolve_handler(const boost::system::error_code &ec,
-                     tcp::resolver::iterator it)
-{
-    if (!ec) {
-        std::cout << (*it).service_name() << std::endl;
-        tcp_socket.async_connect(*it, connect_handler);
-
-    }
-}
+//using namespace boost::asio;
+//using namespace boost::asio::ip;
+//
+//io_service ioservice;
+//tcp::resolver resolv{ioservice};
+//tcp::socket tcp_socket{ioservice};
+//std::array<char, 4096> bytes;
+//
+//void read_handler(const boost::system::error_code &ec,
+//                  std::size_t bytes_transferred)
+//{
+//    if (!ec)
+//    {
+//        std::cout.write(bytes.data(), bytes_transferred);
+//        tcp_socket.async_read_some(buffer(bytes), read_handler);
+//    }
+//}
+//
+//void connect_handler(const boost::system::error_code &ec)
+//{
+//    if (!ec)
+//    {
+//        std::string r =
+//                "GET / HTTP/1.1\r\nHost: theboostcpplibraries.com\r\n\r\n";
+//        write(tcp_socket, buffer(r));
+//        tcp_socket.async_read_some(buffer(bytes), read_handler);
+//    }
+//}
+//
+//void resolve_handler(const boost::system::error_code &ec,
+//                     tcp::resolver::iterator it)
+//{
+//    if (!ec) {
+//        std::cout << (*it).service_name() << std::endl;
+//        tcp_socket.async_connect(*it, connect_handler);
+//
+//    }
+//}
 
 int main(int argc, char *argv[])
 {
@@ -74,5 +74,26 @@ int main(int argc, char *argv[])
     rbg_parser::game_items g = input_tokens(result,msg);
     rbg_parser::parsed_game pg = g.parse_game(msg);
     game_description gd(pg);
-    std::cout << "LINE" << std::endl;
+    game_state state(gd);
+    std::cout << pg.to_rbg(true) << std::endl;
+    std::vector<move> moves = find_all_moves(&state);
+    for(const move& m : moves)
+    {
+        for(const modifier_action& ac : m.move_actions)
+        {
+            std::cout << ac.board_position_x << " " << ac.board_position_y << " " << ac.modifier_index << ", ";
+        }
+        std::cout << std::endl;
+    }
+    make_move(&state,moves[0]);
+    std::cout << "MOVE MADE" << std::endl;
+    moves = find_all_moves(&state);
+    for(const move& m : moves)
+    {
+        for(const modifier_action& ac : m.move_actions)
+        {
+            std::cout << ac.board_position_x << " " << ac.board_position_y << " " << ac.modifier_index << ", ";
+        }
+        std::cout << std::endl;
+    }
 }
