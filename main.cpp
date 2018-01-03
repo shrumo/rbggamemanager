@@ -78,23 +78,19 @@ int main(int argc, char *argv[])
     game_state state(pg);
     std::cout << pg.to_rbg(true) << std::endl;
     std::vector<game_move> moves = state.find_all_moves();
-    for(const game_move& m : moves)
-    {
-        for(const move_segment& ac : m.segments)
-        {
-            std::cout << ac.board_x << " " << ac.board_y << " " << ac.modifier_index << ", ";
+    while(!moves.empty()) {
+        std::cout << "Turn: " << state.sigma[state.get_name_resolver().get_variable_id("turn")] << std::endl;
+        std::cout << "Possible moves: " << std::endl;
+        for (const game_move &m : moves) {
+            for (const move_segment &ac : m.segments) {
+                std::cout << ac.board_x << " " << ac.board_y << " " << ac.modifier_index << ", ";
+            }
+            std::cout << std::endl;
         }
-        std::cout << std::endl;
+        std::cout << "Which move to make? [0 - " << moves.size()-1 << "]" << std::endl;
+        size_t x;
+        std::cin >> x;
+        state.make_move(moves[x]);
+        moves = state.find_all_moves();
     }
-//    make_move(&state,moves[0]);
-//    std::cout << "MOVE MADE" << std::endl;
-//    moves = find_all_moves(&state);
-//    for(const move& m : moves)
-//    {
-//        for(const modifier_action& ac : m.move_actions)
-//        {
-//            std::cout << ac.board_position_x << " " << ac.board_position_y << " " << ac.modifier_index << ", ";
-//        }
-//        std::cout << std::endl;
-//    }
 }

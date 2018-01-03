@@ -62,6 +62,7 @@ public:
     std::vector<game_move> find_all_moves();
     friend void find_all_moves_rec(game_state* state, game_move* current_move,
                                    std::vector<game_move>* result, std::unordered_set<game_state_identifier,identifier_hash >* visited);
+    void make_move(const game_move& move);
 };
 
 class move_segment

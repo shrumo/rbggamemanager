@@ -53,7 +53,6 @@ void game_state::pop_lazy_action() {
     lazy_actions.pop_back();
 }
 
-
 game_state::game_state(const rbg_parser::parsed_game &parsed_game)
     : resolver(parsed_game), reg(), nfa(&reg), modifier_states(), lazy_actions(),
       lazy_head(0),
@@ -130,6 +129,21 @@ const fsm::state_register<action> &game_state::get_state_register() const {
 
 fsm::state_id_t game_state::get_current_nfa_state() const {
     return current_nfa_state;
+}
+
+void game_state::make_move(const game_move &move) {
+    for(const auto& segment : move.segments)
+    {
+        board_x = segment.board_x;
+        board_y = segment.board_y;
+        current_nfa_state = modifier_states[segment.modifier_index];
+        const game_transition& transition = nfa[current_nfa_state].get_transitions()[0];
+        transition.get_letter()->apply(this);
+        current_nfa_state = transition.target_state_id();
+    }
+    evaluate_lazy();
+    lazy_actions.clear();
+    lazy_head = 0;
 }
 
 
