@@ -1,3 +1,7 @@
+#!/usr/bin/python3
+
+# Script to create CMakeLists.txt for submodule
+
 import os
 import re
 
@@ -23,7 +27,7 @@ for filename in os.listdir('src'):
         files += ['src/' + filename]
 
 text = '''
-cmake_minimum_required(VERSION 3.7)
+cmake_minimum_required(VERSION 3.5.0)
 project(rbg2gdl)
 
 set(CMAKE_CXXFLAGS "${{CMAKE_CXX_FLAGS}} {}")

@@ -9,42 +9,32 @@
 #include <unordered_set>
 #include <memory>
 #include "rbg2gdl/src/condition_check.hpp"
-
-
-class board;
-class game_state;
-
+#include "game_state.h"
 
 class action {
 protected:
-    int index;
 public:
-    action(int index) : index(index) {}
     virtual bool apply(game_state *b)=0;
     virtual void revert(game_state *b)=0;
-    int get_index() const
-    {
-        return index;
-    }
-    virtual bool is_modifier() { return false; }
-    virtual bool is_switch() { return false; }
+    virtual bool is_modifier() const { return false; }
+    virtual bool is_switch() const { return false; }
 };
 
 namespace actions
 {
     class shift : public action {
-        int dx, dy;
+        long long dx, dy;
     public:
-        shift(int index, int dx, int dy) : action(index), dx(dx), dy(dy) {}
+        shift(long long dx, long long dy) : dx(dx), dy(dy) {}
         bool apply(game_state *b) override;
         void revert(game_state *b) override;
     };
 
     class on : public action {
-        std::unordered_set<int> pieces;
+        std::unordered_set<token_id_t> pieces;
     public:
-        on(int index, const std::vector<int>& pieces)
-                : action(index), pieces(pieces.begin(),pieces.end()) {}
+        on(const std::vector<token_id_t>& pieces)
+                : pieces(pieces.begin(),pieces.end()) {}
         bool apply(game_state *b) override;
         void revert(game_state *b) override;
     };
@@ -57,7 +47,8 @@ namespace actions
     class condition_action : public action {
         std::unique_ptr<condition> cond;
     public:
-        condition_action(int index,const rbg_parser::condition_check& check) : action(index)
+        condition_action(std::unique_ptr<condition> cond)
+            : cond(std::move(cond))
         {
             /* TODO(shrum): create condition out of this condition check. Probably by some other visitor. */
         }
@@ -66,22 +57,30 @@ namespace actions
     };
 
     namespace conditions {
-
         class conjunction : public condition {
             std::unique_ptr<condition> left, right;
         public:
+            conjunction(std::unique_ptr<condition> left, std::unique_ptr<condition> right)
+                    : left(std::move(left)), right(std::move(right))
+            {}
             bool check(game_state *b) override;
         };
 
         class alternative : public condition {
             std::unique_ptr<condition> left, right;
         public:
+            alternative(std::unique_ptr<condition> left, std::unique_ptr<condition> right)
+                : left(std::move(left)), right(std::move(right))
+            {}
             bool check(game_state *b) override;
         };
 
         class negation : public condition {
             std::unique_ptr<condition> cond;
         public:
+            negation(std::unique_ptr<condition> cond)
+                : cond(std::move(cond))
+            {}
             bool check(game_state *b) override;
         };
 
@@ -93,24 +92,33 @@ namespace actions
         class less : public condition {
             std::unique_ptr<arithmetic_operation> left, right;
         public:
+            less(std::unique_ptr<arithmetic_operation> left, std::unique_ptr<arithmetic_operation> right)
+                : left(std::move(left)), right(std::move(right))
+                {}
             bool check(game_state *b) override;
         };
 
         class less_equal : public condition {
             std::unique_ptr<arithmetic_operation> left, right;
         public:
+            less_equal(std::unique_ptr<arithmetic_operation> left, std::unique_ptr<arithmetic_operation> right)
+            : left(std::move(left)), right(std::move(right))
+                {}
             bool check(game_state *b) override;
         };
 
         class equal : public condition {
             std::unique_ptr<arithmetic_operation> left, right;
         public:
+            equal(std::unique_ptr<arithmetic_operation> left, std::unique_ptr<arithmetic_operation> right)
+            : left(std::move(left)), right(std::move(right))
+                {}
             bool check(game_state *b) override;
         };
 
         namespace arithmetic {
             class variable : public arithmetic_operation {
-                int variable_index;
+                token_id_t variable_index;
             public:
                 int value(game_state *b) override;
             };
@@ -129,81 +137,100 @@ namespace actions
 
     class modifier : public action
     {
-        int lazy_head;
+        size_t index;
+        size_t lazy_head_before;
     public:
-        modifier(int index) : action(index)
+        modifier(size_t index) : index(index)
         {}
         virtual bool apply(game_state *b) override;
         virtual void revert(game_state *b) override;
-        bool is_modifier() override
+        bool is_modifier() const override
         {
             return true;
+        }
+        size_t get_index() const {
+            return index;
+        }
+    };
+
+    class switch_action : public modifier {
+    public:
+        switch_action(size_t index) : modifier(index) {}
+        bool is_switch() const override
+        {
+            return true;
+        }
+    };
+
+    template<typename Modifier,
+            typename = std::enable_if<not std::is_base_of<switch_action,Modifier>::value> >
+    class lazy : public modifier {
+    private:
+        std::unique_ptr<Modifier> lazy_action;
+    public:
+        template<typename ...Args>
+        lazy(size_t index, Args... args) : modifier(index), lazy_action(new Modifier(index, args...))
+        {}
+        bool apply(game_state *b) override {
+            b->add_lazy_action(lazy_action.get());
+            return true;
+        }
+        void revert(game_state *b) override
+        {
+            b->pop_lazy_action();
         }
     };
 
     namespace modifiers
     {
         class off : public modifier {
-            int piece_id;
-            int previous_piece_id;
+            token_id_t piece_id;
+            token_id_t previous_piece_id;
         public:
-            off(int index, int piece_id) : modifier(index), piece_id(piece_id) {}
+            off(size_t index, token_id_t piece_id) : modifier(index), piece_id(piece_id) {}
             bool apply(game_state *b) override;
             void revert(game_state *b) override;
         };
 
+        namespace switches {
+            class player_switch : public switch_action {
+                token_id_t player_id;
+                token_id_t previous_player_id;
+            public:
+                player_switch(size_t index, token_id_t player_id) : switch_action(index), player_id(player_id) {}
 
-        class player_switch : public modifier {
-            int player_id;
-            int previous_player_id;
-        public:
-            player_switch(int index, int player_id) : modifier(index), player_id(player_id) {}
-            bool apply(game_state *b) override;
-            void revert(game_state *b) override;
-            bool is_switch() override
-            {
-                return true;
-            }
-        };
+                bool apply(game_state *b) override;
+                void revert(game_state *b) override;
 
-        class semi_switch : public modifier {
-        public:
-            semi_switch(int index) : modifier(index) {}
-            bool apply(game_state *b) override;
-            void revert(game_state *b) override;
-            bool is_switch() override
-            {
-                return true;
-            }
-        };
+                bool is_switch() const override {
+                    return true;
+                }
+            };
+
+            class semi_switch : public switch_action {
+            public:
+                semi_switch(size_t index) : switch_action(index) {}
+
+                bool apply(game_state *b) override;
+                void revert(game_state *b) override;
+
+                bool is_switch() const override {
+                    return true;
+                }
+            };
+        }
 
         class assignment : public modifier {
-            int variable;
+            token_id_t variable;
             int value;
             int previous_value;
         public:
-            assignment(int index, int variable, int value) : modifier(index), variable(variable), value(value) {}
+            assignment(size_t index, token_id_t variable, int value) : modifier(index), variable(variable), value(value) {}
             bool apply(game_state *b) override;
             void revert(game_state *b) override;
         };
     }
 
-    class lazy_off : public action {
-        int piece_id;
-    public:
-        lazy_off(int index, int piece_id) : action(index), piece_id(piece_id) {}
-        bool apply(game_state *b) override;
-        void revert(game_state *b) override;
-    };
-
-    class lazy_assignment : public action {
-        int variable;
-        int value;
-    public:
-        lazy_assignment(int index, int variable, int value) : action(index), variable(variable), value(value) {}
-        bool apply(game_state *b) override;
-        void revert(game_state *b) override;
-    };
 }
 
 

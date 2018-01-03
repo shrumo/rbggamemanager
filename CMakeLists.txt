@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.7)
+cmake_minimum_required(VERSION 3.5.0)
 project(rbggamemanager)
 
 set(CMAKE_CXX_STANDARD 11)
@@ -11,7 +11,7 @@ find_package(Threads)
 find_package(Boost REQUIRED COMPONENTS system)
 include_directories(${Boost_INCLUDE_DIR})
 
-set(SOURCE_FILES ${SOURCE_FILES} main.cpp automaton.cpp automaton.h game.cpp game.h action.cpp action.h)
+set(SOURCE_FILES ${SOURCE_FILES} main.cpp automaton.h action.cpp action.h game_state.cpp game_state.h board.h name_resolver.h dispatchers.cpp dispatchers.h)
 add_executable(rbggamemanager ${SOURCE_FILES})
 target_link_libraries(rbggamemanager parser)
 target_link_libraries(rbggamemanager ${Boost_LIBRARIES})

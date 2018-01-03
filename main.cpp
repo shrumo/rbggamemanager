@@ -6,6 +6,8 @@
 #include <string>
 #include <iostream>
 
+#include "action.h"
+
 #include<iostream>
 #include<fstream>
 #include<string>
@@ -18,7 +20,7 @@
 #include"rbg2gdl/src/macro_bank.hpp"
 #include"rbg2gdl/src/slice_iterator.hpp"
 
-#include "game.h"
+#include "game_state.h"
 
 
 //using namespace boost::asio;
@@ -73,27 +75,26 @@ int main(int argc, char *argv[])
     std::vector<rbg_parser::token> result = tokenize(buffer.str(),msg);
     rbg_parser::game_items g = input_tokens(result,msg);
     rbg_parser::parsed_game pg = g.parse_game(msg);
-    game_description gd(pg);
-    game_state state(gd);
+    game_state state(pg);
     std::cout << pg.to_rbg(true) << std::endl;
-    std::vector<move> moves = find_all_moves(&state);
-    for(const move& m : moves)
+    std::vector<game_move> moves = state.find_all_moves();
+    for(const game_move& m : moves)
     {
-        for(const modifier_action& ac : m.move_actions)
+        for(const move_segment& ac : m.segments)
         {
-            std::cout << ac.board_position_x << " " << ac.board_position_y << " " << ac.modifier_index << ", ";
+            std::cout << ac.board_x << " " << ac.board_y << " " << ac.modifier_index << ", ";
         }
         std::cout << std::endl;
     }
-    make_move(&state,moves[0]);
-    std::cout << "MOVE MADE" << std::endl;
-    moves = find_all_moves(&state);
-    for(const move& m : moves)
-    {
-        for(const modifier_action& ac : m.move_actions)
-        {
-            std::cout << ac.board_position_x << " " << ac.board_position_y << " " << ac.modifier_index << ", ";
-        }
-        std::cout << std::endl;
-    }
+//    make_move(&state,moves[0]);
+//    std::cout << "MOVE MADE" << std::endl;
+//    moves = find_all_moves(&state);
+//    for(const move& m : moves)
+//    {
+//        for(const modifier_action& ac : m.move_actions)
+//        {
+//            std::cout << ac.board_position_x << " " << ac.board_position_y << " " << ac.modifier_index << ", ";
+//        }
+//        std::cout << std::endl;
+//    }
 }

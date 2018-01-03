@@ -3,7 +3,6 @@
 //
 
 #include "action.h"
-#include "game.h"
 
 bool actions::shift::apply(game_state *b) {
     b->board_x += dx;
@@ -64,13 +63,13 @@ int actions::conditions::arithmetic::constant::value(game_state *b) {
 
 
 bool actions::modifier::apply(game_state *b) {
-    lazy_head = b->get_lazy_ptr();
+    lazy_head_before = b->get_lazy_ptr();
     b->evaluate_lazy();
     return true;
 }
 
 void actions::modifier::revert(game_state *b) {
-    b->revert_lazy(lazy_head);
+    b->revert_lazy(lazy_head_before);
 }
 
 bool actions::modifiers::off::apply(game_state *b) {
@@ -82,29 +81,6 @@ bool actions::modifiers::off::apply(game_state *b) {
 
 void actions::modifiers::off::revert(game_state *b) {
     b->set_piece(previous_piece_id);
-    modifier::revert(b);
-}
-
-bool actions::modifiers::player_switch::apply(game_state *b) {
-    modifier::apply(b);
-    previous_player_id = b->current_player;
-    b->current_player = player_id;
-    b->turn++;
-    return true;
-}
-
-void actions::modifiers::player_switch::revert(game_state *b) {
-    b->turn--;
-    b->current_player = previous_player_id;
-    modifier::revert(b);
-}
-
-bool actions::modifiers::semi_switch::apply(game_state *b) {
-    /* TODO(shrum): Impl */
-    return modifier::apply(b);
-}
-
-void actions::modifiers::semi_switch::revert(game_state *b) {
     modifier::revert(b);
 }
 
@@ -120,20 +96,24 @@ void actions::modifiers::assignment::revert(game_state *b) {
     modifier::revert(b);
 }
 
-bool actions::lazy_off::apply(game_state *b) {
-    b->lazy_actions.emplace_back(new modifiers::off(index, piece_id));
+bool actions::modifiers::switches::player_switch::apply(game_state *b) {
+    modifier::apply(b);
+    previous_player_id = b->current_player;
+    b->current_player = player_id;
+    b->sigma[b->get_name_resolver().get_variable_id("turn")]++;
     return true;
 }
 
-void actions::lazy_off::revert(game_state *b) {
-    b->lazy_actions.pop_back();
+void actions::modifiers::switches::player_switch::revert(game_state *b) {
+    b->sigma[b->get_name_resolver().get_variable_id("turn")]--;
+    b->current_player = previous_player_id;
+    modifier::revert(b);
 }
 
-bool actions::lazy_assignment::apply(game_state *b) {
-    b->lazy_actions.emplace_back(new modifiers::assignment(index, variable, value));
-    return true;
+bool actions::modifiers::switches::semi_switch::apply(game_state *b) {
+    return modifier::apply(b);
 }
 
-void actions::lazy_assignment::revert(game_state *b) {
-    b->lazy_actions.pop_back();
+void actions::modifiers::switches::semi_switch::revert(game_state *b) {
+    modifier::revert(b);
 }
