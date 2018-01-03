@@ -12,6 +12,7 @@
 #include<fstream>
 #include<string>
 #include<sstream>
+#include <chrono>
 
 #include"rbg2gdl/src/options.hpp"
 #include"rbg2gdl/src/token.hpp"
@@ -78,8 +79,10 @@ int main(int argc, char *argv[])
     game_state state(pg);
     std::cout << pg.to_rbg(true) << std::endl;
     std::vector<game_move> moves = state.find_all_moves();
+    auto start = std::chrono::system_clock::now();
     while(!moves.empty()) {
         std::cout << "Turn: " << state.sigma[state.get_name_resolver().get_variable_id("turn")] << std::endl;
+        std::cout << "Player: " << state.get_name_resolver().get_player_name(state.current_player) << std::endl;
         std::cout << "Possible moves: " << std::endl;
         for (const game_move &m : moves) {
             for (const move_segment &ac : m.segments) {
@@ -88,9 +91,12 @@ int main(int argc, char *argv[])
             std::cout << std::endl;
         }
         std::cout << "Which move to make? [0 - " << moves.size()-1 << "]" << std::endl;
-        size_t x;
+        size_t x = rand() % moves.size();
         std::cin >> x;
         state.make_move(moves[x]);
         moves = state.find_all_moves();
     }
+    auto end = std::chrono::system_clock::now();
+    std::chrono::duration<double> elapsed = end-start;
+    std::cout << elapsed.count() << "s" << std::endl;
 }

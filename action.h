@@ -10,6 +10,7 @@
 #include <memory>
 #include "rbg2gdl/src/condition_check.hpp"
 #include "game_state.h"
+#include "automaton.h"
 
 class action {
 protected:
@@ -58,20 +59,20 @@ namespace actions
 
     namespace conditions {
         class conjunction : public condition {
-            std::unique_ptr<condition> left, right;
+            std::vector<std::unique_ptr<condition> > items;
         public:
-            conjunction(std::unique_ptr<condition> left, std::unique_ptr<condition> right)
-                    : left(std::move(left)), right(std::move(right))
+            conjunction(std::vector<std::unique_ptr<condition> > items)
+                    : items(std::move(items))
             {}
             bool check(game_state *b) override;
         };
 
         class alternative : public condition {
-            std::unique_ptr<condition> left, right;
+            std::vector<std::unique_ptr<condition> > items;
         public:
-            alternative(std::unique_ptr<condition> left, std::unique_ptr<condition> right)
-                : left(std::move(left)), right(std::move(right))
-            {}
+            alternative(std::vector<std::unique_ptr<condition> > items)
+            : items(std::move(items))
+                    {}
             bool check(game_state *b) override;
         };
 
@@ -116,22 +117,44 @@ namespace actions
             bool check(game_state *b) override;
         };
 
+        class not_equal : public condition {
+            std::unique_ptr<arithmetic_operation> left, right;
+        public:
+            not_equal(std::unique_ptr<arithmetic_operation> left, std::unique_ptr<arithmetic_operation> right)
+                    : left(std::move(left)), right(std::move(right))
+            {}
+            bool check(game_state *b) override;
+        };
+
         namespace arithmetic {
             class variable : public arithmetic_operation {
                 token_id_t variable_index;
             public:
+                variable(token_id_t variable_index)
+                        : variable_index(variable_index)
+                {}
                 int value(game_state *b) override;
             };
 
             class constant : public arithmetic_operation {
                 int constant_value;
             public:
+                constant(int constant_value)
+                        : constant_value(constant_value)
+                {}
                 int value(game_state *b) override;
             };
         }
 
         class move_pattern : public condition {
-            /* TODO(shrum): store nfa, evaluated stuff and other? */
+            fsm::nfa<action> move_pattern_nfa;
+            std::unique_ptr<std::unordered_set<game_state_identifier,identifier_hash>> visited;
+            size_t visited_moves_count;
+        public:
+            move_pattern(const fsm::nfa<action>& move_nfa)
+                    : move_pattern_nfa(move_nfa), visited_moves_count(0), visited(nullptr)
+            {}
+            bool check(game_state *b) override;
         };
     }
 

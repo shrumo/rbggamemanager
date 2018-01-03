@@ -201,5 +201,83 @@ void game_nfa_dispatcher::dispatch(const rbg_parser::condition_check & move) {
     fsm::state_id_t final_id = result.new_state();
     result.set_initial(initial_id);
     result.set_final(final_id);
-    result.initial().add_transition(final_id); /* TODO(shrum): Conditions */
+    game_condition_dispatcher condition_dispatcher(resolver);
+    move.get_content()->accept(condition_dispatcher);
+    result.initial().add_transition(final_id,std::unique_ptr<action>(new actions::condition_action(std::move(condition_dispatcher.result))));
+}
+
+void game_condition_dispatcher::dispatch(const rbg_parser::conjunction & m) {
+    std::vector<std::unique_ptr<actions::condition> > rec_result;
+    for(const auto& item : m.get_content())
+    {
+        item->accept(*this);
+        rec_result.push_back(std::move(result));
+    }
+    result = std::unique_ptr<actions::condition>(new actions::conditions::conjunction(std::move(rec_result)));
+}
+
+void game_condition_dispatcher::dispatch(const rbg_parser::alternative & m) {
+    std::vector<std::unique_ptr<actions::condition> > rec_result;
+    for(const auto& item : m.get_content())
+    {
+        item->accept(*this);
+        rec_result.push_back(std::move(result));
+    }
+    result = std::unique_ptr<actions::condition>(new actions::conditions::alternative(std::move(rec_result)));
+}
+
+void game_condition_dispatcher::dispatch(const rbg_parser::negatable_condition & m) {
+    m.get_content()->accept(*this);
+    result = std::unique_ptr<actions::condition>(new actions::conditions::negation(std::move(result)));
+}
+
+void game_condition_dispatcher::dispatch(const rbg_parser::comparison & m) {
+    std::unique_ptr<actions::conditions::arithmetic_operation> left;
+    if(m.get_left_side().get_type() == rbg_parser::number)
+    {
+        left = std::unique_ptr<actions::conditions::arithmetic_operation>(new actions::conditions::arithmetic::constant(m.get_left_side().get_value()));
+    } else
+    {
+        token_id_t variable_id = resolver.get_variable_id(m.get_left_side().to_string());
+        left = std::unique_ptr<actions::conditions::arithmetic_operation>(new actions::conditions::arithmetic::variable(variable_id));
+    }
+
+    std::unique_ptr<actions::conditions::arithmetic_operation> right;
+    if(m.get_right_side().get_type() == rbg_parser::number)
+    {
+        right = std::unique_ptr<actions::conditions::arithmetic_operation>(new actions::conditions::arithmetic::constant(m.get_right_side().get_value()));
+    } else
+    {
+        token_id_t variable_id = resolver.get_variable_id(m.get_right_side().to_string());
+        right = std::unique_ptr<actions::conditions::arithmetic_operation>(new actions::conditions::arithmetic::variable(variable_id));
+    }
+
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wswitch"
+    switch (m.get_kind_of_comparison().get_type())
+    {
+        case rbg_parser::not_equal:
+            result = std::unique_ptr<actions::condition>(new actions::conditions::not_equal(std::move(left),std::move(right)));
+            break;
+        case rbg_parser::double_equal:
+            result = std::unique_ptr<actions::condition>(new actions::conditions::equal(std::move(left),std::move(right)));
+            break;
+        case rbg_parser::less:
+            result = std::unique_ptr<actions::condition>(new actions::conditions::less(std::move(left),std::move(right)));
+            break;
+        case rbg_parser::less_equal:
+            result = std::unique_ptr<actions::condition>(new actions::conditions::less_equal(std::move(left),std::move(right)));
+            break;
+        case rbg_parser::greater:
+            result = std::unique_ptr<actions::condition>(new actions::conditions::less(std::move(right),std::move(left)));
+            break;
+        case rbg_parser::greater_equal:
+            result = std::unique_ptr<actions::condition>(new actions::conditions::less_equal(std::move(right),std::move(left)));
+            break;
+    }
+#pragma clang diagnostic pop
+}
+
+void game_condition_dispatcher::dispatch(const rbg_parser::move_condition & m) {
+    /* TODO(shrum): Use the game_nfa_dispatcher to create nfa. */
 }

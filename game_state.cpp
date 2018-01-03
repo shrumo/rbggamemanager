@@ -145,8 +145,16 @@ void game_state::make_move(const game_move &move) {
     evaluate_lazy();
     lazy_actions.clear();
     lazy_head = 0;
+    moves_made++;
 }
 
+int game_state::turn() {
+    return sigma[resolver.get_variable_id("turn")];
+}
+
+size_t game_state::get_moves_made() {
+    return moves_made;
+}
 
 bool operator==(const game_state_identifier &a, const game_state_identifier &b) {
     return a.applied_move == b.applied_move && a.board_x == b.board_x && a.board_y == b.board_y && a.current_nfa_state == b.current_nfa_state;

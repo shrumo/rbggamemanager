@@ -4,8 +4,8 @@
          [empty, empty, empty]
          [empty, empty, empty]
 
-#players = sad
-#pieces = empty, piece
+#players = sad, happy
+#pieces = empty, piece, happypiece
 #variables =
 
 #anySquare =
@@ -21,8 +21,14 @@
         anySquare
         (empty)
         [piece]
+        ->happy
+        anySquare
+        (piece)
+        (((? $happypiece > $piece) (1,0) [@ happypiece])
+        +
+        ((? $happypiece <= $piece) (-1,0) [@ happypiece]))
         ->sad
-    )^* [@ $sad = 100]
+    )^* [$sad = 100]
 
 
 

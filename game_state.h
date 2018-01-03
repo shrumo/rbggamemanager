@@ -32,12 +32,17 @@ class game_state
     size_t lazy_head;
 
     fsm::state_id_t current_nfa_state;
+
+    size_t moves_made;
 public:
     board current_board;
     size_t board_x;
     size_t board_y;
     std::vector<int> sigma;
     token_id_t current_player;
+
+    int turn();
+    size_t get_moves_made();
 
     game_state(const rbg_parser::parsed_game& parsed_game);
 

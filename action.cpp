@@ -30,11 +30,21 @@ void actions::condition_action::revert(game_state *b) {
 }
 
 bool actions::conditions::conjunction::check(game_state *b) {
-    return left->check(b) && right->check(b);
+    for(auto& cond : items)
+    {
+        if(!cond->check(b))
+            return false;
+    }
+    return true;
 }
 
 bool actions::conditions::alternative::check(game_state *b) {
-    return left->check(b) || right->check(b);
+    for(auto& cond : items)
+    {
+        if(cond->check(b))
+            return true;
+    }
+    return false;
 }
 
 bool actions::conditions::negation::check(game_state *b) {
@@ -75,12 +85,16 @@ void actions::modifier::revert(game_state *b) {
 bool actions::modifiers::off::apply(game_state *b) {
     modifier::apply(b);
     previous_piece_id = b->current_piece();
+    b->sigma[previous_piece_id]--;
     b->set_piece(piece_id);
+    b->sigma[piece_id]++;
     return true;
 }
 
 void actions::modifiers::off::revert(game_state *b) {
+    b->sigma[b->current_piece()]--;
     b->set_piece(previous_piece_id);
+    b->sigma[b->current_piece()]++;
     modifier::revert(b);
 }
 
@@ -116,4 +130,13 @@ bool actions::modifiers::switches::semi_switch::apply(game_state *b) {
 
 void actions::modifiers::switches::semi_switch::revert(game_state *b) {
     modifier::revert(b);
+}
+
+bool actions::conditions::not_equal::check(game_state *b) {
+    return left->value(b) != right->value(b);
+}
+
+bool actions::conditions::move_pattern::check(game_state *b) {
+    /* TODO(shrum): Use the dfa and the game_state to get the answer. */
+    return false;
 }

@@ -1,0 +1,39 @@
+#game = "SimpleSquares"
+
+#zero = empty
+#one = zero, zero, zero, zero, zero, zero, zero, zero, zero, zero
+#two = one, one, one, one, one, one, one, one, one, one
+#three = two, two, two, two, two, two, two, two, two, two
+#four = three, three, three, three, three, three, three, three, three, three
+#five = four, four, four, four, four, four, four, four, four, four
+
+
+#board = [three, one]
+         [three, one]
+         [three, one]
+         [three, one]
+         [three, one]
+         [three, one]
+
+#players = sad
+#pieces = empty, piece
+#variables =
+
+#anySquare =
+    (
+            ( 1, 0)
+          + ( 0, 1)
+          + (-1, 0)
+          + ( 0,-1)
+    )^*
+
+#rules =
+    (
+        anySquare
+        (empty)
+        [piece]
+        ->sad
+    )^* [@ $sad = 100]
+
+
+

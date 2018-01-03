@@ -41,17 +41,17 @@ class name_resolver
 public:
     name_resolver(const rbg_parser::parsed_game& parsed_game)
     {
-        for(const auto& player_token : parsed_game.get_declarations().get_legal_players())
-        {
-            std::string player_name = player_token.to_string();
-            add_player_name(player_name);
-            add_variable_name(player_name);
-        }
         for(const auto& piece_token : parsed_game.get_declarations().get_legal_pieces())
         {
             std::string piece_name = piece_token.to_string();
             add_piece_name(piece_name);
             add_variable_name(piece_name);
+        }
+        for(const auto& player_token : parsed_game.get_declarations().get_legal_players())
+        {
+            std::string player_name = player_token.to_string();
+            add_player_name(player_name);
+            add_variable_name(player_name);
         }
         for(const auto& variable_token : parsed_game.get_declarations().get_legal_variables())
         {
@@ -75,6 +75,11 @@ public:
     token_id_t get_variable_id(const std::string& variable_name) const
     {
         return variables_ids.at(variable_name);
+    }
+
+    const std::string& get_player_name(token_id_t player_id) const
+    {
+        return players[player_id];
     }
 
     size_t variables_count() const
