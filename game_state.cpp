@@ -12,7 +12,7 @@ void game_state::revert_lazy(size_t ptr) {
     while(lazy_head > ptr)
     {
         lazy_head--;
-        lazy_actions[lazy_head-1]->revert(this);
+        lazy_actions[lazy_head]->revert(this);
     }
     evaluating_lazy = false;
 }
@@ -61,7 +61,8 @@ game_state::game_state(const rbg_parser::parsed_game &parsed_game)
       board_x(0),
       board_y(0),
       sigma(resolver.variables_count(),0),
-      current_player(resolver.get_player_id(parsed_game.get_declarations().get_first_player().to_string()))
+      current_player(resolver.get_player_id(parsed_game.get_declarations().get_first_player().to_string())),
+      evaluating_lazy(false)
 {
     game_nfa_dispatcher dispatcher(&reg, resolver);
     parsed_game.get_moves()->accept(dispatcher);
