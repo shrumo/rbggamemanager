@@ -28,6 +28,7 @@ class game_state
     std::vector<fsm::state_id_t> modifier_states;
 
     std::vector<action*> lazy_actions;
+    bool evaluating_lazy;
     size_t lazy_head;
 
     fsm::state_id_t current_nfa_state;

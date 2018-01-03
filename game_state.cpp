@@ -6,19 +6,27 @@
 #include "dispatchers.h"
 
 void game_state::revert_lazy(size_t ptr) {
+    if(evaluating_lazy)
+        return;
+    evaluating_lazy = true;
     while(lazy_head > ptr)
     {
-        lazy_actions[lazy_head-1]->revert(this);
         lazy_head--;
+        lazy_actions[lazy_head-1]->revert(this);
     }
+    evaluating_lazy = false;
 }
 
 void game_state::evaluate_lazy() {
+    if(evaluating_lazy)
+        return;
+    evaluating_lazy = true;
     while(lazy_head < lazy_actions.size())
     {
         lazy_actions[lazy_head]->apply(this);
         lazy_head++;
     }
+    evaluating_lazy = false;
 }
 
 size_t game_state::get_lazy_ptr() const {
