@@ -172,7 +172,7 @@ std::ostream &operator<<(std::ostream &s, const game_state &state) {
     {
         for(size_t x = 0; x < state.current_board.width(); x++)
         {
-            s << "[" << std::setw(8) << state.get_name_resolver().get_piece_name(state.current_board(y,x)) << "] ";
+            s << "[" << std::setw(8) << state.get_name_resolver().get_piece_name(state.current_board(x,y)) << "] ";
         }
         s << "\n";
     }
