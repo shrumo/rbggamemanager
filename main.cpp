@@ -93,10 +93,11 @@ int main(int argc, char *argv[])
         }
         std::cout << "Which move to make? [0 - " << moves.size()-1 << "]" << std::endl;
         size_t x = rand() % moves.size();
-        std::cin >> x;
+//        std::cin >> x;
         state.make_move(moves[x]);
         moves = state.find_all_moves();
     }
+    std::cout << state << std::endl;
     for(size_t i = 0; i < state.get_name_resolver().players_count() ; i++)
     {
         std::string player_name = state.get_name_resolver().get_player_name(i);

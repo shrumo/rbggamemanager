@@ -19,6 +19,15 @@ class game_move;
 class game_state_identifier;
 class identifier_hash;
 
+struct lazy_action
+{
+    size_t x;
+    size_t y;
+    action *action_ptr;
+public:
+    lazy_action(size_t x, size_t y, action *action_ptr) : x(x), y(y), action_ptr(action_ptr) {}
+};
+
 class game_state
 {
     name_resolver resolver;
@@ -27,7 +36,7 @@ class game_state
     game_nfa nfa;
     std::vector<fsm::state_id_t> modifier_states;
 
-    std::vector<action*> lazy_actions;
+    std::vector<lazy_action> lazy_actions;
     bool evaluating_lazy;
     size_t lazy_head;
 

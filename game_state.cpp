@@ -13,7 +13,13 @@ void game_state::revert_lazy(size_t ptr) {
     while(lazy_head > ptr)
     {
         lazy_head--;
-        lazy_actions[lazy_head]->revert(this);
+        size_t old_x = board_x;
+        size_t old_y = board_y;
+        board_x = lazy_actions[lazy_head].x;
+        board_y = lazy_actions[lazy_head].y;
+        lazy_actions[lazy_head].action_ptr->revert(this);
+        board_x = old_x;
+        board_y = old_y;
     }
     evaluating_lazy = false;
 }
@@ -24,7 +30,13 @@ void game_state::evaluate_lazy() {
     evaluating_lazy = true;
     while(lazy_head < lazy_actions.size())
     {
-        lazy_actions[lazy_head]->apply(this);
+        size_t old_x = board_x;
+        size_t old_y = board_y;
+        board_x = lazy_actions[lazy_head].x;
+        board_y = lazy_actions[lazy_head].y;
+        lazy_actions[lazy_head].action_ptr->apply(this);
+        board_x = old_x;
+        board_y = old_y;
         lazy_head++;
     }
     evaluating_lazy = false;
@@ -47,7 +59,7 @@ const name_resolver& game_state::get_name_resolver() const {
 }
 
 void game_state::add_lazy_action(action *action) {
-    lazy_actions.emplace_back(action);
+    lazy_actions.emplace_back(board_x,board_y,action);
 }
 
 void game_state::pop_lazy_action() {
@@ -172,7 +184,18 @@ std::ostream &operator<<(std::ostream &s, const game_state &state) {
     {
         for(size_t x = 0; x < state.current_board.width(); x++)
         {
-            s << "[" << std::setw(8) << state.get_name_resolver().get_piece_name(state.current_board(x,y)) << "] ";
+            std::string name = state.get_name_resolver().get_piece_name(state.current_board(x,y));
+            if(name == "empty") {
+                s << "[" << std::setw(2) << " "  << "] ";
+            }
+            else if(name == "blackMan")
+            {
+                s << "[" << std::setw(2) << "o" << "] ";
+            }
+            else
+            {
+                s << "[" << std::setw(2) << "x" << "] ";
+            }
         }
         s << "\n";
     }
