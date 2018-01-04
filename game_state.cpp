@@ -185,17 +185,18 @@ std::ostream &operator<<(std::ostream &s, const game_state &state) {
         for(size_t x = 0; x < state.current_board.width(); x++)
         {
             std::string name = state.get_name_resolver().get_piece_name(state.current_board(x,y));
-            if(name == "empty") {
-                s << "[" << std::setw(2) << " "  << "] ";
-            }
-            else if(name == "blackMan")
-            {
-                s << "[" << std::setw(2) << "o" << "] ";
-            }
-            else
-            {
-                s << "[" << std::setw(2) << "x" << "] ";
-            }
+//            if(name == "empty") {
+//                s << "[" << std::setw(2) << " "  << "] ";
+//            }
+//            else if(name == "blackMan")
+//            {
+//                s << "[" << std::setw(2) << "o" << "] ";
+//            }
+//            else
+//            {
+//                s << "[" << std::setw(2) << "x" << "] ";
+//            }
+            s  << "[" << std::setw(10) << name << "] ";
         }
         s << "\n";
     }

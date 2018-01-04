@@ -14,7 +14,7 @@
 #players = wplayer, bplayer
 
 #pieces = empty, wpiece, bpiece, wplaceholder, bplaceholder
-#variables = wswapped, bswapped
+#variables=
 
 #anySquare =
     (
@@ -26,18 +26,16 @@
 
 #swapdirection (pla; opp; direction; oppositedirection) =
     (
-        [wplaceholder]
+        [pla~placeholder]
         (
             direction
             (opp~piece)
             [pla~piece]
-            [$pla~swapped=1]
-            ->
         )^*
         direction 
         (pla~piece)
         (oppositedirection)^*
-        (wplaceholder)
+        (pla~placeholder)
         [pla~piece]
     )
 
@@ -50,14 +48,17 @@
         swapdirection(pla;opp;(1,0);(-1,0))
         swapdirection(pla;opp;(0,1);(0,-1))
         swapdirection(pla;opp;(0,-1);(0,1))
-        (? $pla~swapped == 1)
+        swapdirection(pla;opp;(-1,-1);(1,1))
+        swapdirection(pla;opp;(1,1);(-1,-1))
+        swapdirection(pla;opp;(1,-1);(-1,1))
+        swapdirection(pla;opp;(-1,1);(1,-1))
     )
 
 #canswapdirection (pla; opp; direction; oppositedirection) =
     (
         direction
         (opp~piece)
-        direction^*
+        (direction)^*
         (pla~piece)
     )
 
@@ -68,13 +69,12 @@
         (canswapdirection(pla;opp;(-1,0);(1,0)) +
         canswapdirection(pla;opp;(1,0);(-1,0)) +
         canswapdirection(pla;opp;(0,1);(0,-1)) +
-        canswapdirection(pla;opp;(0,-1);(0,1))
+        canswapdirection(pla;opp;(0,-1);(0,1)) +
+        canswapdirection(pla;opp;(1,1);(-1,-1)) +
+        canswapdirection(pla;opp;(-1,-1);(1,1)) +
+        canswapdirection(pla;opp;(-1,1);(1,-1)) +
+        canswapdirection(pla;opp;(1,-1);(-1,1))
         )
-    )
-
-#reset =
-    (
-        [$wswapped = 0, $bswapped = 0]
     )
 
 #move (pla; opp) =
@@ -84,13 +84,13 @@
 
 #rules = 
     (
-        (move(w; b) + (? not (!canplace(w;b))))
-        reset
+        (((? (! canplace(w;b))) move(w; b)) + (? not (!canplace(w;b))))
         ->bplayer
-        (move(b; w) + (? not (!canplace(b;w))))
-        reset
+        (((? (! canplace(b;w))) move(b; w)) + (? not (!canplace(b;w))))
         ->wplayer
     )^*
+    (? not (! canplace(w;b)))
+    (? not (! canplace(b;w)))
     (
     (? $wpiece > $bpiece) [$wplayer = 100]
     )
