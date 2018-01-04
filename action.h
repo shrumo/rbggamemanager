@@ -6,7 +6,7 @@
 #define RBGGAMEMANAGER_ACTION_H
 
 #include <vector>
-#include <unordered_set>
+#include <unordered_map>
 #include <memory>
 #include "rbg2gdl/src/condition_check.hpp"
 #include "game_state.h"
@@ -148,13 +148,16 @@ namespace actions
 
         class move_pattern : public condition {
             fsm::nfa<action> move_pattern_nfa;
-            std::unique_ptr<std::unordered_set<game_state_identifier,identifier_hash>> visited;
+            std::unique_ptr<std::unordered_map<game_state_identifier,bool,identifier_hash>> visited;
             size_t visited_moves_count;
+            std::unique_ptr<fsm::state_register<action> > state_register;
         public:
-            move_pattern(const fsm::nfa<action>& move_nfa)
-                    : move_pattern_nfa(move_nfa), visited_moves_count(0), visited(nullptr)
-            {}
+            move_pattern(const fsm::nfa<action>& move_nfa, std::unique_ptr<fsm::state_register<action> > state_register)
+                    : move_pattern_nfa(move_nfa), visited_moves_count(0), visited(nullptr), state_register(std::move(state_register))
+            {
+            }
             bool check(game_state *b) override;
+            bool check_play_exists_rec(size_t nfa_state, game_state* state, game_move* current_move);
         };
     }
 

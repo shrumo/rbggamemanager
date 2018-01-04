@@ -4,6 +4,7 @@
 
 #include "action.h"
 #include "dispatchers.h"
+#include "iomanip"
 
 void game_state::revert_lazy(size_t ptr) {
     if(evaluating_lazy)
@@ -163,4 +164,17 @@ bool operator==(const game_state_identifier &a, const game_state_identifier &b) 
 
 game_state_identifier create_identifier(const game_state &state, game_move *move) {
     return {move, state.board_x, state.board_y, state.get_current_nfa_state()};
+}
+
+
+std::ostream &operator<<(std::ostream &s, const game_state &state) {
+    for(size_t y = 0; y < state.current_board.height(); y++)
+    {
+        for(size_t x = 0; x < state.current_board.width(); x++)
+        {
+            s << "[" << std::setw(8) << state.get_name_resolver().get_piece_name(state.current_board(y,x)) << "] ";
+        }
+        s << "\n";
+    }
+    return s;
 }

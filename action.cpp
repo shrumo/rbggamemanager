@@ -137,6 +137,64 @@ bool actions::conditions::not_equal::check(game_state *b) {
 }
 
 bool actions::conditions::move_pattern::check(game_state *b) {
-    /* TODO(shrum): Use the dfa and the game_state to get the answer. */
+    if(b->get_moves_made() != visited_moves_count || !visited)
+    {
+        visited = std::unique_ptr<std::unordered_map<game_state_identifier,bool,identifier_hash>>(new std::unordered_map<game_state_identifier,bool,identifier_hash>(20,identifier_hash(*b)));
+    }
+    game_move empty_move;
+    return check_play_exists_rec(move_pattern_nfa.get_initial_id(), b, &empty_move);
+}
+
+bool actions::conditions::move_pattern::check_play_exists_rec(size_t nfa_state, game_state *state, game_move *current_move) {
+    game_state_identifier id = game_state_identifier(current_move, state->board_x, state->board_y, nfa_state);
+    if(visited->find(id) != visited->end())
+        return (*visited)[id];
+
+    (*visited)[id] = nfa_state == move_pattern_nfa.get_final_id();
+    if(nfa_state == move_pattern_nfa.get_final_id())
+    {
+        return true;
+    }
+
+    for(const fsm::transition<action>& transition : move_pattern_nfa[nfa_state].get_transitions())
+    {
+        bool should_end = false;
+        fsm::state_id_t previous_state = nfa_state;
+        if(transition.is_epsilon())
+        {
+            nfa_state = transition.target_state_id();
+            should_end = check_play_exists_rec(nfa_state, state, current_move);
+            nfa_state = previous_state;
+            if(should_end)
+            {
+                (*visited)[id] = true;
+                return true;
+            }
+            continue;
+        }
+        bool success = transition.get_letter()->apply(state);
+        if(success)
+        {
+            nfa_state = transition.target_state_id();
+            if(transition.get_letter()->is_modifier())
+            {
+                game_move new_move(*current_move);
+                should_end = check_play_exists_rec(nfa_state,state, &new_move);
+            }
+            else
+            {
+                should_end = check_play_exists_rec(nfa_state,state, current_move);
+            }
+            nfa_state = previous_state;
+        }
+        transition.get_letter()->revert(state);
+        if(should_end)
+        {
+            (*visited)[id] = true;
+            return true;
+        }
+    }
+    (*visited)[id] = false;
     return false;
 }
+

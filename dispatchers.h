@@ -26,6 +26,7 @@
 #include "rbg2gdl/src/negatable_condition.hpp"
 #include "rbg2gdl/src/comparison.hpp"
 #include "rbg2gdl/src/move_condition.hpp"
+#include "rbg2gdl/src/modifier_block.hpp"
 #include "action.h"
 
 class game_condition_dispatcher : public rbg_parser::abstract_dispatcher {
@@ -54,6 +55,7 @@ public:
     void dispatch(const rbg_parser::negatable_condition&) override;
     void dispatch(const rbg_parser::comparison&) override;
     void dispatch(const rbg_parser::move_condition&) override;
+    void dispatch(const rbg_parser::modifier_block&) override {};
 };
 
 class game_nfa_dispatcher : public rbg_parser::abstract_dispatcher{
@@ -93,6 +95,7 @@ public:
     void dispatch(const rbg_parser::negatable_condition&) override {};
     void dispatch(const rbg_parser::comparison&) override {};
     void dispatch(const rbg_parser::move_condition&) override {};
+    void dispatch(const rbg_parser::modifier_block&) override;
 };
 
 #endif //RBGGAMEMANAGER_EXPRESSION_TRAVERSE_H

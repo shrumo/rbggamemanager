@@ -82,9 +82,19 @@ public:
         return players[player_id];
     }
 
+    const std::string& get_piece_name(token_id_t piece_id) const
+    {
+        return pieces[piece_id];
+    }
+
     size_t variables_count() const
     {
         return variables.size();
+    }
+
+    size_t players_count() const
+    {
+        return players.size();
     }
 };
 

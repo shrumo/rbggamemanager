@@ -70,6 +70,8 @@ public:
     void make_move(const game_move& move);
 };
 
+std::ostream& operator<<(std::ostream& s,const game_state& state);
+
 class move_segment
 {
 public:
@@ -133,6 +135,7 @@ public:
         return result;
     }
 };
+
 
 
 #endif //RBGGAMEMANAGER_GAME_STATE_H

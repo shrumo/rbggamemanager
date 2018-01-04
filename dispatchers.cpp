@@ -206,6 +206,21 @@ void game_nfa_dispatcher::dispatch(const rbg_parser::condition_check & move) {
     result.initial().add_transition(final_id,std::unique_ptr<action>(new actions::condition_action(std::move(condition_dispatcher.result))));
 }
 
+void game_nfa_dispatcher::dispatch(const rbg_parser::modifier_block &move) {
+
+    move.get_content().front()->accept(*this);
+
+    fsm::nfa<action> current = result;
+    for(size_t i = 1; i < move.get_content().size(); i++)
+    {
+        const auto& child = move.get_content()[i];
+        child->accept(*this);
+        current.final().add_transition(result.get_initial_id());
+        current.set_final(result.get_final_id());
+    }
+    result = current;
+}
+
 void game_condition_dispatcher::dispatch(const rbg_parser::conjunction & m) {
     std::vector<std::unique_ptr<actions::condition> > rec_result;
     for(const auto& item : m.get_content())
@@ -279,5 +294,8 @@ void game_condition_dispatcher::dispatch(const rbg_parser::comparison & m) {
 }
 
 void game_condition_dispatcher::dispatch(const rbg_parser::move_condition & m) {
-    /* TODO(shrum): Use the game_nfa_dispatcher to create nfa. */
+    std::unique_ptr<fsm::state_register<action> > states(new fsm::state_register<action>());
+    game_nfa_dispatcher dispatcher(states.get(), resolver);
+    m.get_content()->accept(dispatcher);
+    result = std::unique_ptr<actions::condition>(new actions::conditions::move_pattern(dispatcher.get_result(),std::move(states)));
 }
