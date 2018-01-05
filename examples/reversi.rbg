@@ -29,7 +29,8 @@
     (
         direction
         (opp~piece)
-        (direction)^*
+        ((direction) (opp~piece))^*
+        (direction)
         (pla~piece)
     )
 
@@ -41,12 +42,13 @@
             direction
             (opp~piece)
             [pla~piece]
+            ->
         )^*
         direction 
         (pla~piece)
         (oppositedirection)^*
         (pla~placeholder)
-        [pla~piece])
+        [pla~piece]->)
         +
         (? not (! canswapdirection(pla; opp; direction; oppositedirection)))
     )
@@ -69,6 +71,7 @@
         )
         anySquare
         (pla~placeholder)
+        [pla~piece]
         swapdirection(pla; opp; (-1,0); (1,0))
         swapdirection(pla;opp;(1,0);(-1,0))
         swapdirection(pla;opp;(0,1);(0,-1))
