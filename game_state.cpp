@@ -81,6 +81,13 @@ game_state::game_state(const rbg_parser::parsed_game &parsed_game)
     parsed_game.get_moves()->accept(dispatcher);
     nfa = dispatcher.get_result();
     modifier_states = dispatcher.get_modifier_states();
+    for(size_t y = 0; y < current_board.height(); y++)
+    {
+        for(size_t x = 0; x < current_board.width(); x++)
+        {
+            sigma[current_board(x,y)]++;
+        }
+    }
 }
 
 
@@ -185,18 +192,15 @@ std::ostream &operator<<(std::ostream &s, const game_state &state) {
         for(size_t x = 0; x < state.current_board.width(); x++)
         {
             std::string name = state.get_name_resolver().get_piece_name(state.current_board(x,y));
-//            if(name == "empty") {
-//                s << "[" << std::setw(2) << " "  << "] ";
-//            }
-//            else if(name == "blackMan")
-//            {
-//                s << "[" << std::setw(2) << "o" << "] ";
-//            }
-//            else
-//            {
-//                s << "[" << std::setw(2) << "x" << "] ";
-//            }
-            s  << "[" << std::setw(10) << name << "] ";
+            int width=2;
+            if(name == "empty")
+            {
+                s << "[" << std::setw(width) << " " << "] ";
+            }
+            else
+            {
+                s << "[" << std::setw(width) << name.substr(0, (unsigned long) width) << "] ";
+            }
         }
         s << "\n";
     }

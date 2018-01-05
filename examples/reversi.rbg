@@ -24,8 +24,18 @@
       + ( 0,-1)
     )^*
 
+
+#canswapdirection (pla; opp; direction; oppositedirection) =
+    (
+        direction
+        (opp~piece)
+        (direction)^*
+        (pla~piece)
+    )
+
 #swapdirection (pla; opp; direction; oppositedirection) =
     (
+        ((? (! canswapdirection(pla; opp; direction; oppositedirection)))
         [pla~placeholder]
         (
             direction
@@ -36,7 +46,9 @@
         (pla~piece)
         (oppositedirection)^*
         (pla~placeholder)
-        [pla~piece]
+        [pla~piece])
+        +
+        (? not (! canswapdirection(pla; opp; direction; oppositedirection)))
     )
 
 #place (pla; opp) =
@@ -44,6 +56,19 @@
         anySquare
         (empty)
         [pla~piece]
+        [pla~placeholder]
+        (
+        canswapdirection(pla;opp;(-1,0);(1,0)) +
+        canswapdirection(pla;opp;(1,0);(-1,0)) +
+        canswapdirection(pla;opp;(0,1);(0,-1)) +
+        canswapdirection(pla;opp;(0,-1);(0,1)) +
+        canswapdirection(pla;opp;(1,1);(-1,-1)) +
+        canswapdirection(pla;opp;(-1,-1);(1,1)) +
+        canswapdirection(pla;opp;(-1,1);(1,-1)) +
+        canswapdirection(pla;opp;(1,-1);(-1,1))
+        )
+        anySquare
+        (pla~placeholder)
         swapdirection(pla; opp; (-1,0); (1,0))
         swapdirection(pla;opp;(1,0);(-1,0))
         swapdirection(pla;opp;(0,1);(0,-1))
@@ -52,14 +77,6 @@
         swapdirection(pla;opp;(1,1);(-1,-1))
         swapdirection(pla;opp;(1,-1);(-1,1))
         swapdirection(pla;opp;(-1,1);(1,-1))
-    )
-
-#canswapdirection (pla; opp; direction; oppositedirection) =
-    (
-        direction
-        (opp~piece)
-        (direction)^*
-        (pla~piece)
     )
 
 #canplace (pla; opp) =
@@ -77,30 +94,38 @@
         )
     )
 
-#move (pla; opp) =
-    (
-        place(pla;opp)
-    )  
-
 #rules = 
     (
-        (((? (! canplace(w;b))) move(w; b)) + (? not (!canplace(w;b))))
+        ((? (! canplace(b;w))) + (? (! canplace(w;b))))
+        (((? (!canplace(w;b))) place(w;b)) + (? not (!canplace(w;b))))
+        ((
+        (? $wpiece > $bpiece) [$bplayer = 0][$wplayer = 100]
+        )
+        +
+        (
+        (? $wpiece < $bpiece) [$bplayer = 100][$wplayer = 0]
+        )
+        +
+        (
+        (? $wpiece == $bpiece) [$bplayer = 50][$wplayer = 50]
+        ))
+
         ->bplayer
-        (((? (! canplace(b;w))) move(b; w)) + (? not (!canplace(b;w))))
+        (((? (!canplace(b;w))) place(b;w)) + (? not (!canplace(b;w))))
+
+        ((
+        (? $wpiece > $bpiece) [$bplayer = 0][$wplayer = 100]
+        )
+        +
+        (
+        (? $wpiece < $bpiece) [$bplayer = 100][$wplayer = 0]
+        )
+        +
+        (
+        (? $wpiece == $bpiece) [$bplayer = 50][$wplayer = 50]
+        ))
         ->wplayer
     )^*
-    (? not (! canplace(w;b)))
-    (? not (! canplace(b;w)))
-    (
-    (? $wpiece > $bpiece) [$wplayer = 100]
-    )
-    +
-    (
-    (? $wpiece < $bpiece) [$bplayer = 100]
-    )
-    +
-    (
-    (? $wpiece == $bpiece) [$bplayer = 50][$wplayer = 50]
-    )
+
 
 

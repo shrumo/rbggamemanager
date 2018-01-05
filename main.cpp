@@ -83,6 +83,9 @@ int main(int argc, char *argv[])
     while(!moves.empty()) {
         std::cout << state << std::endl;
         std::cout << "Turn: " << state.sigma[state.get_name_resolver().get_variable_id("turn")] << std::endl;
+
+        if(state.turn() == 22)
+            std::cout<<"WAIT" <<std::endl;
         std::cout << "Player: " << state.get_name_resolver().get_player_name(state.current_player) << std::endl;
         std::cout << "Possible moves: " << std::endl;
         for (const game_move &m : moves) {
