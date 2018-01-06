@@ -8,7 +8,7 @@ python3 ../scripts/create_cmakelists.py > CMakeLists.txt
 echo "CMakeLists.txt for submodule created."
 cd ../
 echo "Creating build directory."
-mkdir build
+mkdir build -p
 cd build
 echo "Build directory made at:"
 pwd
