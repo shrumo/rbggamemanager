@@ -8,7 +8,7 @@
 #include <vector>
 #include <unordered_map>
 #include <memory>
-#include "rbg2gdl/src/condition_check.hpp"
+#include "rbgParser/src/condition_check.hpp"
 #include "game_state.h"
 #include "automaton.h"
 

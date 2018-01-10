@@ -28,7 +28,7 @@ for filename in os.listdir('src'):
 
 text = '''
 cmake_minimum_required(VERSION 3.5.0)
-project(rbg2gdl)
+project(rbgParser)
 
 set(CMAKE_CXXFLAGS "${{CMAKE_CXX_FLAGS}} {}")
 set(CMAKE_CXX_FLAGS_DEBUG "${{CMAKE_CXX_FLAGS_DEBUG}} {}")
@@ -36,8 +36,7 @@ set(CMAKE_CXX_FLAGS_DEBUG "${{CMAKE_CXX_FLAGS_DEBUG}} {}")
 set(CMAKE_CXX_STANDARD 11)
 
 set(SOURCE_FILES {})
-add_library(parser ${{SOURCE_FILES}})
-add_executable(rbg2gdl ${{SOURCE_FILES}} src/main.cpp)
+add_library(rbgParser ${{SOURCE_FILES}})
 '''
 
 print(text.format(cxxflags,cxxdebugflags,'\n'.join(files)))

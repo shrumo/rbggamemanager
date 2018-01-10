@@ -6,7 +6,7 @@
 #define RBGGAMEMANAGER_NAME_RESOLVER_H
 
 #include <unordered_map>
-#include "rbg2gdl/src/parsed_game.hpp"
+#include "rbgParser/src/parsed_game.hpp"
 
 using token_id_t = std::vector<std::string>::size_type;
 

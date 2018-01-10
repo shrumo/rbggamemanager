@@ -7,7 +7,7 @@
 #include<sstream>
 #include <chrono>
 
-#include"rbg2gdl/src/game_items.hpp"
+#include"rbgParser/src/game_items.hpp"
 
 #include "boost/program_options.hpp"
 

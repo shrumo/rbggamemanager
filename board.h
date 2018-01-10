@@ -6,7 +6,7 @@
 #define RBGGAMEMANAGER_BOARD_H
 
 #include <vector>
-#include "rbg2gdl/src/game_board.hpp"
+#include "rbgParser/src/game_board.hpp"
 #include "name_resolver.h"
 
 class board
