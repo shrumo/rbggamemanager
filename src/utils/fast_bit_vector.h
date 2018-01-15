@@ -6,6 +6,8 @@
 #define RBGGAMEMANAGER_FAST_RESET_VECTOR_H
 
 #include <vector>
+#include <limits>
+
 class fast_bit_vector {
     std::vector<unsigned int> data;
     unsigned int threshold;
@@ -28,6 +30,10 @@ public:
 
     void reset()
     {
+        if(threshold == std::numeric_limits<unsigned int>::max()) {
+            std::fill(data.begin(), data.end(), 0);
+            threshold = 1;
+        }
         threshold++;
     }
 

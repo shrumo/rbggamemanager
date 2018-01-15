@@ -52,6 +52,7 @@ namespace fsm {
         state_id_t initial_state_id;
         state_id_t final_state_id;
         std::vector<state<Letter> > states;
+        std::size_t state_count_cache;
     public:
         nfa()
             : initial_state_id(0),
@@ -80,6 +81,7 @@ namespace fsm {
         state_id_t new_state()
         {
             states.emplace_back();
+            state_count_cache = states.size();
             return states.size() - 1;
         }
 
@@ -95,7 +97,7 @@ namespace fsm {
 
         std::size_t get_state_count() const
         {
-            return states.size();
+            return state_count_cache;
         }
     };
 }

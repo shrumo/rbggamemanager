@@ -38,9 +38,9 @@ int main(int argc, char *argv[]) {
         auto moves = state.get_move_evaluator().find_moves(&state);
         std::cout << state << std::endl;
         while (!moves.empty()) {
-        std::cout << std::endl;
+            std::cout << std::endl;
             state.make_move(moves[rand() % moves.size()]);
-        std::cout << state << std::endl;
+            std::cout << state << std::endl;
             moves = state.get_move_evaluator().find_moves(&state);
         }
         turns += state.turn();

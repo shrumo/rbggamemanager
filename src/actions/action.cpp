@@ -15,7 +15,7 @@ void actions::shift::revert(game_state *b, const action_result &apply_result) co
 }
 
 action_result actions::on::apply(game_state *b) const {
-    return pieces.find(b->current_piece()) != pieces.end();
+    return action_result(pieces[b->current_piece()]);
 }
 
 action_result actions::off::apply(game_state *b) const {

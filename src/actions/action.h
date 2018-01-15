@@ -119,9 +119,9 @@ namespace actions
 
     class on : public action
     {
-        std::unordered_set<token_id_t> pieces;
+        std::vector<bool> pieces;
     public:
-        on(std::unordered_set<token_id_t> pieces)
+        on(std::vector<bool> pieces)
                 : pieces(std::move(pieces))
         {}
         action_result apply(game_state *b) const override;

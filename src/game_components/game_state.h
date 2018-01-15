@@ -16,6 +16,8 @@ class game_state {
     lazy_evaluator lazy_controller;
 
     board current_board;
+    size_t board_width_cache;
+    size_t board_height_cache;
     size_t current_x,current_y;
     fsm::state_id_t current_state;
 
@@ -30,7 +32,9 @@ public:
           current_x(0), current_y(0),
           sigma(description.get_variables_count()),
           current_player(description.get_starting_player()),
-          current_state(description.get_moves_description().get_nfa().initial())
+          current_state(description.get_moves_description().get_nfa().initial()),
+          board_width_cache(current_board.width()),
+          board_height_cache(current_board.height())
     {
         for(size_t y = 0; y < current_board.height(); y++)
         {
@@ -117,12 +121,12 @@ public:
 
     size_t width() const
     {
-        return current_board.width();
+        return board_width_cache;
     }
 
     size_t height() const
     {
-        return current_board.height();
+        return board_height_cache;
     }
 
     int turn() const

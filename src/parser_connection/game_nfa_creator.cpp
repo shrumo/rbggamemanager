@@ -267,12 +267,14 @@ void game_nfa_creator::dispatch(const rbg_parser::ons& move) {
     std::string move_identifier = move.to_rbg();
     if(used_actions.find(move_identifier) == used_actions.end())
     {
-        std::vector<token_id_t> pieces;
+        /* TODO(shrum): Get pieces count here somehow and make sure pieces are first names. */
+        std::vector<bool> pieces(resolver.names_count(),false);
         for(const auto& piece_token : move.get_legal_ons())
         {
-            pieces.emplace_back(resolver.id(piece_token.to_string()));
+            token_id_t piece_id = resolver.id(piece_token.to_string());
+            pieces[piece_id] = true;
         }
-        std::unique_ptr<action> action(new actions::on(std::unordered_set<token_id_t>(pieces.begin(),pieces.end())));
+        std::unique_ptr<action> action(new actions::on(std::move(pieces)));
         used_actions[move_identifier] = action.get();
         actions.push_back(std::move(action));
     }
