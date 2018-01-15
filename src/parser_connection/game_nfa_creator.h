@@ -83,6 +83,7 @@ class game_nfa_creator : public rbg_parser::abstract_dispatcher
             : resolver(resolver), nfa_result(new fsm::nfa<action*>()), move_pattern_count(0),
               block_started(false), reuse_final_as_initial(false), last_final(0)
     {
+        blocks_states.push_back(0);
     }
 
     void stop_reusing_finals()

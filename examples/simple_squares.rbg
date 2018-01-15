@@ -1,6 +1,13 @@
 #game = "SimpleSquares"
 
-#board = [empty, empty, empty]
+#board = [empty, empty, empty, empty, empty, empty, empty, empty]
+         [empty, empty, empty, empty, empty, empty, empty, empty]
+         [empty, empty, empty, empty, empty, empty, empty, empty]
+         [empty, empty, empty, empty, empty, empty, empty, empty]
+         [empty, empty, empty, empty, empty, empty, empty, empty]
+         [empty, empty, empty, empty, empty, empty, empty, empty]
+         [empty, empty, empty, empty, empty, empty, empty, empty]
+         [empty, empty, empty, empty, empty, empty, empty, empty]
 
 #players = sad, happy
 #pieces = empty, piece, happypiece
@@ -18,10 +25,14 @@
     (
         (
         anySquare
+        (empty)
         [piece]
-        (? (! (1,0) ) )
+        (? (! ((1,0) + (0,1)) (empty)) )
         ->happy
+        anySquare
+        (empty)
         [happypiece]
+        (? (! (-1,0)(piece) + (0,-1)(piece)))
         ->sad
         )^*
     )

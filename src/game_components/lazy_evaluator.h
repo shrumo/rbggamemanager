@@ -28,6 +28,12 @@ public:
         lazy_actions.pop_back();
     }
 
+    void clear()
+    {
+        lazy_actions.clear();
+        action_results.clear();
+    }
+
     std::size_t evaluate(game_state* state);
     void revert(game_state* state, std::size_t revert_point);
 };

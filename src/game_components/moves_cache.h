@@ -20,6 +20,21 @@ public:
     block_application(std::size_t applied_x, std::size_t applied_y, std::size_t block_id)
             : applied_x(applied_x), applied_y(applied_y),
               block_id(block_id) {}
+
+    std::size_t x() const
+    {
+        return applied_x;
+    }
+
+    std::size_t y() const
+    {
+        return applied_y;
+    }
+
+    std::size_t get_block_id() const
+    {
+        return block_id;
+    }
 };
 
 class move

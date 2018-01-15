@@ -42,13 +42,12 @@
             direction
             (opp~piece)
             [pla~piece]
-            ->
         )^*
         direction 
         (pla~piece)
         (oppositedirection)^*
         (pla~placeholder)
-        [pla~piece]->)
+        [pla~piece])
         +
         (? not (! canswapdirection(pla; opp; direction; oppositedirection)))
     )

@@ -9,7 +9,7 @@ std::size_t lazy_evaluator::evaluate(game_state *state) {
     size_t old_lazy_head = action_results.size();
     while(action_results.size() < lazy_actions.size())
     {
-        action_results.push_back(state->apply_action_application(lazy_actions[action_results.size()-1]));
+        action_results.push_back(state->apply_action_application(lazy_actions[action_results.size()]));
     }
     return old_lazy_head;
 }

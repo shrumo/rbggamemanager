@@ -291,12 +291,12 @@ void game_nfa_creator::dispatch(const rbg_parser::off& move) {
     fsm::state_id_t final_id = nfa_result->new_state();
     register_modifier(initial_id);
     token_id_t piece_id = resolver.id(move.get_piece().to_string());
-    std::unique_ptr<action> letter(new actions::off((unsigned int) blocks_states.size(), piece_id));
+    std::unique_ptr<action> letter(new actions::off((unsigned int) blocks_states.size() - 1, piece_id));
     action* letter_ptr = letter.get();
     actions.push_back(std::move(letter));
     if(move.is_lazy())
     {
-        std::unique_ptr<action> lazy_letter(new actions::lazy((unsigned int) blocks_states.size(), letter_ptr));
+        std::unique_ptr<action> lazy_letter(new actions::lazy((unsigned int) blocks_states.size() - 1, letter_ptr));
         letter_ptr = lazy_letter.get();
         actions.push_back(std::move(lazy_letter));
     }
@@ -314,12 +314,12 @@ void game_nfa_creator::dispatch(const rbg_parser::assignment& move) {
     register_modifier(initial_id);
     token_id_t variable_id = resolver.id(move.get_left_side().to_string());
     int value = move.get_right_side().get_value();
-    std::unique_ptr<action> letter(new actions::assignment((unsigned int) blocks_states.size(), variable_id, value));
+    std::unique_ptr<action> letter(new actions::assignment((unsigned int) blocks_states.size() - 1, variable_id, value));
     action* letter_ptr = letter.get();
     actions.push_back(std::move(letter));
     if(move.is_lazy())
     {
-        std::unique_ptr<action> lazy_letter(new actions::lazy((unsigned int) blocks_states.size(), letter_ptr));
+        std::unique_ptr<action> lazy_letter(new actions::lazy((unsigned int) blocks_states.size() - 1, letter_ptr));
         letter_ptr = lazy_letter.get();
         actions.push_back(std::move(lazy_letter));
     }
@@ -338,11 +338,11 @@ void game_nfa_creator::dispatch(const rbg_parser::player_switch& move) {
     std::unique_ptr<action> letter;
     if(move.changes_player()) {
         token_id_t player_id = resolver.id(move.get_player().to_string());
-        letter = std::unique_ptr<action>(new actions::player_switch((unsigned int) blocks_states.size(), player_id));
+        letter = std::unique_ptr<action>(new actions::player_switch((unsigned int) blocks_states.size() - 1, player_id));
     }
     else
     {
-        letter = std::unique_ptr<action>(new actions::semi_switch((unsigned int) blocks_states.size()));
+        letter = std::unique_ptr<action>(new actions::semi_switch((unsigned int) blocks_states.size() - 1));
     }
     action* letter_ptr = letter.get();
     actions.push_back(std::move(letter));
@@ -379,23 +379,21 @@ void game_nfa_creator::dispatch(const rbg_parser::condition_check& move) {
 }
 
 void game_nfa_creator::dispatch(const rbg_parser::modifier_block& move) {
+
     move.get_content().front()->accept(*this);
 
-    fsm::state_id_t initial = new_initial();
-    fsm::state_id_t final = nfa_result->final();
-    last_final = final;
-    stop_reusing_finals();
+    fsm::state_id_t initial = nfa_result->initial();
     start_block();
     for(size_t i = 1; i < move.get_content().size(); i++)
     {
         const auto& child = move.get_content()[i];
-        child->accept(*this);
-        final = nfa_result->final();
-        last_final = final;
         start_reusing_finals();
+        child->accept(*this);
     }
     stop_block();
     nfa_result->set_initial(initial);
+    last_final = nfa_result->final();
+    start_reusing_finals();
 }
 
 void game_nfa_creator::stop_block() { block_started = false; }

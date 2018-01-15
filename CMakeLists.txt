@@ -3,6 +3,9 @@ project(rbggamemanager)
 
 set(CMAKE_CXX_STANDARD 11)
 
+set(CMAKE_CXXFLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wpedantic -std=c++11 -O3 -flto -s")
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -Wextra -Wpedantic -O0 -std=c++11 -g")
+
 add_subdirectory(rbgParser)
 
 find_package(Threads)

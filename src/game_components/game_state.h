@@ -22,8 +22,6 @@ class game_state {
     std::vector<int> sigma;
     token_id_t current_player;
 
-    size_t moves_made;
-
     moves_cache moves_information;
 public:
     game_state(const game_description& description)
@@ -32,9 +30,15 @@ public:
           current_x(0), current_y(0),
           sigma(description.get_variables_count()),
           current_player(description.get_starting_player()),
-          moves_made(0),
           current_state(description.get_moves_description().get_nfa().initial())
     {
+        for(size_t y = 0; y < current_board.height(); y++)
+        {
+            for(size_t x = 0; x < current_board.width(); x++)
+            {
+                sigma[current_board(x,y)]++;
+            }
+        }
     }
 
     moves_cache& get_move_evaluator()
@@ -82,6 +86,11 @@ public:
     void set_value(token_id_t variable, int value)
     {
         sigma[variable] = value;
+    }
+
+    const board& get_board() const
+    {
+        return current_board;
     }
 
     size_t x() const
@@ -153,7 +162,28 @@ public:
 
     action_result apply_action_application(const action_application& application);
     void revert_action_application(const action_application& application, const action_result& application_result);
+
+    void make_move(const move& move)
+    {
+
+        for(const auto& block : move.get_blocks())
+        {
+            current_state = parent.get_moves_description().get_corresponding_state(block.get_block_id());
+            current_x = block.x();
+            current_y = block.y();
+            while(parent.get_moves_description().get_nfa()[current_state].transitions().size() == 1 &&
+                    parent.get_moves_description().get_nfa()[current_state].transitions().front().letter()->get_index() == block.get_block_id())
+            {
+                parent.get_moves_description().get_nfa()[current_state].transitions().front().letter()->apply(this);
+                lazy_controller.evaluate(this);
+                current_state = parent.get_moves_description().get_nfa()[current_state].transitions().front().target();
+            }
+        }
+        lazy_controller.clear();
+        moves_information.clear();
+    }
 };
 
+std::ostream& operator<<(std::ostream& s,const game_state& state);
 
 #endif //RBGGAMEMANAGER_GAME_STATE_H
