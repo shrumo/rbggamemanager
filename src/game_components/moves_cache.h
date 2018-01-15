@@ -7,6 +7,7 @@
 
 #include <vector>
 #include "../game_nfa/automaton.h"
+#include "../utils/fast_bit_vector.h"
 #include <unordered_map>
 
 class game_state;
@@ -63,8 +64,8 @@ public:
 class moves_cache {
     std::vector<move> possible_moves;
 
-    std::vector< std::vector< std::vector<bool> > > visited;
-    std::vector< std::vector< std::vector<bool> > > results;
+    std::vector< std::vector< fast_bit_vector > > visited;
+    std::vector< std::vector< fast_bit_vector > > results;
 
     std::size_t last_visited_array_index;
     std::size_t last_results_array_index;

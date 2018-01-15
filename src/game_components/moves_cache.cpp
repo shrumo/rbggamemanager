@@ -21,7 +21,7 @@ void moves_cache::find_all_moves_rec(game_state *state, size_t visited_array_ind
     size_t depth = move->get_blocks().size();
     if(visited[visited_array_index][depth][index])
         return;
-    visited[visited_array_index][depth][index] = true;
+    visited[visited_array_index][depth].set(index);
     for(const auto& transition : nfa[current_state].transitions())
     {
         action_result result = transition.letter()->apply(state);
@@ -41,7 +41,6 @@ void moves_cache::find_all_moves_rec(game_state *state, size_t visited_array_ind
                     find_all_moves_rec(state, visited_array_index, nfa, transition.target(), move, true);
                 }
                 if(!block_started) {
-                    visited[visited_array_index].pop_back();
                     move->pop_block();
                 }
                 state->lazy().revert(state, lazy_head);
@@ -63,7 +62,7 @@ size_t moves_cache::new_visited(game_state *state, const fsm::nfa<action *> &nfa
     if(last_visited_array_index < visited.size())
     {
         visited[last_visited_array_index].front().resize(state->width() * state->height() * nfa.get_state_count());
-        std::fill(visited[last_visited_array_index].front().begin(),visited[last_visited_array_index].front().end(),false);
+        visited[last_visited_array_index].front().reset();
         return last_visited_array_index++;
     }
     visited.emplace_back();
@@ -76,7 +75,7 @@ size_t moves_cache::new_results_cache(game_state *state, const fsm::nfa<action *
     if(last_results_array_index < results.size())
     {
         results[last_results_array_index].front().resize(state->width() * state->height() * nfa.get_state_count());
-        std::fill(results[last_results_array_index].front().begin(),results[last_results_array_index].front().end(),false);
+        results[last_results_array_index].front().reset();
         return last_results_array_index++;
     }
     results.emplace_back();
@@ -91,12 +90,12 @@ bool moves_cache::check_play(game_state *state, size_t visited_array_index, size
     size_t index = visited_index(state, nfa, current_state);
     if(current_state == nfa.final() || results[results_index][depth][index])
     {
-        results[results_index][depth][index] = true;
+        results[results_index][depth].set(index);
         return true;
     }
     if(visited[visited_array_index][depth][index])
         return false;
-    visited[visited_array_index][depth][index] = true;
+    visited[visited_array_index][depth].set(index);
     for(const auto& transition : nfa[current_state].transitions())
     {
         action_result result = transition.letter()->apply(state);
@@ -111,11 +110,13 @@ bool moves_cache::check_play(game_state *state, size_t visited_array_index, size
                     create_result_layers(visited_array_index, depth + 1);
                     new_depth = depth + 1;
                 }
-                    results[results_index][depth][index] = check_play(state, visited_array_index, results_index, nfa, transition.target(), new_depth, true);
+                if(check_play(state, visited_array_index, results_index, nfa, transition.target(), new_depth, true))
+                    results[results_index][depth].set(index);
                 state->lazy().revert(state, lazy_head);
             }
             else
-                results[results_index][depth][index] = check_play(state, visited_array_index, results_index, nfa, transition.target(), depth);
+                if(check_play(state, visited_array_index, results_index, nfa, transition.target(), depth))
+                    results[results_index][depth].set(index);
         }
         transition.letter()->revert(state, result);
         if(results[results_index][depth][index])
@@ -149,8 +150,8 @@ bool moves_cache::check_pattern(game_state *state, const fsm::nfa<action *> &nfa
 void moves_cache::create_visited_layers(size_t visited_array_index, size_t layer_depth) {
     if(visited[visited_array_index].size() > layer_depth)
     {
-        visited[visited_array_index][layer_depth].resize(visited[visited_array_index].front().size(),false);
-        std::fill(visited[visited_array_index][layer_depth].begin(),visited[visited_array_index][layer_depth].end(),false);
+        visited[visited_array_index][layer_depth].resize(visited[visited_array_index].front().size());
+        visited[visited_array_index][layer_depth].reset();
         return;
     }
     while(visited[visited_array_index].size() <= layer_depth)
@@ -163,7 +164,7 @@ void moves_cache::create_result_layers(size_t results_array_index, size_t layer_
     if(results[results_array_index].size() > layer_depth)
     {
         results[results_array_index][layer_depth].resize(results[results_array_index].front().size());
-        std::fill(results[results_array_index][layer_depth].begin(),results[results_array_index][layer_depth].end(),false);
+        results[results_array_index][layer_depth].reset();
         return;
     }
     while(results[results_array_index].size() <= layer_depth)
