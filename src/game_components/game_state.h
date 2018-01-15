@@ -1,0 +1,159 @@
+//
+// Created by shrum on 12.01.18.
+//
+
+#ifndef RBGGAMEMANAGER_GAME_STATE_H
+#define RBGGAMEMANAGER_GAME_STATE_H
+
+
+#include "game_description.h"
+#include "lazy_evaluator.h"
+#include "moves_cache.h"
+
+class game_state {
+    const game_description& parent;
+
+    lazy_evaluator lazy_controller;
+
+    board current_board;
+    size_t current_x,current_y;
+    fsm::state_id_t current_state;
+
+    std::vector<int> sigma;
+    token_id_t current_player;
+
+    size_t moves_made;
+
+    moves_cache moves_information;
+public:
+    game_state(const game_description& description)
+        : parent(description),
+          current_board(description.get_initial_board()),
+          current_x(0), current_y(0),
+          sigma(description.get_variables_count()),
+          current_player(description.get_starting_player()),
+          moves_made(0),
+          current_state(description.get_moves_description().get_nfa().initial())
+    {
+    }
+
+    moves_cache& get_move_evaluator()
+    {
+        return moves_information;
+    }
+
+    const moves_cache& get_possible_moves() const
+    {
+        return moves_information;
+    }
+
+    void set_current_state(fsm::state_id_t state)
+    {
+        current_state = state;
+    }
+
+    fsm::state_id_t get_current_state() const
+    {
+        return current_state;
+    }
+
+    token_id_t current_piece() const
+    {
+        return current_board(current_x,current_y);
+    }
+
+    const game_description& get_description() const
+    {
+        return parent;
+    }
+
+    void set_piece(token_id_t piece)
+    {
+        sigma[current_piece()]--;
+        current_board(current_x,current_y) = piece;
+        sigma[piece]++;
+    }
+
+    int value(token_id_t variable) const
+    {
+        return sigma[variable];
+    }
+
+    void set_value(token_id_t variable, int value)
+    {
+        sigma[variable] = value;
+    }
+
+    size_t x() const
+    {
+        return current_x;
+    }
+
+    size_t y() const
+    {
+        return current_y;
+    }
+
+    void change_pos(long long int dx, long long int dy)
+    {
+        current_x += dx;
+        current_y += dy;
+    }
+
+    void set_pos(size_t new_x, size_t new_y)
+    {
+        current_x = new_x;
+        current_y = new_y;
+    }
+
+    size_t width() const
+    {
+        return current_board.width();
+    }
+
+    size_t height() const
+    {
+        return current_board.height();
+    }
+
+    int turn() const
+    {
+        return sigma[parent.get_turn_id()];
+    }
+
+    void inc_turn()
+    {
+        sigma[parent.get_turn_id()]++;
+    }
+
+    void dec_turn()
+    {
+        sigma[parent.get_turn_id()]--;
+    }
+
+    token_id_t player() const
+    {
+        return current_player;
+    }
+
+    void set_player(token_id_t player)
+    {
+        current_player = player;
+    }
+
+    lazy_evaluator& lazy()
+    {
+        return lazy_controller;
+    }
+
+    const lazy_evaluator& lazy() const
+    {
+        return lazy_controller;
+    }
+
+    action_result apply_action_application(const action_application& application);
+    void revert_action_application(const action_application& application, const action_result& application_result);
+};
+
+
+#endif //RBGGAMEMANAGER_GAME_STATE_H

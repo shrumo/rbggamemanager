@@ -1,8 +1,6 @@
 #game = "SimpleSquares"
 
 #board = [empty, empty, empty]
-         [empty, empty, empty]
-         [empty, empty, empty]
 
 #players = sad, happy
 #pieces = empty, piece, happypiece
@@ -18,17 +16,15 @@
 
 #rules =
     (
+        (
         anySquare
-        (empty)
         [piece]
+        (? (! (1,0) ) )
         ->happy
-        anySquare
-        (piece)
-        (((? $happypiece > $piece) (1,0) [@ happypiece])
-        +
-        ((? $happypiece <= $piece) (-1,0) [@ happypiece]))
+        [happypiece]
         ->sad
-    )^* [$sad = 100]
+        )^*
+    )
 
 
 
