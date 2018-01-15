@@ -2,7 +2,7 @@
 
 # This script guides user through compiling process. It worked for me.
 
-echo "Creating CMakeLists.txt for submodule rbg2gdl."
+echo "Creating CMakeLists.txt for submodule rbgParser."
 cd ../rbgParser/
 python3 ../scripts/create_cmakelists.py > CMakeLists.txt
 echo "CMakeLists.txt for submodule created."

@@ -149,7 +149,7 @@ bool moves_cache::check_pattern(game_state *state, const fsm::nfa<action *> &nfa
 void moves_cache::create_visited_layers(size_t visited_array_index, size_t layer_depth) {
     if(visited[visited_array_index].size() > layer_depth)
     {
-        visited[visited_array_index][layer_depth].resize(visited[visited_array_index].front().size());
+        visited[visited_array_index][layer_depth].resize(visited[visited_array_index].front().size(),false);
         std::fill(visited[visited_array_index][layer_depth].begin(),visited[visited_array_index][layer_depth].end(),false);
         return;
     }
@@ -162,7 +162,7 @@ void moves_cache::create_visited_layers(size_t visited_array_index, size_t layer
 void moves_cache::create_result_layers(size_t results_array_index, size_t layer_depth) {
     if(results[results_array_index].size() > layer_depth)
     {
-        results[results_array_index][layer_depth].resize(visited[results_array_index].front().size());
+        results[results_array_index][layer_depth].resize(results[results_array_index].front().size());
         std::fill(results[results_array_index][layer_depth].begin(),results[results_array_index][layer_depth].end(),false);
         return;
     }

@@ -35,7 +35,7 @@ namespace fsm {
         std::vector<transition<Letter> > state_transitions;
     public:
         state() = default;
-        const std::vector<transition<Letter> > transitions() const
+        const std::vector<transition<Letter> >& transitions() const
         {
             return state_transitions;
         }

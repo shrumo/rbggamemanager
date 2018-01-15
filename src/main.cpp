@@ -30,14 +30,18 @@ int main(int argc, char *argv[]) {
     rbg_parser::parsed_game pg = g.parse_game(msg);
 
     game_description gd(create_description(pg));
-    game_state state(gd);
-    auto moves = state.get_move_evaluator().find_moves(&state);
-    std::cout << state << std::endl;
-    while(!moves.empty())
-    {
-        std::cout << std::endl;
-        state.make_move(moves[rand()%moves.size()]);
-        std::cout << state << std::endl;
-        moves = state.get_move_evaluator().find_moves(&state);
+//    std::cout << state << std::endl;
+    auto begin = std::chrono::system_clock::now();
+    for(size_t i = 0; i < 100; i++) {
+        game_state state(gd);
+        auto moves = state.get_move_evaluator().find_moves(&state);
+        while (!moves.empty()) {
+//        std::cout << std::endl;
+            state.make_move(moves[rand() % moves.size()]);
+//        std::cout << state << std::endl;
+            moves = state.get_move_evaluator().find_moves(&state);
+        }
     }
+    auto end = std::chrono::system_clock::now();
+    std::cout << std::chrono::duration<double>(end - begin).count() << std::endl;
 }
