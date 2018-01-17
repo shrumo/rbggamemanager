@@ -9,7 +9,8 @@
 
 
 moves_cache::moves_cache()
-    :last_results_array_index(0), last_visited_array_index(0)
+    : last_visited_array_index(0),
+      last_results_array_index(0)
 {
 
 }
@@ -180,10 +181,4 @@ void moves_cache::dump_visited(std::size_t visited_array_index) {
     }
 }
 
-void moves_cache::dump_results(std::size_t results_array_index) {
-    if(results_array_index == last_results_array_index - 1)
-    {
-        last_results_array_index--;
-    }
-}
 

@@ -74,7 +74,6 @@ class moves_cache {
     std::size_t new_results_cache(game_state* state, const fsm::nfa<action *> &nfa);
 
     void dump_visited(std::size_t visited_array_index);
-    void dump_results(std::size_t results_array_index);
 
     void create_visited_layers(std::size_t visited_array_index, std::size_t layer_depth);
     void create_result_layers(std::size_t results_array_index, std::size_t layer_depth);

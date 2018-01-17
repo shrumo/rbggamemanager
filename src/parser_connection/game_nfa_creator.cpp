@@ -72,6 +72,39 @@ void game_nfa_creator::dispatch(const rbg_parser::comparison& move) {
         case rbg_parser::greater_equal:
             condition_result = std::unique_ptr<condition>(new conditions::less_equal(std::move(right),std::move(left)));
             break;
+        case rbg_parser::left_round_bracket:break;
+        case rbg_parser::right_round_bracket:break;
+        case rbg_parser::left_square_bracket:break;
+        case rbg_parser::right_square_bracket:break;
+        case rbg_parser::tilde:break;
+        case rbg_parser::hash:break;
+        case rbg_parser::minus:break;
+        case rbg_parser::plus:break;
+        case rbg_parser::caret:break;
+        case rbg_parser::star:break;
+        case rbg_parser::comma:break;
+        case rbg_parser::semicolon:break;
+        case rbg_parser::dollar:break;
+        case rbg_parser::at_sign:break;
+        case rbg_parser::equal:break;
+        case rbg_parser::arrow:break;
+        case rbg_parser::exclamation:break;
+        case rbg_parser::question:break;
+        case rbg_parser::logical_and:break;
+        case rbg_parser::logical_or:break;
+        case rbg_parser::logical_not:break;
+        case rbg_parser::turn:break;
+        case rbg_parser::player:break;
+        case rbg_parser::game:break;
+        case rbg_parser::players:break;
+        case rbg_parser::pieces:break;
+        case rbg_parser::variables:break;
+        case rbg_parser::rules:break;
+        case rbg_parser::board:break;
+        case rbg_parser::number:break;
+        case rbg_parser::identifier:break;
+        case rbg_parser::quotation:break;
+        case rbg_parser::dummy:break;
     }
 }
 

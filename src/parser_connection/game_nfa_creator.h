@@ -80,8 +80,9 @@ class game_nfa_creator : public rbg_parser::abstract_dispatcher
     }
 
     game_nfa_creator(const name_resolver& resolver)
-            : resolver(resolver), nfa_result(new fsm::nfa<action*>()), move_pattern_count(0),
-              block_started(false), reuse_final_as_initial(false), last_final(0)
+            : resolver(resolver), nfa_result(new fsm::nfa<action*>()),
+              block_started(false), reuse_final_as_initial(false), last_final(0),
+              move_pattern_count(0)
     {
         blocks_states.push_back(0);
     }

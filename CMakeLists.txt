@@ -3,7 +3,9 @@ project(rbggamemanager)
 
 set(CMAKE_CXX_STANDARD 11)
 
-set(CMAKE_CXXFLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wpedantic -std=c++11 -O3 -flto -s")
+set(CMAKE_CXX_FLAGS "-Wall -Wextra")
+set(CMAKE_CXX_FLAGS_DEBUG "-g")
+set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 
 add_subdirectory(rbgParser)
 

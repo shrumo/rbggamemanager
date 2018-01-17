@@ -29,12 +29,12 @@ public:
     game_state(const game_description& description)
         : parent(description),
           current_board(description.get_initial_board()),
-          current_x(0), current_y(0),
-          sigma(description.get_variables_count()),
-          current_player(description.get_starting_player()),
-          current_state(description.get_moves_description().get_nfa().initial()),
           board_width_cache(current_board.width()),
-          board_height_cache(current_board.height())
+          board_height_cache(current_board.height()),
+          current_x(0), current_y(0),
+          current_state(description.get_moves_description().get_nfa().initial()),
+          sigma(description.get_variables_count()),
+          current_player(description.get_starting_player())
     {
         for(size_t y = 0; y < current_board.height(); y++)
         {
@@ -43,21 +43,12 @@ public:
                 sigma[current_board(x,y)]++;
             }
         }
+        sigma[get_description().get_turn_id()] = 0;
     }
 
     moves_cache& get_move_evaluator()
     {
         return moves_information;
-    }
-
-    const moves_cache& get_possible_moves() const
-    {
-        return moves_information;
-    }
-
-    void set_current_state(fsm::state_id_t state)
-    {
-        current_state = state;
     }
 
     fsm::state_id_t get_current_state() const

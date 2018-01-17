@@ -68,7 +68,7 @@ protected:
 public:
     action() : index(0) {}
     virtual action_result apply(game_state *b) const =0;
-    virtual void revert(game_state *b,const action_result& apply_result) const {}
+    virtual void revert(game_state *,const action_result&) const {}
     bool is_modifier() const { return index != 0; }
     bool is_switch() const { return index < 0; }
     unsigned int get_index()
@@ -105,7 +105,7 @@ namespace actions
     class empty : public action
     {
     public:
-        action_result apply(game_state *b) const override { return true; };
+        action_result apply(game_state *) const override { return true; };
     };
 
     class shift : public action
@@ -162,7 +162,7 @@ namespace actions
     {
     public:
         semi_switch(unsigned int index) : action(index, true) {}
-        action_result apply(game_state *b) const override { return true; };
+        action_result apply(game_state *) const override { return true; };
     };
 
     class assignment : public action

@@ -18,10 +18,38 @@
 #include "game_components/game_description.h"
 #include "game_components/game_state.h"
 
-int main(int argc, char *argv[]) {
+namespace po = boost::program_options;
+using uint = unsigned int;
+
+int main(int argc,const char *argv[]) {
+    po::options_description description("Allowed options");
+    description.add_options()
+            ("number,n",po::value<uint>(),"number of games to be played")
+            ("help,h","produce help message")
+            ("input-file,i",po::value<std::string>(),"input file")
+            ("randomseed,s",po::value<uint>(),"random seed for random player")
+            ;
+
+    po::variables_map vm;
+    po::store(po::parse_command_line(argc,argv,description), vm);
+    po::notify(vm);
+
+    po::positional_options_description p;
+    p.add("input-file", -1);
+
+    po::store(po::command_line_parser(argc, argv).
+            options(description).positional(p).run(), vm);
+    po::notify(vm);
+
+    if(vm.count("randomseed"))
+        srand(vm["randomseed"].as<uint>());
+    if(vm.count("help")) {
+        std::cout << description << std::endl;
+        return 1;
+    }
+
     rbg_parser::messages_container msg;
-    std::string input_file_name(argv[argc - 1]);
-    std::ifstream t(input_file_name);
+    std::ifstream t(vm["input-file"].as< std::string>());
     std::stringstream buffer;
     buffer << t.rdbuf();
 
@@ -32,20 +60,31 @@ int main(int argc, char *argv[]) {
     game_description gd(create_description(pg));
     size_t turns = 0;
     size_t iterations = 1;
+    if(vm.count("number"))
+        iterations = vm["number"].as<uint>();
+    size_t avgmoves = 0;
     auto begin = std::chrono::system_clock::now();
     for(size_t i = 0; i < iterations; i++) {
+        size_t moves_count = 0;
         game_state state(gd);
         auto moves = state.get_move_evaluator().find_moves(&state);
-        std::cout << state << std::endl;
-        while (!moves.empty()) {
-            std::cout << std::endl;
-            state.make_move(moves[rand() % moves.size()]);
+        moves_count += moves.size();
+        if(iterations == 1)
             std::cout << state << std::endl;
+        while (!moves.empty()) {
+            if(iterations == 1)
+                std::cout << "\n";
+            state.make_move(moves[rand() % moves.size()]);
+            if(iterations == 1)
+                std::cout << state << std::endl;
             moves = state.get_move_evaluator().find_moves(&state);
+            moves_count += moves.size();
         }
-        turns += state.turn();
+        turns += state.turn() - 1;
+        avgmoves += moves_count / (state.turn() - 1);
     }
     auto end = std::chrono::system_clock::now();
-    std::cout << std::chrono::duration<double>(end - begin).count() / iterations << std::endl;
-    std::cout << (double) turns / iterations << std::endl;
+    std::cout << "Time for one game: " << std::chrono::duration<double>(end - begin).count() / iterations << std::endl;
+    std::cout << "Avarage number of turns in game: " << (double) turns / iterations << std::endl;
+    std::cout << "Avarage number of moves in one state: " << (double) avgmoves / iterations << std::endl;
 }

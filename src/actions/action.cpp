@@ -7,10 +7,10 @@
 
 action_result actions::shift::apply(game_state *b) const {
     b->change_pos(dx,dy);
-    return 0 <= b->x() && b->x()< b->width() && 0 <= b->y() && b->y() < b->height();
+    return b->x()< b->width() && b->y() < b->height();
 }
 
-void actions::shift::revert(game_state *b, const action_result &apply_result) const {
+void actions::shift::revert(game_state *b, const action_result&) const {
     b->change_pos(-dx,-dy);
 }
 
@@ -55,6 +55,6 @@ action_result actions::lazy::apply(game_state *b) const {
     return true;
 }
 
-void actions::lazy::revert(game_state *b, const action_result &apply_result) const {
+void actions::lazy::revert(game_state *b, const action_result &) const {
     b->lazy().pop_lazy_action();
 }
