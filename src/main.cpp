@@ -53,11 +53,19 @@ int main(int argc,const char *argv[]) {
     std::stringstream buffer;
     buffer << t.rdbuf();
 
-    std::vector<rbg_parser::token> result = tokenize(buffer.str(), msg);
-    rbg_parser::game_items g = input_tokens(result, msg);
-    rbg_parser::parsed_game pg = g.parse_game(msg);
+    std::unique_ptr<rbg_parser::parsed_game> pg;
 
-    game_description gd(create_description(pg));
+    try {
+        std::vector<rbg_parser::token> result = tokenize(buffer.str(), msg);
+        rbg_parser::game_items g = input_tokens(result, msg);
+        pg = std::unique_ptr<rbg_parser::parsed_game>(new rbg_parser::parsed_game(g.parse_game(msg)));
+    }catch(rbg_parser::message& m){
+        std::cout<<"Game description is bad. Here is the error: " << "\n";
+        std::cout<<m.as_error()<<std::endl;
+        return 1;
+    }
+
+    game_description gd(create_description(*pg));
     size_t turns = 0;
     size_t iterations = 1;
     if(vm.count("number"))

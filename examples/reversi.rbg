@@ -25,52 +25,33 @@
     )^*
 
 
-#canswapdirection (pla; opp; direction; oppositedirection) =
+#swapdirectionpossible (pla; opp; direction; oppositedirection) =
     (
         direction
         (opp~piece)
-        ((direction) (opp~piece))^*
-        (direction)
+        (direction (opp~piece))^*
+        direction
         (pla~piece)
     )
 
 #swapdirection (pla; opp; direction; oppositedirection) =
     (
-        ((? (! canswapdirection(pla; opp; direction; oppositedirection)))
-        [pla~placeholder]
         (
             direction
             (opp~piece)
             [pla~piece]
         )^*
-        direction 
+        direction
         (pla~piece)
-        (oppositedirection)^*
-        (pla~placeholder)
-        [pla~piece])
+        oppositedirection
+        ((pla~piece) oppositedirection)^*
+        (empty)
         +
-        (? not (! canswapdirection(pla; opp; direction; oppositedirection)))
+        (? not (!  swapdirectionpossible(pla; opp; direction; oppositedirection)))
     )
 
-#place (pla; opp) =
+#swapdirections (pla;opp) =
     (
-        anySquare
-        (empty)
-        [pla~piece]
-        [pla~placeholder]
-        (
-        canswapdirection(pla;opp;(-1,0);(1,0)) +
-        canswapdirection(pla;opp;(1,0);(-1,0)) +
-        canswapdirection(pla;opp;(0,1);(0,-1)) +
-        canswapdirection(pla;opp;(0,-1);(0,1)) +
-        canswapdirection(pla;opp;(1,1);(-1,-1)) +
-        canswapdirection(pla;opp;(-1,-1);(1,1)) +
-        canswapdirection(pla;opp;(-1,1);(1,-1)) +
-        canswapdirection(pla;opp;(1,-1);(-1,1))
-        )
-        anySquare
-        (pla~placeholder)
-        [pla~piece]
         swapdirection(pla; opp; (-1,0); (1,0))
         swapdirection(pla;opp;(1,0);(-1,0))
         swapdirection(pla;opp;(0,1);(0,-1))
@@ -81,51 +62,54 @@
         swapdirection(pla;opp;(-1,1);(1,-1))
     )
 
-#canplace (pla; opp) =
+#movepossible (pla; opp) =
+    (
+        swapdirectionpossible(pla; opp; (-1,0); (1,0))
+        +
+        swapdirectionpossible(pla;opp;(1,0);(-1,0))
+        +
+        swapdirectionpossible(pla;opp;(0,1);(0,-1))
+        +
+        swapdirectionpossible(pla;opp;(0,-1);(0,1))
+        +
+        swapdirectionpossible(pla;opp;(-1,-1);(1,1))
+        +
+        swapdirectionpossible(pla;opp;(1,1);(-1,-1))
+        +
+        swapdirectionpossible(pla;opp;(1,-1);(-1,1))
+        +
+        swapdirectionpossible(pla;opp;(-1,1);(1,-1))
+    )
+
+#move (pla; opp) =
     (
         anySquare
         (empty)
-        (canswapdirection(pla;opp;(-1,0);(1,0)) +
-        canswapdirection(pla;opp;(1,0);(-1,0)) +
-        canswapdirection(pla;opp;(0,1);(0,-1)) +
-        canswapdirection(pla;opp;(0,-1);(0,1)) +
-        canswapdirection(pla;opp;(1,1);(-1,-1)) +
-        canswapdirection(pla;opp;(-1,-1);(1,1)) +
-        canswapdirection(pla;opp;(-1,1);(1,-1)) +
-        canswapdirection(pla;opp;(1,-1);(-1,1))
-        )
+        ( ? (! movepossible(pla;opp)))
+        swapdirections(pla; opp)
+        [pla~piece]
+        +
+        (? not (! anySquare movepossible(pla;opp)))
     )
+
+#setpoints =
+    (
+            (? $wpiece > $bpiece) [$bplayer = 0][$wplayer = 100]
+            +
+            (? $wpiece < $bpiece) [$bplayer = 100][$wplayer = 0]
+            +
+            (? $wpiece == $bpiece) [$bplayer = 50][$wplayer = 50]
+    )
+
 
 #rules = 
     (
-        ((? (! canplace(b;w))) + (? (! canplace(w;b))))
-        (((? (!canplace(w;b))) place(w;b)) + (? not (!canplace(w;b))))
-        ((
-        (? $wpiece > $bpiece) [$bplayer = 0][$wplayer = 100]
-        )
-        +
-        (
-        (? $wpiece < $bpiece) [$bplayer = 100][$wplayer = 0]
-        )
-        +
-        (
-        (? $wpiece == $bpiece) [$bplayer = 50][$wplayer = 50]
-        ))
-
+        move(w;b)
+        setpoints
         ->bplayer
-        (((? (!canplace(b;w))) place(b;w)) + (? not (!canplace(b;w))))
 
-        ((
-        (? $wpiece > $bpiece) [$bplayer = 0][$wplayer = 100]
-        )
-        +
-        (
-        (? $wpiece < $bpiece) [$bplayer = 100][$wplayer = 0]
-        )
-        +
-        (
-        (? $wpiece == $bpiece) [$bplayer = 50][$wplayer = 50]
-        ))
+        move(b;w)
+        setpoints
         ->wplayer
     )^*
 
