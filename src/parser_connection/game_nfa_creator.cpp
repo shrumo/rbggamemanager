@@ -302,7 +302,6 @@ void game_nfa_creator::dispatch(const rbg_parser::ons& move) {
         for(const auto& piece_token : move.get_legal_ons())
         {
             token_id_t piece_id = resolver.id(piece_token.to_string());
-            std::cout << "\t" << piece_id << " " << piece_id_threshold << std::endl;
             pieces[piece_id] = true;
         }
         std::unique_ptr<action> action(new actions::on(std::move(pieces)));
