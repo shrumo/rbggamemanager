@@ -2,9 +2,7 @@
 // Created by shrum on 12.01.18.
 //
 
-#include <cursesm.h>
 #include "game_nfa_creator.h"
-
 
 void game_nfa_creator::dispatch(const rbg_parser::conjunction& move) {
     std::vector<std::unique_ptr<condition> > rec_result;
