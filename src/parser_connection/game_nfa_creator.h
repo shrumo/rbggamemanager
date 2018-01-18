@@ -55,6 +55,8 @@ class game_nfa_creator : public rbg_parser::abstract_dispatcher
     bool reuse_final_as_initial;
     fsm::state_id_t last_final;
 
+    token_id_t piece_id_threshold;
+
     void register_modifier(fsm::state_id_t initial_id);
     void start_block();
     void stop_block();
@@ -79,9 +81,10 @@ class game_nfa_creator : public rbg_parser::abstract_dispatcher
         last_final = information.last_final;
     }
 
-    game_nfa_creator(const name_resolver& resolver)
+    game_nfa_creator(const name_resolver& resolver, token_id_t piece_id_threshold)
             : resolver(resolver), nfa_result(new fsm::nfa<action*>()),
               block_started(false), reuse_final_as_initial(false), last_final(0),
+              piece_id_threshold(piece_id_threshold),
               move_pattern_count(0)
     {
         blocks_states.push_back(0);
@@ -141,7 +144,7 @@ public:
         return game_moves_description(get_nfa(), std::move(blocks_states), std::move(actions), move_pattern_count);
     }
 
-    friend game_moves_description create_moves(const rbg_parser::game_move& move, const name_resolver& resolver);
+    friend game_moves_description create_moves(const rbg_parser::game_move& move, const name_resolver& resolver, token_id_t piece_id_threshold);
 };
 
 

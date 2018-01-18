@@ -63,6 +63,7 @@ int main(int argc,const char *argv[]) {
     if(vm.count("number"))
         iterations = vm["number"].as<uint>();
     size_t avgmoves = 0;
+    size_t all_moves_count = 0;
     auto begin = std::chrono::system_clock::now();
     for(size_t i = 0; i < iterations; i++) {
         size_t moves_count = 0;
@@ -82,9 +83,11 @@ int main(int argc,const char *argv[]) {
         }
         turns += state.turn() - 1;
         avgmoves += moves_count / (state.turn() - 1);
+        all_moves_count += moves_count;
     }
     auto end = std::chrono::system_clock::now();
     std::cout << "Time for one game: " << std::chrono::duration<double>(end - begin).count() / iterations << std::endl;
     std::cout << "Avarage number of turns in game: " << (double) turns / iterations << std::endl;
     std::cout << "Avarage number of moves in one state: " << (double) avgmoves / iterations << std::endl;
+    std::cout << "Number of considered states: " << all_moves_count << std::endl;
 }

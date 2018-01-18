@@ -43,8 +43,8 @@ name_resolver create_resolver(const rbg_parser::declarations& declarations)
 }
 
 
-game_moves_description create_moves(const rbg_parser::game_move& move, const name_resolver &resolver) {
-    game_nfa_creator creator(resolver);
+game_moves_description create_moves(const rbg_parser::game_move& move, const name_resolver &resolver, token_id_t piece_id_threshold) {
+    game_nfa_creator creator(resolver, piece_id_threshold);
     move.accept(creator);
     return creator.create_description();
 }
@@ -53,7 +53,7 @@ game_moves_description create_moves(const rbg_parser::game_move& move, const nam
 game_description create_description(const rbg_parser::parsed_game &game) {
     name_resolver resolver(create_resolver(game.get_declarations()));
     board initial_board(create_board(game.get_board(),resolver));
-    game_moves_description moves(create_moves(*game.get_moves(),resolver));
+    game_moves_description moves(create_moves(*game.get_moves(),resolver, game.get_declarations().get_legal_pieces().size()));
     token_id_t first_player_id = resolver.id(game.get_declarations().get_first_player().to_string());
     return std::move(game_description(std::move(resolver), std::move(moves), std::move(initial_board), first_player_id));
 }
