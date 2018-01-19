@@ -1,0 +1,51 @@
+#game = "Breakthrough"
+
+#board = [b, b, b, b, b, b, b, b]
+         [b, b, b, b, b, b, b, b]
+         [e, e, e, e, e, e, e, e]
+         [e, e, e, e, e, e, e, e]
+         [e, e, e, e, e, e, e, e]
+         [e, e, e, e, e, e, e, e]
+         [w, w, w, w, w, w, w, w]
+         [w, w, w, w, w, w, w, w]
+         
+#players = white, black
+#pieces = e, w, b
+#variables = 
+
+#anySquare =
+    (
+        ( 1, 0)
+      + ( 0, 1)
+      + (-1, 0)
+      + ( 0,-1)
+    )^*
+
+#moveWhite = 
+    (
+        anySquare
+        (w)[e]
+        ((0,1)(e) + (-1,1)((e)+(b)) + (1,1)((e)+(b)))
+        [w]
+        ( (? not(!(0,1))) [$white=10, $black=0] ->()
+          + (0,1))
+    )
+
+#moveBlack = 
+    (
+        anySquare
+        (b)[e]
+        ((0,-1)(e) + (-1,-1)((e)+(w)) + (1,-1)((e)+(w)))
+        [b]
+        ( (? not(!(0,-1))) [$white=0, $black=10] ->()
+          + (0,-1))
+    )
+
+#rules =
+    [$white=5, $black=5]
+    (
+        moveWhite
+        ->black
+        moveBlack
+        ->white
+    )^*

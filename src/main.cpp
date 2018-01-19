@@ -41,8 +41,9 @@ int main(int argc,const char *argv[]) {
             options(description).positional(p).run(), vm);
     po::notify(vm);
 
-    if(vm.count("randomseed"))
+    if(vm.count("randomseed")) {
         srand(vm["randomseed"].as<uint>());
+    }
     if(vm.count("help")) {
         std::cout << description << std::endl;
         return 1;
@@ -66,6 +67,16 @@ int main(int argc,const char *argv[]) {
     }
 
     game_description gd(create_description(*pg));
+
+    std::unordered_map<token_id_t, size_t> player_scores;
+
+    for(const auto& token : pg->get_declarations().get_legal_players())
+    {
+        std::string name = token.to_string();
+        token_id_t player_id = gd.get_resolver().id(name);
+        player_scores[player_id] = 0;
+    }
+
     size_t turns = 0;
     size_t iterations = 1;
     if(vm.count("number"))
@@ -89,13 +100,23 @@ int main(int argc,const char *argv[]) {
             moves = state.get_move_evaluator().find_moves(&state);
             moves_count += moves.size();
         }
+        for(auto& player_score : player_scores)
+        {
+            player_score.second += state.value(player_score.first);
+        }
         turns += state.turn() - 1;
         avgmoves += moves_count / (state.turn() - 1);
         all_moves_count += moves_count;
     }
     auto end = std::chrono::system_clock::now();
-    std::cout << "Time for one game: " << std::chrono::duration<double>(end - begin).count() / iterations << std::endl;
+    std::cout << "Calculated " << iterations << " games in " << std::chrono::duration<double>(end - begin).count() << "s" << std::endl;
+    std::cout << "Time for one game: " << std::chrono::duration<double>(end - begin).count() / iterations << "s" << std::endl;
     std::cout << "Avarage number of turns in game: " << (double) turns / iterations << std::endl;
     std::cout << "Avarage number of moves in one state: " << (double) avgmoves / iterations << std::endl;
-    std::cout << "Number of considered states: " << all_moves_count << std::endl;
+    std::cout << "Number of calculated moves: " << all_moves_count << std::endl;
+    std::cout << "Avarage player scores: " << "\n";
+    for(auto& player_score : player_scores)
+    {
+        std::cout << "\t" << gd.get_resolver().name(player_score.first) << " : " << (double) player_score.second / iterations<< "\n";
+    }
 }

@@ -13,7 +13,7 @@
 
 #players = wplayer, bplayer
 
-#pieces = empty, wpiece, bpiece, wplaceholder, bplaceholder
+#pieces = empty, wpiece, bpiece
 #variables=
 
 #anySquare =
@@ -89,7 +89,7 @@
         swapdirections(pla; opp)
         [pla~piece]
         +
-        (? not (! anySquare movepossible(pla;opp)))
+        (? not (! anySquare (empty) movepossible(pla;opp)))
     )
 
 #setpoints =
@@ -111,6 +111,12 @@
         move(b;w)
         setpoints
         ->wplayer
+
+        (
+        (? (! anySquare (empty) movepossible(b;w)))
+        +
+        (? (! anySquare (empty) movepossible(w;b)))
+        )
     )^*
 
 

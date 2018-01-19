@@ -83,7 +83,8 @@ class game_nfa_creator : public rbg_parser::abstract_dispatcher
 
     game_nfa_creator(const name_resolver& resolver, token_id_t piece_id_threshold)
             : resolver(resolver), nfa_result(new fsm::nfa<action*>()),
-              block_started(false), reuse_final_as_initial(false), last_final(0),
+              block_started(false), register_modifiers(true), reuse_final_as_initial(false),
+              last_final(0),
               piece_id_threshold(piece_id_threshold),
               move_pattern_count(0)
     {
