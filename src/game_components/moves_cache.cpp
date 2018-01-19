@@ -8,13 +8,6 @@
 
 
 
-moves_cache::moves_cache()
-    : last_visited_array_index(0),
-      last_results_array_index(0)
-{
-
-}
-
 void moves_cache::find_all_moves_rec(game_state *state, size_t visited_array_index, const fsm::nfa<action *> &nfa,
                                            fsm::state_id_t current_state, move *move, bool block_started)
 {
@@ -23,6 +16,8 @@ void moves_cache::find_all_moves_rec(game_state *state, size_t visited_array_ind
     if(visited[visited_array_index][depth][index])
         return;
     visited[visited_array_index][depth].set(index);
+    if(depth == max_depth)
+        return;
     for(const auto& transition : nfa[current_state].transitions())
     {
         action_result result = transition.letter()->apply(state);
@@ -97,6 +92,8 @@ bool moves_cache::check_play(game_state *state, size_t visited_array_index, size
     if(visited[visited_array_index][depth][index])
         return false;
     visited[visited_array_index][depth].set(index);
+    if(depth == max_depth)
+        return false;
     for(const auto& transition : nfa[current_state].transitions())
     {
         action_result result = transition.letter()->apply(state);
@@ -126,7 +123,9 @@ bool moves_cache::check_play(game_state *state, size_t visited_array_index, size
     return false;
 }
 
-std::vector<move> moves_cache::find_moves(game_state *state) {
+std::vector<move> moves_cache::find_moves(game_state *state, ssize_t maximal_depth) {
+    if(maximal_depth >= 0)
+        max_depth = (size_t) maximal_depth;
     size_t visited_index = new_visited(state,state->get_description().get_moves_description().get_nfa());
     move empty;
     find_all_moves_rec(state, visited_index,state->get_description().get_moves_description().get_nfa(),state->get_current_state(),&empty);
@@ -134,7 +133,9 @@ std::vector<move> moves_cache::find_moves(game_state *state) {
     return std::move(possible_moves);
 }
 
-bool moves_cache::check_pattern(game_state *state, const fsm::nfa<action *> &nfa, unsigned int move_pattern_index) {
+bool moves_cache::check_pattern(game_state *state, const fsm::nfa<action *> &nfa, unsigned int move_pattern_index, ssize_t maximal_depth) {
+    if(maximal_depth >= 0)
+        max_depth = (size_t) maximal_depth;
     size_t visited_index = new_visited(state,state->get_description().get_moves_description().get_nfa());
     size_t results_index;
     if(move_pattern_results.find(move_pattern_index) != move_pattern_results.end())

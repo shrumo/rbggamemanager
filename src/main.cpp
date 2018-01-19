@@ -87,7 +87,7 @@ int main(int argc,const char *argv[]) {
     for(size_t i = 0; i < iterations; i++) {
         size_t moves_count = 0;
         game_state state(gd);
-        auto moves = state.get_move_evaluator().find_moves(&state);
+        auto moves = state.get_move_evaluator().find_moves(&state, 10);
         moves_count += moves.size();
         if(iterations == 1)
             std::cout << state << std::endl;

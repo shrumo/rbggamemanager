@@ -63,6 +63,7 @@ public:
 
 class moves_cache {
     std::vector<move> possible_moves;
+    size_t max_depth;
 
     std::vector< std::vector< fast_bit_vector > > visited;
     std::vector< std::vector< fast_bit_vector > > results;
@@ -85,7 +86,13 @@ class moves_cache {
 
     std::size_t visited_index(game_state* state, const fsm::nfa<action *> &nfa, fsm::state_id_t current_state);
 public:
-    moves_cache();
+    moves_cache()
+            :
+            max_depth(10),
+            last_visited_array_index(0),
+            last_results_array_index(0)
+    {
+    }
 
     void clear()
     {
@@ -94,8 +101,8 @@ public:
         move_pattern_results.clear();
     }
 
-    std::vector<move> find_moves(game_state* state);
-    bool check_pattern(game_state* state, const fsm::nfa<action*>& nfa, unsigned int move_pattern_index);
+    std::vector<move> find_moves(game_state* state, ssize_t max_depth=-1);
+    bool check_pattern(game_state* state, const fsm::nfa<action*>& nfa, unsigned int move_pattern_index, ssize_t max_depth=-1);
 };
 
 
