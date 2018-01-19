@@ -113,6 +113,7 @@ int main(int argc,const char *argv[]) {
     std::cout << "Time for one game: " << std::chrono::duration<double>(end - begin).count() / iterations << "s" << std::endl;
     std::cout << "Avarage number of turns in game: " << (double) turns / iterations << std::endl;
     std::cout << "Avarage number of moves in one state: " << (double) avgmoves / iterations << std::endl;
+    std::cout << "Number of traveled states: " << turns << std::endl;
     std::cout << "Number of calculated moves: " << all_moves_count << std::endl;
     std::cout << "Avarage player scores: " << "\n";
     for(auto& player_score : player_scores)

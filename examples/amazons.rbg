@@ -1,0 +1,62 @@
+#game = "Amazons"
+
+#board = [e, e, e, b, e, e, b, e, e, e]
+         [e, e, e, e, e, e, e, e, e, e]
+         [e, e, e, e, e, e, e, e, e, e]
+         [b, e, e, e, e, e, e, e, e, b]
+         [e, e, e, e, e, e, e, e, e, e]
+         [e, e, e, e, e, e, e, e, e, e]
+         [w, e, e, e, e, e, e, e, e, w]
+         [e, e, e, e, e, e, e, e, e, e]
+         [e, e, e, e, e, e, e, e, e, e]
+         [e, e, e, w, e, e, w, e, e, e]
+        
+
+#players = white, black
+#pieces = e, w, b, x
+#variables = 
+
+#anySquare =
+    (
+        ( 1, 0)
+      + ( 0, 1)
+      + (-1, 0)
+      + ( 0,-1)
+    )^*
+
+#move(piece) = 
+    (
+        anySquare
+        (piece)
+        [e]
+        (
+          ((1,1)(e)(1,1)(e))^* +
+          ((1,0)(e)(1,0)(e))^* +
+          ((1,-1)(e)(1,-1)(e))^* +
+          ((0,1)(e)(0,1)(e))^* +
+          ((0,-1)(e)(0,-1)(e))^* +
+          ((-1,1)(e)(-1,1)(e))^* +
+          ((-1,0)(e)(-1,0)(e))^* +
+          ((-1,-1)(e)(-1,-1)(e))^*
+        )
+        [piece]
+        (
+          ((1,1)(e)(1,1)(e))^* +
+          ((1,0)(e)(1,0)(e))^* +
+          ((1,-1)(e)(1,-1)(e))^* +
+          ((0,1)(e)(0,1)(e))^* +
+          ((0,-1)(e)(0,-1)(e))^* +
+          ((-1,1)(e)(-1,1)(e))^* +
+          ((-1,0)(e)(-1,0)(e))^* +
+          ((-1,-1)(e)(-1,-1)(e))^*
+        )
+        [x]
+    )
+
+#rules =
+    (
+        move(w)
+        [$white=10, $black=0] ->black
+        move(b)
+        [$white=0, $black=10] ->white
+    )^*
