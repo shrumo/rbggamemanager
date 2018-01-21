@@ -42,10 +42,9 @@
     )
 
 #rules =
-    [$white=5, $black=5]
     (
         moveWhite
-        ->black
+        [$white=10, $black=0]->black
         moveBlack
-        ->white
+        [$white=0, $black=10]->white
     )^*

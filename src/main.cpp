@@ -21,6 +21,11 @@
 namespace po = boost::program_options;
 using uint = unsigned int;
 
+struct player_results
+{
+    int sum,min,max;
+};
+
 int main(int argc,const char *argv[]) {
     po::options_description description("Allowed options");
     description.add_options()
@@ -68,13 +73,13 @@ int main(int argc,const char *argv[]) {
 
     game_description gd(create_description(*pg));
 
-    std::unordered_map<token_id_t, size_t> player_scores;
+    std::unordered_map<token_id_t, player_results> player_scores_sum;
 
     for(const auto& token : pg->get_declarations().get_legal_players())
     {
         std::string name = token.to_string();
         token_id_t player_id = gd.get_resolver().id(name);
-        player_scores[player_id] = 0;
+        player_scores_sum[player_id] = {0, std::numeric_limits<int>::max(), std::numeric_limits<int>::min()};
     }
 
     size_t turns = 0;
@@ -100,24 +105,35 @@ int main(int argc,const char *argv[]) {
             moves = state.get_move_evaluator().find_moves(&state);
             moves_count += moves.size();
         }
-        for(auto& player_score : player_scores)
+        for(auto& player_score : player_scores_sum)
         {
-            player_score.second += state.value(player_score.first);
+            const auto& score = state.value(player_score.first);
+            player_score.second.sum += score;
+            if(score < player_score.second.min)
+                player_score.second.min = score;
+            if(score > player_score.second.max)
+                player_score.second.max = score;
+
         }
         turns += state.turn() - 1;
         avgmoves += moves_count / (state.turn() - 1);
         all_moves_count += moves_count;
     }
     auto end = std::chrono::system_clock::now();
-    std::cout << "Calculated " << iterations << " games in " << std::chrono::duration<double>(end - begin).count() << "s" << std::endl;
+    auto duration = std::chrono::duration<double>(end - begin).count();
+    std::cout << "Calculated " << iterations << " games in " <<  duration << "s" << std::endl;
     std::cout << "Time for one game: " << std::chrono::duration<double>(end - begin).count() / iterations << "s" << std::endl;
     std::cout << "Avarage number of turns in game: " << (double) turns / iterations << std::endl;
     std::cout << "Avarage number of moves in one state: " << (double) avgmoves / iterations << std::endl;
-    std::cout << "Number of traveled states: " << turns << std::endl;
-    std::cout << "Number of calculated moves: " << all_moves_count << std::endl;
+    std::cout << "Number of traveled states: " << turns << " (" << turns/duration
+              << " states/sec)" << std::endl;
+    std::cout << "Number of calculated moves: " << all_moves_count << " (" << all_moves_count/duration
+              << " moves/sec)" << std::endl;
     std::cout << "Avarage player scores: " << "\n";
-    for(auto& player_score : player_scores)
+    for(auto& player_score : player_scores_sum)
     {
-        std::cout << "\t" << gd.get_resolver().name(player_score.first) << " : " << (double) player_score.second / iterations<< "\n";
+        std::cout << "\t" << gd.get_resolver().name(player_score.first) << " : "
+                  << (double) player_score.second.sum / iterations
+                  << " (Min: " << player_score.second.min << ", Max: " << player_score.second.max << ")\n";
     }
 }
