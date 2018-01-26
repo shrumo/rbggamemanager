@@ -47,7 +47,7 @@
         ((pla~piece) oppositedirection)^*
         (empty)
         +
-        (? not (!  swapdirectionpossible(pla; opp; direction; oppositedirection)))
+        (? not (! swapdirectionpossible(pla; opp; direction; oppositedirection)))
     )
 
 #swapdirections (pla;opp) =
@@ -86,10 +86,12 @@
         anySquare
         (empty)
         ( ? (! movepossible(pla;opp)))
+        ->
         swapdirections(pla; opp)
         [pla~piece]
         +
         (? not (! anySquare (empty) movepossible(pla;opp)))
+        (? (!anySquare (empty) movepossible(opp;pla)))
     )
 
 #setpoints =
@@ -111,13 +113,7 @@
         move(b;w)
         setpoints
         ->wplayer
-
-        (
-        (? (! anySquare (empty) movepossible(b;w)))
-        +
-        (? (! anySquare (empty) movepossible(w;b)))
-        )
     )^*
 
-#finalizer = ()
 
+#finalizer = ()

@@ -70,10 +70,13 @@
         anySquare
         (tocapture)
         hasNeighbor(opponentColor)
-        [tocapture]
+        [tocapture]->
       )^*
       (? not (! anySquare (tocapture) hasNeighbor(opponentColor)) )
     )
+
+#start = anySquare (?not(!(-1,0)+(0,-1)))
+#next = (1,0)+(?not(!(1,0)))(0,1)(-1,0)^*(?not(!(-1,0)))
 
 // Usuwamy z planszy wszystkie 'tocapture'
 #clearCaptures = 
@@ -81,9 +84,13 @@
       (
         anySquare
         (tocapture)
-        [empty]
+        [empty]->
       )^*
       (? not (! anySquare (tocapture)) )
+      
+ //     start
+   //   (((tocapture)[empty]+(empty,whiteStone,blackStone)) next)^*
+     // (?not(!next))
     )
     
 // dopóki na planszy są puste pola (bloki) to zapełniamy je neutralnymi jeśli blok jest otoczony kamieniami obu graczy (lub dame)
@@ -100,21 +107,21 @@
         (empty)
         (
             (? ( (!blockHasNeighbor(empty; blackStone)) and (!blockHasNeighbor(empty; whiteStone))) or (!blockHasNeighbor(empty; dame)) )
-            [dame]
+            [dame]->
           + (? (!blockHasNeighbor(empty; blackStone)) and not (!blockHasNeighbor(empty; whiteStone)) and not (!blockHasNeighbor(empty; dame)) )
-            [blackStone]
+            [blackStone]->
           + (? not (!blockHasNeighbor(empty; blackStone)) and (!blockHasNeighbor(empty; whiteStone)) and not (!blockHasNeighbor(empty; dame)) )
-            [whiteStone]
+            [whiteStone]->
         )
       )^*  
       (? not (! anySquare (empty)) )
-      //[$black=blackStone]  // Jak to zrobić?
-      [$white=$whiteStone] // Jak to zrobić?
+      [$white=$whiteStone]
     )
 
 #placeStoneOrPass(me; opponent) =
     (
-        [$me~pass=0] legalMove(me~Stone; opponent~Stone) markToCapture(opponent~Stone) floodfillCaptures(opponent~Stone) clearCaptures
+        [$me~pass=0] legalMove(me~Stone; opponent~Stone) -> markToCapture(opponent~Stone) floodfillCaptures(opponent~Stone)
+        clearCaptures
       + [$me~pass=1]
     )
 
@@ -122,10 +129,10 @@
 // koniec gry jeśli obu graczy spasowało pod rząd
 #endgameCheck = 
     (
-        (? ($blackpass==1 and $whitepass==1))
+        (? ($blackpass==1 and $whitepass==1) or ($turn >= 200))
         countPoints
         ->()
-      + (? ($blackpass==0 or $whitepass==0))
+      + (? ($blackpass==0 or $whitepass==0) and ($turn < 200))
     )
  
 #rules = 
@@ -137,4 +144,5 @@
       endgameCheck
       ->black
     )^*
+    
 #finalizer = ()
