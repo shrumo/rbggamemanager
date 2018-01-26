@@ -29,6 +29,7 @@ void moves_cache::find_all_moves_rec(game_state *state, size_t visited_array_ind
                 if(!block_started) {
                     move->add_block(state->x(), state->y(), transition.letter()->get_index());
                     create_visited_layers(visited_array_index, depth+1);
+                    invalidate_results();
                 }
                 if(transition.letter()->is_switch())
                     possible_moves.push_back(*move);
@@ -106,6 +107,7 @@ bool moves_cache::check_play(game_state *state, size_t visited_array_index, size
                 if(!block_started) {
                     create_visited_layers(visited_array_index, depth + 1);
                     create_result_layers(visited_array_index, depth + 1);
+                    invalidate_results(visited_array_index);
                     new_depth = depth + 1;
                 }
                 if(check_play(state, visited_array_index, results_index, nfa, transition.target(), new_depth, true))

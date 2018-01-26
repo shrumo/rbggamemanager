@@ -15,7 +15,7 @@ cd build
 echo "Build directory made at:"
 pwd
 echo "Using cmake to generate makefiles."
-cmake ..
+cmake .. -DCMAKE_BUILD_TYPE=Release
 echo "Using make to compile the project."
 make -j4
 echo "Done."

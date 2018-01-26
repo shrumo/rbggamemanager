@@ -101,6 +101,20 @@ public:
         move_pattern_results.clear();
     }
 
+    void invalidate_results(ssize_t omit=-1)
+    {
+        for(size_t i = 0; i < results.size(); i++)
+        {
+            if((ssize_t )i != omit)
+            {
+                for(auto& depth_results : results[i])
+                {
+                    depth_results.reset();
+                }
+            }
+        }
+    }
+
     std::vector<move> find_moves(game_state* state, ssize_t max_depth=-1);
     bool check_pattern(game_state* state, const fsm::nfa<action*>& nfa, unsigned int move_pattern_index, ssize_t max_depth=-1);
 };
