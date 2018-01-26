@@ -2,6 +2,7 @@
 
 # This script guides user through compiling process. It worked for me.
 
+cd "${0%/*}"
 git pull
 rm ../rbgParser/CMakeLists.txt
 git submodule update --init

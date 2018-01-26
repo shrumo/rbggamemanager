@@ -1,5 +1,6 @@
 #/bin/bash
 
+cd "${0%/*}"
 ./make.sh
 echo -e "\n\tChess"
 ../build/rbggamemanager ../rbgParser/examples/chess.rbg -n 50 -s 0
