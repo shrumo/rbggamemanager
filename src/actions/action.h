@@ -121,7 +121,7 @@ namespace actions
     {
         std::vector<bool> pieces;
     public:
-        on(std::vector<bool> pieces)
+        explicit on(std::vector<bool> pieces)
                 : pieces(std::move(pieces))
         {}
         action_result apply(game_state *b) const override;
@@ -131,7 +131,7 @@ namespace actions
     {
         std::unique_ptr<condition> cond;
     public:
-        condition_action(std::unique_ptr<condition> cond)
+        explicit condition_action(std::unique_ptr<condition> cond)
                 : cond(std::move(cond))
         {}
         action_result apply(game_state *b) const override
@@ -155,24 +155,25 @@ namespace actions
     public:
         player_switch(unsigned int index, token_id_t player) : action(index,true), player(player) {}
         action_result apply(game_state *b) const override;
-        virtual void revert(game_state *b,const action_result& apply_result) const override;
+        void revert(game_state *b,const action_result& apply_result) const override;
     };
 
     class semi_switch : public action
     {
     public:
-        semi_switch(unsigned int index) : action(index, true) {}
+        explicit semi_switch(unsigned int index) : action(index, true) {}
         action_result apply(game_state *) const override { return true; };
     };
 
     class assignment : public action
     {
         token_id_t variable;
-        int value;
+        std::unique_ptr<arithmetic_operation> value;
     public:
-        assignment(unsigned int index, size_t variable, int value) : action(index, false), variable(variable), value(value) {}
+        assignment(unsigned int index, size_t variable, std::unique_ptr<arithmetic_operation> value)
+                : action(index, false), variable(variable), value(std::move(value)) {}
         action_result apply(game_state *b) const override;
-        virtual void revert(game_state *b,const action_result& apply_result) const override;
+        void revert(game_state *b,const action_result& apply_result) const override;
     };
 
     class lazy : public action

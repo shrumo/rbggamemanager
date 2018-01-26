@@ -110,6 +110,20 @@ class game_nfa_creator : public rbg_parser::abstract_dispatcher
         return nfa_result->new_state();
     }
 
+    std::unique_ptr<arithmetic_operation> get_operation(const rbg_parser::token& token)
+    {
+        std::unique_ptr<arithmetic_operation> result;
+        if(token.get_type() == rbg_parser::number)
+        {
+            result = std::unique_ptr<arithmetic_operation>(new arithmetic_operations::constant_value(token.get_value()));
+        } else
+        {
+            token_id_t variable_id = resolver.id(token.to_string());
+            result = std::unique_ptr<arithmetic_operation>(new arithmetic_operations::variable_value(variable_id));
+        }
+        return result;
+    }
+
 public:
     void dispatch(const rbg_parser::sum&) override;
     void dispatch(const rbg_parser::pure_sum&) override;

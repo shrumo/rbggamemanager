@@ -1,15 +1,16 @@
 #game = "Reversi"
 
-#row = [empty,empty,empty,empty,empty,empty,empty,empty]
+#halfWithoutOne = empty,empty,empty,empty,empty,empty,empty
+#row = halfWithoutOne, empty, empty, halfWithoutOne
 
-#board = row
-         row
-         row
-         [empty,empty,empty,wpiece,bpiece,empty,empty,empty]
-         [empty,empty,empty,bpiece,wpiece,empty,empty,empty]
-         row
-         row
-         row
+#board = [row]
+         [row]
+         [row]
+         [halfWithoutOne, wpiece, bpiece, halfWithoutOne]
+         [halfWithoutOne, bpiece, wpiece, halfWithoutOne]
+         [row]
+         [row]
+         [row]
 
 #players = wplayer, bplayer
 

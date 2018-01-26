@@ -30,26 +30,8 @@ void game_nfa_creator::dispatch(const rbg_parser::negatable_condition& move) {
 }
 
 void game_nfa_creator::dispatch(const rbg_parser::comparison& move) {
-    std::unique_ptr<arithmetic_operation> left;
-    if(move.get_left_side().get_type() == rbg_parser::number)
-    {
-        left = std::unique_ptr<arithmetic_operation>(new arithmetic_operations::constant_value(move.get_left_side().get_value()));
-    } else
-    {
-        token_id_t variable_id = resolver.id(move.get_left_side().to_string());
-        left = std::unique_ptr<arithmetic_operation>(new arithmetic_operations::variable_value(variable_id));
-    }
-
-    std::unique_ptr<arithmetic_operation> right;
-    if(move.get_right_side().get_type() == rbg_parser::number)
-    {
-        right = std::unique_ptr<arithmetic_operation>(new arithmetic_operations::constant_value(move.get_right_side().get_value()));
-    } else
-    {
-        token_id_t variable_id = resolver.id(move.get_right_side().to_string());
-        right = std::unique_ptr<arithmetic_operation>(new arithmetic_operations::variable_value(variable_id));
-    }
-
+    std::unique_ptr<arithmetic_operation> left = get_operation(move.get_left_side());
+    std::unique_ptr<arithmetic_operation> right = get_operation(move.get_right_side());
     switch (move.get_kind_of_comparison().get_type())
     {
         case rbg_parser::not_equal:
@@ -103,6 +85,7 @@ void game_nfa_creator::dispatch(const rbg_parser::comparison& move) {
         case rbg_parser::identifier:break;
         case rbg_parser::quotation:break;
         case rbg_parser::dummy:break;
+        case rbg_parser::finalizer:break;
     }
 }
 
@@ -345,8 +328,8 @@ void game_nfa_creator::dispatch(const rbg_parser::assignment& move) {
     fsm::state_id_t final_id = nfa_result->new_state();
     register_modifier(initial_id);
     token_id_t variable_id = resolver.id(move.get_left_side().to_string());
-    int value = move.get_right_side().get_value();
-    std::unique_ptr<action> letter(new actions::assignment((unsigned int) blocks_states.size() - 1, variable_id, value));
+    std::unique_ptr<action> letter(new actions::assignment((unsigned int) blocks_states.size() - 1,
+                                                           variable_id, get_operation(move.get_right_side())));
     action* letter_ptr = letter.get();
     actions.push_back(std::move(letter));
     if(move.is_lazy())

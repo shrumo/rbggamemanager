@@ -1,0 +1,44 @@
+#game = "Breakthrough"
+
+#board = [e,e,e,e,e,e,e]
+         [e,e,e,e,e,e,e]
+         [e,e,e,e,e,e,e]
+         [e,e,e,e,e,e,e]
+         [e,e,e,e,e,e,e]
+         [e,e,e,e,e,e,e]
+         
+#players = red, yellow
+#pieces = e, r, y
+#variables = 
+
+#anySquare = (((1,0)+(-1,0)+(0,1)+(0,-1))^*)
+
+#winat(piece) = (
+     ((1,-1)(piece))^3
+    +((1,0)(piece))^3
+    +((1,1)(piece))^3
+    +((0,1)(piece))^3
+    +((0,-1)(piece))^3
+    +((-1,-1)(piece))^3
+    +((-1,0)(piece))^3
+    +((-1,1)(piece))^3
+  )
+
+#move(color; oppColor; piece) = (
+    anySquare (e) (? not(!(0,-1)(e)))
+    [piece]
+    (
+        winat(piece)[$color=10, $oppColor=0]->()
+      + (? not(!winat(piece)))
+
+    )
+  )
+    
+#rules =
+    [$red=5, $yellow=5]
+    (
+        move(red;yellow;r) ->yellow
+        move(yellow;red;y) ->red
+    )^*
+
+#finalizer = ()

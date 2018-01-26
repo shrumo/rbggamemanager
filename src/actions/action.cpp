@@ -15,7 +15,7 @@ void actions::shift::revert(game_state *b, const action_result&) const {
 }
 
 action_result actions::on::apply(game_state *b) const {
-    return action_result(pieces[b->current_piece()]);
+    return {pieces[b->current_piece()]};
 }
 
 action_result actions::off::apply(game_state *b) const {
@@ -42,7 +42,7 @@ void actions::player_switch::revert(game_state *b, const action_result &apply_re
 
 action_result actions::assignment::apply(game_state *b) const {
     int previous_value = b->value(variable);
-    b->set_value(variable, value);
+    b->set_value(variable, value->value(b));
     return {true, previous_value};
 }
 

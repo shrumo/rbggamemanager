@@ -2,10 +2,13 @@
 
 # This script guides user through compiling process. It worked for me.
 
+git pull
 rm ../rbgParser/CMakeLists.txt
 git submodule update --init
 echo "Creating CMakeLists.txt for submodule rbgParser."
 cd ../rbgParser/
+git checkout master
+git pull
 python3 ../scripts/cmakesubmodule.py > CMakeLists.txt
 echo "CMakeLists.txt for submodule created."
 cd ../

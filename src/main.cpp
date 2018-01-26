@@ -122,7 +122,8 @@ int main(int argc,const char *argv[]) {
     auto end = std::chrono::system_clock::now();
     auto duration = std::chrono::duration<double>(end - begin).count();
     std::cout << "Calculated " << iterations << " games in " <<  duration << "s" << std::endl;
-    std::cout << "Time for one game: " << std::chrono::duration<double>(end - begin).count() / iterations << "s" << std::endl;
+    std::cout << "Time for one game: " << duration / iterations << "s" << " (" << iterations/duration
+                                                                                                                 << " games/sec)" << std::endl;
     std::cout << "Avarage number of turns in game: " << (double) turns / iterations << std::endl;
     std::cout << "Avarage number of moves in one state: " << (double) avgmoves / iterations << std::endl;
     std::cout << "Number of traveled states: " << turns << " (" << turns/duration
