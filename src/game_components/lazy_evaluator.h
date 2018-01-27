@@ -14,6 +14,7 @@ class game_state;
 class lazy_evaluator {
     std::vector<action_application> lazy_actions;
     std::vector<action_result> action_results;
+    std::vector<size_t> evaluation_heads;
 public:
     lazy_evaluator() = default;
 
@@ -34,8 +35,10 @@ public:
         action_results.clear();
     }
 
-    std::size_t evaluate(game_state* state);
-    void revert(game_state* state, std::size_t revert_point);
+    void evaluate_reversible(game_state* state);
+    void revert_last_evaluation(game_state *state);
+
+    void evaluate(game_state* state);
 };
 
 
