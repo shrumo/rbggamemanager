@@ -162,7 +162,8 @@ namespace actions
     {
     public:
         explicit semi_switch(unsigned int index) : action(index, true) {}
-        action_result apply(game_state *) const override { return true; };
+        action_result apply(game_state *) const override;
+        void revert(game_state *b,const action_result& apply_result) const override;
     };
 
     class assignment : public action

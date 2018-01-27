@@ -25,7 +25,6 @@ void moves_cache::find_all_moves_rec(game_state *state, size_t visited_array_ind
         {
             if(transition.letter()->is_modifier())
             {
-                state->lazy().evaluate_reversible(state);
                 if(!block_started) {
                     move->add_block(state->x(), state->y(), transition.letter()->get_index());
                     create_visited_layers(visited_array_index, depth+1);
@@ -40,7 +39,6 @@ void moves_cache::find_all_moves_rec(game_state *state, size_t visited_array_ind
                 if(!block_started) {
                     move->pop_block();
                 }
-                state->lazy().revert_last_evaluation(state);
             }
             else
                 find_all_moves_rec(state, visited_array_index, nfa, transition.target(), move);
@@ -103,7 +101,6 @@ bool moves_cache::check_play(game_state *state, size_t visited_array_index, size
             if(transition.letter()->is_modifier())
             {
                 size_t new_depth = depth;
-                state->lazy().evaluate_reversible(state);
                 if(!block_started) {
                     create_visited_layers(visited_array_index, depth + 1);
                     create_result_layers(visited_array_index, depth + 1);
@@ -112,7 +109,6 @@ bool moves_cache::check_play(game_state *state, size_t visited_array_index, size
                 }
                 if(check_play(state, visited_array_index, results_index, nfa, transition.target(), new_depth, true))
                     results[results_index][depth].set(index);
-                state->lazy().revert_last_evaluation(state);
             }
             else
                 if(check_play(state, visited_array_index, results_index, nfa, transition.target(), depth))

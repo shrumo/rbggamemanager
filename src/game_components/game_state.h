@@ -25,6 +25,27 @@ class game_state {
     token_id_t current_player;
 
     moves_cache moves_information;
+
+    void inc_turn() { sigma[parent.get_turn_id()]++; }
+    void dec_turn() { sigma[parent.get_turn_id()]--; }
+
+    void set_piece(token_id_t piece)
+    {
+        sigma[current_piece()]--;
+        current_board(current_x,current_y) = piece;
+        sigma[piece]++;
+    }
+
+    lazy_evaluator& lazy()
+    {
+        return lazy_controller;
+    }
+
+    moves_cache& get_move_evaluator()
+    {
+        return moves_information;
+    }
+
 public:
     game_state(const game_description& description)
         : parent(description),
@@ -46,11 +67,6 @@ public:
         sigma[get_description().get_turn_id()] = 0;
     }
 
-    moves_cache& get_move_evaluator()
-    {
-        return moves_information;
-    }
-
     fsm::state_id_t get_current_state() const
     {
         return current_state;
@@ -66,21 +82,9 @@ public:
         return parent;
     }
 
-    void set_piece(token_id_t piece)
-    {
-        sigma[current_piece()]--;
-        current_board(current_x,current_y) = piece;
-        sigma[piece]++;
-    }
-
     int value(token_id_t variable) const
     {
         return sigma[variable];
-    }
-
-    void set_value(token_id_t variable, int value)
-    {
-        sigma[variable] = value;
     }
 
     const board& get_board() const
@@ -98,18 +102,6 @@ public:
         return current_y;
     }
 
-    void change_pos(long long int dx, long long int dy)
-    {
-        current_x += dx;
-        current_y += dy;
-    }
-
-    void set_pos(size_t new_x, size_t new_y)
-    {
-        current_x = new_x;
-        current_y = new_y;
-    }
-
     size_t width() const
     {
         return board_width_cache;
@@ -125,34 +117,9 @@ public:
         return sigma[parent.get_turn_id()];
     }
 
-    void inc_turn()
-    {
-        sigma[parent.get_turn_id()]++;
-    }
-
-    void dec_turn()
-    {
-        sigma[parent.get_turn_id()]--;
-    }
-
     token_id_t player() const
     {
         return current_player;
-    }
-
-    void set_player(token_id_t player)
-    {
-        current_player = player;
-    }
-
-    lazy_evaluator& lazy()
-    {
-        return lazy_controller;
-    }
-
-    const lazy_evaluator& lazy() const
-    {
-        return lazy_controller;
     }
 
     action_result apply_action_application(const action_application& application);
@@ -170,13 +137,32 @@ public:
                     parent.get_moves_description().get_nfa()[current_state].transitions().front().letter()->get_index() == block.get_block_id())
             {
                 parent.get_moves_description().get_nfa()[current_state].transitions().front().letter()->apply(this);
-                lazy_controller.evaluate(this);
                 current_state = parent.get_moves_description().get_nfa()[current_state].transitions().front().target();
             }
         }
         lazy_controller.clear();
         moves_information.clear();
     }
+
+    std::vector<move> find_moves(ssize_t max_depth=-1)
+    {
+        return moves_information.find_moves(this, max_depth);
+    }
+
+    // Lazy controller is separated from main class
+    friend class lazy_controller;
+
+    // Modifying actions
+    friend class actions::shift;
+    friend class actions::off;
+    friend class actions::player_switch;
+    friend class actions::semi_switch;
+    friend class actions::assignment;
+    friend class actions::lazy;
+
+    // Move pattern will be able to use the state to check the condition
+    // This will speed up things. (We do not have to make a copy.)
+    friend class conditions::move_pattern;
 };
 
 std::ostream& operator<<(std::ostream& s,const game_state& state);

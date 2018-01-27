@@ -92,7 +92,7 @@ int main(int argc,const char *argv[]) {
     for(size_t i = 0; i < iterations; i++) {
         size_t moves_count = 0;
         game_state state(gd);
-        auto moves = state.get_move_evaluator().find_moves(&state, 10);
+        auto moves = state.find_moves(10);
         moves_count += moves.size();
         if(iterations == 1)
             std::cout << state << std::endl;
@@ -102,7 +102,7 @@ int main(int argc,const char *argv[]) {
             state.make_move(moves[rand() % moves.size()]);
             if(iterations == 1)
                 std::cout << state << std::endl;
-            moves = state.get_move_evaluator().find_moves(&state);
+            moves = state.find_moves();
             moves_count += moves.size();
         }
         for(auto& player_score : player_scores_sum)
@@ -122,8 +122,7 @@ int main(int argc,const char *argv[]) {
     auto end = std::chrono::system_clock::now();
     auto duration = std::chrono::duration<double>(end - begin).count();
     std::cout << "Calculated " << iterations << " games in " <<  duration << "s" << std::endl;
-    std::cout << "Time for one game: " << duration / iterations << "s" << " (" << iterations/duration
-                                                                                                                 << " games/sec)" << std::endl;
+    std::cout << "Time for one game: " << duration / iterations << "s" << " (" << iterations/duration << " games/sec)" << std::endl;
     std::cout << "Avarage number of turns in game: " << (double) turns / iterations << std::endl;
     std::cout << "Avarage number of moves in one state: " << (double) avgmoves / iterations << std::endl;
     std::cout << "Number of traveled states: " << turns << " (" << turns/duration

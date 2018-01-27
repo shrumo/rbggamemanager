@@ -6,12 +6,14 @@
 #include "../game_components/game_state.h"
 
 action_result actions::shift::apply(game_state *b) const {
-    b->change_pos(dx,dy);
+    b->current_x += dx;
+    b->current_y += dy;
     return b->x()< b->width() && b->y() < b->height();
 }
 
 void actions::shift::revert(game_state *b, const action_result&) const {
-    b->change_pos(-dx,-dy);
+    b->current_x-=dx;
+    b->current_y-=dy;
 }
 
 action_result actions::on::apply(game_state *b) const {
@@ -19,6 +21,7 @@ action_result actions::on::apply(game_state *b) const {
 }
 
 action_result actions::off::apply(game_state *b) const {
+    b->lazy().evaluate_lazy_reversible(b);
     size_t previous_piece = b->current_piece();
     b->set_piece(piece);
     return {true, previous_piece};
@@ -26,28 +29,33 @@ action_result actions::off::apply(game_state *b) const {
 
 void actions::off::revert(game_state *b, const action_result &apply_result) const {
     b->set_piece(apply_result.get_revert_piece());
+    b->lazy().revert_last_lazy_evaluation(b);
 }
 
 action_result actions::player_switch::apply(game_state *b) const {
+    b->lazy().evaluate_lazy_reversible(b);
     size_t previous_player = b->player();
-    b->set_player(player);
+    b->current_player = player;
     b->inc_turn();
     return {true, previous_player};
 }
 
 void actions::player_switch::revert(game_state *b, const action_result &apply_result) const {
     b->dec_turn();
-    b->set_player(apply_result.get_revert_player());
+    b->current_player = apply_result.get_revert_player();
+    b->lazy().revert_last_lazy_evaluation(b);
 }
 
 action_result actions::assignment::apply(game_state *b) const {
+    b->lazy().evaluate_lazy_reversible(b);
     int previous_value = b->value(variable);
-    b->set_value(variable, value->value(b));
+    b->sigma[variable] = value->value(b);
     return {true, previous_value};
 }
 
 void actions::assignment::revert(game_state *b, const action_result &apply_result) const {
-    b->set_value(variable, apply_result.get_revert_value());
+    b->sigma[variable] = apply_result.get_revert_value();
+    b->lazy().revert_last_lazy_evaluation(b);
 }
 
 action_result actions::lazy::apply(game_state *b) const {
@@ -57,4 +65,13 @@ action_result actions::lazy::apply(game_state *b) const {
 
 void actions::lazy::revert(game_state *b, const action_result &) const {
     b->lazy().pop_lazy_action();
+}
+
+action_result actions::semi_switch::apply(game_state *b) const {
+    b->lazy().evaluate_lazy_reversible(b);
+    return true;
+}
+
+void actions::semi_switch::revert(game_state *b, const action_result &) const {
+    b->lazy().revert_last_lazy_evaluation(b);
 }

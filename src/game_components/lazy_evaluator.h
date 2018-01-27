@@ -15,8 +15,11 @@ class lazy_evaluator {
     std::vector<action_application> lazy_actions;
     std::vector<action_result> action_results;
     std::vector<size_t> evaluation_heads;
+    bool evaluating;
 public:
-    lazy_evaluator() = default;
+    lazy_evaluator()
+            : evaluating(false)
+    {}
 
     template<typename ...Args>
     void add_lazy_action(Args&&... args)
@@ -35,10 +38,9 @@ public:
         action_results.clear();
     }
 
-    void evaluate_reversible(game_state* state);
-    void revert_last_evaluation(game_state *state);
+    void evaluate_lazy_reversible(game_state *state);
+    void revert_last_lazy_evaluation(game_state *state);
 
-    void evaluate(game_state* state);
 };
 
 
