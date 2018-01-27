@@ -122,7 +122,7 @@
     (
         [$me~pass=0] legalMove(me~Stone; opponent~Stone) -> markToCapture(opponent~Stone) floodfillCaptures(opponent~Stone)
         clearCaptures
-      + [$me~pass=1]
+      + [$me~pass=1]->
     )
 
 

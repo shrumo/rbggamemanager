@@ -17,6 +17,7 @@ class action;
 class condition {
 public:
     virtual bool check(game_state *b)const =0;
+    virtual ~condition()= default;
 };
 
 namespace conditions

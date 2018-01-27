@@ -12,6 +12,7 @@ class game_state;
 class arithmetic_operation {
 public:
     virtual int value(game_state *b) const=0;
+    virtual ~arithmetic_operation()=default;
 };
 
 namespace arithmetic_operations

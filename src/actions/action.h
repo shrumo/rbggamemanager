@@ -75,6 +75,7 @@ public:
     {
         return (unsigned int) std::abs(index);
     }
+    virtual ~action()=default;
 };
 
 class action_application
