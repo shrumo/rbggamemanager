@@ -21,7 +21,7 @@ void game_nfa_creator::dispatch(const rbg_parser::alternative& move) {
         item->accept(*this);
         rec_result.push_back(std::move(condition_result));
     }
-    condition_result = std::unique_ptr<condition>(new conditions::conjunction(std::move(rec_result)));
+    condition_result = std::unique_ptr<condition>(new conditions::alternative(std::move(rec_result)));
 }
 
 void game_nfa_creator::dispatch(const rbg_parser::negatable_condition& move) {
