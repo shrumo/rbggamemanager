@@ -6,9 +6,44 @@
 #define RBGGAMEMANAGER_GAME_STATE_H
 
 
+#include <utility>
+
 #include "game_description.h"
 #include "lazy_evaluator.h"
 #include "moves_cache.h"
+
+class move_revert_information
+{
+    std::vector<action_result> actions_results;
+    size_t previous_x, previous_y;
+    fsm::state_id_t previous_state;
+    std::vector<action_application> applied_modifiers;
+public:
+    move_revert_information(std::vector<action_result> actions_results, size_t previous_x, size_t previous_y,
+                                fsm::state_id_t previous_state, std::vector<action_application> applied_modifiers)
+            : actions_results(std::move(actions_results)), previous_x(previous_x),
+              previous_y(previous_y), previous_state(previous_state), applied_modifiers(std::move(applied_modifiers)) {}
+
+    const std::vector<action_result> &get_actions_results() const {
+        return actions_results;
+    }
+
+    const std::vector<action_application> &get_applied_modifiers() const {
+        return applied_modifiers;
+    }
+
+    size_t get_previous_x() const {
+        return previous_x;
+    }
+
+    size_t get_previous_y() const {
+        return previous_y;
+    }
+
+    fsm::state_id_t get_previous_state() const {
+        return previous_state;
+    }
+};
 
 class game_state {
     const game_description& parent;
@@ -46,6 +81,8 @@ class game_state {
         return moves_information;
     }
 
+    action_result apply_action_application(const action_application& application);
+    void revert_action_application(const action_application& application, const action_result& application_result);
 public:
     game_state(const game_description& description)
         : parent(description),
@@ -122,12 +159,8 @@ public:
         return current_player;
     }
 
-    action_result apply_action_application(const action_application& application);
-    void revert_action_application(const action_application& application, const action_result& application_result);
-
     void make_move(const move& move)
     {
-
         for(const auto& block : move.get_blocks())
         {
             current_state = parent.get_moves_description().get_corresponding_state(block.get_block_id());
@@ -144,13 +177,49 @@ public:
         moves_information.clear();
     }
 
+    move_revert_information make_revertible_move(const move& move)
+    {
+        std::vector<action_result> results;
+        std::vector<action_application> applied_modifiers;
+        size_t previous_x = current_x;
+        size_t previous_y = current_y;
+        fsm::state_id_t previous_state = current_state;
+        for(const auto& block : move.get_blocks())
+        {
+            current_state = parent.get_moves_description().get_corresponding_state(block.get_block_id());
+            current_x = block.x();
+            current_y = block.y();
+            while(parent.get_moves_description().get_nfa()[current_state].transitions().size() == 1 &&
+                  parent.get_moves_description().get_nfa()[current_state].transitions().front().letter()->get_index() == block.get_block_id())
+            {
+                results.push_back(parent.get_moves_description().get_nfa()[current_state].transitions().front().letter()->apply(this));
+                applied_modifiers.emplace_back(current_x, current_y, parent.get_moves_description().get_nfa()[current_state].transitions().front().letter());
+                current_state = parent.get_moves_description().get_nfa()[current_state].transitions().front().target();
+            }
+        }
+        moves_information.clear();
+        return {std::move(results), previous_x, previous_y, previous_state, std::move(applied_modifiers)};
+    }
+
+    void revert_move(const move_revert_information& information)
+    {
+        for(ssize_t i = information.get_applied_modifiers().size()-1; i >= 0; i--)
+        {
+            const auto& action = information.get_applied_modifiers()[i];
+            revert_action_application(action, information.get_actions_results()[i]);
+        }
+        current_x = information.get_previous_x();
+        current_y = information.get_previous_y();
+        current_state = information.get_previous_state();
+    }
+
     std::vector<move> find_moves(ssize_t max_depth=-1)
     {
         return moves_information.find_moves(this, max_depth);
     }
 
     // Lazy controller is separated from main class
-    friend class lazy_controller;
+    friend class lazy_evaluator;
 
     // Modifying actions
     friend class actions::shift;

@@ -26,6 +26,22 @@ struct player_results
     int sum,min,max;
 };
 
+int min_max_benchmark(game_state* state, size_t depth)
+{
+    if(depth == 0)
+        return state->turn();
+    auto moves = state->find_moves();
+    int min = std::numeric_limits<int>::max();
+    for(const auto& move : moves) {
+        auto revert_info = state->make_revertible_move(move);
+        int rec_res = min_max_benchmark(state, depth - 1);
+        if(rec_res < min)
+            min = rec_res;
+        state->revert_move(revert_info);
+    }
+    return min;
+}
+
 int main(int argc,const char *argv[]) {
     po::options_description description("Allowed options");
     description.add_options()
@@ -33,6 +49,7 @@ int main(int argc,const char *argv[]) {
             ("help,h","produce help message")
             ("input-file,i",po::value<std::string>(),"input file")
             ("randomseed,s",po::value<uint>(),"random seed for random player")
+            ("depth,d",po::value<uint>(),"depth of minmax benchmark")
             ;
 
     po::variables_map vm;
@@ -52,6 +69,12 @@ int main(int argc,const char *argv[]) {
     if(vm.count("help")) {
         std::cout << description << std::endl;
         return 1;
+    }
+
+    size_t search_depth = 0;
+    if(vm.count("depth"))
+    {
+        search_depth = vm["depth"].as<uint>();
     }
 
     rbg_parser::messages_container msg;
@@ -99,6 +122,7 @@ int main(int argc,const char *argv[]) {
         while (!moves.empty()) {
             if(iterations == 1)
                 std::cout << "\n";
+            volatile int discard = min_max_benchmark(&state,search_depth);
             state.make_move(moves[rand() % moves.size()]);
             if(iterations == 1)
                 std::cout << state << std::endl;
