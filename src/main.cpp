@@ -146,8 +146,8 @@ int main(int argc,const char *argv[]) {
                 player_score.second.max = score;
 
         }
-        turns += state.turn() - 1;
-        avgmoves += moves_count / (state.turn() - 1);
+        turns += state.turn() + 1;
+        avgmoves += moves_count / (state.turn() + 1);
         all_moves_count += moves_count;
     }
     auto end = std::chrono::system_clock::now();
