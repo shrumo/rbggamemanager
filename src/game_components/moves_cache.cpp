@@ -56,7 +56,8 @@ moves_cache::visited_index(game_state *state, const fsm::nfa<action *> &nfa, fsm
 size_t moves_cache::new_visited(game_state *state, const fsm::nfa<action *> &nfa) {
     if(last_visited_array_index < visited.size())
     {
-        visited[last_visited_array_index].front().resize(state->width() * state->height() * nfa.get_state_count());
+        visited[last_visited_array_index].front().resize(std::max(visited[last_visited_array_index].front().size(),
+                                                                  state->width() * state->height() * nfa.get_state_count()));
         visited[last_visited_array_index].front().reset();
         return last_visited_array_index++;
     }
@@ -69,7 +70,8 @@ size_t moves_cache::new_visited(game_state *state, const fsm::nfa<action *> &nfa
 size_t moves_cache::new_results_cache(game_state *state, const fsm::nfa<action *> &nfa) {
     if(last_results_array_index < results.size())
     {
-        results[last_results_array_index].front().resize(state->width() * state->height() * nfa.get_state_count());
+        results[last_results_array_index].front().resize(std::max(results[last_results_array_index].front().size(),
+                                                                  state->width() * state->height() * nfa.get_state_count()));
         results[last_results_array_index].front().reset();
         return last_results_array_index++;
     }
