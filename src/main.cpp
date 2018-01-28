@@ -26,15 +26,15 @@ struct player_results
     int sum,min,max;
 };
 
-int perft(game_state *state, size_t depth)
+int perft(search_context* context, game_state *state, size_t depth)
 {
     if(depth == 0)
         return 1;
-    auto moves = state->find_moves();
+    auto moves = state->find_moves(context);
     int result = 0;
     for(const auto& move : moves) {
         auto revert_info = state->make_revertible_move(move);
-        int rec_res = perft(state, depth - 1);
+        int rec_res = perft(context, state, depth - 1);
         result += rec_res;
         state->revert_move(revert_info);
     }
@@ -111,17 +111,18 @@ int main(int argc,const char *argv[]) {
     size_t avgmoves = 0;
     size_t all_moves_count = 0;
     auto begin = std::chrono::system_clock::now();
+    search_context context;
     for(size_t i = 0; i < iterations; i++) {
         size_t moves_count = 0;
         game_state state(gd);
-        auto moves = state.find_moves();
+        auto moves = state.find_moves(&context);
         moves_count += moves.size();
         if(iterations == 1)
             std::cout << state << std::endl;
         while (!moves.empty()) {
             if(iterations == 1)
                 std::cout << "\n";
-            volatile int unused = perft(&state, search_depth);
+            volatile int unused = perft(&context, &state, search_depth);
             state.make_move(moves[rand() % moves.size()]);
             if(iterations == 1) {
                 std::cout << "Perft: " << unused << " (Depth: " << search_depth << ")" << std::endl;
@@ -129,9 +130,9 @@ int main(int argc,const char *argv[]) {
             }
             if(state.player() == state.get_description().get_keeper_player_id())
             {
-                moves = state.find_first_move();
+                moves = state.find_first_move(&context);
             } else {
-                moves = state.find_moves();
+                moves = state.find_moves(&context);
             }
             moves_count += moves.size();
         }

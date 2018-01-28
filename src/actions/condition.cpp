@@ -6,5 +6,5 @@
 #include "../game_components/game_state.h"
 
 bool conditions::move_pattern::check(game_state *b) const {
-    return b->get_move_evaluator().check_pattern(b,*move_nfa, index);
+    return b->get_search_context().check_pattern(*move_nfa, index);
 }

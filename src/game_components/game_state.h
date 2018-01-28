@@ -10,7 +10,7 @@
 
 #include "game_description.h"
 #include "lazy_evaluator.h"
-#include "moves_cache.h"
+#include "search_context.h"
 
 class move_revert_information
 {
@@ -59,7 +59,7 @@ class game_state {
     std::vector<int> sigma;
     token_id_t current_player;
 
-    moves_cache moves_information;
+    search_context* current_search;
 
     void inc_turn() { sigma[parent.get_turn_id()]++; }
     void dec_turn() { sigma[parent.get_turn_id()]--; }
@@ -76,9 +76,14 @@ class game_state {
         return lazy_controller;
     }
 
-    moves_cache& get_move_evaluator()
+    bool is_used_in_search()
     {
-        return moves_information;
+        return current_search != nullptr;
+    }
+
+    search_context& get_search_context()
+    {
+        return *current_search;
     }
 
     action_result apply_action_application(const action_application& application);
@@ -174,7 +179,6 @@ public:
             }
         }
         lazy_controller.clear();
-        moves_information.clear();
     }
 
     move_revert_information make_revertible_move(const move& move)
@@ -197,7 +201,6 @@ public:
                 current_state = parent.get_moves_description().get_nfa()[current_state].transitions().front().target();
             }
         }
-        moves_information.clear();
         return {std::move(results), previous_x, previous_y, previous_state, std::move(applied_modifiers)};
     }
 
@@ -213,14 +216,20 @@ public:
         current_state = information.get_previous_state();
     }
 
-    std::vector<move> find_moves(ssize_t max_depth=-1)
+    std::vector<move> find_moves(search_context* context, ssize_t max_depth=-1)
     {
-        return moves_information.find_moves(this, max_depth);
+        current_search = context;
+        auto result = current_search->find_moves(this, max_depth);
+        current_search = nullptr;
+        return std::move(result);
     }
 
-    std::vector<move> find_first_move(ssize_t max_depth=-1)
+    std::vector<move> find_first_move(search_context* context, ssize_t max_depth=-1)
     {
-        return moves_information.find_first_move(this, max_depth);
+        current_search = context;
+        auto result = current_search->find_first_move(this, max_depth);
+        current_search = nullptr;
+        return std::move(result);
     }
 
     // Lazy controller is separated from main class
