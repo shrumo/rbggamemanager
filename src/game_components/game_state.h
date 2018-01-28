@@ -218,6 +218,11 @@ public:
         return moves_information.find_moves(this, max_depth);
     }
 
+    std::vector<move> find_first_move(ssize_t max_depth=-1)
+    {
+        return moves_information.find_first_move(this, max_depth);
+    }
+
     // Lazy controller is separated from main class
     friend class lazy_evaluator;
 

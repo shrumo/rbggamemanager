@@ -69,9 +69,12 @@ void actions::lazy::revert(game_state *b, const action_result &) const {
 
 action_result actions::semi_switch::apply(game_state *b) const {
     b->lazy().evaluate_lazy_reversible(b);
-    return true;
+    size_t previous_player = b->player();
+    b->current_player = b->get_description().get_keeper_player_id();
+    return {true, previous_player};;
 }
 
-void actions::semi_switch::revert(game_state *b, const action_result &) const {
+void actions::semi_switch::revert(game_state *b, const action_result& apply_result) const {
+    b->current_player = apply_result.get_revert_player();
     b->lazy().revert_last_lazy_evaluation(b);
 }

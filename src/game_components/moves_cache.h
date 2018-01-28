@@ -63,7 +63,7 @@ public:
 
 class moves_cache {
     std::vector<move> possible_moves;
-    size_t max_depth;
+    ssize_t max_depth;
 
     std::vector< std::vector< fast_bit_vector > > visited;
     std::vector< std::vector< fast_bit_vector > > results;
@@ -82,13 +82,14 @@ class moves_cache {
     std::unordered_map<unsigned int, std::size_t> move_pattern_results;
 
     void find_all_moves_rec(game_state* state, std::size_t visited_array_index, const fsm::nfa<action*>& nfa, fsm::state_id_t current_state, move* move, bool block_started=false);
+    bool find_first_move_rec(game_state* state, std::size_t visited_array_index, const fsm::nfa<action*>& nfa, fsm::state_id_t current_state, move* move, bool block_started=false);
     bool check_play(game_state* state, std::size_t visited_array_index, std::size_t results_index, const fsm::nfa<action*>& nfa, fsm::state_id_t current_state, std::size_t depth, bool block_started=false);
 
     std::size_t visited_index(game_state* state, const fsm::nfa<action *> &nfa, fsm::state_id_t current_state);
 public:
     moves_cache()
             :
-            max_depth(10),
+            max_depth(-1),
             last_visited_array_index(0),
             last_results_array_index(0)
     {
@@ -116,6 +117,7 @@ public:
     }
 
     std::vector<move> find_moves(game_state* state, ssize_t max_depth=-1);
+    std::vector<move> find_first_move(game_state* state, ssize_t max_depth=-1);
     bool check_pattern(game_state* state, const fsm::nfa<action*>& nfa, unsigned int move_pattern_index, ssize_t max_depth=-1);
 };
 

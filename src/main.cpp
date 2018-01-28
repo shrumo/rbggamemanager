@@ -114,7 +114,7 @@ int main(int argc,const char *argv[]) {
     for(size_t i = 0; i < iterations; i++) {
         size_t moves_count = 0;
         game_state state(gd);
-        auto moves = state.find_moves(10);
+        auto moves = state.find_moves();
         moves_count += moves.size();
         if(iterations == 1)
             std::cout << state << std::endl;
@@ -127,7 +127,12 @@ int main(int argc,const char *argv[]) {
                 std::cout << "Perft: " << unused << " (Depth: " << search_depth << ")" << std::endl;
                 std::cout << state << std::endl;
             }
-            moves = state.find_moves();
+            if(state.player() == state.get_description().get_keeper_player_id())
+            {
+                moves = state.find_first_move();
+            } else {
+                moves = state.find_moves();
+            }
             moves_count += moves.size();
         }
         for(auto& player_score : player_scores_sum)

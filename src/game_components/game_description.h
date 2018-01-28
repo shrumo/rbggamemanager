@@ -18,6 +18,9 @@ class game_description {
     token_id_t turn_variable_id;
     board initial_board;
     token_id_t starting_player;
+    token_id_t keeper_player_id;
+
+private:
     size_t variables_count;
 public:
     game_description(name_resolver name_resolver, game_moves_description moves_description,
@@ -26,6 +29,9 @@ public:
             std::move(initial_board)), starting_player(starting_player), variables_count(resolver.names_count())
     {
         turn_variable_id = resolver.id("turn");
+
+        resolver.add_name("keeper");
+        keeper_player_id = resolver.id("keeper");
     }
 
     game_description(size_t width, size_t height)
@@ -34,6 +40,9 @@ public:
     {
         resolver.add_name("turn");
         turn_variable_id = resolver.id("turn");
+
+        resolver.add_name("keeper");
+        keeper_player_id = resolver.id("keeper");
     }
 
     const name_resolver& get_resolver() const {
@@ -59,6 +68,10 @@ public:
     size_t get_variables_count() const
     {
         return variables_count;
+    }
+
+    token_id_t get_keeper_player_id() const {
+        return keeper_player_id;
     }
 };
 

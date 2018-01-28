@@ -16,7 +16,7 @@ void moves_cache::find_all_moves_rec(game_state *state, size_t visited_array_ind
     if(visited[visited_array_index][depth][index])
         return;
     visited[visited_array_index][depth].set(index);
-    if(depth == max_depth)
+    if((ssize_t)depth == max_depth)
         return;
     for(const auto& transition : nfa[current_state].transitions())
     {
@@ -93,7 +93,7 @@ bool moves_cache::check_play(game_state *state, size_t visited_array_index, size
     if(visited[visited_array_index][depth][index])
         return false;
     visited[visited_array_index][depth].set(index);
-    if(depth == max_depth)
+    if((ssize_t)depth == max_depth)
         return false;
     for(const auto& transition : nfa[current_state].transitions())
     {
@@ -180,6 +180,60 @@ void moves_cache::dump_visited(std::size_t visited_array_index) {
     {
         last_visited_array_index--;
     }
+}
+
+std::vector<move> moves_cache::find_first_move(game_state *state, ssize_t maximal_depth) {
+    if(maximal_depth >= 0)
+        max_depth = (size_t) maximal_depth;
+    size_t visited_index = new_visited(state,state->get_description().get_moves_description().get_nfa());
+    move empty;
+    find_first_move_rec(state, visited_index,state->get_description().get_moves_description().get_nfa(),state->get_current_state(),&empty);
+    dump_visited(visited_index);
+    return std::move(possible_moves);
+}
+
+bool moves_cache::find_first_move_rec(game_state *state, std::size_t visited_array_index, const fsm::nfa<action *> &nfa,
+                                      fsm::state_id_t current_state, move *move, bool block_started) {
+    size_t index = visited_index(state, nfa, current_state);
+    size_t depth = move->get_blocks().size();
+    if(visited[visited_array_index][depth][index])
+        return false;
+    visited[visited_array_index][depth].set(index);
+    if((ssize_t)depth == max_depth)
+        return false;
+    bool rec_result = false;
+    for(const auto& transition : nfa[current_state].transitions())
+    {
+        action_result result = transition.letter()->apply(state);
+        if(result)
+        {
+            if(transition.letter()->is_modifier())
+            {
+                if(!block_started) {
+                    move->add_block(state->x(), state->y(), transition.letter()->get_index());
+                    create_visited_layers(visited_array_index, depth+1);
+                    invalidate_results();
+                }
+                if(transition.letter()->is_switch()) {
+                    possible_moves.push_back(*move);
+                    rec_result = true;
+                }
+                else
+                {
+                    rec_result = find_first_move_rec(state, visited_array_index, nfa, transition.target(), move, true);
+                }
+                if(!block_started) {
+                    move->pop_block();
+                }
+            }
+            else
+                rec_result = find_first_move_rec(state, visited_array_index, nfa, transition.target(), move);
+        }
+        transition.letter()->revert(state, result);
+        if(rec_result)
+            return true;
+    }
+    return false;
 }
 
 
