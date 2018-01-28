@@ -26,20 +26,19 @@ struct player_results
     int sum,min,max;
 };
 
-int min_max_benchmark(game_state* state, size_t depth)
+int perft(game_state *state, size_t depth)
 {
     if(depth == 0)
-        return state->turn();
+        return 1;
     auto moves = state->find_moves();
-    int min = std::numeric_limits<int>::max();
+    int result = 0;
     for(const auto& move : moves) {
         auto revert_info = state->make_revertible_move(move);
-        int rec_res = min_max_benchmark(state, depth - 1);
-        if(rec_res < min)
-            min = rec_res;
+        int rec_res = perft(state, depth - 1);
+        result += rec_res;
         state->revert_move(revert_info);
     }
-    return min;
+    return result;
 }
 
 int main(int argc,const char *argv[]) {
@@ -49,7 +48,7 @@ int main(int argc,const char *argv[]) {
             ("help,h","produce help message")
             ("input-file,i",po::value<std::string>(),"input file")
             ("randomseed,s",po::value<uint>(),"random seed for random player")
-            ("depth,d",po::value<uint>(),"depth of minmax benchmark")
+            ("depth,d",po::value<uint>(),"depth of perft calculation")
             ;
 
     po::variables_map vm;
@@ -122,10 +121,12 @@ int main(int argc,const char *argv[]) {
         while (!moves.empty()) {
             if(iterations == 1)
                 std::cout << "\n";
-            volatile int discard = min_max_benchmark(&state,search_depth);
+            volatile int unused = perft(&state, search_depth);
             state.make_move(moves[rand() % moves.size()]);
-            if(iterations == 1)
+            if(iterations == 1) {
+                std::cout << "Perft: " << unused << " (Depth: " << search_depth << ")" << std::endl;
                 std::cout << state << std::endl;
+            }
             moves = state.find_moves();
             moves_count += moves.size();
         }
