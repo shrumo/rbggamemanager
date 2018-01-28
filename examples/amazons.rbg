@@ -15,13 +15,7 @@
 #pieces = e, w, b, x
 #variables = 
 
-#anySquare =
-    (
-        ( 1, 0)
-      + ( 0, 1)
-      + (-1, 0)
-      + ( 0,-1)
-    )^*
+#anySquare = (((1,0)^*+(-1,0)^*)((0,1)^*+(0,-1)^*))
 
 #queenMove =
     (

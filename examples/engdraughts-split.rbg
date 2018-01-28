@@ -1,0 +1,132 @@
+#game = "English Checkers"
+
+#line(piece) =
+    [piece, empty, piece, empty, piece, empty, piece, empty]
+#offsetLine(piece) =
+    [empty, piece, empty, piece, empty, piece, empty, piece]
+
+#board =
+    offsetLine(blackMan)
+    line(blackMan)
+    offsetLine(blackMan)
+    line(empty)
+    offsetLine(empty)
+    line(whiteMan)
+    offsetLine(whiteMan)
+    line(whiteMan)
+
+#players = black, white
+#pieces = empty, whiteMan, whiteKing, blackMan, blackKing
+#variables = 
+
+#anySquare = (((1,0)^*+(-1,0)^*)((0,1)^*+(0,-1)^*))
+
+#nonCapturingManMove(forward) =
+    ((1, forward 1)+(-1, forward 1))
+    (empty)
+
+#nonCapturingKingMove =
+    ((1,1)+(-1,1)+(1,-1)+(-1,-1))
+    (empty)
+
+#canJumpInGivenDirection(xDir; yDir; oppColor) =
+    (xDir 1, yDir 1)
+    (oppColor~Man,oppColor~King)
+    (xDir 1, yDir 1)
+    (empty)
+#canManJump(forward; oppColor) =
+    (
+        canJumpInGivenDirection(+;forward;oppColor)
+      + canJumpInGivenDirection(-;forward;oppColor)
+    )
+#canKingJump(oppColor) =
+    (
+        canJumpInGivenDirection(+;+;oppColor)
+      + canJumpInGivenDirection(-;+;oppColor)
+      + canJumpInGivenDirection(+;-;oppColor)
+      + canJumpInGivenDirection(-;-;oppColor)
+    )
+#canCapture(forward; color; oppColor) =
+    anySquare
+    (
+       (color~Man)canManJump(forward;oppColor)
+       +
+       (color~King)canKingJump(oppColor)
+    )
+
+#jumpInGivenDirection(xDir; yDir; color; oppColor) =
+    (xDir 1, yDir 1)
+    (oppColor~Man,oppColor~King)
+    (?(!(xDir 1,yDir 1)(empty)))
+    [empty]
+
+#capturingManMove(forward; color; oppColor) = (
+    (
+      jumpInGivenDirection(+;forward;color;oppColor)
+     +jumpInGivenDirection(-;forward;color;oppColor)
+    )
+    (
+      (? (! canManJump(forward;oppColor))) ->color
+      jumpInGivenDirection(+;forward;color;oppColor)
+     +jumpInGivenDirection(-;forward;color;oppColor)
+    )^*
+    (? not (! canManJump(forward;oppColor)))
+  )
+#capturingKingMove(color; oppColor) = (
+    (
+      jumpInGivenDirection(+;+;color;oppColor)
+     +jumpInGivenDirection(-;+;color;oppColor)
+     +jumpInGivenDirection(+;-;color;oppColor)
+     +jumpInGivenDirection(-;-;color;oppColor)
+    )
+    (
+      (? not (! canKingJump(oppColor))) ->color
+      jumpInGivenDirection(+;+;color;oppColor)
+     +jumpInGivenDirection(-;+;color;oppColor)
+     +jumpInGivenDirection(+;-;color;oppColor)
+     +jumpInGivenDirection(-;-;color;oppColor)
+    )^*
+    (? not (! canKingJump(oppColor)))
+  )
+#placeMan(forward; color) =
+    (
+        (?(!(0,forward 1)))[color~Man]
+      + (?not (!(0, forward 1)))[color~King]
+    )
+
+#allMoves(forward; color; oppColor) =
+    (
+        (? not (!canCapture(forward; color; oppColor)))
+        anySquare
+        (
+            (color~Man)[empty]
+            nonCapturingManMove(forward)
+            placeMan(forward;color)
+          + (color~King)[empty]
+            nonCapturingKingMove
+            [color~King]
+        )
+      +
+        anySquare
+        (
+            (color~Man)[empty]
+            capturingManMove(forward;color;oppColor)
+            placeMan(forward;color)
+          + (color~King)[empty]
+            capturingKingMove(color;oppColor)
+            [color~King]
+        )
+    )->
+    (
+      (? $turn>=200) [$white=5, $black=5]->()
+      +
+      (? $turn<200) [$color=10, $oppColor=0]->oppColor
+    )
+    
+#rules =
+    (
+        allMoves(+;white;black)
+        allMoves(-;black;white)
+    )^*
+
+#finalizer = ()

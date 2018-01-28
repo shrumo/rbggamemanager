@@ -14,16 +14,9 @@
 #players = wplayer, bplayer
 
 #pieces = empty, wpiece, bpiece
-#variables=
+#variables =
 
-#anySquare =
-    (
-        ( 1, 0)
-      + ( 0, 1)
-      + (-1, 0)
-      + ( 0,-1)
-    )^*
-
+#anySquare = (((1,0)^*+(-1,0)^*)((0,1)^*+(0,-1)^*))
 
 #swapdirectionpossible (pla; opp; direction; oppositedirection) =
     (
