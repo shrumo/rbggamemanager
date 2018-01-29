@@ -3,8 +3,8 @@
 cd "${0%/*}"
 ./make.sh
 echo -e "\n\tChess"
-../build/rbggamemanager ../rbgParser/examples/chess.rbg -n 2 -s 0 
-../build/rbggamemanager ../rbgParser/examples/chess.rbg -s 0 -d 3
+../build/rbggamemanager ../examples/chess.rbg -n 2 -s 0
+../build/rbggamemanager ../examples/chess.rbg -s 0 -d 3
 echo -e "\n\tCheckers"
 ../build/rbggamemanager ../rbgParser/examples/checkers.rbg -n 10 -s 0 
 ../build/rbggamemanager ../rbgParser/examples/checkers.rbg -s 0 -d 3

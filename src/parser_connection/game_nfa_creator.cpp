@@ -192,8 +192,8 @@ void game_nfa_creator::dispatch(const rbg_parser::bracketed_move& move) {
 
         move.get_content()->accept(*this);
 
-        (*nfa_result)[new_initial_id].add_transition(nfa_result->initial(), used_actions["epsilon"] );
         (*nfa_result)[new_initial_id].add_transition(new_final_id, used_actions["epsilon"]);
+        (*nfa_result)[new_initial_id].add_transition(nfa_result->initial(), used_actions["epsilon"] );
         (*nfa_result)[nfa_result->final()].add_transition(new_final_id, used_actions["epsilon"]);
         (*nfa_result)[nfa_result->final()].add_transition(nfa_result->initial(), used_actions["epsilon"]);
 
@@ -233,8 +233,8 @@ void game_nfa_creator::dispatch(const rbg_parser::pure_bracketed_move& move) {
 
         move.get_content()->accept(*this);
 
-        (*nfa_result)[new_initial_id].add_transition(nfa_result->initial(), used_actions["epsilon"] );
         (*nfa_result)[new_initial_id].add_transition(new_final_id, used_actions["epsilon"]);
+        (*nfa_result)[new_initial_id].add_transition(nfa_result->initial(), used_actions["epsilon"] );
         (*nfa_result)[nfa_result->final()].add_transition(new_final_id, used_actions["epsilon"]);
         (*nfa_result)[nfa_result->final()].add_transition(nfa_result->initial(), used_actions["epsilon"]);
 

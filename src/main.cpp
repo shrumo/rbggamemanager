@@ -30,11 +30,20 @@ size_t perft(search_context* context, game_state *state, size_t depth)
 {
     if(depth == 0)
         return 1;
-    auto moves = state->find_moves(context);
+
+    std::vector<move> moves;
+    size_t new_depth = depth - 1;
+    if(state->player() == state->get_description().get_keeper_player_id())
+    {
+        moves = state->find_first_move(context);
+        new_depth = depth;
+    } else {
+        moves = state->find_moves(context);
+    }
     size_t result = 0;
     for(const auto& move : moves) {
         auto revert_info = state->make_revertible_move(move);
-        size_t rec_res = perft(context, state, depth - 1);
+        size_t rec_res = perft(context, state, new_depth);
         result += rec_res;
         state->revert_move(revert_info);
     }
