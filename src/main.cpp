@@ -142,7 +142,8 @@ void perft_benchmark(const rbg_parser::parsed_game& pg, size_t depth)
     auto duration = std::chrono::duration<double>(end - begin).count();
     std::cout << "Calculated perft for depth " << depth << " in " <<  duration << "s" << std::endl;
     std::cout << "There are " << result.leaf_count << " leafes" << std::endl;
-    std::cout << "Number of traveled states: " << result.node_count << std::endl;
+    std::cout << "Number of traveled states: " << result.node_count <<  " (" <<  result.node_count/duration
+                                                                    << " states/sec)" << std::endl;
 }
 
 int main(int argc,const char *argv[]) {

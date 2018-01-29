@@ -213,16 +213,16 @@
           + standardPawnMove(forwardDirection; backDirection; color; opponentColor)
         )
       + enPassantPawnMove(forwardDirection; color)
-    ) (? not checked(color; opponentColor; forwardDirection))
+    )
+    ->
+    (
+        (? $opponentColor~King > 0)[$color=5,$opponentColor=5]
+      + (? $opponentColor~King == 0)[$color=10,$opponentColor=0]
+    )
     ->
     (
         (? $turn<=200)
       + (? $turn>200)[$color=5,$opponentColor=5]->()
-    )
-    ->
-    (
-        (? not checked(opponentColor; color; backDirection))[$color=5,$opponentColor=5]
-      + (? checked(opponentColor; color; backDirection))[$color=10,$opponentColor=0]
     )
     ->opponentColor
 

@@ -5,6 +5,9 @@ cd "${0%/*}"
 echo -e "\n\tChess"
 ../build/rbggamemanager ../examples/chess.rbg -n 2 -s 0
 ../build/rbggamemanager ../examples/chess.rbg -s 0 -d 3
+echo -e "\n\tChess Capture"
+../build/rbggamemanager ../examples/chess-cap.rbg -n 10 -s 0
+../build/rbggamemanager ../examples/chess-cap.rbg -s 0 -d 3
 echo -e "\n\tCheckers"
 ../build/rbggamemanager ../rbgParser/examples/checkers.rbg -n 10 -s 0 
 ../build/rbggamemanager ../rbgParser/examples/checkers.rbg -s 0 -d 3
