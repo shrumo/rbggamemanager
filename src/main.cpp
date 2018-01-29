@@ -26,10 +26,16 @@ struct player_results
     int sum,min,max;
 };
 
-size_t perft(search_context* context, game_state *state, size_t depth)
+struct perft_result
+{
+    size_t leaf_count;
+    size_t node_count;
+};
+
+perft_result perft(search_context* context, game_state *state, size_t depth)
 {
     if(depth == 0)
-        return 1;
+        return {1,1};
 
     std::vector<move> moves;
     size_t new_depth = depth - 1;
@@ -40,14 +46,16 @@ size_t perft(search_context* context, game_state *state, size_t depth)
     } else {
         moves = state->find_moves(context);
     }
-    size_t result = 0;
+    size_t leaf_count = 0;
+    size_t node_count = 1;
     for(const auto& move : moves) {
         auto revert_info = state->make_revertible_move(move);
-        size_t rec_res = perft(context, state, new_depth);
-        result += rec_res;
+        auto rec_res = perft(context, state, new_depth);
+        leaf_count += rec_res.leaf_count;
+        node_count += rec_res.node_count;
         state->revert_move(revert_info);
     }
-    return result;
+    return {leaf_count, node_count};
 }
 
 void random_play_benchmark(const rbg_parser::parsed_game& pg, size_t iterations)
@@ -133,7 +141,8 @@ void perft_benchmark(const rbg_parser::parsed_game& pg, size_t depth)
     auto end = std::chrono::system_clock::now();
     auto duration = std::chrono::duration<double>(end - begin).count();
     std::cout << "Calculated perft for depth " << depth << " in " <<  duration << "s" << std::endl;
-    std::cout << "The result was: " << result << std::endl;
+    std::cout << "There are " << result.leaf_count << " leafes" << std::endl;
+    std::cout << "Number of traveled states: " << result.node_count << std::endl;
 }
 
 int main(int argc,const char *argv[]) {
