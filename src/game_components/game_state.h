@@ -51,8 +51,6 @@ class game_state {
     lazy_evaluator lazy_controller;
 
     board current_board;
-    size_t board_width_cache;
-    size_t board_height_cache;
     size_t current_x,current_y;
     fsm::state_id_t current_state;
 
@@ -89,15 +87,13 @@ class game_state {
     action_result apply_action_application(const action_application& application);
     void revert_action_application(const action_application& application, const action_result& application_result);
 public:
-    game_state(const game_description& description)
+    explicit game_state(const game_description& description)
         : parent(description),
           current_board(description.get_initial_board()),
-          board_width_cache(current_board.width()),
-          board_height_cache(current_board.height()),
           current_x(0), current_y(0),
           current_state(description.get_moves_description().get_nfa().initial()),
           sigma(description.get_variables_count()),
-          current_player(description.get_starting_player())
+          current_player(description.get_deterministic_keeper_player_id())
     {
         for(size_t y = 0; y < current_board.height(); y++)
         {
@@ -107,6 +103,16 @@ public:
             }
         }
         sigma[get_description().get_turn_id()] = 0;
+    }
+
+    void reset()
+    {
+        current_board = parent.get_initial_board();
+        current_x = 0;
+        current_y = 0;
+        current_state = parent.get_moves_description().get_nfa().initial();
+        std::fill(sigma.begin(),sigma.end(),0);
+        current_player = parent.get_deterministic_keeper_player_id();
     }
 
     fsm::state_id_t get_current_state() const
@@ -146,12 +152,12 @@ public:
 
     size_t width() const
     {
-        return board_width_cache;
+        return current_board.width();
     }
 
     size_t height() const
     {
-        return board_height_cache;
+        return current_board.height();
     }
 
     int turn() const

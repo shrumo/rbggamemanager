@@ -36,3 +36,16 @@ In order to run the benchmark just run the benchmark.sh script in ./scripts dire
 cd ./scripts
 ./benchmark.sh
 ```
+
+### TODO
+* Refactor the whole code according to some style
+* Give nice interface to python programming
+* Fix all todos
+* Get rid of finalizer
+* Add arithmetic as soon as it will be available in parser
+* Ask about turn variable
+* Make asynchronous client
+* Make sample, not random client
+* Document code
+* Ask to change parser examples
+* Make additional server communication protocol to get information as a client

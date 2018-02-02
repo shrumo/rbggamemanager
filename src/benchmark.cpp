@@ -39,7 +39,7 @@ perft_result perft(search_context* context, game_state *state, size_t depth)
 
     std::vector<move> moves;
     size_t new_depth = depth - 1;
-    if(state->player() == state->get_description().get_keeper_player_id())
+    if(state->player() == state->get_description().get_deterministic_keeper_player_id())
     {
         moves = state->find_first_move(context);
         new_depth = depth;
@@ -90,7 +90,7 @@ void random_play_benchmark(const rbg_parser::parsed_game& pg, size_t iterations)
             if(iterations == 1) {
                 std::cout << state << std::endl;
             }
-            if(state.player() == state.get_description().get_keeper_player_id())
+            if(state.player() == state.get_description().get_deterministic_keeper_player_id())
             {
                 moves = state.find_first_move(&context);
             } else {

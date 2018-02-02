@@ -122,6 +122,7 @@
     )
     
 #rules =
+    ->black
     (
         allMoves(+;white;black)
         allMoves(-;black;white)

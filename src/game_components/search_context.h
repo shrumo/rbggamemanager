@@ -36,6 +36,11 @@ public:
     {
         return block_id;
     }
+
+    bool operator!=(const block_application& b) const /* TODO(shrum): Make the operators right. */
+    {
+        return x() != b.x() || y() != b.y() || block_id != b.block_id;
+    }
 };
 
 class move
@@ -59,7 +64,43 @@ public:
     {
         return blocks;
     }
+
+    bool operator==(const move& b) const
+    {
+        const auto& a_blocks = get_blocks();
+        const auto& b_blocks = b.get_blocks();
+        if(a_blocks.size() != b_blocks.size())
+            return false;
+        for(size_t i = 0; i < a_blocks.size(); i++)
+        {
+            if(a_blocks[i] != b_blocks[i])
+            {
+                return false;
+            }
+        }
+        return true;
+    }
 };
+
+using move_type = move;
+
+namespace std
+{
+    template <>
+    struct hash<move_type>
+    {
+        std::size_t operator()(const move_type& m) const
+        {
+            std::size_t result = 0;
+            for(const auto& block : m.get_blocks())
+            {
+                result *= 2579;
+                result += (block.y() * 31 + block.x()) * 83 + block.get_block_id();
+            }
+            return result;
+        }
+    };
+}
 
 class search_context {
     std::vector<move> possible_moves;

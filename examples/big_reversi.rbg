@@ -105,6 +105,7 @@
     )
 
 #rules =
+    ->wplayer
     (
         move(w;b)
         setpoints

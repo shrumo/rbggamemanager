@@ -41,6 +41,7 @@
     )
 
 #rules =
+    ->white
     (
         move(w;white)
         [$white=10, $black=0] ->black

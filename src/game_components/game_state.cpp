@@ -53,7 +53,8 @@ std::ostream &operator<<(std::ostream &s, const game_state &state) {
                 s << "[" << std::setw(width) << name.substr(0, (unsigned long) width) << "] ";
             }
         }
-        s << "\n";
+        if(y != state.height()-1)
+            s << "\n";
     }
     return s;
 }

@@ -54,6 +54,26 @@ game_description create_description(const rbg_parser::parsed_game &game) {
     name_resolver resolver(create_resolver(game.get_declarations()));
     board initial_board(create_board(game.get_board(),resolver));
     game_moves_description moves(create_moves(*game.get_moves(),resolver, game.get_declarations().get_legal_pieces().size()));
-    token_id_t first_player_id = resolver.id(game.get_declarations().get_first_player().to_string());
-    return std::move(game_description(std::move(resolver), std::move(moves), std::move(initial_board), first_player_id));
+    declarations_description declarations(create_declarations(game.get_declarations(), resolver));
+    return std::move(game_description(std::move(resolver), std::move(moves), std::move(initial_board),std::move(declarations),game.to_rbg(true)));
+}
+
+declarations_description create_declarations(const rbg_parser::declarations &declarations, const name_resolver &resolver) {
+    declarations_description result;
+    for(const auto& piece_token : declarations.get_legal_pieces())
+    {
+        std::string piece_name = piece_token.to_string();
+        result.add_piece(resolver.id(piece_name));
+    }
+    for(const auto& player_token : declarations.get_legal_players())
+    {
+        std::string player_name = player_token.to_string();
+        result.add_player(resolver.id(player_name));
+    }
+    for(const auto& variable_token : declarations.get_legal_variables())
+    {
+        std::string variable_name = variable_token.to_string();
+        result.add_variable(resolver.id(variable_name));
+    }
+    return result;
 }

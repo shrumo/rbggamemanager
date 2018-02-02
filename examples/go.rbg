@@ -128,7 +128,8 @@
       + (? ($blackpass==0 or $whitepass==0) and ($turn < 1444))
     )
  
-#rules = 
+#rules =
+    ->black
     (
       placeStoneOrPass(black; white) 
       endgameCheck

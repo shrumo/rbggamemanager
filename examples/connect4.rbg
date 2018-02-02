@@ -43,6 +43,7 @@
     
 #rules =
     [$red=5, $yellow=5]
+    ->red
     (
         move(red;yellow;r) ->yellow
         move(yellow;red;y) ->red

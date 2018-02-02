@@ -38,6 +38,7 @@
     )
 
 #rules =
+    ->white
     (
         moveWhite
         [$white=10, $black=0]->black
