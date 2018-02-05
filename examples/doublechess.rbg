@@ -39,7 +39,9 @@
 
 #players = white, black
 #pieces = allPieces, empty
-#variables = pawnDoubleMove, whiteKingMoved, blackKingMoved
+#variables = pawnDoubleMove, whiteKingMoved, blackKingMoved, turn
+
+#bound = 202
 
 #anySquare = (((1,0)^*+(-1,0)^*)((0,1)^*+(0,-1)^*))
 
@@ -226,12 +228,12 @@
     ) (? not checked(color; opponentColor; forwardDirection))
     ->
     (
-        (? $turn>200)[$color=5,$opponentColor=5]->()
+        (? $turn>200)[$color=1,$opponentColor=1]->()
       + (? $turn<=200)
     )
     (
-        (? checked(opponentColor; color; backDirection))[$color=10,$opponentColor=0]
-      + (? not checked(opponentColor; color; backDirection))[$color=5,$opponentColor=5]
+        (? checked(opponentColor; color; backDirection))[$color=2,$opponentColor=0]
+      + (? not checked(opponentColor; color; backDirection))[$color=1,$opponentColor=1]
     )
     ->opponentColor
 
@@ -240,8 +242,8 @@
     ->white
     (
         allMoves(+;-;white;black)
+        [$turn++]
         allMoves(-;+;black;white)
+        [$turn++]
     )^*
-
-#finalizer = ()
 

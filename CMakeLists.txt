@@ -26,8 +26,7 @@ target_link_libraries(host rbgParser)
 target_link_libraries(host ${Boost_LIBRARIES})
 target_link_libraries(host ${CMAKE_THREAD_LIBS_INIT})
 
-add_executable(client ${PLAYING_FILES} src/networking/message.cpp src/networking/message.h src/networking/networking_utils.cpp src/networking/networking_utils.h src/networking/client.cpp src/networking/client.h src/random_playing_client.cpp)
-target_link_libraries(client rbgParser)
-target_link_libraries(client ${Boost_LIBRARIES})
-target_link_libraries(client ${CMAKE_THREAD_LIBS_INIT})
-
+add_executable(random_client ${PLAYING_FILES} src/networking/message.cpp src/networking/message.h src/networking/networking_utils.cpp src/networking/networking_utils.h src/networking/client.cpp src/networking/client.h src/random_playing_client.cpp)
+target_link_libraries(random_client rbgParser)
+target_link_libraries(random_client ${Boost_LIBRARIES})
+target_link_libraries(random_client ${CMAKE_THREAD_LIBS_INIT})

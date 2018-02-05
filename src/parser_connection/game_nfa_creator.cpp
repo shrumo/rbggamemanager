@@ -73,7 +73,6 @@ void game_nfa_creator::dispatch(const rbg_parser::comparison& move) {
         case rbg_parser::logical_and:break;
         case rbg_parser::logical_or:break;
         case rbg_parser::logical_not:break;
-        case rbg_parser::turn:break;
         case rbg_parser::player:break;
         case rbg_parser::game:break;
         case rbg_parser::players:break;
@@ -86,6 +85,9 @@ void game_nfa_creator::dispatch(const rbg_parser::comparison& move) {
         case rbg_parser::quotation:break;
         case rbg_parser::dummy:break;
         case rbg_parser::finalizer:break;
+        case rbg_parser::double_plus:break;
+        case rbg_parser::double_minus:break;
+        case rbg_parser::bound:break;
     }
 }
 
@@ -328,8 +330,19 @@ void game_nfa_creator::dispatch(const rbg_parser::assignment& move) {
     fsm::state_id_t final_id = nfa_result->new_state();
     register_modifier(initial_id);
     token_id_t variable_id = resolver.id(move.get_left_side().to_string());
-    std::unique_ptr<action> letter(new actions::assignment((unsigned int) blocks_states.size() - 1,
-                                                           variable_id, get_operation(move.get_right_side())));
+    std::unique_ptr<action> letter;
+    if(move.is_incrementation())
+    {
+        letter = std::unique_ptr<action>(new actions::incrementation((unsigned int) blocks_states.size() - 1, variable_id));
+    }
+    else if(move.is_decrementation()) {
+        letter = std::unique_ptr<action>(new actions::decrementation((unsigned int) blocks_states.size() - 1, variable_id));
+    }
+    else
+    {
+        letter = std::unique_ptr<action>(new actions::assignment((unsigned int) blocks_states.size() - 1,
+                                          variable_id, get_operation(move.get_right_side())));
+    }
     action* letter_ptr = letter.get();
     actions.push_back(std::move(letter));
     if(move.is_lazy())
@@ -351,13 +364,16 @@ void game_nfa_creator::dispatch(const rbg_parser::player_switch& move) {
     fsm::state_id_t final_id = nfa_result->new_state();
     register_modifier(initial_id);
     std::unique_ptr<action> letter;
-    if(move.changes_player()) {
+    if(move.is_deterministic_keeper()) {
+        letter = std::unique_ptr<action>(new actions::player_switch((unsigned int) blocks_states.size() - 1, resolver.id("_epsilon")));
+    }
+    else if(move.is_non_deterministic_keeper())
+    {
+        letter = std::unique_ptr<action>(new actions::player_switch((unsigned int) blocks_states.size() - 1, resolver.id("_*")));
+    } else
+    {
         token_id_t player_id = resolver.id(move.get_player().to_string());
         letter = std::unique_ptr<action>(new actions::player_switch((unsigned int) blocks_states.size() - 1, player_id));
-    }
-    else
-    {
-        letter = std::unique_ptr<action>(new actions::semi_switch((unsigned int) blocks_states.size() - 1));
     }
     action* letter_ptr = letter.get();
     actions.push_back(std::move(letter));

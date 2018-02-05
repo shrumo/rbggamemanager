@@ -30,7 +30,7 @@ namespace arithmetic_operations
         int constant;
     public:
         constant_value(int constant) : constant(constant) {}
-        int value(game_state*) const override { return constant; };
+        int value(game_state* b) const override;;
     };
 }
 

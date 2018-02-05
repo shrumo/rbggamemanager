@@ -78,6 +78,7 @@ void random_play_benchmark(const rbg_parser::parsed_game& pg, size_t iterations)
     search_context context;
     for(size_t i = 0; i < iterations; i++) {
         size_t moves_count = 0;
+        size_t state_turns = 0;
         game_state state(gd);
         auto moves = state.find_moves(&context);
         moves_count += moves.size();
@@ -97,6 +98,7 @@ void random_play_benchmark(const rbg_parser::parsed_game& pg, size_t iterations)
                 moves = state.find_moves(&context);
             }
             moves_count += moves.size();
+            state_turns++;
         }
         for(auto& player_score : player_scores_sum)
         {
@@ -108,8 +110,8 @@ void random_play_benchmark(const rbg_parser::parsed_game& pg, size_t iterations)
                 player_score.second.max = score;
 
         }
-        turns += state.turn() + 1;
-        avgmoves += moves_count / (state.turn() + 1);
+        turns += state_turns + 1;
+        avgmoves += moves_count / (state_turns + 1);
         all_moves_count += moves_count;
     }
     auto end = std::chrono::system_clock::now();
@@ -141,7 +143,7 @@ void perft_benchmark(const rbg_parser::parsed_game& pg, size_t depth)
     auto end = std::chrono::system_clock::now();
     auto duration = std::chrono::duration<double>(end - begin).count();
     std::cout << "Calculated perft for depth " << depth << " in " <<  duration << "s" << std::endl;
-    std::cout << "There are " << result.leaf_count << " leafes" << std::endl;
+    std::cout << "There are " << result.leaf_count << " leaves" << std::endl;
     std::cout << "Number of traveled states: " << result.node_count <<  " (" <<  result.node_count/duration
                                                                     << " states/sec)" << std::endl;
 }

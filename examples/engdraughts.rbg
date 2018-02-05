@@ -17,7 +17,9 @@
 
 #players = black, white
 #pieces = empty, whiteMan, whiteKing, blackMan, blackKing
-#variables =
+#variables = turn
+
+#bound = 202
 
 #anySquare = (((1,0)^*+(-1,0)^*)((0,1)^*+(0,-1)^*))
 
@@ -116,16 +118,16 @@
         )
     )->
     (
-      (? $turn>=200) [$white=5, $black=5]->()
+      (? $turn>=200) [$white=1, $black=1]->()
       +
-      (? $turn<200) [$color=10, $oppColor=0]->oppColor
+      (? $turn<200) [$color=2, $oppColor=0]->oppColor
     )
     
 #rules =
     ->black
     (
         allMoves(+;white;black)
+        [$turn++]
         allMoves(-;black;white)
+        [$turn++]
     )^*
-
-#finalizer = ()

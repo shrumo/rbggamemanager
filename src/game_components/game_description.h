@@ -51,31 +51,39 @@ public:
 class game_description {
     name_resolver resolver;
     game_moves_description moves_description;
-    token_id_t turn_variable_id;
     board initial_board;
-    token_id_t deterministic_keeper_player_id;
-    token_id_t nondeterministic_keeper_player_id;
 
     declarations_description declarations;
 
     std::string game_text;
 
-public:
-    game_description(name_resolver name_resolver, game_moves_description moves_description,
-                     board initial_board, declarations_description declarations, std::string game_description)
-            : resolver(std::move(name_resolver)), moves_description(std::move(moves_description)),
-              turn_variable_id(resolver.id("turn")), /* TODO(shrum): Ask what about the turn variable */
-              initial_board(std::move(initial_board)),
-              deterministic_keeper_player_id(0),
-              nondeterministic_keeper_player_id(0),
-              declarations(std::move(declarations)),
-              game_text(game_description)
-    {
-        resolver.add_name("epsilon");
-        deterministic_keeper_player_id = resolver.id("epsilon");
+    token_id_t deterministic_keeper_id;
+    token_id_t nondeterministic_keeper_id;
 
-        resolver.add_name("*");
-        nondeterministic_keeper_player_id = resolver.id("*");
+    uint bound;
+
+    game_description(name_resolver name_resolver, game_moves_description moves_description,
+                     board initial_board, declarations_description declarations, std::string game_description,
+                     uint bound)
+            : resolver(std::move(name_resolver)), moves_description(std::move(moves_description)),
+              initial_board(std::move(initial_board)),
+              declarations(std::move(declarations)),
+              game_text(game_description),
+              deterministic_keeper_id(resolver.id("_epsilon")),
+              nondeterministic_keeper_id(resolver.id("_*")),
+              bound(bound)
+    {
+    }
+public:
+
+    token_id_t get_deterministic_keeper_player_id() const
+    {
+        return deterministic_keeper_id;
+    }
+
+    token_id_t get_nondeterministic_keeper_player_id() const
+    {
+        return nondeterministic_keeper_id;
     }
 
     const std::string get_text_description() const
@@ -96,10 +104,6 @@ public:
         return moves_description;
     }
 
-    token_id_t get_turn_id() const {
-        return turn_variable_id;
-    }
-
     const board& get_initial_board() const {
         return initial_board;
     }
@@ -109,13 +113,12 @@ public:
         return resolver.names_count();
     }
 
-    token_id_t get_deterministic_keeper_player_id() const {
-        return deterministic_keeper_player_id;
+    uint get_bound() const
+    {
+        return bound;
     }
 
-    token_id_t get_nondeterministic_keeper_player_id() const {
-        return nondeterministic_keeper_player_id;
-    }
+    friend game_description  create_description(const rbg_parser::parsed_game& game);
 };
 
 

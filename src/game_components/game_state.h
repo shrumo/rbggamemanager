@@ -59,9 +59,6 @@ class game_state {
 
     search_context* current_search;
 
-    void inc_turn() { sigma[parent.get_turn_id()]++; }
-    void dec_turn() { sigma[parent.get_turn_id()]--; }
-
     void set_piece(token_id_t piece)
     {
         sigma[current_piece()]--;
@@ -92,8 +89,8 @@ public:
           current_board(description.get_initial_board()),
           current_x(0), current_y(0),
           current_state(description.get_moves_description().get_nfa().initial()),
-          sigma(description.get_variables_count()),
-          current_player(description.get_deterministic_keeper_player_id())
+          sigma(description.get_variables_count(),0),
+          current_player(description.get_resolver().id("_epsilon"))
     {
         for(size_t y = 0; y < current_board.height(); y++)
         {
@@ -102,7 +99,6 @@ public:
                 sigma[current_board(x,y)]++;
             }
         }
-        sigma[get_description().get_turn_id()] = 0;
     }
 
     void reset()
@@ -112,7 +108,7 @@ public:
         current_y = 0;
         current_state = parent.get_moves_description().get_nfa().initial();
         std::fill(sigma.begin(),sigma.end(),0);
-        current_player = parent.get_deterministic_keeper_player_id();
+        current_player = parent.get_resolver().id("_epsilon");
     }
 
     fsm::state_id_t get_current_state() const
@@ -158,11 +154,6 @@ public:
     size_t height() const
     {
         return current_board.height();
-    }
-
-    int turn() const
-    {
-        return sigma[parent.get_turn_id()];
     }
 
     token_id_t player() const
@@ -245,9 +236,10 @@ public:
     friend class actions::shift;
     friend class actions::off;
     friend class actions::player_switch;
-    friend class actions::semi_switch;
     friend class actions::assignment;
     friend class actions::lazy;
+    friend class actions::incrementation;
+    friend class actions::decrementation;
 
     // Move pattern will be able to use the state to check the condition
     // This will speed up things. (We do not have to make a copy.)

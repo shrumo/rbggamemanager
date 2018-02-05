@@ -22,9 +22,9 @@ int main(int argc, char* argv[])
     {
         rbg_parser::messages_container msg;
         synchronous_client client(argv[argc - 2], argv[argc - 1]);
-        std::stringstream buffer(client.description() + "\n#finalizer = ()"); /* TODO(shrum): Get rid of finalizer in the end. */
+        std::stringstream buffer(client.description());
 
-        std::cout << client.description() + "\n#finalizer = ()" << std::endl;
+        std::cout << client.description() << std::endl;
 
         std::unique_ptr<rbg_parser::parsed_game> pg;
         try {

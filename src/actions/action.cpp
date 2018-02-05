@@ -36,12 +36,10 @@ action_result actions::player_switch::apply(game_state *b) const {
     b->lazy().evaluate_lazy_reversible(b);
     size_t previous_player = b->player();
     b->current_player = player;
-    b->inc_turn();
     return {true, previous_player};
 }
 
 void actions::player_switch::revert(game_state *b, const action_result &apply_result) const {
-    b->dec_turn();
     b->current_player = apply_result.get_revert_player();
     b->lazy().revert_last_lazy_evaluation(b);
 }
@@ -67,14 +65,26 @@ void actions::lazy::revert(game_state *b, const action_result &) const {
     b->lazy().pop_lazy_action();
 }
 
-action_result actions::semi_switch::apply(game_state *b) const {
-    b->lazy().evaluate_lazy_reversible(b);
-    size_t previous_player = b->player();
-    b->current_player = b->get_description().get_deterministic_keeper_player_id();
-    return {true, previous_player};;
+action_result actions::incrementation::apply(game_state *b) const {
+    b->sigma[variable]++;
+    b->sigma[variable] %= b->get_description().get_bound();
+    return true;
 }
 
-void actions::semi_switch::revert(game_state *b, const action_result& apply_result) const {
-    b->current_player = apply_result.get_revert_player();
-    b->lazy().revert_last_lazy_evaluation(b);
+void actions::incrementation::revert(game_state *b, const action_result &) const {
+    b->sigma[variable]--;
+    b->sigma[variable] += b->get_description().get_bound();
+    b->sigma[variable] %= b->get_description().get_bound();
+}
+
+action_result actions::decrementation::apply(game_state *b) const {
+    b->sigma[variable]--;
+    b->sigma[variable] += b->get_description().get_bound();
+    b->sigma[variable] %= b->get_description().get_bound();
+    return true;
+}
+
+void actions::decrementation::revert(game_state *b, const action_result &) const {
+    b->sigma[variable]++;
+    b->sigma[variable] %= b->get_description().get_bound();
 }

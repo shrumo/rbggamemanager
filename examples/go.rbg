@@ -10,7 +10,9 @@
 
 #pieces = empty, blackStone, whiteStone, tocapture, dame
 
-#variables = blackpass, whitepass
+#variables = blackpass, whitepass, turn
+
+#bound = 1446
 
 
 #anySquare = (((1,0)^*+(-1,0)^*)((0,1)^*+(0,-1)^*))
@@ -122,10 +124,10 @@
 // koniec gry jeśli obu graczy spasowało pod rząd
 #endgameCheck = 
     (
-        (? ($blackpass==1 and $whitepass==1) or ($turn >= 1444))
+        (? ($blackpass==1 and $whitepass==1))
         countPoints
         ->()
-      + (? ($blackpass==0 or $whitepass==0) and ($turn < 1444))
+      + (? ($blackpass==0 or $whitepass==0))
     )
  
 #rules =
@@ -138,5 +140,3 @@
       endgameCheck
       ->black
     )^*
-    
-#finalizer = ()

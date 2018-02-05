@@ -38,7 +38,8 @@ name_resolver create_resolver(const rbg_parser::declarations& declarations)
         std::string variable_name = variable_token.to_string();
         result.add_name(variable_name);
     }
-    result.add_name("turn");
+    result.add_name("_epsilon");
+    result.add_name("_*");
     return result;
 }
 
@@ -55,7 +56,7 @@ game_description create_description(const rbg_parser::parsed_game &game) {
     board initial_board(create_board(game.get_board(),resolver));
     game_moves_description moves(create_moves(*game.get_moves(),resolver, game.get_declarations().get_legal_pieces().size()));
     declarations_description declarations(create_declarations(game.get_declarations(), resolver));
-    return std::move(game_description(std::move(resolver), std::move(moves), std::move(initial_board),std::move(declarations),game.to_rbg(true)));
+    return std::move(game_description(std::move(resolver), std::move(moves), std::move(initial_board),std::move(declarations),game.to_rbg(true),game.get_bound()));
 }
 
 declarations_description create_declarations(const rbg_parser::declarations &declarations, const name_resolver &resolver) {

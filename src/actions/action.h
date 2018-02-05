@@ -159,14 +159,6 @@ namespace actions
         void revert(game_state *b,const action_result& apply_result) const override;
     };
 
-    class semi_switch : public action
-    {
-    public:
-        explicit semi_switch(unsigned int index) : action(index, true) {}
-        action_result apply(game_state *) const override;
-        void revert(game_state *b,const action_result& apply_result) const override;
-    };
-
     class assignment : public action
     {
         token_id_t variable;
@@ -174,6 +166,28 @@ namespace actions
     public:
         assignment(unsigned int index, size_t variable, std::unique_ptr<arithmetic_operation> value)
                 : action(index, false), variable(variable), value(std::move(value)) {}
+        action_result apply(game_state *b) const override;
+        void revert(game_state *b,const action_result& apply_result) const override;
+    };
+
+    class incrementation : public action
+    {
+        token_id_t variable;
+    public:
+        incrementation(unsigned int index, size_t variable)
+                : action(index, false), variable(variable)
+        {}
+        action_result apply(game_state *b) const override;
+        void revert(game_state *b,const action_result& apply_result) const override;
+    };
+
+    class decrementation : public action
+    {
+        token_id_t variable;
+    public:
+        decrementation(unsigned int index, size_t variable)
+                : action(index, false), variable(variable)
+        {}
         action_result apply(game_state *b) const override;
         void revert(game_state *b,const action_result& apply_result) const override;
     };

@@ -27,9 +27,11 @@
 #emptyOrColor(color) = singleColorPieces(color), empty
 #allPieces = singleColorPieces(white), singleColorPieces(black)
 
+#bound = 202
+
 #players = white, black
 #pieces = allPieces, empty
-#variables = pawnDoubleMove, whiteKingMoved, blackKingMoved
+#variables = pawnDoubleMove, whiteKingMoved, blackKingMoved, turn
 
 #anySquare = (((1,0)^*+(-1,0)^*)((0,1)^*+(0,-1)^*))
 
@@ -216,13 +218,13 @@
     )
     ->
     (
-        (? $opponentColor~King > 0)[$color=5,$opponentColor=5]
-      + (? $opponentColor~King == 0)[$color=10,$opponentColor=0]
+        (? $opponentColor~King > 0)[$color=1,$opponentColor=1]
+      + (? $opponentColor~King == 0)[$color=2,$opponentColor=0]
     )
     ->
     (
         (? $turn<=200)
-      + (? $turn>200)[$color=5,$opponentColor=5]->()
+      + (? $turn>200)[$color=1,$opponentColor=1]->()
     )
     ->opponentColor
 
@@ -231,8 +233,7 @@
     ->white
     (
         allMoves(+;-;white;black)
+        [$turn++]
         allMoves(-;+;black;white)
+        [$turn++]
     )^*
-
-#finalizer = ()
-

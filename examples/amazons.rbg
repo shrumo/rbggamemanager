@@ -13,7 +13,8 @@
         
 #players = white, black
 #pieces = e, w, b, x
-#variables = 
+#variables =
+#bound = 2
 
 #anySquare = (((1,0)^*+(-1,0)^*)((0,1)^*+(0,-1)^*))
 
@@ -44,9 +45,7 @@
     ->white
     (
         move(w;white)
-        [$white=10, $black=0] ->black
+        [$white=1, $black=0] ->black
         move(b;black)
-        [$white=0, $black=10] ->white
+        [$white=0, $black=1] ->white
     )^*
-
-#finalizer = ()

@@ -9,44 +9,36 @@
          
 #players = red, yellow
 #pieces = e, r, y
-#variables = 
+#variables =
+
+#bound = 3
 
 #anySquare = (((1,0)^*+(-1,0)^*)((0,1)^*+(0,-1)^*))
 
 #winat(piece) = (
-//     ((1,-1)(piece))^3
-//    +((1,0)(piece))^3
-//    +((1,1)(piece))^3
-//    +((0,1)(piece))^3
-//    +((0,-1)(piece))^3
-//    +((-1,-1)(piece))^3
-//    +((-1,0)(piece))^3
-//    +((-1,1)(piece))^3
-      (-1,-1)(piece)^2((-1,-1)(piece)+( 3, 3)(piece))
-     +(-1, 0)(piece)^2((-1, 0)(piece)+( 3, 0)(piece))
-     +(-1, 1)(piece)^2((-1, 1)(piece)+( 3,-3)(piece))
-     +( 0,-1)(piece)^2(( 0,-1)(piece)+( 0, 3)(piece))
-     +( 0, 1)(piece)^2(( 0, 1)(piece)+( 0,-3)(piece))
-     +( 1,-1)(piece)^2(( 1,-1)(piece)+(-3, 3)(piece))
-     +( 1, 0)(piece)^2(( 1, 0)(piece)+(-3, 0)(piece))
-     +( 1, 1)(piece)^2(( 1, 1)(piece)+(-3,-3)(piece))
+     ((1,-1)(piece))^3
+    +((1,0)(piece))^3
+    +((1,1)(piece))^3
+    +((0,1)(piece))^3
+    +((0,-1)(piece))^3
+    +((-1,-1)(piece))^3
+    +((-1,0)(piece))^3
+    +((-1,1)(piece))^3
  )
 
 #move(color; oppColor; piece) = (
     anySquare (e) (? not(!(0,-1)(e))) ->
     (
-        (?(!winat(piece)))[$color=10, $oppColor=0]->()
+        (?(!winat(piece)))[piece][$color=2, $oppColor=0]->()
       + (? not(!winat(piece)))
     )
     [piece]
   )
     
 #rules =
-    [$red=5, $yellow=5]
+    [$red=1, $yellow=1]
     ->red
     (
         move(red;yellow;r) ->yellow
         move(yellow;red;y) ->red
     )^*
-
-#finalizer = ()

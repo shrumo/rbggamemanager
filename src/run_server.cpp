@@ -39,7 +39,8 @@ int main(int argc, char* argv[])
         return 1;
     }
 
-    std::stringstream new_buffer(pg->to_rbg(true) + "\n#finalizer = ()"); /* TODO(shrum): Get rid of finalizer. */
+    /* TODO(shrum): Do it once in the future. There were some differences with to_rbg game and original. */
+    std::stringstream new_buffer(pg->to_rbg(true));
     msg = {};
 
     try {
