@@ -108,6 +108,13 @@ public:
         current_y = 0;
         current_state = parent.get_moves_description().get_nfa().initial();
         std::fill(sigma.begin(),sigma.end(),0);
+        for(size_t y = 0; y < current_board.height(); y++)
+        {
+            for(size_t x = 0; x < current_board.width(); x++)
+            {
+                sigma[current_board(x,y)]++;
+            }
+        }
         current_player = parent.get_resolver().id("_epsilon");
     }
 

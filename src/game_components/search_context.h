@@ -112,8 +112,8 @@ class search_context {
     std::size_t last_visited_array_index;
     std::size_t last_results_array_index;
 
-    std::size_t new_visited(const fsm::nfa<action *> &nfa);
-    std::size_t new_results_cache(const fsm::nfa<action *> &nfa);
+    std::size_t new_visited(const fsm::nfa<const action*> &nfa);
+    std::size_t new_results_cache(const fsm::nfa<const action*> &nfa);
 
     void dump_visited(std::size_t visited_array_index);
 
@@ -122,11 +122,11 @@ class search_context {
 
     std::unordered_map<unsigned int, std::size_t> move_pattern_results;
 
-    void find_all_moves_rec(std::size_t visited_array_index, const fsm::nfa<action*>& nfa, fsm::state_id_t current_state, move* move, bool block_started=false);
-    bool find_first_move_rec(std::size_t visited_array_index, const fsm::nfa<action*>& nfa, fsm::state_id_t current_state, move* move, bool block_started=false);
-    bool check_play(std::size_t visited_array_index, std::size_t results_index, const fsm::nfa<action*>& nfa, fsm::state_id_t current_state, std::size_t depth, bool block_started=false);
+    void find_all_moves_rec(std::size_t visited_array_index, const fsm::nfa<const action*>& nfa, fsm::state_id_t current_state, move* move, bool block_started=false);
+    bool find_first_move_rec(std::size_t visited_array_index, const fsm::nfa<const action*>& nfa, fsm::state_id_t current_state, move* move, bool block_started=false);
+    bool check_play(std::size_t visited_array_index, std::size_t results_index, const fsm::nfa<const action*>& nfa, fsm::state_id_t current_state, std::size_t depth, bool block_started=false);
 
-    std::size_t visited_index(const fsm::nfa<action *> &nfa, fsm::state_id_t current_state);
+    std::size_t visited_index(const fsm::nfa<const action*> &nfa, fsm::state_id_t current_state);
 
     game_state* calculation_state;
 public:
@@ -166,8 +166,8 @@ public:
 
     std::vector<move> find_moves(game_state* state, ssize_t max_depth=-1);
     std::vector<move> find_first_move(game_state* state, ssize_t max_depth=-1);
-    bool check_pattern(game_state* state, const fsm::nfa<action*>& nfa, unsigned int move_pattern_index, ssize_t max_depth=-1);
-    bool check_pattern(const fsm::nfa<action*>& nfa, unsigned int move_pattern_index, ssize_t max_depth=-1);
+    bool check_pattern(game_state* state, const fsm::nfa<const action*>& nfa, unsigned int move_pattern_index, ssize_t max_depth=-1);
+    bool check_pattern(const fsm::nfa<const action*>& nfa, unsigned int move_pattern_index, ssize_t max_depth=-1);
 
 };
 

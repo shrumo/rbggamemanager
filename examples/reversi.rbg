@@ -13,7 +13,7 @@
 
 #players = wplayer, bplayer
 
-#bound = 3
+#bound = 65
 
 #pieces = empty, wpiece, bpiece
 #variables =
@@ -76,6 +76,16 @@
         swapdirectionpossible(pla;opp;(-1,1);(1,-1))
     )
 
+
+#setpoints =
+    (
+            (? $wpiece > $bpiece) [$bplayer = 0][$wplayer = 2]
+            +
+            (? $wpiece < $bpiece) [$bplayer = 2][$wplayer = 0]
+            +
+            (? $wpiece == $bpiece) [$bplayer = 1][$wplayer = 1]
+    )
+
 #move (pla; opp) =
     (
         anySquare
@@ -89,14 +99,6 @@
         (? (!anySquare (empty) movepossible(opp;pla)))
     )
 
-#setpoints =
-    (
-            (? $wpiece > $bpiece) [$bplayer = 0][$wplayer = 2]
-            +
-            (? $wpiece < $bpiece) [$bplayer = 2][$wplayer = 0]
-            +
-            (? $wpiece == $bpiece) [$bplayer = 1][$wplayer = 1]
-    )
 
 
 #rules =

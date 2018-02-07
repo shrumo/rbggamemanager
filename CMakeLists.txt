@@ -4,8 +4,8 @@ project(rbggamemanager)
 set(CMAKE_CXX_STANDARD 11)
 
 set(CMAKE_CXX_FLAGS "-Wall -Wextra")
-set(CMAKE_CXX_FLAGS_DEBUG "-g")
-set(CMAKE_CXX_FLAGS_RELEASE "-Ofast -march=native")
+set(CMAKE_CXX_FLAGS_DEBUG "-g -O0")
+#set(CMAKE_CXX_FLAGS_RELEASE "-Ofast -march=native")
 
 add_subdirectory(rbgParser)
 
@@ -15,7 +15,7 @@ find_package(Threads)
 find_package(Boost REQUIRED COMPONENTS system program_options)
 include_directories(${Boost_INCLUDE_DIR})
 
-set(PLAYING_FILES ${PLAYING_FILES} src/game_nfa/automaton.h src/game_components/name_resolver.h src/actions/action.cpp src/actions/action.h src/game_components/game_description.h src/game_nfa/game_moves_description.h src/game_components/game_state.cpp src/game_components/game_state.h src/game_components/board.h src/game_components/lazy_evaluator.cpp src/game_components/lazy_evaluator.h src/actions/condition.cpp src/actions/condition.h src/actions/arithmetic_operation.cpp src/actions/arithmetic_operation.h src/parser_connection/game_nfa_creator.cpp src/parser_connection/game_nfa_creator.h src/parser_connection/parser_connection.cpp src/parser_connection/parser_connection.h src/game_components/search_context.cpp src/game_components/search_context.h src/utils/fast_bit_vector.h )
+set(PLAYING_FILES ${PLAYING_FILES} src/game_nfa/automaton.h src/game_components/name_resolver.h src/actions/action.cpp src/actions/action.h src/game_components/game_description.h src/game_nfa/game_moves_description.h src/game_components/game_state.cpp src/game_components/game_state.h src/game_components/board.h src/game_components/lazy_evaluator.cpp src/game_components/lazy_evaluator.h src/actions/condition.cpp src/actions/condition.h src/actions/arithmetic_operation.cpp src/actions/arithmetic_operation.h src/parser_connection/game_nfa_creator.cpp src/parser_connection/game_nfa_creator.h src/parser_connection/parser_connection.cpp src/parser_connection/parser_connection.h src/game_components/search_context.cpp src/game_components/search_context.h src/utils/fast_bit_vector.h src/utils/utilities.h)
 add_executable(benchmark ${PLAYING_FILES} src/benchmark.cpp)
 target_link_libraries(benchmark rbgParser)
 target_link_libraries(benchmark ${Boost_LIBRARIES})
@@ -26,7 +26,13 @@ target_link_libraries(host rbgParser)
 target_link_libraries(host ${Boost_LIBRARIES})
 target_link_libraries(host ${CMAKE_THREAD_LIBS_INIT})
 
-add_executable(random_client ${PLAYING_FILES} src/networking/message.cpp src/networking/message.h src/networking/networking_utils.cpp src/networking/networking_utils.h src/networking/client.cpp src/networking/client.h src/random_playing_client.cpp)
+add_executable(random_client ${PLAYING_FILES} src/networking/message.cpp src/networking/message.h src/networking/networking_utils.cpp src/networking/networking_utils.h src/networking/client.cpp src/networking/client.h src/random_client.cpp)
 target_link_libraries(random_client rbgParser)
 target_link_libraries(random_client ${Boost_LIBRARIES})
 target_link_libraries(random_client ${CMAKE_THREAD_LIBS_INIT})
+
+add_executable(material_client ${PLAYING_FILES} src/networking/message.cpp src/networking/message.h src/networking/networking_utils.cpp src/networking/networking_utils.h src/networking/client.cpp src/networking/client.h src/material_heuristic_client.cpp)
+target_link_libraries(material_client rbgParser)
+target_link_libraries(material_client ${Boost_LIBRARIES})
+target_link_libraries(material_client ${CMAKE_THREAD_LIBS_INIT})
+

@@ -17,7 +17,7 @@ int main(int argc, char* argv[])
     /* TODO(shrum): Make proper program options with boost. */
     if (argc != 3)
     {
-        std::cerr << "Usage: chat_server <filename> <port>\n";
+        std::cerr << "Usage: " << argv[0] << " <filename> <port>\n";
         return 1;
     }
 

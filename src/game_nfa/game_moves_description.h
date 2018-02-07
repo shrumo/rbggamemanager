@@ -11,23 +11,17 @@
 
 class game_moves_description
 {
-    std::unique_ptr<fsm::nfa<action*>> nfa;
+    std::unique_ptr<fsm::nfa<const action*>> nfa;
     std::vector<fsm::state_id_t> blocks_states;
     std::vector<std::unique_ptr<action> > actions;
     unsigned int move_pattern_count;
-public:
-    game_moves_description(std::unique_ptr<fsm::nfa<action *>> nfa,
+    game_moves_description(std::unique_ptr<fsm::nfa<const action *>> nfa,
                            std::vector<fsm::state_id_t> blocks_states,
                            std::vector<std::unique_ptr<action>> actions, unsigned int move_pattern_count) : nfa(
             std::move(nfa)), blocks_states(std::move(blocks_states)), actions(std::move(actions)), move_pattern_count(move_pattern_count)
     {}
-
-    game_moves_description()
-        : nfa(new fsm::nfa<action*>()), move_pattern_count(0)
-    {
-    }
-
-    const fsm::nfa<action*>& get_nfa() const
+public:
+    const fsm::nfa<const action*>& get_nfa() const
     {
         return *nfa;
     }
@@ -41,6 +35,8 @@ public:
     {
         return move_pattern_count;
     }
+
+    friend class game_nfa_creator;
 };
 
 

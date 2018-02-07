@@ -8,7 +8,7 @@
 
 
 
-void search_context::find_all_moves_rec(size_t visited_array_index, const fsm::nfa<action *> &nfa,
+void search_context::find_all_moves_rec(size_t visited_array_index, const fsm::nfa<const action*> &nfa,
                                            fsm::state_id_t current_state, move *move, bool block_started)
 {
     size_t index = visited_index(nfa, current_state);
@@ -48,12 +48,12 @@ void search_context::find_all_moves_rec(size_t visited_array_index, const fsm::n
 }
 
 size_t
-search_context::visited_index(const fsm::nfa<action *> &nfa, fsm::state_id_t current_state)
+search_context::visited_index(const fsm::nfa<const action*> &nfa, fsm::state_id_t current_state)
 {
     return (calculation_state->y() * calculation_state->width() + calculation_state->x()) * nfa.get_state_count() + current_state;
 }
 
-size_t search_context::new_visited(const fsm::nfa<action *> &nfa) {
+size_t search_context::new_visited(const fsm::nfa<const action*> &nfa) {
     if(last_visited_array_index < visited.size())
     {
         visited[last_visited_array_index].front().resize(std::max(visited[last_visited_array_index].front().size(),
@@ -67,7 +67,7 @@ size_t search_context::new_visited(const fsm::nfa<action *> &nfa) {
     return visited.size()-1;
 }
 
-size_t search_context::new_results_cache(const fsm::nfa<action *> &nfa) {
+size_t search_context::new_results_cache(const fsm::nfa<const action*> &nfa) {
     if(last_results_array_index < results.size())
     {
         results[last_results_array_index].front().resize(std::max(results[last_results_array_index].front().size(),
@@ -82,7 +82,7 @@ size_t search_context::new_results_cache(const fsm::nfa<action *> &nfa) {
 }
 
 bool search_context::check_play(size_t visited_array_index, size_t results_index,
-                                   const fsm::nfa<action *> &nfa, fsm::state_id_t current_state, size_t depth, bool block_started)
+                                   const fsm::nfa<const action*> &nfa, fsm::state_id_t current_state, size_t depth, bool block_started)
 {
     size_t index = visited_index(nfa, current_state);
     if(current_state == nfa.final() || results[results_index][depth][index])
@@ -135,7 +135,7 @@ std::vector<move> search_context::find_moves(game_state *state, ssize_t maximal_
     return std::move(possible_moves);
 }
 
-bool search_context::check_pattern(game_state *state, const fsm::nfa<action *> &nfa, unsigned int move_pattern_index, ssize_t maximal_depth) {
+bool search_context::check_pattern(game_state *state, const fsm::nfa<const action*> &nfa, unsigned int move_pattern_index, ssize_t maximal_depth) {
     calculation_state = state;
     bool result = check_pattern(nfa, move_pattern_index, maximal_depth);
     calculation_state = nullptr;
@@ -187,7 +187,7 @@ std::vector<move> search_context::find_first_move(game_state *state, ssize_t max
     return std::move(possible_moves);
 }
 
-bool search_context::find_first_move_rec(std::size_t visited_array_index, const fsm::nfa<action *> &nfa,
+bool search_context::find_first_move_rec(std::size_t visited_array_index, const fsm::nfa<const action*> &nfa,
                                       fsm::state_id_t current_state, move *move, bool block_started) {
     size_t index = visited_index(nfa, current_state);
     size_t depth = move->get_blocks().size();
@@ -231,7 +231,7 @@ bool search_context::find_first_move_rec(std::size_t visited_array_index, const 
     return false;
 }
 
-bool search_context::check_pattern(const fsm::nfa<action *> &nfa, unsigned int move_pattern_index, ssize_t maximal_depth) {
+bool search_context::check_pattern(const fsm::nfa<const action*> &nfa, unsigned int move_pattern_index, ssize_t maximal_depth) {
     if(maximal_depth >= 0)
         max_depth = (size_t) maximal_depth;
     size_t visited_index = new_visited(nfa);

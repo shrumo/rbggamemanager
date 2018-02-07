@@ -28,11 +28,11 @@
 
 struct recover_information
 {
-    std::unique_ptr<fsm::nfa<action*>> nfa_result;
+    std::unique_ptr<fsm::nfa<const action*>> nfa_result;
     bool register_modifiers;
     bool reuse_final_as_intial;
     fsm::state_id_t last_final;
-    recover_information(std::unique_ptr<fsm::nfa<action*>> nfa_result, bool register_modifiers,
+    recover_information(std::unique_ptr<fsm::nfa<const action*>> nfa_result, bool register_modifiers,
                         bool reuse_final_as_intial, fsm::state_id_t last_final)
             : nfa_result(std::move(nfa_result)), register_modifiers(register_modifiers),
               reuse_final_as_intial(reuse_final_as_intial), last_final(last_final)
@@ -42,9 +42,9 @@ struct recover_information
 class game_nfa_creator : public rbg_parser::abstract_dispatcher
 {
     const name_resolver& resolver;
-    std::unique_ptr<fsm::nfa<action*>> nfa_result;
+    std::unique_ptr<fsm::nfa<const action*>> nfa_result;
     std::unique_ptr<condition> condition_result;
-    std::unordered_map<std::string, action*> used_actions;
+    std::unordered_map<std::string,const action*> used_actions;
 
     std::vector<std::unique_ptr<action> > actions;
 
@@ -67,7 +67,7 @@ class game_nfa_creator : public rbg_parser::abstract_dispatcher
     {
         recover_information information(std::move(nfa_result), register_modifiers, reuse_final_as_initial, last_final);
         register_modifiers = false;
-        nfa_result = std::unique_ptr<fsm::nfa<action*>>(new fsm::nfa<action*>());
+        nfa_result = std::unique_ptr<fsm::nfa<const action*>>(new fsm::nfa<const action*>());
         last_final = 0;
         reuse_final_as_initial = false;
         return information;
@@ -82,7 +82,7 @@ class game_nfa_creator : public rbg_parser::abstract_dispatcher
     }
 
     game_nfa_creator(const name_resolver& resolver, token_id_t piece_id_threshold)
-            : resolver(resolver), nfa_result(new fsm::nfa<action*>()),
+            : resolver(resolver), nfa_result(new fsm::nfa<const action*>()),
               block_started(false), register_modifiers(true), reuse_final_as_initial(false),
               last_final(0),
               piece_id_threshold(piece_id_threshold),
@@ -144,7 +144,7 @@ public:
     void dispatch(const rbg_parser::move_condition&) override;
     void dispatch(const rbg_parser::modifier_block&) override;
 
-    std::unique_ptr<fsm::nfa<action*>> get_nfa()
+    std::unique_ptr<fsm::nfa<const action*>> get_nfa()
     {
         return std::move(nfa_result);
     }

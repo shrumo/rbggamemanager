@@ -14,17 +14,17 @@ int main(int argc, char* argv[])
     /* TODO(shrum): Make proper program options with boost. */
     if (argc != 3)
     {
-        std::cerr << "Usage: chat_server <host> <port>\n";
+        std::cerr << "Usage " << argv[0] << " <host> <port>\n";
         return 1;
     }
 
     try
     {
+        srand(time(0));
+
         rbg_parser::messages_container msg;
         synchronous_client client(argv[argc - 2], argv[argc - 1]);
         std::stringstream buffer(client.description());
-
-        std::cout << client.description() << std::endl;
 
         std::unique_ptr<rbg_parser::parsed_game> pg;
         try {
@@ -42,6 +42,8 @@ int main(int argc, char* argv[])
         game_state state(gd);
 
         token_id_t assigned_player = gd.get_resolver().id(client.player());
+
+        std::cout << "I am player: " << gd.get_resolver().name(assigned_player) << std::endl;
 
         auto moves = state.find_moves(&context);
         while(!moves.empty()) {
