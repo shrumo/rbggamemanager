@@ -14,7 +14,7 @@ On debian based distros one can get all required packages through apt repository
 ```
 sudo apt install g++
 sudo apt install cmake
-sudo apt install libbost-all-dev
+sudo apt install libboost-all-dev
 ```
 
 In order to build the project one can try to run the script make.sh:
@@ -22,6 +22,15 @@ In order to build the project one can try to run the script make.sh:
 cd ./scripts
 ./make.sh
 ```
+This script requires the code to be downloaded by git for example with git clone command:
+```
+git clone https://github.com/shrumo/rbggamemanager.git
+```
+This requires the git program which can also can be downloaded from apt with:
+```
+sudo apt install git
+```
+
 You can also open the file itself and learn from it.
 
 ### Benchmarks
