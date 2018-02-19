@@ -10,10 +10,7 @@
 
 #pieces = empty, blackStone, whiteStone, tocapture, dame
 
-#variables = blackpass, whitepass, turn
-
-#bound = 1446
-
+#variables = blackpass, whitepass
 
 #anySquare = (((1,0)^*+(-1,0)^*)((0,1)^*+(0,-1)^*))
 
@@ -31,15 +28,14 @@
       anySquare
       (empty)
       [color]
-      (
+      (?
           // Stawiamy na puste pole, które należy do bloku posiadającego oddech
-          (? (!blockHasNeighbor(color; empty)))
-        + (? // Stawiamy na puste pole które ma za sąsiada blok przeciwnika nie mający oddechu
-               neighborBlockHasNoLiberty( 1; 0; opponentColor)
-            or neighborBlockHasNoLiberty(-1; 0; opponentColor)
-            or neighborBlockHasNoLiberty(0;  1; opponentColor)
-            or neighborBlockHasNoLiberty(0; -1; opponentColor)
-          )
+        (!blockHasNeighbor(color; empty))
+        // Stawiamy na puste pole które ma za sąsiada blok przeciwnika nie mający oddechu
+        or neighborBlockHasNoLiberty( 1; 0; opponentColor)
+        or neighborBlockHasNoLiberty(-1; 0; opponentColor)
+        or neighborBlockHasNoLiberty(0;  1; opponentColor)
+        or neighborBlockHasNoLiberty(0; -1; opponentColor)
       )
     )
 
@@ -124,14 +120,13 @@
 // koniec gry jeśli obu graczy spasowało pod rząd
 #endgameCheck = 
     (
-        (? ($blackpass==1 and $whitepass==1))
+        (? ($blackpass==0 or $whitepass==0) and ($turn < 722))
+      + (? ($blackpass==1 and $whitepass==1) or ($turn >= 722))
         countPoints
         ->()
-      + (? ($blackpass==0 or $whitepass==0))
     )
  
-#rules =
-    ->black
+#rules = 
     (
       placeStoneOrPass(black; white) 
       endgameCheck
@@ -140,3 +135,5 @@
       endgameCheck
       ->black
     )^*
+    
+#finalizer = ()

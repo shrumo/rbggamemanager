@@ -13,10 +13,10 @@
         
 #players = white, black
 #pieces = e, w, b, x
-#variables =
-#bound = 2
+#variables = 
 
-#anySquare = (((1,0)^*+(-1,0)^*)((0,1)^*+(0,-1)^*))
+//#anySquare = (((1,0)^*+(-1,0)^*)((0,1)^*+(0,-1)^*))
+#anySquare = ((1,0)^*(0,1)^*(-9,-9)(1,0)^*(0,1)^*)
 
 #queenMove =
     (
@@ -42,10 +42,11 @@
     )
 
 #rules =
-    ->white
     (
         move(w;white)
-        [$white=1, $black=0] ->black
+        [$white=10, $black=0] ->black
         move(b;black)
-        [$white=0, $black=1] ->white
+        [$white=0, $black=10] ->white
     )^*
+
+#finalizer = ()

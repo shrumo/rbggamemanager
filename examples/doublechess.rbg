@@ -11,7 +11,7 @@
 //#emptyLine =
 //    [empty, empty, empty, empty, empty, empty, empty, empty]
 #backLine(color) =
-    [color~RookUnmoved, color~Knight, color~Bishop, color~Queen, color~King, color~Bishop, color~Knight, color~RookUnmoved, color~RookUnmoved, color~Knight, color~Bishop, color~Queen, color~King, color~Bishop, color~Knight, color~RookUnmoved]
+    [color~RookUnmoved, color~Knight, color~Bishop, color~Queen, color~KingUnmoved, color~Bishop, color~Knight, color~RookUnmoved, color~RookUnmoved, color~Knight, color~Bishop, color~Queen, color~KingUnmoved, color~Bishop, color~Knight, color~RookUnmoved]
 #pawnLine(color) =
     [color~Pawn, color~Pawn, color~Pawn, color~Pawn, color~Pawn, color~Pawn, color~Pawn, color~Pawn, color~Pawn, color~Pawn, color~Pawn, color~Pawn, color~Pawn, color~Pawn, color~Pawn, color~Pawn]
 #emptyLine =
@@ -32,16 +32,15 @@
     backLine(white)
 
 #anyRook(color) = color~RookMoved, color~RookUnmoved
+#anyKing(color) = color~KingMoved, color~KingUnmoved
 #majorPieces(color) = color~RookMoved, color~Knight, color~Bishop, color~Queen
-#singleColorPieces(color) = color~Pawn, color~King, anyRook(color), color~Knight, color~Bishop, color~Queen
+#singleColorPieces(color) = color~Pawn, anyKing(color), anyRook(color), color~Knight, color~Bishop, color~Queen
 #emptyOrColor(color) = singleColorPieces(color), empty
 #allPieces = singleColorPieces(white), singleColorPieces(black)
 
 #players = white, black
 #pieces = allPieces, empty
-#variables = pawnDoubleMove, whiteKingMoved, blackKingMoved, turn
-
-#bound = 202
+#variables = pawnDoubleMove
 
 #anySquare = (((1,0)^*+(-1,0)^*)((0,1)^*+(0,-1)^*))
 
@@ -113,8 +112,9 @@
     captureAnyBy(color~RookMoved; opponentColor)
 
 #standardKingMove(color; opponentColor) =
-    standardMove(color~King; anyNeighborSquare; opponentColor)
-    [$color~KingMoved=1]
+    pickUpPiece(anyKing(color))
+    parallelLine
+    captureAnyBy(color~KingMoved; opponentColor)
 
 #isAttackedByBishop(opponentColor) = diagonalLine(opponentColor~Bishop)
 #isAttackedByBishopOrQueen(opponentColor) = diagonalLine(opponentColor~Bishop,opponentColor~Queen)
@@ -122,7 +122,7 @@
 #isAttackedByRookOrQueen(opponentColor) = parallelLine(anyRook(opponentColor),opponentColor~Queen)
 #isAttackedByQueen(opponentColor) = anyDirectionLine(opponentColor~Queen)
 #isAttackedByKnight(opponentColor) = knightHop(opponentColor~Knight)
-#isAttackedByKing(opponentColor) = anyNeighborSquare(opponentColor~King)
+#isAttackedByKing(opponentColor) = anyNeighborSquare(anyKing(opponentColor))
 #isAttackedByPawn(opponentColor; forwardDirection) =
     ((1, forwardDirection 1) + (-1, forwardDirection 1))(opponentColor~Pawn)
 
@@ -139,7 +139,7 @@
 #checked(color; opponentColor; forwardDirection) =
     (!
         anySquare
-        (color~King)
+        (anyKing(color))
         (
             isAttackedByBishopOrQueen(opponentColor)
           + isAttackedByRookOrQueen(opponentColor)
@@ -151,23 +151,21 @@
     )
 
 #castlingKingMove(forwardDirection; color; opponentColor) =
-    (? $color~KingMoved==0)
-    pickUpPiece(color~King)
+    pickUpPiece(color~KingUnmoved)
     (
         (1,0)(empty)isNotAttackedBy(opponentColor; forwardDirection)
         (1,0)(empty)//isNotAttackedBy(opponentColor; forwardDirection)
-        [color~King]
+        [color~KingMoved]
         (1,0)pickUpPiece(color~RookUnmoved)
         (-2,0)
       + (-1,0)(empty)isNotAttackedBy(opponentColor; forwardDirection)
         (-1,0)(empty)//isNotAttackedBy(opponentColor; forwardDirection)
-        [color~King]
+        [color~KingMoved]
         (-1,0)(empty) // rook CAN pass through attacked square
         (-1,0)pickUpPiece(color~RookUnmoved)
         (3,0)
     )
     [color~RookMoved]
-    [$color~KingMoved=1]
 
 #kingMove(forwardDirection; color; opponentColor) =
     (
@@ -187,8 +185,17 @@
     (
         // promotion cannot occur
         (? not (!(0, backDirection 2)))
-        (0, forwardDirection 1)(empty)
-        (0, forwardDirection 1)(empty)
+        (
+            (0, forwardDirection 1)(empty)
+            (0, forwardDirection 1)(empty)
+          + (0, forwardDirection 1)(empty)
+            (0, forwardDirection 1)(empty)
+            (0, forwardDirection 1)(empty)
+          + (0, forwardDirection 1)(empty)
+            (0, forwardDirection 1)(empty)
+            (0, forwardDirection 1)(empty)
+            (0, forwardDirection 1)(empty)
+        )
         [color~Pawn]
         [$pawnDoubleMove=1]
       + (
@@ -198,19 +205,22 @@
         checkForPromotion(forwardDirection; color)
     )
 
+#enPassant(forwardDirection; color; distanceFromCaptured; distanceFromBoardEdge) =
+    (?(! (0,forwardDirection distanceFromBoardEdge)))
+    [empty]
+    (0,forwardDirection distanceFromCaptured)
+    [color~Pawn]
+    (1,0)
+    pickUpPiece(color~Pawn)
+
 #enPassantPawnMove(forwardDirection; color) =
     (? $pawnDoubleMove==1)
     (
-        // we are sure that adjacent cell is occupied by opponentColor~Pawn, because pawnDoubleMove==1, so don't check it
-        (1,0)pickUpPiece(color~Pawn)
-        (-1,0)[empty]
-        (0, forwardDirection 1)
-      + (-1,0)pickUpPiece(color~Pawn)
-        (1,0)[empty]
-        (0, forwardDirection 1)
+        enPassant(forwardDirection; color; 0; 5)
+      + enPassant(forwardDirection; color; 1; 4)
+      + enPassant(forwardDirection; color; 2; 3)
     )
     [$pawnDoubleMove=0]
-    [color~Pawn]
 
 #allMoves(forwardDirection; backDirection; color; opponentColor) =
     (
@@ -228,22 +238,22 @@
     ) (? not checked(color; opponentColor; forwardDirection))
     ->
     (
-        (? $turn>200)[$color=1,$opponentColor=1]->()
-      + (? $turn<=200)
+        (? $turn<=200)
+      + (? $turn>200)[$color=5,$opponentColor=5]->()
     )
+    ->
     (
-        (? checked(opponentColor; color; backDirection))[$color=2,$opponentColor=0]
-      + (? not checked(opponentColor; color; backDirection))[$color=1,$opponentColor=1]
+        (? not checked(opponentColor; color; backDirection))[$color=5,$opponentColor=5]
+      + (? checked(opponentColor; color; backDirection))[$color=10,$opponentColor=0]
     )
     ->opponentColor
 
 
 #rules =
-    ->white
     (
         allMoves(+;-;white;black)
-        [$turn++]
         allMoves(-;+;black;white)
-        [$turn++]
     )^*
+
+#finalizer = ()
 
