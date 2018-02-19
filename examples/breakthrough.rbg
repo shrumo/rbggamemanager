@@ -1,14 +1,48 @@
-        Breakthrough
-Calculated 1200000 games in 572.29673217s
-Time for one game: 0.00047691s (2096.81434916 games/sec)
-Avarage number of turns in game: 64.09793250
-Avarage number of moves in one state: 26.34361500
-Number of traveled states: 76917519 (134401.46461727 states/sec)
-Number of calculated moves: 2053316931 (3587853.67023925 moves/sec)
-Avarage player scores: 
-        white : 5.09090833 (Min: 0, Max: 10)
-        black : 4.90909167 (Min: 0, Max: 10)
-Calculated perft for depth 6 in 71.641799s
-There are 149264638 leafes
-Number of traveled states: 162165623 (2263561.56583736 states/sec)
- 
+#game = "Breakthrough"
+
+#board = [b, b, b, b, b, b, b, b]
+         [b, b, b, b, b, b, b, b]
+         [e, e, e, e, e, e, e, e]
+         [e, e, e, e, e, e, e, e]
+         [e, e, e, e, e, e, e, e]
+         [e, e, e, e, e, e, e, e]
+         [w, w, w, w, w, w, w, w]
+         [w, w, w, w, w, w, w, w]
+         
+#players = white, black
+#pieces = e, w, b
+#variables = 
+#bound = 2
+
+#anySquare = (((1,0)^*+(-1,0)^*)((0,1)^*+(0,-1)^*))
+
+#moveWhite = 
+    (
+        anySquare
+        (w)[e]
+        ((0,1)(e) + (-1,1)((e,b)) + (1,1)((e,b)))
+        ->
+        ( (0,-7) [$white=1, $black=0] ->()
+          + (?(!(0,1))))
+        [w]
+    )
+
+#moveBlack = 
+    (
+        anySquare
+        (b)[e]
+        ((0,-1)(e) + (-1,-1)((e,w)) + (1,-1)((e,w)))
+        ->
+        ( (0,7) [$white=0, $black=1] ->()
+          + (?(!(0,-1))))
+        [b]
+    )
+
+#rules =
+    ->white
+    (
+        moveWhite
+        [$white=1, $black=0]->black
+        moveBlack
+        [$white=0, $black=1]->white
+    )^*

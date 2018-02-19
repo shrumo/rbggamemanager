@@ -1,27 +1,249 @@
-Calculated 1600 games in 582.77991091s
-Time for one game: 0.36423744s (2.74546183 games/sec)
-Avarage number of turns in game: 189.77000000
-Avarage number of moves in one state: 100.57000000
-Number of traveled states: 303632 (521.00629126 states/sec)
-Number of calculated moves: 30991798 (53179.24900974 moves/sec)
-Avarage player scores:                                                                                                                                                 
-        white : 4.98750000 (Min: 0, Max: 10)                                                                                                                           
-        black : 5.01250000 (Min: 0, Max: 10)                                                                                                                           
-Calculated perft for depth 4 in 526.4058s
-There are 29115620 leafes
-Number of traveled states: 30298875 (57558.01894324 states/sec)
+#game = "Chess"
+// notes:
+// - no rules about repeating states or tie after given number of turns without pawn moves
+// - game is limited to 180 turns
 
 
-400 turns:
-Calculated 1600 games in 1121.67633537s
-Time for one game: 0.70104771s (1.42643644 games/sec)
-Avarage number of turns in game: 362.77875000
-Avarage number of moves in one state: 98.32625000
-Number of traveled states: 580446 (517.48082909 states/sec)
-Number of calculated moves: 57696966 (51438.15928075 moves/sec)
-Avarage player scores:                                                                                                                                                 
-        white : 4.95312500 (Min: 0, Max: 10)                                                                                                                           
-        black : 5.04687500 (Min: 0, Max: 10)                                                                                                                           
-Calculated perft for depth 4 in 527.64967s                                                                   
-There are 29115620 leafes
-Number of traveled states: 30298875 (57422.33277501 states/sec)
+//#backLine(color) =
+//    [color~RookUnmoved, color~Knight, color~Bishop, color~Queen, color~King, color~Bishop, color~Knight, color~RookUnmoved]
+//#pawnLine(color) =
+//    [color~Pawn, color~Pawn, color~Pawn, color~Pawn, color~Pawn, color~Pawn, color~Pawn, color~Pawn]
+//#emptyLine =
+//    [empty, empty, empty, empty, empty, empty, empty, empty]
+#backLine(color) =
+    [color~RookUnmoved, color~Knight, color~Bishop, color~Queen, color~King, color~Bishop, color~Knight, color~RookUnmoved, color~RookUnmoved, color~Knight, color~Bishop, color~Queen, color~King, color~Bishop, color~Knight, color~RookUnmoved]
+#pawnLine(color) =
+    [color~Pawn, color~Pawn, color~Pawn, color~Pawn, color~Pawn, color~Pawn, color~Pawn, color~Pawn, color~Pawn, color~Pawn, color~Pawn, color~Pawn, color~Pawn, color~Pawn, color~Pawn, color~Pawn]
+#emptyLine =
+    [empty, empty, empty, empty, empty, empty, empty, empty, empty, empty, empty, empty, empty, empty, empty, empty]
+
+#board =
+    backLine(black)
+    pawnLine(black)
+    emptyLine
+    emptyLine
+    emptyLine
+    emptyLine
+    emptyLine
+    emptyLine
+    emptyLine
+    emptyLine
+    pawnLine(white)
+    backLine(white)
+
+#anyRook(color) = color~RookMoved, color~RookUnmoved
+#majorPieces(color) = color~RookMoved, color~Knight, color~Bishop, color~Queen
+#singleColorPieces(color) = color~Pawn, color~King, anyRook(color), color~Knight, color~Bishop, color~Queen
+#emptyOrColor(color) = singleColorPieces(color), empty
+#allPieces = singleColorPieces(white), singleColorPieces(black)
+
+#players = white, black
+#pieces = allPieces, empty
+#variables = pawnDoubleMove, whiteKingMoved, blackKingMoved, turn
+
+#bound = 202
+
+#anySquare = (((1,0)^*+(-1,0)^*)((0,1)^*+(0,-1)^*))
+
+#anyNeighborSquare =
+    (
+        ( 1, 0)
+      + ( 0, 1)
+      + (-1, 0)
+      + ( 0,-1)
+      + ( 1, 1)
+      + (-1, 1)
+      + ( 1,-1)
+      + (-1,-1)
+    )
+
+#diagonalLine =
+    (
+        (( 1, 1)(empty))^*( 1, 1)
+      + (( 1,-1)(empty))^*( 1,-1)
+      + ((-1, 1)(empty))^*(-1, 1)
+      + ((-1,-1)(empty))^*(-1,-1)
+    )
+
+#parallelLine =
+    (
+        (( 1, 0)(empty))^*( 1, 0)
+      + (( 0, 1)(empty))^*( 0, 1)
+      + ((-1, 0)(empty))^*(-1, 0)
+      + (( 0,-1)(empty))^*( 0,-1)
+    )
+
+#anyDirectionLine =
+    (
+        diagonalLine
+      + parallelLine
+    )
+
+#knightHop =
+    (
+        ( 1, 2)
+      + ( 1,-2)
+      + (-1, 2)
+      + (-1,-2)
+      + ( 2, 1)
+      + ( 2,-1)
+      + (-2, 1)
+      + (-2,-1)
+    )
+
+#captureAnyBy(capturingPiece; opponentColor) =
+    (emptyOrColor(opponentColor))
+    [capturingPiece]
+
+#pickUpPiece(piece) =
+    (piece)[empty]
+
+#standardMove(piece; movePattern; opponentColor) =
+    pickUpPiece(piece)
+    movePattern
+    captureAnyBy(piece; opponentColor)
+
+#bishopMove(color; opponentColor) = standardMove(color~Bishop; diagonalLine; opponentColor)
+#knightMove(color; opponentColor) = standardMove(color~Knight; knightHop; opponentColor)
+#queenMove(color; opponentColor) = standardMove(color~Queen; anyDirectionLine; opponentColor)
+
+#rookMove(color; opponentColor) =
+    pickUpPiece(anyRook(color))
+    parallelLine
+    captureAnyBy(color~RookMoved; opponentColor)
+
+#standardKingMove(color; opponentColor) =
+    standardMove(color~King; anyNeighborSquare; opponentColor)
+    [$color~KingMoved=1]
+
+#isAttackedByBishop(opponentColor) = diagonalLine(opponentColor~Bishop)
+#isAttackedByBishopOrQueen(opponentColor) = diagonalLine(opponentColor~Bishop,opponentColor~Queen)
+#isAttackedByRook(opponentColor) = parallelLine(anyRook(opponentColor))
+#isAttackedByRookOrQueen(opponentColor) = parallelLine(anyRook(opponentColor),opponentColor~Queen)
+#isAttackedByQueen(opponentColor) = anyDirectionLine(opponentColor~Queen)
+#isAttackedByKnight(opponentColor) = knightHop(opponentColor~Knight)
+#isAttackedByKing(opponentColor) = anyNeighborSquare(opponentColor~King)
+#isAttackedByPawn(opponentColor; forwardDirection) =
+    ((1, forwardDirection 1) + (-1, forwardDirection 1))(opponentColor~Pawn)
+
+#isNotAttackedBy(opponentColor; forwardDirection) =
+    (? not (!
+        isAttackedByBishopOrQueen(opponentColor)
+      + isAttackedByRookOrQueen(opponentColor)
+//      + isAttackedByQueen(opponentColor)
+      + isAttackedByKnight(opponentColor)
+      + isAttackedByKing(opponentColor)
+      + isAttackedByPawn(opponentColor; forwardDirection)
+    ))
+
+#checked(color; opponentColor; forwardDirection) =
+    (!
+        anySquare
+        (color~King)
+        (
+            isAttackedByBishopOrQueen(opponentColor)
+          + isAttackedByRookOrQueen(opponentColor)
+//          + isAttackedByQueen(opponentColor)
+          + isAttackedByKnight(opponentColor)
+          + isAttackedByKing(opponentColor)
+          + isAttackedByPawn(opponentColor; forwardDirection)
+        )
+    )
+
+#castlingKingMove(forwardDirection; color; opponentColor) =
+    (? $color~KingMoved==0)
+    pickUpPiece(color~King)
+    (
+        (1,0)(empty)isNotAttackedBy(opponentColor; forwardDirection)
+        (1,0)(empty)//isNotAttackedBy(opponentColor; forwardDirection)
+        [color~King]
+        (1,0)pickUpPiece(color~RookUnmoved)
+        (-2,0)
+      + (-1,0)(empty)isNotAttackedBy(opponentColor; forwardDirection)
+        (-1,0)(empty)//isNotAttackedBy(opponentColor; forwardDirection)
+        [color~King]
+        (-1,0)(empty) // rook CAN pass through attacked square
+        (-1,0)pickUpPiece(color~RookUnmoved)
+        (3,0)
+    )
+    [color~RookMoved]
+    [$color~KingMoved=1]
+
+#kingMove(forwardDirection; color; opponentColor) =
+    (
+        castlingKingMove(forwardDirection; color; opponentColor)
+      + standardKingMove(color; opponentColor)
+        //isNotAttackedBy(opponentColor; forwardDirection)
+    )
+
+#checkForPromotion(forwardDirection; color) =
+    (
+        (?(!(0, forwardDirection 1)))[color~Pawn]
+      + (? not (!(0, forwardDirection 1)))[majorPieces(color)]
+    )
+
+#standardPawnMove(forwardDirection; backDirection; color; opponentColor) =
+    pickUpPiece(color~Pawn)
+    (
+        // promotion cannot occur
+        (? not (!(0, backDirection 2)))
+        (0, forwardDirection 1)(empty)
+        (0, forwardDirection 1)(empty)
+        [color~Pawn]
+        [$pawnDoubleMove=1]
+      + (
+            (0, forwardDirection 1)(empty)
+          + ((1, forwardDirection 1)+(-1, forwardDirection 1))(singleColorPieces(opponentColor))
+        )
+        checkForPromotion(forwardDirection; color)
+    )
+
+#enPassantPawnMove(forwardDirection; color) =
+    (? $pawnDoubleMove==1)
+    (
+        // we are sure that adjacent cell is occupied by opponentColor~Pawn, because pawnDoubleMove==1, so don't check it
+        (1,0)pickUpPiece(color~Pawn)
+        (-1,0)[empty]
+        (0, forwardDirection 1)
+      + (-1,0)pickUpPiece(color~Pawn)
+        (1,0)[empty]
+        (0, forwardDirection 1)
+    )
+    [$pawnDoubleMove=0]
+    [color~Pawn]
+
+#allMoves(forwardDirection; backDirection; color; opponentColor) =
+    (
+        [$pawnDoubleMove=0]
+        anySquare
+        (
+            bishopMove(color; opponentColor)
+          + rookMove(color; opponentColor)
+          + knightMove(color; opponentColor)
+          + queenMove(color; opponentColor)
+          + kingMove(forwardDirection; color; opponentColor)
+          + standardPawnMove(forwardDirection; backDirection; color; opponentColor)
+        )
+      + enPassantPawnMove(forwardDirection; color)
+    ) (? not checked(color; opponentColor; forwardDirection))
+    ->
+    (
+        (? $turn>200)[$color=1,$opponentColor=1]->()
+      + (? $turn<=200)
+    )
+    (
+        (? checked(opponentColor; color; backDirection))[$color=2,$opponentColor=0]
+      + (? not checked(opponentColor; color; backDirection))[$color=1,$opponentColor=1]
+    )
+    ->opponentColor
+
+
+#rules =
+    ->white
+    (
+        allMoves(+;-;white;black)
+        [$turn++]
+        allMoves(-;+;black;white)
+        [$turn++]
+    )^*
+

@@ -1,14 +1,51 @@
-        Amazons
-Calculated 300000 games in 568.09699366s
-Time for one game: 0.00189366s (528.07883750 games/sec)
-Avarage number of turns in game: 34.18183667
-Avarage number of moves in one state: 182.98349667
-Number of traveled states: 10254551 (18050.70457069 states/sec)
-Number of calculated moves: 1831405804 (3223755.49324901 moves/sec)
-Avarage player scores: 
-        white : 4.93876667 (Min: 0, Max: 10)
-        black : 5.06123333 (Min: 0, Max: 10)
-Calculated perft for depth 3 in 69.708329s
-There are 111628820 leafes
-Number of traveled states: 111877497 (1604937.29078267 states/sec)
- 
+#game = "Amazons"
+
+#board = [e, e, e, b, e, e, b, e, e, e]
+         [e, e, e, e, e, e, e, e, e, e]
+         [e, e, e, e, e, e, e, e, e, e]
+         [b, e, e, e, e, e, e, e, e, b]
+         [e, e, e, e, e, e, e, e, e, e]
+         [e, e, e, e, e, e, e, e, e, e]
+         [w, e, e, e, e, e, e, e, e, w]
+         [e, e, e, e, e, e, e, e, e, e]
+         [e, e, e, e, e, e, e, e, e, e]
+         [e, e, e, w, e, e, w, e, e, e]
+        
+#players = white, black
+#pieces = e, w, b, x
+#variables =
+#bound = 2
+
+#anySquare = (((1,0)^*+(-1,0)^*)((0,1)^*+(0,-1)^*))
+
+#queenMove =
+    (
+       ((1,1)(e)(1,1)(e))^* +
+       ((1,0)(e)(1,0)(e))^* +
+       ((1,-1)(e)(1,-1)(e))^* +
+       ((0,1)(e)(0,1)(e))^* +
+       ((0,-1)(e)(0,-1)(e))^* +
+       ((-1,1)(e)(-1,1)(e))^* +
+       ((-1,0)(e)(-1,0)(e))^* +
+       ((-1,-1)(e)(-1,-1)(e))^*
+    )
+
+#move(piece; p) = 
+    (
+        anySquare
+        (piece)
+        [e]
+        queenMove
+        [piece]
+        queenMove
+        [x]
+    )
+
+#rules =
+    ->white
+    (
+        move(w;white)
+        [$white=1, $black=0] ->black
+        move(b;black)
+        [$white=0, $black=1] ->white
+    )^*

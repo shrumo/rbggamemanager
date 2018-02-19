@@ -1,12 +1,44 @@
-Calculated 8000000 games in 555.72256140s
-Time for one game: 0.00006947s (14395.67250932 games/sec)
-Avarage number of turns in game: 10.83973425
-Avarage number of moves in one state: 7.94773513
-Number of traveled states: 86717874 (156045.26435110 states/sec)
-Number of calculated moves: 692130505 (1245460.51046159 moves/sec)
-Avarage player scores: 
-        yellow : 3.98862812 (Min: 0, Max: 10)
-        red : 6.01137188 (Min: 0, Max: 10)
-Calculated perft for depth 10 in 189.38928s
-There are 161305420 leafes
-Number of traveled states: 227355981 (1200469.10436827 states/sec)
+#game = "Breakthrough"
+
+#board = [e,e,e,e,e,e,e]
+         [e,e,e,e,e,e,e]
+         [e,e,e,e,e,e,e]
+         [e,e,e,e,e,e,e]
+         [e,e,e,e,e,e,e]
+         [e,e,e,e,e,e,e]
+         
+#players = red, yellow
+#pieces = e, r, y
+#variables =
+
+#bound = 3
+
+#anySquare = (((1,0)^*+(-1,0)^*)((0,1)^*+(0,-1)^*))
+
+#winat(piece) = (
+     ((1,-1)(piece))^3
+    +((1,0)(piece))^3
+    +((1,1)(piece))^3
+    +((0,1)(piece))^3
+    +((0,-1)(piece))^3
+    +((-1,-1)(piece))^3
+    +((-1,0)(piece))^3
+    +((-1,1)(piece))^3
+ )
+
+#move(color; oppColor; piece) = (
+    anySquare (e) (? not(!(0,-1)(e))) ->
+    (
+        (?(!winat(piece)))[piece][$color=2, $oppColor=0]->()
+      + (? not(!winat(piece)))
+    )
+    [piece]
+  )
+    
+#rules =
+    [$red=1, $yellow=1]
+    ->red
+    (
+        move(red;yellow;r) ->yellow
+        move(yellow;red;y) ->red
+    )^*
