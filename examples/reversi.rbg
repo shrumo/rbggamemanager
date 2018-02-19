@@ -1,115 +1,13 @@
-#game = "Reversi"
-
-#row = [empty,empty,empty,empty,empty,empty,empty,empty]
-
-#board = row
-         row
-         row
-         [empty,empty,empty,wpiece,bpiece,empty,empty,empty]
-         [empty,empty,empty,bpiece,wpiece,empty,empty,empty]
-         row
-         row
-         row
-
-#players = wplayer, bplayer
-
-#bound = 65
-
-#pieces = empty, wpiece, bpiece
-#variables =
-
-#anySquare = (((1,0)^*+(-1,0)^*)((0,1)^*+(0,-1)^*))
-
-#swapdirectionpossible (pla; opp; direction; oppositedirection) =
-    (
-        direction
-        (opp~piece)
-        (direction (opp~piece))^*
-        direction
-        (pla~piece)
-    )
-
-#swapdirection (pla; opp; direction; oppositedirection) =
-    (
-        (
-            direction
-            (opp~piece)
-            [pla~piece]
-        )^*
-        direction
-        (pla~piece)
-        oppositedirection
-        ((pla~piece) oppositedirection)^*
-        (empty)
-        +
-        (? not (! swapdirectionpossible(pla; opp; direction; oppositedirection)))
-    )
-
-#swapdirections (pla;opp) =
-    (
-        swapdirection(pla; opp; (-1,0); (1,0))
-        swapdirection(pla;opp;(1,0);(-1,0))
-        swapdirection(pla;opp;(0,1);(0,-1))
-        swapdirection(pla;opp;(0,-1);(0,1))
-        swapdirection(pla;opp;(-1,-1);(1,1))
-        swapdirection(pla;opp;(1,1);(-1,-1))
-        swapdirection(pla;opp;(1,-1);(-1,1))
-        swapdirection(pla;opp;(-1,1);(1,-1))
-    )
-
-#movepossible (pla; opp) =
-    (
-        swapdirectionpossible(pla; opp; (-1,0); (1,0))
-        +
-        swapdirectionpossible(pla;opp;(1,0);(-1,0))
-        +
-        swapdirectionpossible(pla;opp;(0,1);(0,-1))
-        +
-        swapdirectionpossible(pla;opp;(0,-1);(0,1))
-        +
-        swapdirectionpossible(pla;opp;(-1,-1);(1,1))
-        +
-        swapdirectionpossible(pla;opp;(1,1);(-1,-1))
-        +
-        swapdirectionpossible(pla;opp;(1,-1);(-1,1))
-        +
-        swapdirectionpossible(pla;opp;(-1,1);(1,-1))
-    )
-
-
-#setpoints =
-    (
-            (? $wpiece > $bpiece) [$bplayer = 0][$wplayer = 2]
-            +
-            (? $wpiece < $bpiece) [$bplayer = 2][$wplayer = 0]
-            +
-            (? $wpiece == $bpiece) [$bplayer = 1][$wplayer = 1]
-    )
-
-#move (pla; opp) =
-    (
-        anySquare
-        (empty)
-        ( ? (! movepossible(pla;opp)))
-        ->
-        swapdirections(pla; opp)
-        [pla~piece]
-        +
-        (? not (! anySquare (empty) movepossible(pla;opp)))
-        (? (!anySquare (empty) movepossible(opp;pla)))
-    )
-
-
-
-#rules =
-    ->wplayer
-    (
-        move(w;b)
-        setpoints
-        ->bplayer
-
-        move(b;w)
-        setpoints
-        ->wplayer
-    )^*
-
+        Reversi
+Calculated 471000 games in 580.41155539s
+Time for one game: 0.00123230s (811.49314762 games/sec)
+Avarage number of turns in game: 61.41479618
+Avarage number of moves in one state: 8.82961146
+Number of traveled states: 28926369 (49837.68626145 states/sec)
+Number of calculated moves: 269644957 (464575.44564095 moves/sec)
+Avarage player scores: 
+        wplayer : 47.59246285 (Min: 0, Max: 100)
+        bplayer : 52.40753715 (Min: 0, Max: 100)
+Calculated perft for depth 7 in 0.26000694s
+There are 55092 leafes
+Number of traveled states: 74917 (288134.61560628 states/sec) 
