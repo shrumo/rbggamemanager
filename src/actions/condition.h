@@ -11,197 +11,198 @@
 #include "../game_nfa/automaton.h"
 #include <limits>
 
-class game_state;
-class action;
+class GameState;
 
-enum class condition_type : char
-{
-    CONJUNCTION_T,
-    ALTERNATIVE_T,
-    NEGATION_T,
-    LESS_T,
-    LESS_EQUAL_T,
-    EQUAL_T,
-    NOT_EQUAL_T,
-    MOVE_PATTERN_T,
-};
+class Action;
 
-class condition {
-    condition_type type;
-protected:
-    explicit condition(condition_type type) : type(type) {};
+class Condition {
 public:
-    virtual bool check(game_state *b)const =0;
-    virtual ~condition()= default;
-    condition_type get_type() const { return type; }
+  virtual bool Check(GameState *b) const =0;
+
+  virtual ~Condition() = default;
+
+  ConditionType type() const { return condition_type_; }
+
+protected:
+  explicit Condition(ConditionType type) : condition_type_(type) {};
+private:
+  ConditionType condition_type_;
 };
 
-namespace conditions
-{
-    class conjunction : public condition
-    {
-        std::vector<std::unique_ptr<condition> > items;
-    public:
-        conjunction(std::vector<std::unique_ptr<condition> > items) : condition(condition_type::CONJUNCTION_T),
-                                                                      items(std::move(items))
-        {}
-        bool check(game_state *b) const override
-        {
-            for(auto& cond : items)
-            {
-                if(!cond->check(b))
-                    return false;
-            }
-            return true;
-        }
+namespace conditions {
+  class Conjunction : public Condition {
+  public:
+    explicit Conjunction(std::vector<std::unique_ptr<Condition> > items)
+        : Condition(ConditionType::kConjunctionType),
+          items_(std::move(items)) {}
 
-        const std::vector<std::unique_ptr<condition>>& get_items() const
-        {
-            return items;
-        }
-    };
+    bool Check(GameState *b) const override {
+      for (auto &cond : items_) {
+        if (!cond->Check(b))
+          return false;
+      }
+      return true;
+    }
 
-    class alternative : public condition
-    {
-        std::vector<std::unique_ptr<condition> > items;
-    public:
-        alternative(std::vector<std::unique_ptr<condition> > items) : condition(condition_type ::ALTERNATIVE_T),
-                                                                      items(std::move(items))
-        {}
-        bool check(game_state *b) const override
-        {
-            for(auto& cond : items)
-            {
-                if(cond->check(b))
-                    return true;
-            }
-            return false;
-        }
+    const std::vector<std::unique_ptr<Condition>> &items() const {
+      return items_;
+    }
 
-        const std::vector<std::unique_ptr<condition>>& get_items() const
-        {
-            return items;
-        }
-    };
+  private:
+    std::vector<std::unique_ptr<Condition> > items_;
+  };
 
-    class negation : public condition
-    {
-        std::unique_ptr<condition> item;
-    public:
-        negation(std::unique_ptr<condition> item) : condition(condition_type::NEGATION_T),
-                                                    item(std::move(item))
-        {}
-        bool check(game_state *b) const override
-        {
-            return !item->check(b);
-        }
+  class Alternative : public Condition {
+  public:
+    explicit Alternative(std::vector<std::unique_ptr<Condition> > items)
+        : Condition(ConditionType::kAlternativeType),
+          items_(std::move(items)) {}
 
-        const condition* get_condition() const
-        {
-            return item.get();
-        }
-    };
+    bool Check(GameState *b) const override {
+      for (auto &cond : items_) {
+        if (cond->Check(b))
+          return true;
+      }
+      return false;
+    }
 
-    class less : public condition
-    {
-        std::unique_ptr<arithmetic_operation> left, right;
-    public:
-        less(std::unique_ptr<arithmetic_operation> left, std::unique_ptr<arithmetic_operation> right)
-            : condition(condition_type::LESS_T), left(std::move(left)), right(std::move(right))  {}
-        bool check(game_state *b) const override
-        {
-            return left->value(b) < right->value(b);
-        }
-        const arithmetic_operation* get_left() const
-        {
-            return left.get();
-        }
+    const std::vector<std::unique_ptr<Condition>> &
+    items() const { return items_; }
 
-        const arithmetic_operation* get_right() const
-        {
-            return right.get();
-        }
-    };
+  private:
+    std::vector<std::unique_ptr<Condition> > items_;
+  };
 
-    class less_equal : public condition
-    {
-        std::unique_ptr<arithmetic_operation> left, right;
-    public:
-        less_equal(std::unique_ptr<arithmetic_operation> left, std::unique_ptr<arithmetic_operation> right)
-                : condition(condition_type :: LESS_EQUAL_T), left(std::move(left)), right(std::move(right))  {}
-        bool check(game_state *b) const override
-        {
-            return left->value(b) <= right->value(b);
-        }
-        const arithmetic_operation* get_left() const
-        {
-            return left.get();
-        }
+  class Negation : public Condition {
+  public:
+    explicit Negation(std::unique_ptr<Condition> item)
+        : Condition(ConditionType::kNegationType),
+          item_(std::move(item)) {}
 
-        const arithmetic_operation* get_right() const
-        {
-            return right.get();
-        }
+    bool Check(GameState *b) const override { return !item_->Check(b); }
 
-    };
+    const Condition *condition() const { return item_.get(); }
 
-    class equal : public condition
-    {
-        std::unique_ptr<arithmetic_operation> left, right;
-    public:
-        equal(std::unique_ptr<arithmetic_operation> left, std::unique_ptr<arithmetic_operation> right)
-        : condition(condition_type::EQUAL_T), left(std::move(left)), right(std::move(right))  {}
-        bool check(game_state *b) const override
-        {
-            return left->value(b) == right->value(b);
-        }
-        const arithmetic_operation* get_left() const
-        {
-            return left.get();
-        }
+  private:
+    std::unique_ptr<Condition> item_;
+  };
 
-        const arithmetic_operation* get_right() const
-        {
-            return right.get();
-        }
-    };
+  class Less : public Condition {
+  public:
+    Less(std::unique_ptr<ArithmeticOperation> left,
+         std::unique_ptr<ArithmeticOperation> right)
+        : Condition(ConditionType::kLessType),
+          left_(std::move(left)),
+          right_(std::move(right)) {}
 
-    class not_equal : public condition
-    {
-        std::unique_ptr<arithmetic_operation> left, right;
-    public:
-        not_equal(std::unique_ptr<arithmetic_operation> left, std::unique_ptr<arithmetic_operation> right)
-        : condition(condition_type::NOT_EQUAL_T), left(std::move(left)), right(std::move(right))  {}
-        bool check(game_state *b) const override
-        {
-            return left->value(b) != right->value(b);
-        }
-        const arithmetic_operation* get_left() const
-        {
-            return left.get();
-        }
+    bool Check(GameState *b) const override {
+      return left_->Value(b) < right_->Value(b);
+    }
 
-        const arithmetic_operation* get_right() const
-        {
-            return right.get();
-        }
-    };
+    const ArithmeticOperation *left() const {
+      return left_.get();
+    }
 
-    class move_pattern : public condition
-    {
-        unsigned int index;
-        std::unique_ptr<fsm::nfa<const action*> > move_nfa;
-    public:
-        move_pattern(unsigned int index, std::unique_ptr<fsm::nfa<const action*> > move_nfa)
-                : condition(condition_type ::MOVE_PATTERN_T), index(index), move_nfa(std::move(move_nfa))
-        {}
-        bool check(game_state *b) const override;
+    const ArithmeticOperation *right() const {
+      return right_.get();
+    }
 
-        const fsm::nfa<const action*>* get_nfa() const
-        {
-            return move_nfa.get();
-        }
-    };
+  private:
+    std::unique_ptr<ArithmeticOperation> left_, right_;
+  };
+
+  class LessEqual : public Condition {
+  public:
+    LessEqual(std::unique_ptr<ArithmeticOperation> left,
+              std::unique_ptr<ArithmeticOperation> right)
+        : Condition(ConditionType::kLessEqualType),
+          left_(std::move(left)),
+          right_(std::move(right)) {}
+
+    bool Check(GameState *b) const override {
+      return left_->Value(b) <= right_->Value(b);
+    }
+
+    const ArithmeticOperation *left() const {
+      return left_.get();
+    }
+
+    const ArithmeticOperation *right() const {
+      return right_.get();
+    }
+
+  private:
+    std::unique_ptr<ArithmeticOperation> left_, right_;
+  };
+
+  class Equal : public Condition {
+  public:
+    Equal(std::unique_ptr<ArithmeticOperation> left,
+          std::unique_ptr<ArithmeticOperation> right)
+        : Condition(ConditionType::kEqualType),
+          left_(std::move(left)),
+          right_(std::move(right)) {}
+
+    bool Check(GameState *b) const override {
+      return left_->Value(b) == right_->Value(b);
+    }
+
+    const ArithmeticOperation *left() const {
+      return left_.get();
+    }
+
+    const ArithmeticOperation *right() const {
+      return right_.get();
+    }
+
+  private:
+    std::unique_ptr<ArithmeticOperation> left_, right_;
+  };
+
+  class NotEqual : public Condition {
+  public:
+    NotEqual(std::unique_ptr<ArithmeticOperation> left,
+             std::unique_ptr<ArithmeticOperation> right)
+        : Condition(ConditionType::kNotEqualType),
+          left_(std::move(left)),
+          right_(std::move(right)) {}
+
+    bool Check(GameState *b) const override {
+      return left_->Value(b) != right_->Value(b);
+    }
+
+    const ArithmeticOperation *left() const {
+      return left_.get();
+    }
+
+    const ArithmeticOperation *right() const {
+      return right_.get();
+    }
+
+  private:
+    std::unique_ptr<ArithmeticOperation> left_, right_;
+  };
+
+  // Checks whether there exists a move starting 
+  // from the game state in specified nfa.
+  class MovePattern : public Condition {
+  public:
+    MovePattern(unsigned int index,
+                std::unique_ptr<fsm::Nfa<const Action *> > move_nfa)
+        : Condition(ConditionType::kMovePatternType),
+          index_(index),
+          move_nfa_(std::move(move_nfa)) {}
+
+    bool Check(GameState *b) const override;
+
+    const fsm::Nfa<const Action *> *nfa() const {
+      return move_nfa_.get();
+    }
+
+  private:
+    unsigned int index_;
+    std::unique_ptr<fsm::Nfa<const Action *> > move_nfa_;
+  };
 }
 
 

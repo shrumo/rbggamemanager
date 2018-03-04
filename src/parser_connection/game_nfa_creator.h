@@ -26,140 +26,167 @@
 #include "../actions/action.h"
 #include "../game_nfa/game_moves_description.h"
 
-struct recover_information
-{
-    std::unique_ptr<fsm::nfa<const action*>> nfa_result;
-    bool register_modifiers;
-    bool reuse_final_as_intial;
-    fsm::state_id_t last_final;
-    recover_information(std::unique_ptr<fsm::nfa<const action*>> nfa_result, bool register_modifiers,
-                        bool reuse_final_as_intial, fsm::state_id_t last_final)
-            : nfa_result(std::move(nfa_result)), register_modifiers(register_modifiers),
-              reuse_final_as_intial(reuse_final_as_intial), last_final(last_final)
-    {}
+// This structur alows the nfa creator to safe its current state information.
+struct RecoverInformation {
+  std::unique_ptr<fsm::Nfa<const Action *>> nfa_result;
+  bool register_modifiers;
+  bool reuse_final_as_initial;
+  fsm::state_id_t last_final;
+
+  RecoverInformation(std::unique_ptr<fsm::Nfa<const Action *>> nfa_result,
+                     bool register_modifiers,
+                     bool reuse_final_as_initial, fsm::state_id_t last_final)
+      : nfa_result(std::move(nfa_result)),
+        register_modifiers(register_modifiers),
+        reuse_final_as_initial(reuse_final_as_initial),
+        last_final(last_final) {}
 };
 
-class game_nfa_creator : public rbg_parser::abstract_dispatcher
-{
-    const name_resolver& resolver;
-    std::unique_ptr<fsm::nfa<const action*>> nfa_result;
-    std::unique_ptr<condition> condition_result;
-    std::unordered_map<std::string,const action*> used_actions;
-
-    std::vector<std::unique_ptr<action> > actions;
-
-    bool block_started;
-    std::vector<fsm::state_id_t> blocks_states;
-    bool register_modifiers;
-
-    bool reuse_final_as_initial;
-    fsm::state_id_t last_final;
-
-    token_id_t piece_id_threshold;
-
-    void register_modifier(fsm::state_id_t initial_id);
-    void start_block();
-    void stop_block();
-
-    unsigned int move_pattern_count;
-
-    recover_information start_move_pattern()
-    {
-        recover_information information(std::move(nfa_result), register_modifiers, reuse_final_as_initial, last_final);
-        register_modifiers = false;
-        nfa_result = std::unique_ptr<fsm::nfa<const action*>>(new fsm::nfa<const action*>());
-        last_final = 0;
-        reuse_final_as_initial = false;
-        return information;
-    }
-
-    void stop_move_pattern(recover_information information)
-    {
-        nfa_result = std::move(information.nfa_result);
-        register_modifiers = information.register_modifiers;
-        reuse_final_as_initial = information.reuse_final_as_intial;
-        last_final = information.last_final;
-    }
-
-    game_nfa_creator(const name_resolver& resolver, token_id_t piece_id_threshold)
-            : resolver(resolver), nfa_result(new fsm::nfa<const action*>()),
-              block_started(false), register_modifiers(true), reuse_final_as_initial(false),
-              last_final(0),
-              piece_id_threshold(piece_id_threshold),
-              move_pattern_count(0)
-    {
-        blocks_states.push_back(0);
-    }
-
-    void stop_reusing_finals()
-    {
-        reuse_final_as_initial = false;
-    }
-
-    void start_reusing_finals()
-    {
-        reuse_final_as_initial = true;
-    }
-
-    fsm::state_id_t new_initial()
-    {
-        if(reuse_final_as_initial) {
-            reuse_final_as_initial = false;
-            return last_final;
-        }
-        return nfa_result->new_state();
-    }
-
-    std::unique_ptr<arithmetic_operation> get_operation(const rbg_parser::token& token)
-    {
-        std::unique_ptr<arithmetic_operation> result;
-        if(token.get_type() == rbg_parser::number)
-        {
-            result = std::unique_ptr<arithmetic_operation>(new arithmetic_operations::constant_value(token.get_value()));
-        } else
-        {
-            token_id_t variable_id = resolver.id(token.to_string());
-            result = std::unique_ptr<arithmetic_operation>(new arithmetic_operations::variable_value(variable_id));
-        }
-        return result;
-    }
-
+class GameNfaCreator : public rbg_parser::abstract_dispatcher {
 public:
-    void dispatch(const rbg_parser::sum&) override;
-    void dispatch(const rbg_parser::pure_sum&) override;
-    void dispatch(const rbg_parser::concatenation&) override;
-    void dispatch(const rbg_parser::pure_concatenation&) override;
-    void dispatch(const rbg_parser::bracketed_move&) override;
-    void dispatch(const rbg_parser::pure_bracketed_move&) override;
-    void dispatch(const rbg_parser::shift&) override;
-    void dispatch(const rbg_parser::ons&) override;
-    void dispatch(const rbg_parser::off&) override;
-    void dispatch(const rbg_parser::assignment&) override;
-    void dispatch(const rbg_parser::player_switch&) override;
-    void dispatch(const rbg_parser::condition_check&) override;
-    void dispatch(const rbg_parser::conjunction&) override;
-    void dispatch(const rbg_parser::alternative&) override;
-    void dispatch(const rbg_parser::negatable_condition&) override;
-    void dispatch(const rbg_parser::comparison&) override;
-    void dispatch(const rbg_parser::move_condition&) override;
-    void dispatch(const rbg_parser::modifier_block&) override;
+  // This function extracts current nfa. Nfa can be extracted only once after creation.
+  std::unique_ptr<fsm::Nfa<const Action *>> ExtractNfa() {
+    return std::move(nfa_result_);
+  }
 
-    std::unique_ptr<fsm::nfa<const action*>> get_nfa()
-    {
-        return std::move(nfa_result);
+  // This function extracts current created condition. Condition can be extracted only once after creation.
+  std::unique_ptr<Condition> ExtractCondition() {
+    return std::move(condition_result_);
+  }
+
+  // This function extract current move description. Move description can be extracted only once after creation.
+  GameMovesDescription ExtractDescription() {
+    return GameMovesDescription(ExtractNfa(), std::move(blocks_states_),
+                                std::move(actions_), move_pattern_count_);
+  }
+
+  friend GameMovesDescription
+  create_moves(const rbg_parser::game_move &move, const NameResolver &resolver,
+               token_id_t piece_id_threshold);
+
+
+  void dispatch(const rbg_parser::sum &) override;
+
+  void dispatch(const rbg_parser::pure_sum &) override;
+
+  void dispatch(const rbg_parser::concatenation &) override;
+
+  void dispatch(const rbg_parser::pure_concatenation &) override;
+
+  void dispatch(const rbg_parser::bracketed_move &) override;
+
+  void dispatch(const rbg_parser::pure_bracketed_move &) override;
+
+  void dispatch(const rbg_parser::shift &) override;
+
+  void dispatch(const rbg_parser::ons &) override;
+
+  void dispatch(const rbg_parser::off &) override;
+
+  void dispatch(const rbg_parser::assignment &) override;
+
+  void dispatch(const rbg_parser::player_switch &) override;
+
+  void dispatch(const rbg_parser::condition_check &) override;
+
+  void dispatch(const rbg_parser::conjunction &) override;
+
+  void dispatch(const rbg_parser::alternative &) override;
+
+  void dispatch(const rbg_parser::negatable_condition &) override;
+
+  void dispatch(const rbg_parser::comparison &) override;
+
+  void dispatch(const rbg_parser::move_condition &) override;
+
+  void dispatch(const rbg_parser::modifier_block &) override;
+
+private:
+  void RegisterModifier(fsm::state_id_t initial_id);
+
+  void StartBlock();
+
+  void StopBlock();
+
+  RecoverInformation StartMovePattern() {
+    RecoverInformation information(std::move(nfa_result_), register_modifiers_,
+                                   reuse_final_as_initial_, last_final_);
+    register_modifiers_ = false;
+    nfa_result_ = std::unique_ptr<fsm::Nfa<const Action *>>(
+        new fsm::Nfa<const Action *>());
+    last_final_ = 0;
+    reuse_final_as_initial_ = false;
+    return information;
+  }
+
+  void StopMovePattern(RecoverInformation information) {
+    nfa_result_ = std::move(information.nfa_result);
+    register_modifiers_ = information.register_modifiers;
+    reuse_final_as_initial_ = information.reuse_final_as_initial;
+    last_final_ = information.last_final;
+  }
+
+  GameNfaCreator(const NameResolver &resolver, token_id_t piece_id_threshold)
+      : resolver_(resolver),
+        nfa_result_(new fsm::Nfa<const Action *>()),
+        block_started_(false),
+        register_modifiers_(true),
+        reuse_final_as_initial_(false),
+        last_final_(0),
+        piece_id_threshold_(piece_id_threshold),
+        move_pattern_count_(0) {
+    blocks_states_.push_back(0);
+  }
+
+  void StopReusingFinals() {
+    reuse_final_as_initial_ = false;
+  }
+
+  void StartReusingFinals() {
+    reuse_final_as_initial_ = true;
+  }
+
+  fsm::state_id_t NewInitial() {
+    if (reuse_final_as_initial_) {
+      reuse_final_as_initial_ = false;
+      return last_final_;
     }
+    return nfa_result_->NewState();
+  }
 
-    std::unique_ptr<condition> get_condition()
-    {
-        return std::move(condition_result);
+  std::unique_ptr<ArithmeticOperation>
+  CreateOperation(const rbg_parser::token &token) {
+    std::unique_ptr<ArithmeticOperation> result;
+    if (token.get_type() == rbg_parser::number) {
+      result = std::unique_ptr<ArithmeticOperation>(
+          new arithmetic_operations::Constant(token.get_value()));
+    } else {
+      token_id_t variable_id = resolver_.Id(token.to_string());
+      result = std::unique_ptr<ArithmeticOperation>(
+          new arithmetic_operations::Variable(variable_id));
     }
+    return result;
+  }
 
-    game_moves_description create_description()
-    {
-        return game_moves_description(get_nfa(), std::move(blocks_states), std::move(actions), move_pattern_count);
-    }
 
-    friend game_moves_description create_moves(const rbg_parser::game_move& move, const name_resolver& resolver, token_id_t piece_id_threshold);
+  const NameResolver &resolver_;
+  std::unique_ptr<fsm::Nfa<const Action *>> nfa_result_;
+  std::unique_ptr<Condition> condition_result_;
+  std::unordered_map<std::string, const Action *> used_actions_;
+
+  std::vector<std::unique_ptr<Action> > actions_;
+
+  bool block_started_;
+  std::vector<fsm::state_id_t> blocks_states_;
+  bool register_modifiers_;
+
+  bool reuse_final_as_initial_;
+  fsm::state_id_t last_final_;
+
+  token_id_t piece_id_threshold_;
+
+  unsigned int move_pattern_count_;
+
 };
 
 

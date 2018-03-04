@@ -6,8 +6,9 @@
 #define RBGGAMEMANAGER_SERVER_H
 
 #include <boost/asio.hpp>
+
 #include <deque>
-#include <fstream>
+
 #include "message.h"
 #include "../game_components/game_description.h"
 #include "../game_components/game_state.h"
@@ -16,234 +17,215 @@
 
 using boost::asio::ip::tcp;
 
-class server_game_instance;
+class ServerGameInstance;
 
-class client_connection
-    : public std::enable_shared_from_this<client_connection>
-{
-    tcp::socket socket;
-
-    message read_move;
-    std::deque<message> write_moves;
-
-    server_game_instance* instance;
-
-    client_connection(tcp::socket socket, server_game_instance* instance):
-            socket(std::move(socket)), read_move(message::empty()),
-            instance(instance)
-    {}
-
-    void do_read_header();
-    void do_read_body();
-    void do_write();
-
+class ClientConnection
+    : public std::enable_shared_from_this<ClientConnection> {
 public:
-    typedef std::shared_ptr<client_connection> pointer;
+  typedef std::shared_ptr<ClientConnection> pointer;
 
-    static pointer create(tcp::socket socket, server_game_instance* instance)
-    {
-        return pointer(new client_connection(std::move(socket),instance));
+  static pointer Create(tcp::socket socket, ServerGameInstance *instance) {
+    return pointer(new ClientConnection(std::move(socket), instance));
+  }
+
+  tcp::socket &socket() {
+    return socket_;
+  }
+
+  void Start();
+
+  void Send(const Message &message) {
+    bool write_in_progress = !write_moves_.empty();
+    write_moves_.push_back(message);
+    if (!write_in_progress) {
+      Write();
     }
+  }
 
-    tcp::socket& get_socket()
-    {
-        return socket;
-    }
+private:
+  tcp::socket socket_;
 
-    void start();
+  Message read_move_;
+  std::deque<Message> write_moves_;
 
-    void send(const message& message)
-    {
-        bool write_in_progress = !write_moves.empty();
-        write_moves.push_back(message);
-        if(!write_in_progress)
-        {
-            do_write();
-        }
-    }
+  ServerGameInstance *instance_;
+
+  ClientConnection(tcp::socket socket, ServerGameInstance *instance) :
+      socket_(std::move(socket)), read_move_(Message::Empty()),
+      instance_(instance) {}
+
+  void ReadHeader();
+
+  void ReadBody();
+
+  void Write();
 };
 
 class server;
 
-class server_game_instance
-{
-    std::unordered_map<client_connection::pointer, token_id_t> clients;
-    std::unordered_map<token_id_t, client_connection::pointer> players;
-    game_state state;
-    server* controlling_server;
-    std::unordered_set<move> available_moves;
-    search_context context;
-
-    void make_keeper_moves()
-    {
-        while(state.player() == state.get_description().get_deterministic_keeper_player_id() ||
-              state.player() == state.get_description().get_nondeterministic_keeper_player_id())
-        {
-            if(state.player() == state.get_description().get_deterministic_keeper_player_id())
-            {
-                auto moves = state.find_moves(&context);
-                if(moves.empty())
-                {
-                    stop();
-                    return;
-                }
-                auto move = moves[rand()%moves.size()];
-                state.make_move(move);
-                deliver(message::client_move_message(move));
-            }
-            else if(state.player() == state.get_description().get_nondeterministic_keeper_player_id())
-            {
-                auto moves = state.find_first_move(&context);
-                if(moves.empty())
-                {
-                    stop();
-                    return;
-                }
-                state.make_move(moves[0]);
-                deliver(message::client_move_message(moves[0]));
-            }
-        }
-    }
+class ServerGameInstance {
 public:
-    explicit server_game_instance(const game_description& description,server* controlling_server=nullptr)
-            : state(description), controlling_server(controlling_server)
-    {
-        for(token_id_t player_token : description.get_declarations().get_players_ids())
-        {
-            players[player_token] = nullptr;
-        }
+  explicit ServerGameInstance(const GameDescription &description,
+                              server *controlling_server = nullptr)
+      : state_(description), controlling_server_(controlling_server) {
+    for (token_id_t player_token : description.declarations().players_ids()) {
+      players_[player_token] = nullptr;
     }
+  }
 
-    void join(const client_connection::pointer &client)
-    {
-        std::cout << client << " joins the game." << std::endl;
-        for(token_id_t player_token : state.get_description().get_declarations().get_players_ids())
-        {
-            if(!players[player_token])
-            {
-                clients[client] = player_token;
-                players[player_token] = client;
-                std::cout<< client << " is player " << state.get_description().get_resolver().name(player_token)
-                         << "."<< std::endl;
-                if(full())
-                    start();
-                return;
-            }
-        }
-        std::cout << client << " has no player assigned." << std::endl;
+  void Join(const ClientConnection::pointer &client) {
+    std::cout << client << " joins the game." << std::endl;
+    for (token_id_t player_token :
+        state_.description().declarations().players_ids()) {
+      if (!players_[player_token]) {
+        clients_[client] = player_token;
+        players_[player_token] = client;
+        std::cout << client << " is player "
+                  << state_.description().resolver().Name(player_token)
+                  << "." << std::endl;
+        if (Full())
+          Start();
+        return;
+      }
     }
+    std::cout << client << " has no player assigned." << std::endl;
+  }
 
-    void start()
-    {
-        std::cout << "Starting the game." << std::endl;
-        for(const auto& pair : clients)
-        {
-            const auto& client = pair.first;
-            client->send(state.get_description().get_text_description());
-            client->send(state.get_description().get_resolver().name(pair.second));
-        }
-        make_keeper_moves();
-        auto moves = state.find_moves(&context);
-        available_moves = std::unordered_set<move>(moves.begin(),moves.end());
-        std::cout << state << std::endl;
-        if(available_moves.empty())
-        {
-            stop();
-        }
+  void Start() {
+    std::cout << "Starting the game." << std::endl;
+    for (const auto &pair : clients_) {
+      const auto &client = pair.first;
+      client->Send(state_.description().text_description());
+      client->Send(state_.description().resolver().Name(pair.second));
     }
-
-    void stop()
-    {
-        std::cout << "Game ended." << std::endl;
-        for(const auto& pair : clients)
-        {
-            std::cout << "\t" << state.get_description().get_resolver().name(pair.second)
-                      << "(" << pair.first << ")" << " : " << state.value(pair.second) << std::endl;
-        }
+    make_keeper_moves();
+    auto moves = state_.FindMoves(&context_);
+    available_moves_ = std::unordered_set<Move>(moves.begin(), moves.end());
+    std::cout << state_ << std::endl;
+    if (available_moves_.empty()) {
+      Stop();
     }
+  }
 
-    bool full() const
-    {
-        return clients.size() == state.get_description().get_declarations().get_players_ids().size();
+  void Stop() {
+    std::cout << "Game ended." << std::endl;
+    for (const auto &pair : clients_) {
+      std::cout << "\t" << state_.description().resolver().Name(pair.second)
+                << "(" << pair.first << ")" << " : "
+                << state_.Value(pair.second) << std::endl;
     }
+  }
 
-    void leave(const client_connection::pointer& client);
+  bool Full() const {
+    return clients_.size() ==
+           state_.description().declarations().players_ids().size();
+  }
 
-    void deliver(const message& msg)
-    {
-        for(const auto& pair : clients)
-        {
-            pair.first->send(msg);
-        }
+  void Leave(const ClientConnection::pointer &client);
+
+  void Deliver(const Message &msg) {
+    for (const auto &pair : clients_) {
+      pair.first->Send(msg);
     }
+  }
 
-    void deliver(const message& msg, const client_connection::pointer& omit)
-    {
-        for(const auto& pair : clients)
-        {
-            if(pair.first && pair.first != omit)
-                pair.first->send(msg);
-        }
+  void Deliver(const Message &msg, const ClientConnection::pointer &omit) {
+    for (const auto &pair : clients_) {
+      if (pair.first && pair.first != omit)
+        pair.first->Send(msg);
     }
+  }
 
-    bool handle_move(const client_connection::pointer &client, const message &message)
-    {
-        token_id_t client_player_id = clients[client];
-        std::cout << "Got a move from client " << client
-                  << " which is player " << state.get_description().get_resolver().name(client_player_id)
-                  << std::endl;
-        if(client_player_id != state.player())
-        {
-            std::cout << "Wrong player." << std::endl;
-            return false;
-        }
-        auto move = decode_move(message);
-        if(available_moves.find(move) == available_moves.end())
-        {
-            std::cout << "Wrong move." << std::endl;
-            return false;
-        }
-        state.make_move(move);
-        deliver(message, client);
-        make_keeper_moves();
-        auto moves = state.find_moves(&context);
-        available_moves = std::unordered_set<move_type>(moves.begin(),moves.end());
-        std::cout << state << std::endl;
-        if(available_moves.empty())
-        {
-            stop();
-        }
-        return true;
+  bool
+  HandleMove(const ClientConnection::pointer &client, const Message &message) {
+    token_id_t client_player_id = clients_[client];
+    std::cout << "Got a move from client " << client
+              << " which is player "
+              << state_.description().resolver().Name(client_player_id)
+              << std::endl;
+    if (client_player_id != state_.player()) {
+      std::cout << "Wrong player." << std::endl;
+      return false;
     }
+    auto move = DecodeMove(message);
+    if (available_moves_.find(move) == available_moves_.end()) {
+      std::cout << "Wrong move." << std::endl;
+      return false;
+    }
+    state_.MakeMove(move);
+    Deliver(message, client);
+    make_keeper_moves();
+    auto moves = state_.FindMoves(&context_);
+    available_moves_ = std::unordered_set<Move>(moves.begin(), moves.end());
+    std::cout << state_ << std::endl;
+    if (available_moves_.empty()) {
+      Stop();
+    }
+    return true;
+  }
+
+private:
+  std::unordered_map<ClientConnection::pointer, token_id_t> clients_;
+  std::unordered_map<token_id_t, ClientConnection::pointer> players_;
+  GameState state_;
+  server *controlling_server_;
+  std::unordered_set<Move> available_moves_;
+  SearchContext context_;
+
+  void make_keeper_moves() {
+    while (state_.player() ==
+           state_.description().deterministic_keeper_player_id() ||
+           state_.player() ==
+           state_.description().nondeterministic_keeper_player_id()) {
+      if (state_.player() ==
+          state_.description().deterministic_keeper_player_id()) {
+        auto moves = state_.FindMoves(&context_);
+        if (moves.empty()) {
+          Stop();
+          return;
+        }
+        auto move = moves[rand() % moves.size()];
+        state_.MakeMove(move);
+        Deliver(Message::ClientMoveMessage(move));
+      } else if (state_.player() ==
+                 state_.description().nondeterministic_keeper_player_id()) {
+        auto moves = state_.FindFirstMove(&context_);
+        if (moves.empty()) {
+          Stop();
+          return;
+        }
+        state_.MakeMove(moves[0]);
+        Deliver(Message::ClientMoveMessage(moves[0]));
+      }
+    }
+  }
 };
 
 class server {
-    tcp::acceptor acceptor;
-    server_game_instance game_instance;
+  tcp::acceptor acceptor;
+  ServerGameInstance game_instance;
 
-    tcp::socket socket_;
+  tcp::socket socket_;
 public:
-    explicit server(const game_description& description, boost::asio::io_service& io_service, unsigned short port=13)
-            : acceptor(io_service, tcp::endpoint(tcp::v4(),port)),
-              game_instance(description,this), socket_(io_service)
-    {
-        do_accept();
-    }
+  explicit server(const GameDescription &description,
+                  boost::asio::io_service &io_service, unsigned short port = 13)
+      : acceptor(io_service, tcp::endpoint(tcp::v4(), port)),
+        game_instance(description, this), socket_(io_service) {
+    do_accept();
+  }
 
-    void do_accept()
-    {
-        acceptor.async_accept(socket_,
-                               [this](boost::system::error_code ec)
-                               {
-                                   if (!ec && !game_instance.full())
-                                   {
-                                       auto new_connection = client_connection::create(std::move(socket_), &game_instance);
-                                       new_connection->start();
-                                   }
-                                   if(!game_instance.full())
-                                       do_accept();
-                               });
-    }
+  void do_accept() {
+    acceptor.async_accept(socket_,
+                          [this](boost::system::error_code ec) {
+                            if (!ec && !game_instance.Full()) {
+                              auto new_connection = ClientConnection::Create(
+                                  std::move(socket_), &game_instance);
+                              new_connection->Start();
+                            }
+                            if (!game_instance.Full())
+                              do_accept();
+                          });
+  }
 };
 
 

@@ -12,247 +12,252 @@
 #include "lazy_evaluator.h"
 #include "search_context.h"
 
-class move_revert_information
-{
-    std::vector<action_result> actions_results;
-    size_t previous_x, previous_y;
-    fsm::state_id_t previous_state;
-    std::vector<action_application> applied_modifiers;
+// This MoveResult can be used to revert moves and get
+// information about move.
+class MoveResult {
 public:
-    move_revert_information(std::vector<action_result> actions_results, size_t previous_x, size_t previous_y,
-                                fsm::state_id_t previous_state, std::vector<action_application> applied_modifiers)
-            : actions_results(std::move(actions_results)), previous_x(previous_x),
-              previous_y(previous_y), previous_state(previous_state), applied_modifiers(std::move(applied_modifiers)) {}
+  MoveResult(std::vector<ActionResult> actions_results, size_t previous_x,
+             size_t previous_y,
+             fsm::state_id_t previous_state,
+             std::vector<ActionApplication> applied_modifiers)
+      : actions_results_(std::move(actions_results)),
+        previous_x_(previous_x),
+        previous_y_(previous_y),
+        previous_state_(previous_state),
+        applied_modifiers_(std::move(applied_modifiers)) {}
 
-    const std::vector<action_result> &get_actions_results() const {
-        return actions_results;
-    }
+  const std::vector<ActionResult> &actions_results() const {
+    return actions_results_;
+  }
 
-    const std::vector<action_application> &get_applied_modifiers() const {
-        return applied_modifiers;
-    }
+  const std::vector<ActionApplication> &applied_modifiers() const {
+    return applied_modifiers_;
+  }
 
-    size_t get_previous_x() const {
-        return previous_x;
-    }
+  size_t previous_x() const {
+    return previous_x_;
+  }
 
-    size_t get_previous_y() const {
-        return previous_y;
-    }
+  size_t previous_y() const {
+    return previous_y_;
+  }
 
-    fsm::state_id_t get_previous_state() const {
-        return previous_state;
-    }
+  fsm::state_id_t previous_state() const {
+    return previous_state_;
+  }
+
+private:
+  std::vector<ActionResult> actions_results_;
+  size_t previous_x_, previous_y_;
+  fsm::state_id_t previous_state_;
+  std::vector<ActionApplication> applied_modifiers_;
 };
 
-class game_state {
-    const game_description& parent;
-
-    lazy_evaluator lazy_controller;
-
-    board current_board;
-    size_t current_x,current_y;
-    fsm::state_id_t current_state;
-
-    std::vector<int> sigma;
-    token_id_t current_player;
-
-    search_context* current_search;
-
-    void set_piece(token_id_t piece)
-    {
-        sigma[current_piece()]--;
-        current_board(current_x,current_y) = piece;
-        sigma[piece]++;
-    }
-
-    lazy_evaluator& lazy()
-    {
-        return lazy_controller;
-    }
-
-    bool is_used_in_search()
-    {
-        return current_search != nullptr;
-    }
-
-    search_context& get_search_context()
-    {
-        return *current_search;
-    }
-
-    action_result apply_action_application(const action_application& application);
-    void revert_action_application(const action_application& application, const action_result& application_result);
+class GameState {
 public:
-    explicit game_state(const game_description& description)
-        : parent(description),
-          current_board(description.get_initial_board()),
-          current_x(0), current_y(0),
-          current_state(description.get_moves_description().get_nfa().initial()),
-          sigma(description.get_variables_count(),0),
-          current_player(description.get_resolver().id("_epsilon"))
-    {
-        for(size_t y = 0; y < current_board.height(); y++)
-        {
-            for(size_t x = 0; x < current_board.width(); x++)
-            {
-                sigma[current_board(x,y)]++;
-            }
-        }
+  // Lazy controller is separated from main class
+  friend class LazyEvaluator;
+
+  // Modifying actions
+
+  friend class actions::Shift;
+
+  friend class actions::Off;
+
+  friend class actions::PlayerSwitch;
+
+  friend class actions::Assignment;
+
+  friend class actions::Lazy;
+
+  friend class actions::Incrementation;
+
+  friend class actions::Decrementation;
+
+  // Move pattern will be able to use the state_ to check the condition
+  // This will speed up things. (We do not have to make a copy.)
+  friend class conditions::MovePattern;
+
+  explicit GameState(const GameDescription &description)
+      : parent_(description),
+        current_board_(description.initial_board()),
+        current_x_(0), current_y_(0),
+        current_state_(description.moves_description().nfa().initial()),
+        sigma_(description.VariablesCount(), 0),
+        current_player_(description.resolver().Id("_epsilon")) {
+    for (size_t y = 0; y < current_board_.height(); y++) {
+      for (size_t x = 0; x < current_board_.width(); x++) {
+        sigma_[current_board_(x, y)]++;
+      }
     }
+  }
 
-    void reset()
-    {
-        current_board = parent.get_initial_board();
-        current_x = 0;
-        current_y = 0;
-        current_state = parent.get_moves_description().get_nfa().initial();
-        std::fill(sigma.begin(),sigma.end(),0);
-        for(size_t y = 0; y < current_board.height(); y++)
-        {
-            for(size_t x = 0; x < current_board.width(); x++)
-            {
-                sigma[current_board(x,y)]++;
-            }
-        }
-        current_player = parent.get_resolver().id("_epsilon");
+  // Resets the game to the initial state_.
+  void Reset() {
+    current_board_ = parent_.initial_board();
+    current_x_ = 0;
+    current_y_ = 0;
+    current_state_ = parent_.moves_description().nfa().initial();
+    std::fill(sigma_.begin(), sigma_.end(), 0);
+    for (size_t y = 0; y < current_board_.height(); y++) {
+      for (size_t x = 0; x < current_board_.width(); x++) {
+        sigma_[current_board_(x, y)]++;
+      }
     }
+    current_player_ = parent_.resolver().Id("_epsilon");
+  }
 
-    fsm::state_id_t get_current_state() const
-    {
-        return current_state;
+  fsm::state_id_t nfa_state() const {
+    return current_state_;
+  }
+
+  // Returns the piece at current position.
+  token_id_t CurrentPiece() const {
+    return current_board_(current_x_, current_y_);
+  }
+
+  const GameDescription &description() const {
+    return parent_;
+  }
+
+  int Value(token_id_t variable) const {
+    return sigma_[variable];
+  }
+
+  const Board &board() const {
+    return current_board_;
+  }
+
+  size_t x() const {
+    return current_x_;
+  }
+
+  size_t y() const {
+    return current_y_;
+  }
+
+  size_t width() const {
+    return current_board_.width();
+  }
+
+  size_t height() const {
+    return current_board_.height();
+  }
+
+  token_id_t player() const {
+    return current_player_;
+  }
+
+  void MakeMove(const Move &move) {
+    for (const auto &block : move.blocks()) {
+      current_state_ = parent_.moves_description().CorrespondingState(
+          block.id());
+      current_x_ = block.x();
+      current_y_ = block.y();
+      while (
+          parent_.moves_description().nfa()[current_state_].transitions().size() ==
+          1 &&
+          parent_.moves_description().nfa()[current_state_].transitions().front().letter()->index() ==
+          block.id()) {
+        parent_.moves_description().nfa()[current_state_].transitions().front().letter()->Apply(
+            this);
+        current_state_ = parent_.moves_description().nfa()[current_state_].transitions().front().target();
+      }
     }
+    lazy_controller_.Clear();
+  }
 
-    token_id_t current_piece() const
-    {
-        return current_board(current_x,current_y);
+  MoveResult MakeRevertibleMove(const Move &move) {
+    std::vector<ActionResult> results;
+    std::vector<ActionApplication> applied_modifiers;
+    size_t previous_x = current_x_;
+    size_t previous_y = current_y_;
+    fsm::state_id_t previous_state = current_state_;
+    for (const auto &block : move.blocks()) {
+      current_state_ = parent_.moves_description().CorrespondingState(
+          block.id());
+      current_x_ = block.x();
+      current_y_ = block.y();
+      while (
+          parent_.moves_description().nfa()[current_state_].transitions().size() ==
+          1 &&
+          parent_.moves_description().nfa()[current_state_].transitions().front().letter()->index() ==
+          block.id()) {
+        results.push_back(
+            parent_.moves_description().nfa()[current_state_].transitions().front().letter()->Apply(
+                this));
+        applied_modifiers.emplace_back(current_x_, current_y_,
+                                       parent_.moves_description().nfa()[current_state_].transitions().front().letter());
+        current_state_ = parent_.moves_description().nfa()[current_state_].transitions().front().target();
+      }
     }
+    return {std::move(results), previous_x, previous_y, previous_state,
+            std::move(applied_modifiers)};
+  }
 
-    const game_description& get_description() const
-    {
-        return parent;
+  void RevertMove(const MoveResult &information) {
+    for (ssize_t i = information.applied_modifiers().size() - 1; i >= 0; i--) {
+      const auto &action = information.applied_modifiers()[i];
+      RevertActionApplication(action, information.actions_results()[i]);
     }
+    current_x_ = information.previous_x();
+    current_y_ = information.previous_y();
+    current_state_ = information.previous_state();
+  }
 
-    int value(token_id_t variable) const
-    {
-        return sigma[variable];
-    }
+  std::vector<Move> FindMoves(SearchContext *context, ssize_t max_depth = -1) {
+    current_search_ = context;
+    auto result = current_search_->FindMoves(this, max_depth);
+    current_search_ = nullptr;
+    return std::move(result);
+  }
 
-    const board& get_board() const
-    {
-        return current_board;
-    }
+  std::vector<Move>
+  FindFirstMove(SearchContext *context, ssize_t max_depth = -1) {
+    current_search_ = context;
+    auto result = current_search_->FindFirstMove(this, max_depth);
+    current_search_ = nullptr;
+    return std::move(result);
+  }
 
-    size_t x() const
-    {
-        return current_x;
-    }
+private:
+  const GameDescription &parent_;
 
-    size_t y() const
-    {
-        return current_y;
-    }
+  LazyEvaluator lazy_controller_;
 
-    size_t width() const
-    {
-        return current_board.width();
-    }
+  Board current_board_;
+  size_t current_x_, current_y_;
+  fsm::state_id_t current_state_;
 
-    size_t height() const
-    {
-        return current_board.height();
-    }
+  std::vector<int> sigma_;
+  token_id_t current_player_;
 
-    token_id_t player() const
-    {
-        return current_player;
-    }
+  SearchContext *current_search_;
 
-    void make_move(const move& move)
-    {
-        for(const auto& block : move.get_blocks())
-        {
-            current_state = parent.get_moves_description().get_corresponding_state(block.get_block_id());
-            current_x = block.x();
-            current_y = block.y();
-            while(parent.get_moves_description().get_nfa()[current_state].transitions().size() == 1 &&
-                    parent.get_moves_description().get_nfa()[current_state].transitions().front().letter()->get_index() == block.get_block_id())
-            {
-                parent.get_moves_description().get_nfa()[current_state].transitions().front().letter()->apply(this);
-                current_state = parent.get_moves_description().get_nfa()[current_state].transitions().front().target();
-            }
-        }
-        lazy_controller.clear();
-    }
+  void SetPiece(token_id_t piece) {
+    sigma_[CurrentPiece()]--;
+    current_board_(current_x_, current_y_) = piece;
+    sigma_[piece]++;
+  }
 
-    move_revert_information make_revertible_move(const move& move)
-    {
-        std::vector<action_result> results;
-        std::vector<action_application> applied_modifiers;
-        size_t previous_x = current_x;
-        size_t previous_y = current_y;
-        fsm::state_id_t previous_state = current_state;
-        for(const auto& block : move.get_blocks())
-        {
-            current_state = parent.get_moves_description().get_corresponding_state(block.get_block_id());
-            current_x = block.x();
-            current_y = block.y();
-            while(parent.get_moves_description().get_nfa()[current_state].transitions().size() == 1 &&
-                  parent.get_moves_description().get_nfa()[current_state].transitions().front().letter()->get_index() == block.get_block_id())
-            {
-                results.push_back(parent.get_moves_description().get_nfa()[current_state].transitions().front().letter()->apply(this));
-                applied_modifiers.emplace_back(current_x, current_y, parent.get_moves_description().get_nfa()[current_state].transitions().front().letter());
-                current_state = parent.get_moves_description().get_nfa()[current_state].transitions().front().target();
-            }
-        }
-        return {std::move(results), previous_x, previous_y, previous_state, std::move(applied_modifiers)};
-    }
+  LazyEvaluator &lazy() {
+    return lazy_controller_;
+  }
 
-    void revert_move(const move_revert_information& information)
-    {
-        for(ssize_t i = information.get_applied_modifiers().size()-1; i >= 0; i--)
-        {
-            const auto& action = information.get_applied_modifiers()[i];
-            revert_action_application(action, information.get_actions_results()[i]);
-        }
-        current_x = information.get_previous_x();
-        current_y = information.get_previous_y();
-        current_state = information.get_previous_state();
-    }
+  bool SearchingForMoves() {
+    return current_search_ != nullptr;
+  }
 
-    std::vector<move> find_moves(search_context* context, ssize_t max_depth=-1)
-    {
-        current_search = context;
-        auto result = current_search->find_moves(this, max_depth);
-        current_search = nullptr;
-        return std::move(result);
-    }
+  SearchContext &search_context() {
+    return *current_search_;
+  }
 
-    std::vector<move> find_first_move(search_context* context, ssize_t max_depth=-1)
-    {
-        current_search = context;
-        auto result = current_search->find_first_move(this, max_depth);
-        current_search = nullptr;
-        return std::move(result);
-    }
+  ActionResult ApplyActionApplication(const ActionApplication &application);
 
-    // Lazy controller is separated from main class
-    friend class lazy_evaluator;
-
-    // Modifying actions
-    friend class actions::shift;
-    friend class actions::off;
-    friend class actions::player_switch;
-    friend class actions::assignment;
-    friend class actions::lazy;
-    friend class actions::incrementation;
-    friend class actions::decrementation;
-
-    // Move pattern will be able to use the state to check the condition
-    // This will speed up things. (We do not have to make a copy.)
-    friend class conditions::move_pattern;
+  void RevertActionApplication(const ActionApplication &application,
+                               const ActionResult &application_result);
 };
 
-std::ostream& operator<<(std::ostream& s,const game_state& state);
+std::ostream &operator<<(std::ostream &s, const GameState &state);
 
 #endif //RBGGAMEMANAGER_GAME_STATE_H

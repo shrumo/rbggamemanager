@@ -10,32 +10,30 @@
 
 using token_id_t = std::size_t;
 
-class name_resolver {
-    std::vector<std::string> names;
-    std::unordered_map<std::string, token_id_t> names_ids;
+class NameResolver {
 public:
-    name_resolver() = default;
+  NameResolver() = default;
 
-    void add_name(const std::string& name)
-    {
-        names.push_back(name);
-        names_ids[name] = names.size() - 1;
-    }
+  void AddName(const std::string &name) {
+    names_.push_back(name);
+    names_ids_[name] = names_.size() - 1;
+  }
 
-    token_id_t id(const std::string& name) const
-    {
-        return names_ids.at(name);
-    }
+  token_id_t Id(const std::string &name) const {
+    return names_ids_.at(name);
+  }
 
-    const std::string& name(token_id_t id) const
-    {
-        return names[id];
-    }
+  const std::string &Name(token_id_t id) const {
+    return names_[id];
+  }
 
-    size_t names_count() const
-    {
-        return names.size();
-    }
+  size_t NamesCount() const {
+    return names_.size();
+  }
+
+private:
+  std::vector<std::string> names_;
+  std::unordered_map<std::string, token_id_t> names_ids_;
 };
 
 

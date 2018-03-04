@@ -13,66 +13,78 @@
 
 using boost::asio::ip::tcp;
 
-class synchronous_client {
-    boost::asio::io_service io_service;
-    tcp::resolver resolver;
-    tcp::resolver::iterator endpoint_iterator;
-
-    tcp::socket socket;
-
-    std::string game_description;
-    std::string assigned_player;
-
-    void initialize()
-    {
-        message message = message::empty();
-        boost::system::error_code ignored_error;
-        boost::asio::read(socket, boost::asio::buffer(message.data_ptr(),header_length), ignored_error);
-        message.decode_header();
-        boost::asio::read(socket, boost::asio::buffer(message.body_ptr(),message.get_body_length()), ignored_error);
-        game_description = std::string(message.body_ptr(),message.body_ptr() + message.get_body_length());
-        boost::asio::read(socket, boost::asio::buffer(message.data_ptr(),header_length), ignored_error);
-        message.decode_header();
-        boost::asio::read(socket, boost::asio::buffer(message.body_ptr(),message.get_body_length()), ignored_error);
-        assigned_player = std::string(message.body_ptr(),message.body_ptr() + message.get_body_length());
-    }
+class SynchronousClient {
 
 public:
-    synchronous_client(const char* host,const char* port)
-        : resolver(io_service),
-          endpoint_iterator(resolver.resolve({host,port})),
-          socket(io_service)
-    {
-        boost::asio::connect(socket, endpoint_iterator);
-        initialize();
-    }
+  SynchronousClient(const char *host, const char *port)
+      : resolver_(io_service_),
+        endpoint_iterator_(resolver_.resolve({host, port})),
+        socket_(io_service_) {
+    boost::asio::connect(socket_, endpoint_iterator_);
+    Initialize();
+  }
 
-    void write(const move& move)
-    {
-        message message = message::client_move_message(move);
-        boost::system::error_code ignored_error;
-        boost::asio::write(socket, boost::asio::buffer(message.data_ptr(), message.length()), ignored_error);
-    }
+  void Write(const Move &move) {
+    Message message = Message::ClientMoveMessage(move);
+    boost::system::error_code ignored_error;
+    boost::asio::write(socket_, boost::asio::buffer(message.data_ptr(),
+                                                    message.length()),
+                       ignored_error);
+  }
 
-    const std::string& description() const
-    {
-        return game_description;
-    }
+  const std::string &description() const {
+    return game_description_;
+  }
 
-    const std::string& player() const
-    {
-        return assigned_player;
-    }
+  const std::string &player() const {
+    return assigned_player_;
+  }
 
-    move read()
-    {
-        message message = message::empty();
-        boost::system::error_code ignored_error;
-        boost::asio::read(socket, boost::asio::buffer(message.data_ptr(),header_length), ignored_error);
-        message.decode_header();
-        boost::asio::read(socket, boost::asio::buffer(message.body_ptr(),message.get_body_length()), ignored_error);
-        return decode_move(message);
-    }
+  Move Read() {
+    Message message = Message::Empty();
+    boost::system::error_code ignored_error;
+    boost::asio::read(socket_,
+                      boost::asio::buffer(message.data_ptr(), kHeaderLength),
+                      ignored_error);
+    message.DecodeHeader();
+    boost::asio::read(socket_, boost::asio::buffer(message.body_ptr(),
+                                                   message.body_length()),
+                      ignored_error);
+    return DecodeMove(message);
+  }
+
+private:
+  void Initialize() {
+    Message message = Message::Empty();
+    boost::system::error_code ignored_error;
+    boost::asio::read(socket_,
+                      boost::asio::buffer(message.data_ptr(), kHeaderLength),
+                      ignored_error);
+    message.DecodeHeader();
+    boost::asio::read(socket_, boost::asio::buffer(message.body_ptr(),
+                                                   message.body_length()),
+                      ignored_error);
+    game_description_ = std::string(message.body_ptr(),
+                                    message.body_ptr() + message.body_length());
+    boost::asio::read(socket_,
+                      boost::asio::buffer(message.data_ptr(), kHeaderLength),
+                      ignored_error);
+    message.DecodeHeader();
+    boost::asio::read(socket_, boost::asio::buffer(message.body_ptr(),
+                                                   message.body_length()),
+                      ignored_error);
+    assigned_player_ = std::string(message.body_ptr(),
+                                   message.body_ptr() + message.body_length());
+  }
+
+  boost::asio::io_service io_service_;
+  tcp::resolver resolver_;
+  tcp::resolver::iterator endpoint_iterator_;
+
+  tcp::socket socket_;
+
+  std::string game_description_;
+  std::string assigned_player_;
 };
 
 

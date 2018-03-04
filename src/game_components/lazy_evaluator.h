@@ -8,39 +8,38 @@
 #include <vector>
 #include "../actions/action.h"
 
-class action_application;
-class game_state;
+class ActionApplication;
 
-class lazy_evaluator {
-    std::vector<action_application> lazy_actions;
-    std::vector<action_result> action_results;
-    std::vector<size_t> evaluation_heads;
-    bool evaluating;
+class GameState;
+
+class LazyEvaluator {
 public:
-    lazy_evaluator()
-            : evaluating(false)
-    {}
+  LazyEvaluator()
+      : evaluating_(false) {}
 
-    template<typename ...Args>
-    void add_lazy_action(Args&&... args)
-    {
-        lazy_actions.emplace_back(std::forward<Args>(args)...);
-    }
+  template<typename ...Args>
+  void AddLazyAction(Args &&... args) {
+    lazy_actions_.emplace_back(std::forward<Args>(args)...);
+  }
 
-    void pop_lazy_action()
-    {
-        lazy_actions.pop_back();
-    }
+  void PopLazyAction() {
+    lazy_actions_.pop_back();
+  }
 
-    void clear()
-    {
-        lazy_actions.clear();
-        action_results.clear();
-    }
+  void Clear() {
+    lazy_actions_.clear();
+    action_results_.clear();
+  }
 
-    void evaluate_lazy_reversible(game_state *state);
-    void revert_last_lazy_evaluation(game_state *state);
+  void EvaluateLazyReversible(GameState *state);
 
+  void RevertLastLazyEvaluation(GameState *state);
+
+private:
+  std::vector<ActionApplication> lazy_actions_;
+  std::vector<ActionResult> action_results_;
+  std::vector<size_t> evaluation_heads_;
+  bool evaluating_;
 };
 
 

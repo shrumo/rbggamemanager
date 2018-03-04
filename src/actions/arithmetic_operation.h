@@ -6,54 +6,66 @@
 #define RBGGAMEMANAGER_ARITHMETIC_OPERATION_H
 
 #include "../game_components/name_resolver.h"
+#include "action_types.h"
 
-class game_state;
+class GameState;
 
-enum class arithmetic_operation_type : char
-{
-    VARIABLE_T,
-    CONSTANT_T,
-};
-
-class arithmetic_operation {
-protected:
-    arithmetic_operation_type type;
-    explicit arithmetic_operation(arithmetic_operation_type type) : type(type) {}
+// Used to represent all possible arithmetic operations that
+// can be created from states variables and constant values.
+// Example:
+//   ArithmeticOperation& ao = arithmetic_operations::variable(17);
+//   int value = ao.Value(state);
+//   if (value == state.Value(17))
+class ArithmeticOperation {
 public:
-    virtual int value(game_state *b) const=0;
-    virtual ~arithmetic_operation()=default;
-    arithmetic_operation_type get_type() const { return type; }
+  virtual int Value(GameState *b) const =0;
+
+  virtual ~ArithmeticOperation() = default;
+
+  ArithmeticOperationType type() const { return type_; }
+
+protected:
+  explicit ArithmeticOperation(ArithmeticOperationType type) : type_(type) {}
+
+private:
+  ArithmeticOperationType type_;
 };
 
-namespace arithmetic_operations
-{
-    class variable_value : public arithmetic_operation
-    {
-        token_id_t variable;
-    public:
-        variable_value(token_id_t variable) :
-                arithmetic_operation(arithmetic_operation_type :: VARIABLE_T),
-                variable(variable) {}
-        int value(game_state *b) const override;
-        token_id_t get_variables() const
-        {
-            return variable;
-        }
-    };
+namespace arithmetic_operations {
+  // Gives the value of the variable in current state.
+  class Variable : public ArithmeticOperation {
+  public:
+    explicit Variable(token_id_t variable) :
+        ArithmeticOperation(ArithmeticOperationType::kVariableType),
+        variable_(variable) {}
 
-    class constant_value : public arithmetic_operation
-    {
-        int constant;
-    public:
-        constant_value(int constant) :
-                arithmetic_operation(arithmetic_operation_type::CONSTANT_T),
-                constant(constant) {}
-        int value(game_state* b) const override;;
-        int get_constant()
-        {
-            return constant;
-        }
-    };
+    int Value(GameState *b) const override;
+
+    token_id_t variable() const {
+      return variable_;
+    }
+
+  private:
+    token_id_t variable_;
+  };
+
+  class Constant : public ArithmeticOperation {
+  public:
+    explicit Constant(int constant) :
+        ArithmeticOperation(ArithmeticOperationType::kConstantType),
+        constant_(constant) {}
+
+    int Value(GameState *b) const override;
+
+    int Value() const { return Value(nullptr); };
+
+    int constant() {
+      return constant_;
+    }
+
+  private:
+    int constant_;
+  };
 }
 
 

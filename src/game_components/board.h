@@ -12,36 +12,30 @@
 #include "../../rbgParser/src/game_move.hpp"
 #include "../parser_connection/game_nfa_creator.h"
 
-class board
-{
-    std::vector<token_id_t> fields;
-    size_t board_width;
-    size_t board_height;
+class Board {
 public:
-    board(size_t width, size_t height, token_id_t initial_value=0)
-            : fields(height * width, initial_value), board_width(width), board_height(height)
-    {}
+  Board(size_t width, size_t height, token_id_t initial_value = 0)
+      : fields_(height * width, initial_value),
+        width_(width),
+        height_(height) {}
 
-    size_t width() const
-    {
-        return board_width;
-    }
-    size_t height() const
-    {
-        return board_height;
-    }
+  size_t width() const { return width_; }
 
-    token_id_t& operator()(size_t x, size_t y)
-    {
-        return fields[y * board_width + x];
-    }
+  size_t height() const { return height_; }
 
-    token_id_t operator()(size_t x,size_t y) const
-    {
-        return fields[y * board_width + x];
-    }
+  token_id_t &operator()(size_t x, size_t y) {
+    return fields_[y * width_ + x];
+  }
+
+  token_id_t operator()(size_t x, size_t y) const {
+    return fields_[y * width_ + x];
+  }
+
+private:
+  std::vector<token_id_t> fields_;
+  size_t width_;
+  size_t height_;
 };
-
 
 
 #endif //RBGGAMEMANAGER_BOARD_H
