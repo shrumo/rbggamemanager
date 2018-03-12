@@ -66,5 +66,5 @@ void ServerGameInstance::Leave(const ClientConnection::pointer &client) {
   players_[player_token] = nullptr;
   state_.Reset();
   if (controlling_server_)
-    controlling_server_->do_accept();
+    controlling_server_->DoAccept();
 }

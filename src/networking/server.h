@@ -61,12 +61,12 @@ private:
   void Write();
 };
 
-class server;
+class Server;
 
 class ServerGameInstance {
 public:
   explicit ServerGameInstance(const GameDescription &description,
-                              server *controlling_server = nullptr)
+                              Server *controlling_server = nullptr)
       : state_(description), controlling_server_(controlling_server) {
     for (token_id_t player_token : description.declarations().players_ids()) {
       players_[player_token] = nullptr;
@@ -98,7 +98,7 @@ public:
       client->Send(state_.description().text_description());
       client->Send(state_.description().resolver().Name(pair.second));
     }
-    make_keeper_moves();
+    MakeKeeperMoves();
     auto moves = state_.FindMoves(&context_);
     available_moves_ = std::unordered_set<Move>(moves.begin(), moves.end());
     std::cout << state_ << std::endl;
@@ -154,7 +154,7 @@ public:
     }
     state_.MakeMove(move);
     Deliver(message, client);
-    make_keeper_moves();
+    MakeKeeperMoves();
     auto moves = state_.FindMoves(&context_);
     available_moves_ = std::unordered_set<Move>(moves.begin(), moves.end());
     std::cout << state_ << std::endl;
@@ -168,11 +168,11 @@ private:
   std::unordered_map<ClientConnection::pointer, token_id_t> clients_;
   std::unordered_map<token_id_t, ClientConnection::pointer> players_;
   GameState state_;
-  server *controlling_server_;
+  Server *controlling_server_;
   std::unordered_set<Move> available_moves_;
   SearchContext context_;
 
-  void make_keeper_moves() {
+  void MakeKeeperMoves() {
     while (state_.player() ==
            state_.description().deterministic_keeper_player_id() ||
            state_.player() ==
@@ -201,31 +201,33 @@ private:
   }
 };
 
-class server {
-  tcp::acceptor acceptor;
-  ServerGameInstance game_instance;
-
-  tcp::socket socket_;
+class Server {
 public:
-  explicit server(const GameDescription &description,
+  explicit Server(const GameDescription &description,
                   boost::asio::io_service &io_service, unsigned short port = 13)
-      : acceptor(io_service, tcp::endpoint(tcp::v4(), port)),
-        game_instance(description, this), socket_(io_service) {
-    do_accept();
+      : acceptor_(io_service, tcp::endpoint(tcp::v4(), port)),
+        game_instance_(description, this), socket_(io_service) {
+    DoAccept();
   }
 
-  void do_accept() {
-    acceptor.async_accept(socket_,
+  void DoAccept() {
+    acceptor_.async_accept(socket_,
                           [this](boost::system::error_code ec) {
-                            if (!ec && !game_instance.Full()) {
+                            if (!ec && !game_instance_.Full()) {
                               auto new_connection = ClientConnection::Create(
-                                  std::move(socket_), &game_instance);
+                                  std::move(socket_), &game_instance_);
                               new_connection->Start();
                             }
-                            if (!game_instance.Full())
-                              do_accept();
+                            if (!game_instance_.Full())
+                              DoAccept();
                           });
   }
+
+private:
+  tcp::acceptor acceptor_;
+  ServerGameInstance game_instance_;
+
+  tcp::socket socket_;
 };
 
 

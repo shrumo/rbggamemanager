@@ -47,14 +47,10 @@ cd ./scripts
 ```
 
 ### TODO
-* Refactor the whole code according to some style
+* IMPORTANT: The arithmetic is now supported in parser the code needs changes
 * Give nice interface to python programming
 * Fix all todos
-* Get rid of finalizer
 * Add arithmetic as soon as it will be available in parser
-* Ask about turn variable
 * Make asynchronous client
-* Make sample, not random client
 * Document code
-* Ask to change parser examples
 * Make additional server communication protocol to get information as a client

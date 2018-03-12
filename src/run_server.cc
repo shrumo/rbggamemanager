@@ -64,7 +64,7 @@ int main(int argc, char *argv[]) {
 
   try {
     boost::asio::io_service io_service;
-    server server(description, io_service,
+    Server server(description, io_service,
                   static_cast<unsigned short>(std::atoi(argv[argc - 1])));
 
     io_service.run();

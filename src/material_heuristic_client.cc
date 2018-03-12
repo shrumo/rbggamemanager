@@ -49,13 +49,13 @@ pieces_player_usages(const GameDescription &gd, size_t iters = 10) {
     GameState s(gd);
     auto moves = s.FindMoves(&context);
     for (const auto &move : moves)
-      collect_move_usages(previous_player, s, move, result);
+      collect_move_usages(previous_player, s, move, &result);
     while (!moves.empty()) {
       previous_player = s.player();
       s.MakeMove(moves[rand() % moves.size()]);
       moves = s.FindMoves(&context);
       for (const auto &move : moves)
-        collect_move_usages(previous_player, s, move, result);
+        collect_move_usages(previous_player, s, move, &result);
     }
   }
   return result;
