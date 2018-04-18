@@ -8,6 +8,12 @@
 #include <vector>
 #include <limits>
 
+// This is vector of booleans supporting fast reset function. Reset
+// is done in constant time, independent from the size of the vector.
+// Example:
+//   FastBitVector vec(10, false);
+//   vec[5] = true;
+//   vec.reset();
 class FastBitVector {
 public:
   FastBitVector(std::size_t size, bool value)

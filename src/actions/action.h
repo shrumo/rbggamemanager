@@ -15,6 +15,7 @@
 
 class GameState;
 
+// TODO(shrum): Add greedy actions and implement them in the search.
 // Represents abstract action that can be called on a game state.
 // Actions can be applied and reverted.
 // Example:

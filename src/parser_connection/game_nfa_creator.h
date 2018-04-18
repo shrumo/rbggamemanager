@@ -26,7 +26,8 @@
 #include "../actions/action.h"
 #include "../game_nfa/game_moves_description.h"
 
-// This structur alows the nfa creator to safe its current state information.
+// TODO(shrum): This must be adjusted to the changes in the parser.
+// This structure allows the nfa creator to safe its current state information.
 struct RecoverInformation {
   std::unique_ptr<fsm::Nfa<const Action *>> nfa_result;
   bool register_modifiers;
