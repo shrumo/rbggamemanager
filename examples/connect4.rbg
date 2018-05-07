@@ -8,6 +8,7 @@
          [e,e,e,e,e,e,e]
          
 #players = red, yellow
+#bound = 1000000
 #pieces = e, r, y
 #variables = 
 

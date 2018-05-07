@@ -5,6 +5,7 @@
 #ifndef RBGGAMEMANAGER_ARITHMETIC_OPERATION_H
 #define RBGGAMEMANAGER_ARITHMETIC_OPERATION_H
 
+#include <bits/unique_ptr.h>
 #include "../game_components/name_resolver.h"
 #include "action_types.h"
 
@@ -65,6 +66,40 @@ namespace arithmetic_operations {
 
   private:
     int constant_;
+  };
+
+  class Sum : public ArithmeticOperation {
+  public:
+    explicit Sum(std::vector<std::unique_ptr<ArithmeticOperation> > operations) :
+        ArithmeticOperation(ArithmeticOperationType::kSumType),
+        operations_(std::move(operations))
+    {}
+
+    int Value(GameState *b) const override;
+
+    const std::vector<std::unique_ptr<ArithmeticOperation> >& operations() const
+    {
+      return operations_;
+    }
+  private:
+    std::vector<std::unique_ptr<ArithmeticOperation> > operations_;
+  };
+
+  class Product : public ArithmeticOperation {
+  public:
+    explicit Product(std::vector<std::unique_ptr<ArithmeticOperation> > operations) :
+    ArithmeticOperation(ArithmeticOperationType::kProductType),
+    operations_(std::move(operations))
+    {}
+
+    int Value(GameState *b) const override;
+
+    const std::vector<std::unique_ptr<ArithmeticOperation> >& operations() const
+    {
+      return operations_;
+    }
+  private:
+    std::vector<std::unique_ptr<ArithmeticOperation>> operations_;
   };
 }
 

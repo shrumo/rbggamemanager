@@ -11,6 +11,7 @@
          row
          row
 
+#bound = 1000000
 #players = wplayer, bplayer
 
 #pieces = empty, wpiece, bpiece

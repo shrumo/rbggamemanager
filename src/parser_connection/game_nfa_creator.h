@@ -6,27 +6,20 @@
 #define RBGGAMEMANAGER_GAME_NFA_CREATOR_H
 
 #include "../../rbgParser/src/sum.hpp"
-#include "../../rbgParser/src/pure_sum.hpp"
 #include "../../rbgParser/src/concatenation.hpp"
-#include "../../rbgParser/src/pure_concatenation.hpp"
-#include "../../rbgParser/src/bracketed_move.hpp"
-#include "../../rbgParser/src/pure_bracketed_move.hpp"
 #include "../../rbgParser/src/shift.hpp"
 #include "../../rbgParser/src/ons.hpp"
 #include "../../rbgParser/src/offs.hpp"
 #include "../../rbgParser/src/assignments.hpp"
 #include "../../rbgParser/src/switch.hpp"
 #include "../../rbgParser/src/condition_check.hpp"
-#include "../../rbgParser/src/conjunction.hpp"
-#include "../../rbgParser/src/alternative.hpp"
-#include "../../rbgParser/src/negatable_condition.hpp"
-#include "../../rbgParser/src/comparison.hpp"
-#include "../../rbgParser/src/move_condition.hpp"
+#include "../../rbgParser/src/power_move.hpp"
+#include "../../rbgParser/src/star_move.hpp"
 #include "../../rbgParser/src/modifier_block.hpp"
 #include "../actions/action.h"
 #include "../game_nfa/game_moves_description.h"
 
-// This structur alows the nfa creator to safe its current state information.
+// This structure alows the nfa creator to safe its current state information.
 struct RecoverInformation {
   std::unique_ptr<fsm::Nfa<const Action *>> nfa_result;
   bool register_modifiers;
@@ -49,11 +42,6 @@ public:
     return std::move(nfa_result_);
   }
 
-  // This function extracts current created condition. Condition can be extracted only once after creation.
-  std::unique_ptr<Condition> ExtractCondition() {
-    return std::move(condition_result_);
-  }
-
   // This function extract current move description. Move description can be extracted only once after creation.
   GameMovesDescription ExtractDescription() {
     return GameMovesDescription(ExtractNfa(), std::move(blocks_states_),
@@ -67,15 +55,15 @@ public:
 
   void dispatch(const rbg_parser::sum &) override;
 
-  void dispatch(const rbg_parser::pure_sum &) override;
-
   void dispatch(const rbg_parser::concatenation &) override;
 
-  void dispatch(const rbg_parser::pure_concatenation &) override;
+  void dispatch(const rbg_parser::conditional_sum&) override;
 
-  void dispatch(const rbg_parser::bracketed_move &) override;
+  void dispatch(const rbg_parser::power_move&) override;
 
-  void dispatch(const rbg_parser::pure_bracketed_move &) override;
+  void dispatch(const rbg_parser::star_move&) override;
+
+  void dispatch(const rbg_parser::conditional_star_move&) override;
 
   void dispatch(const rbg_parser::shift &) override;
 
@@ -87,19 +75,23 @@ public:
 
   void dispatch(const rbg_parser::player_switch &) override;
 
+  void dispatch(const rbg_parser::keeper_switch&) override;
+
   void dispatch(const rbg_parser::condition_check &) override;
 
-  void dispatch(const rbg_parser::conjunction &) override;
-
-  void dispatch(const rbg_parser::alternative &) override;
-
-  void dispatch(const rbg_parser::negatable_condition &) override;
-
-  void dispatch(const rbg_parser::comparison &) override;
-
-  void dispatch(const rbg_parser::move_condition &) override;
-
   void dispatch(const rbg_parser::modifier_block &) override;
+
+  void dispatch(const rbg_parser::arithmetic_comparison &comparison) override;
+
+  void dispatch(const rbg_parser::player_check &check) override;
+
+  void dispatch(const rbg_parser::integer_arithmetic &arithmetic) override {}
+
+  void dispatch(const rbg_parser::variable_arithmetic &arithmetic) override {}
+
+  void dispatch(const rbg_parser::multiply_arithmetic &arithmetic) override {}
+
+  void dispatch(const rbg_parser::sum_arithmetic &arithmetic) override {}
 
 private:
   void RegisterModifier(fsm::state_id_t initial_id);
@@ -138,11 +130,7 @@ private:
     blocks_states_.push_back(0);
   }
 
-  void StopReusingFinals() {
-    reuse_final_as_initial_ = false;
-  }
-
-  void StartReusingFinals() {
+  void ReuseFinal() {
     reuse_final_as_initial_ = true;
   }
 
@@ -154,24 +142,23 @@ private:
     return nfa_result_->NewState();
   }
 
-  std::unique_ptr<ArithmeticOperation>
-  CreateOperation(const rbg_parser::token &token) {
-    std::unique_ptr<ArithmeticOperation> result;
-    if (token.get_type() == rbg_parser::number) {
-      result = std::unique_ptr<ArithmeticOperation>(
-          new arithmetic_operations::Constant(token.get_value()));
-    } else {
-      token_id_t variable_id = resolver_.Id(token.to_string());
-      result = std::unique_ptr<ArithmeticOperation>(
-          new arithmetic_operations::Variable(variable_id));
-    }
-    return result;
-  }
+//  std::unique_ptr<ArithmeticOperation>
+//  CreateOperation(const rbg_parser::token &token) {
+//    std::unique_ptr<ArithmeticOperation> result;
+//    if (token.get_type() == rbg_parser::number) {
+//      result = std::unique_ptr<ArithmeticOperation>(
+//          new arithmetic_operations::Constant(token.get_value()));
+//    } else {
+//      token_id_t variable_id = resolver_.Id(token.to_string());
+//      result = std::unique_ptr<ArithmeticOperation>(
+//          new arithmetic_operations::Variable(variable_id));
+//    }
+//    return result;
+//  }
 
 
   const NameResolver &resolver_;
   std::unique_ptr<fsm::Nfa<const Action *>> nfa_result_;
-  std::unique_ptr<Condition> condition_result_;
   std::unordered_map<std::string, const Action *> used_actions_;
 
   std::vector<std::unique_ptr<Action> > actions_;

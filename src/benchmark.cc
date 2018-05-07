@@ -37,16 +37,23 @@ struct PerftResult {
 };
 
 PerftResult perft(SearchContext *context, GameState *state, size_t depth) {
-  if (depth == 0)
+  if (depth == 0) {
     return {1, 1};
+  }
 
   std::vector<Move> moves;
   size_t new_depth = depth - 1;
   if (state->player() ==
-      state->description().deterministic_keeper_player_id()) {
+      state->description().deterministic_keeper_player_id())
+  {
     moves = state->FindFirstMove(context);
     new_depth = depth;
-  } else {
+  } else if (state->player() == state->description().nondeterministic_keeper_player_id())
+  {
+    moves = state->FindMoves(context);
+    new_depth = depth;
+  } else
+  {
     moves = state->FindMoves(context);
   }
   size_t leaf_count = 0;
@@ -180,7 +187,7 @@ int main(int argc, const char *argv[]) {
   if (vm.count("randomseed")) {
     srand(vm["randomseed"].as<uint>());
   }
-  if (vm.count("help")) {
+  if (vm.count("help") || !vm.count("input-file")) {
     std::cout << description << std::endl;
     return 1;
   }

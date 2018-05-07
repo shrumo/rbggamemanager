@@ -6,6 +6,7 @@
 #define RBGGAMEMANAGER_GAME_DESCRIPTION_H
 
 
+#include <limits>
 #include "name_resolver.h"
 #include "../game_nfa/automaton.h"
 #include "../game_nfa/game_moves_description.h"
@@ -72,15 +73,15 @@ public:
   }
 
 private:
-  std::vector<token_id_t> players_ids_;
-  token_id_t min_player_id_;
-  token_id_t max_player_id_;
-  std::vector<token_id_t> variables_ids_;
-  token_id_t min_variable_id_;
-  token_id_t max_variable_id_;
-  std::vector<token_id_t> pieces_ids_;
-  token_id_t min_piece_id_;
-  token_id_t max_piece_id_;
+  std::vector<token_id_t> players_ids_{};
+  token_id_t min_player_id_ = std::numeric_limits<token_id_t >::max();
+  token_id_t max_player_id_ = std::numeric_limits<token_id_t >::min();
+  std::vector<token_id_t> variables_ids_{};
+  token_id_t min_variable_id_ = std::numeric_limits<token_id_t >::max();
+  token_id_t max_variable_id_ = std::numeric_limits<token_id_t >::min();
+  std::vector<token_id_t> pieces_ids_{};
+  token_id_t min_piece_id_ = std::numeric_limits<token_id_t >::max();
+  token_id_t max_piece_id_ = std::numeric_limits<token_id_t >::min();
 };
 
 class GameDescription {

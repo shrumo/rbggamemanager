@@ -14,13 +14,15 @@
 class GameState;
 
 class Action;
-namespace conditions {
-  class MovePattern;
+namespace actions {
+  class ConditionCheck;
+  class NegatedConditionCheck;
 }
 
 class SearchContext {
 public:
-  friend class conditions::MovePattern;
+  friend class actions::ConditionCheck;
+  friend class actions::NegatedConditionCheck;
 
   SearchContext()
       :

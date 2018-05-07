@@ -11,6 +11,7 @@
 #pieces = empty, blackStone, whiteStone, tocapture, dame
 
 #variables = blackpass, whitepass
+#bound = 1000000
 
 #anySquare = (((1,0)^*+(-1,0)^*)((0,1)^*+(0,-1)^*))
 

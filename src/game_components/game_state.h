@@ -9,7 +9,6 @@
 #include <utility>
 
 #include "game_description.h"
-#include "lazy_evaluator.h"
 #include "search_context.h"
 
 // This MoveResult can be used to revert moves and get
@@ -68,15 +67,12 @@ public:
 
   friend class actions::Assignment;
 
-  friend class actions::Lazy;
+  friend class actions::ConditionCheck;
 
-  friend class actions::Incrementation;
-
-  friend class actions::Decrementation;
+  friend class actions::NegatedConditionCheck;
 
   // Move pattern will be able to use the state_ to check the condition
   // This will speed up things. (We do not have to make a copy.)
-  friend class conditions::MovePattern;
 
   explicit GameState(const GameDescription &description)
       : parent_(description),
@@ -164,7 +160,6 @@ public:
         current_state_ = parent_.moves_description().nfa()[current_state_].transitions().front().target();
       }
     }
-    lazy_controller_.Clear();
   }
 
   MoveResult MakeRevertibleMove(const Move &move) {
@@ -223,8 +218,6 @@ public:
 private:
   const GameDescription &parent_;
 
-  LazyEvaluator lazy_controller_;
-
   Board current_board_;
   size_t current_x_, current_y_;
   fsm::state_id_t current_state_;
@@ -238,10 +231,6 @@ private:
     sigma_[CurrentPiece()]--;
     current_board_(current_x_, current_y_) = piece;
     sigma_[piece]++;
-  }
-
-  LazyEvaluator &lazy() {
-    return lazy_controller_;
   }
 
   bool SearchingForMoves() {

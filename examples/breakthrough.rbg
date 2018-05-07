@@ -10,6 +10,7 @@
          [w, w, w, w, w, w, w, w]
          
 #players = white, black
+#bound = 1000000
 #pieces = e, w, b
 #variables = 
 

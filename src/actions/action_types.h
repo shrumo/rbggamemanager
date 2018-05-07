@@ -14,9 +14,6 @@ enum class ActionType {
   // Modifiers
       kOffType,
   kAssignmentType,
-  kIncrementationType,
-  kDecrementationType,
-  kLazyType,
 
   kModifiersEndMarker,
 
@@ -24,7 +21,15 @@ enum class ActionType {
       kEmptyType,
   kShiftType,
   kOnType,
-  kConditionType,
+  kConditionCheckType,
+  kNegatedConditionCheckType,
+
+  kArithmeticLessComparisonType,
+  kArithmeticLessEqualComparisonType,
+  kArithmeticEqualComparisonType,
+  kArithmeticNotEqualComparisonType,
+
+  kPlayerCheck,
 };
 
 constexpr bool IsSwitchType(ActionType type) {
@@ -35,20 +40,11 @@ constexpr bool IsModifierType(ActionType type) {
   return type < ActionType::kModifiersEndMarker;
 }
 
-enum class ConditionType : char {
-  kConjunctionType,
-  kAlternativeType,
-  kNegationType,
-  kLessType,
-  kLessEqualType,
-  kEqualType,
-  kNotEqualType,
-  kMovePatternType,
-};
-
 enum class ArithmeticOperationType : char {
   kVariableType,
   kConstantType,
+  kSumType,
+  kProductType,
 };
 
 #endif //RBGGAMEMANAGER_ACTION_TYPES_H

@@ -21,7 +21,6 @@ ActionResult actions::On::Apply(GameState *b) const {
 }
 
 ActionResult actions::Off::Apply(GameState *b) const {
-  b->lazy().EvaluateLazyReversible(b);
   size_t previous_piece = b->CurrentPiece();
   b->SetPiece(piece_);
   return {true, previous_piece};
@@ -30,11 +29,9 @@ ActionResult actions::Off::Apply(GameState *b) const {
 void
 actions::Off::Revert(GameState *b, const ActionResult &apply_result) const {
   b->SetPiece(apply_result.revert_piece());
-  b->lazy().RevertLastLazyEvaluation(b);
 }
 
 ActionResult actions::PlayerSwitch::Apply(GameState *b) const {
-  b->lazy().EvaluateLazyReversible(b);
   size_t previous_player = b->player();
   b->current_player_ = player_;
   return {true, previous_player};
@@ -43,11 +40,9 @@ ActionResult actions::PlayerSwitch::Apply(GameState *b) const {
 void actions::PlayerSwitch::Revert(GameState *b,
                                    const ActionResult &apply_result) const {
   b->current_player_ = apply_result.revert_player();
-  b->lazy().RevertLastLazyEvaluation(b);
 }
 
 ActionResult actions::Assignment::Apply(GameState *b) const {
-  b->lazy().EvaluateLazyReversible(b);
   int previous_value = b->Value(variable);
   b->sigma_[variable] = value->Value(b);
   return {true, previous_value};
@@ -56,38 +51,32 @@ ActionResult actions::Assignment::Apply(GameState *b) const {
 void actions::Assignment::Revert(GameState *b,
                                  const ActionResult &apply_result) const {
   b->sigma_[variable] = apply_result.revert_value();
-  b->lazy().RevertLastLazyEvaluation(b);
 }
 
-ActionResult actions::Lazy::Apply(GameState *b) const {
-  b->lazy().AddLazyAction(b->x(), b->y(), lazy_action_);
-  return true;
+ActionResult actions::ConditionCheck::Apply(GameState *b) const {
+  return b->search_context().CheckPattern(*move_nfa_, index_);
 }
 
-void actions::Lazy::Revert(GameState *b, const ActionResult &) const {
-  b->lazy().PopLazyAction();
+ActionResult actions::NegatedConditionCheck::Apply(GameState *b) const {
+  return !b->search_context().CheckPattern(*move_nfa_, index_);
 }
 
-ActionResult actions::Incrementation::Apply(GameState *b) const {
-  b->sigma_[variable_]++;
-  b->sigma_[variable_] %= b->description().bound();
-  return true;
+ActionResult actions::ArithmeticLessComparison::Apply(GameState *b) const {
+  return left_->Value(b) < right_->Value(b);
 }
 
-void actions::Incrementation::Revert(GameState *b, const ActionResult &) const {
-  b->sigma_[variable_]--;
-  b->sigma_[variable_] += b->description().bound();
-  b->sigma_[variable_] %= b->description().bound();
+ActionResult actions::ArithmeticEqualComparison::Apply(GameState *b) const {
+  return left_->Value(b) == right_->Value(b);
 }
 
-ActionResult actions::Decrementation::Apply(GameState *b) const {
-  b->sigma_[variable_]--;
-  b->sigma_[variable_] += b->description().bound();
-  b->sigma_[variable_] %= b->description().bound();
-  return true;
+ActionResult actions::ArithmeticLessEqualComparison::Apply(GameState *b) const {
+  return left_->Value(b) <= right_->Value(b);
 }
 
-void actions::Decrementation::Revert(GameState *b, const ActionResult &) const {
-  b->sigma_[variable_]++;
-  b->sigma_[variable_] %= b->description().bound();
+ActionResult actions::ArithmeticNotEqualComparison::Apply(GameState *b) const {
+  return left_->Value(b) != right_->Value(b);
+}
+
+ActionResult actions::PlayerCheck::Apply(GameState *b) const {
+  return b->player() == player_;
 }

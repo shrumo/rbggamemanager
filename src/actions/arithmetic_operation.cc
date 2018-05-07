@@ -13,3 +13,21 @@ int arithmetic_operations::Variable::Value(GameState *b) const {
 int arithmetic_operations::Constant::Value(GameState *b) const {
   return (constant_ + b->description().bound()) % b->description().bound();
 }
+
+int arithmetic_operations::Sum::Value(GameState *b) const {
+  int result = 0;
+  for(const auto& child : operations_)
+  {
+    result += child->Value(b);
+  }
+  return result;
+}
+
+int arithmetic_operations::Product::Value(GameState *b) const {
+  int result = 1;
+  for(const auto& child : operations_)
+  {
+    result *= child->Value(b);
+  }
+  return (result + b->description().bound()) % b->description().bound();
+}

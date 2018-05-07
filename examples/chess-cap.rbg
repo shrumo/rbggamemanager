@@ -21,6 +21,8 @@
     pawnLine(white)
     backLine(white)
 
+#bound = 1000000
+
 #anyRook(color) = color~RookMoved, color~RookUnmoved
 #majorPieces(color) = color~RookMoved, color~Knight, color~Bishop, color~Queen
 #singleColorPieces(color) = color~Pawn, color~King, anyRook(color), color~Knight, color~Bishop, color~Queen

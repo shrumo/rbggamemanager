@@ -16,6 +16,7 @@
     line(whiteMan)
 
 #players = black, white
+#bound = 1000000
 #pieces = empty, whiteMan, whiteKing, blackMan, blackKing
 #variables =
 

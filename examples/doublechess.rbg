@@ -17,6 +17,8 @@
 #emptyLine =
     [empty, empty, empty, empty, empty, empty, empty, empty, empty, empty, empty, empty, empty, empty, empty, empty]
 
+#bound = 1000000
+
 #board =
     backLine(black)
     pawnLine(black)

@@ -9,9 +9,10 @@
 #include <memory>
 
 #include "../game_components/name_resolver.h"
-#include "condition.h"
 #include "action_types.h"
 #include "action_application.h"
+#include "../game_nfa/automaton.h"
+#include "arithmetic_operation.h"
 
 class GameState;
 
@@ -96,18 +97,148 @@ namespace actions {
     std::vector<bool> pieces_;
   };
 
-  // Checks if some condition is true on the current state.
-  class ConditionAction : public Action {
+  // Check arithmetic comparison
+  class ArithmeticLessComparison : public Action {
   public:
-    explicit ConditionAction(std::unique_ptr<Condition> cond)
-        : Action(ActionType::kConditionType), cond_(std::move(cond)) {}
+    ArithmeticLessComparison(std::unique_ptr<ArithmeticOperation> left,
+                            std::unique_ptr<ArithmeticOperation> right)
+        : Action(ActionType ::kArithmeticLessComparisonType),
+          left_(std::move(left)),
+          right_(std::move(right))
+    {}
 
-    ActionResult Apply(GameState *b) const override { return cond_->Check(b); }
+    ActionResult Apply(GameState *b) const override;
 
-    const Condition *cond() const { return cond_.get(); }
+    const ArithmeticOperation* left() const
+    {
+      return left_.get();
+    }
+
+    const ArithmeticOperation* right() const
+    {
+      return right_.get();
+    }
 
   private:
-    std::unique_ptr<Condition> cond_;
+    std::unique_ptr<ArithmeticOperation> left_, right_;
+  };
+
+  // Check arithmetic comparison
+  class ArithmeticLessEqualComparison : public Action {
+  public:
+    ArithmeticLessEqualComparison(std::unique_ptr<ArithmeticOperation> left,
+                             std::unique_ptr<ArithmeticOperation> right)
+        : Action(ActionType ::kArithmeticLessEqualComparisonType),
+          left_(std::move(left)),
+          right_(std::move(right))
+    {}
+
+    ActionResult Apply(GameState *b) const override;
+
+    const ArithmeticOperation* left() const
+    {
+      return left_.get();
+    }
+
+    const ArithmeticOperation* right() const
+    {
+      return right_.get();
+    }
+
+  private:
+    std::unique_ptr<ArithmeticOperation> left_, right_;
+  };
+
+  // Check arithmetic comparison
+  class ArithmeticEqualComparison : public Action {
+  public:
+    ArithmeticEqualComparison(std::unique_ptr<ArithmeticOperation> left,
+                             std::unique_ptr<ArithmeticOperation> right)
+        : Action(ActionType ::kArithmeticEqualComparisonType),
+          left_(std::move(left)),
+          right_(std::move(right))
+    {}
+
+    ActionResult Apply(GameState *b) const override;
+
+    const ArithmeticOperation* left() const
+    {
+      return left_.get();
+    }
+
+    const ArithmeticOperation* right() const
+    {
+      return right_.get();
+    }
+
+  private:
+    std::unique_ptr<ArithmeticOperation> left_, right_;
+  };
+
+  // Check arithmetic comparison
+  class ArithmeticNotEqualComparison : public Action {
+  public:
+    ArithmeticNotEqualComparison(std::unique_ptr<ArithmeticOperation> left,
+                              std::unique_ptr<ArithmeticOperation> right)
+        : Action(ActionType ::kArithmeticNotEqualComparisonType),
+          left_(std::move(left)),
+          right_(std::move(right))
+    {}
+
+    ActionResult Apply(GameState *b) const override;
+
+    const ArithmeticOperation* left() const
+    {
+      return left_.get();
+    }
+
+    const ArithmeticOperation* right() const
+    {
+      return right_.get();
+    }
+
+  private:
+    std::unique_ptr<ArithmeticOperation> left_, right_;
+  };
+
+  // Check move pattern
+  class ConditionCheck : public Action {
+  public:
+    ConditionCheck(unsigned int index,
+                   std::unique_ptr<fsm::Nfa<const Action *> > move_nfa)
+        : Action(ActionType ::kConditionCheckType),
+          index_(index),
+          move_nfa_(std::move(move_nfa))
+    {}
+
+    ActionResult Apply(GameState *b) const override;
+
+    const fsm::Nfa<const Action *> *nfa() const {
+      return move_nfa_.get();
+    }
+  private:
+    unsigned int index_;
+    std::unique_ptr<fsm::Nfa<const Action *> > move_nfa_;
+  };
+
+  // Check negated move pattern
+  class NegatedConditionCheck : public Action {
+  public:
+    NegatedConditionCheck(unsigned int index,
+                   std::unique_ptr<fsm::Nfa<const Action *> > move_nfa)
+        : Action(ActionType ::kNegatedConditionCheckType),
+          index_(index),
+          move_nfa_(std::move(move_nfa))
+    {}
+
+    ActionResult Apply(GameState *b) const override;
+
+    const fsm::Nfa<const Action *> *nfa() const {
+      return move_nfa_.get();
+    }
+  private:
+    unsigned int index_;
+    std::unique_ptr<fsm::Nfa<const Action *> > move_nfa_;
   };
 
   // Off places specified piece on the current position in game state.
@@ -166,52 +297,22 @@ namespace actions {
     std::unique_ptr<ArithmeticOperation> value;
   };
 
-  // Increments a variable.
-  class Incrementation : public Action {
+  class PlayerCheck : public Action {
   public:
-    explicit Incrementation(size_t variable, unsigned int index = 0)
-        : Action(ActionType::kIncrementationType, index), variable_(variable) {}
+    explicit PlayerCheck(token_id_t player)
+        : Action(ActionType::kPlayerCheck), player_(player)
+    {
+    }
 
     ActionResult Apply(GameState *b) const override;
 
-    void Revert(GameState *b, const ActionResult &apply_result) const override;
-
-    token_id_t variable() const { return variable_; }
-
-  private:
-    token_id_t variable_;
-  };
-
-  // Decrements a variable.
-  class Decrementation : public Action {
-  public:
-    explicit Decrementation(size_t variable, unsigned int index = 0)
-        : Action(ActionType::kDecrementationType, index), variable_(variable) {}
-
-    ActionResult Apply(GameState *b) const override;
-
-    void Revert(GameState *b, const ActionResult &apply_result) const override;
-
-    token_id_t variable() const { return variable_; }
+    token_id_t player() const
+    {
+      return player_;
+    }
 
   private:
-    token_id_t variable_;
-  };
-
-  // Lazy actions are applied when modifier is applied.
-  class Lazy : public Action {
-  public:
-    explicit Lazy(Action *lazy_action, unsigned int index = 0) : Action(
-        ActionType::kLazyType, index), lazy_action_(lazy_action) {}
-
-    ActionResult Apply(GameState *b) const override;
-
-    void Revert(GameState *b, const ActionResult &apply_result) const override;
-
-    const Action *action() const { return lazy_action_; }
-
-  private:
-    Action *lazy_action_;
+    token_id_t player_;
   };
 }
 

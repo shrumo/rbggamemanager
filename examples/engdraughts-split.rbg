@@ -15,6 +15,7 @@
     offsetLine(whiteMan)
     line(whiteMan)
 
+#bound = 1000000
 #players = black, white
 #pieces = empty, whiteMan, whiteKing, blackMan, blackKing
 #variables = 
