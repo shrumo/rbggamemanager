@@ -48,9 +48,10 @@ cd ./scripts
 
 ### TODO
 * IMPORTANT: The arithmetic is now supported in parser the code needs changes
+* IMPORTANT: Adapt to the greedy operators
+* Change the board representation to graph as soon as it will be supported in parser
 * Give nice interface to python programming
 * Fix all todos
-* Add arithmetic as soon as it will be available in parser
 * Make asynchronous client
 * Document code
 * Make additional server communication protocol to get information as a client

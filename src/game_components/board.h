@@ -12,6 +12,7 @@
 #include "../../rbgParser/src/game_move.hpp"
 #include "../parser_connection/game_nfa_creator.h"
 
+// TODO(shrum): Change this to graph representation.
 class Board {
 public:
   Board(size_t width, size_t height, token_id_t initial_value = 0)
