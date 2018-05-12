@@ -118,7 +118,7 @@
     ((1, forwardDirection 1) + (-1, forwardDirection 1))(opponentColor~Pawn)
 
 #isNotAttackedBy(opponentColor; forwardDirection) =
-    (?
+    (!
         isAttackedByBishopOrQueen(opponentColor)
       + isAttackedByRookOrQueen(opponentColor)
 //      + isAttackedByQueen(opponentColor)
@@ -231,12 +231,11 @@
 
 
 #rules =
+    ->white
     (
         allMoves(+;-;white;black)
         [$turn = $turn + 1]
         allMoves(-;+;black;white)
         [$turn = $turn + 1]
     )^*
-
-#finalizer = ()
 

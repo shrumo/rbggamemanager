@@ -154,6 +154,7 @@ void GameNfaCreator::StartBlock() { block_started_ = true; }
 
 void GameNfaCreator::dispatch(const rbg_parser::conditional_sum &) {
   // TODO(shrum): Introduce sth new here.
+  exit(0);
 }
 
 void GameNfaCreator::dispatch(const rbg_parser::assignment &move) {
@@ -207,6 +208,7 @@ void GameNfaCreator::dispatch(const rbg_parser::power_move &move) {
 
 void GameNfaCreator::dispatch(const rbg_parser::conditional_star_move &) {
   // TODO(shrum): Introduce sth new here.
+  exit(0);
 }
 
 void GameNfaCreator::dispatch(const rbg_parser::keeper_switch &) {
@@ -268,7 +270,7 @@ void GameNfaCreator::dispatch(const rbg_parser::arithmetic_comparison &compariso
       }
       case rbg_parser::neq: {
         std::unique_ptr<Action> action(
-            new actions::ArithmeticEqualComparison(CreateOperation(*comparison.get_left_side(), resolver_),
+            new actions::ArithmeticNotEqualComparison(CreateOperation(*comparison.get_left_side(), resolver_),
                                                    CreateOperation(*comparison.get_right_side(), resolver_)));
         used_actions_[move_identifier] = action.get();
         actions_.push_back(std::move(action));
@@ -292,7 +294,7 @@ void GameNfaCreator::dispatch(const rbg_parser::arithmetic_comparison &compariso
       }
       case rbg_parser::ge: {
         std::unique_ptr<Action> action(
-            new actions::ArithmeticEqualComparison(CreateOperation(*comparison.get_right_side(), resolver_),
+            new actions::ArithmeticLessComparison(CreateOperation(*comparison.get_right_side(), resolver_),
                                                    CreateOperation(*comparison.get_left_side(), resolver_)));
         used_actions_[move_identifier] = action.get();
         actions_.push_back(std::move(action));

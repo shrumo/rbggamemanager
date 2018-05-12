@@ -2,6 +2,7 @@
 // notes:
 // - area scoring
 // - no ko rule
+// - NEEDS TO BE REWRITTEN TO NEW VERSION
 
 #boardLine = [empty, empty, empty, empty, empty, empty, empty, empty, empty, empty, empty, empty, empty, empty, empty, empty, empty, empty, empty]
 #board = boardLine boardLine boardLine boardLine boardLine boardLine boardLine boardLine boardLine boardLine boardLine boardLine boardLine boardLine boardLine boardLine boardLine boardLine boardLine 

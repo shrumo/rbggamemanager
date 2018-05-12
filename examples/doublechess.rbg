@@ -42,7 +42,7 @@
 
 #players = white, black
 #pieces = allPieces, empty
-#variables = pawnDoubleMove
+#variables = pawnDoubleMove, turn
 
 #anySquare = (((1,0)^*+(-1,0)^*)((0,1)^*+(0,-1)^*))
 
@@ -129,17 +129,17 @@
     ((1, forwardDirection 1) + (-1, forwardDirection 1))(opponentColor~Pawn)
 
 #isNotAttackedBy(opponentColor; forwardDirection) =
-    (? not (!
+    (!
         isAttackedByBishopOrQueen(opponentColor)
       + isAttackedByRookOrQueen(opponentColor)
 //      + isAttackedByQueen(opponentColor)
       + isAttackedByKnight(opponentColor)
       + isAttackedByKing(opponentColor)
       + isAttackedByPawn(opponentColor; forwardDirection)
-    ))
+    )
 
 #checked(color; opponentColor; forwardDirection) =
-    (!
+    (
         anySquare
         (anyKing(color))
         (
@@ -178,15 +178,15 @@
 
 #checkForPromotion(forwardDirection; color) =
     (
-        (?(!(0, forwardDirection 1)))[color~Pawn]
-      + (? not (!(0, forwardDirection 1)))[majorPieces(color)]
+        (?(0, forwardDirection 1))[color~Pawn]
+      + (!(0, forwardDirection 1))[majorPieces(color)]
     )
 
 #standardPawnMove(forwardDirection; backDirection; color; opponentColor) =
     pickUpPiece(color~Pawn)
     (
         // promotion cannot occur
-        (? not (!(0, backDirection 2)))
+        (!(0, backDirection 2))
         (
             (0, forwardDirection 1)(empty)
             (0, forwardDirection 1)(empty)
@@ -208,7 +208,7 @@
     )
 
 #enPassant(forwardDirection; color; distanceFromCaptured; distanceFromBoardEdge) =
-    (?(! (0,forwardDirection distanceFromBoardEdge)))
+    (? (0,forwardDirection distanceFromBoardEdge))
     [empty]
     (0,forwardDirection distanceFromCaptured)
     [color~Pawn]
@@ -237,7 +237,7 @@
           + standardPawnMove(forwardDirection; backDirection; color; opponentColor)
         )
       + enPassantPawnMove(forwardDirection; color)
-    ) (? not checked(color; opponentColor; forwardDirection))
+    ) (! checked(color; opponentColor; forwardDirection))
     ->
     (
         (? $turn<=200)
@@ -245,17 +245,19 @@
     )
     ->
     (
-        (? not checked(opponentColor; color; backDirection))[$color=5,$opponentColor=5]
+        (! checked(opponentColor; color; backDirection))[$color=5,$opponentColor=5]
       + (? checked(opponentColor; color; backDirection))[$color=10,$opponentColor=0]
     )
     ->opponentColor
 
 
 #rules =
+    ->white
     (
         allMoves(+;-;white;black)
+        [$turn = $turn + 1]
         allMoves(-;+;black;white)
+        [$turn = $turn + 1]
     )^*
 
-#finalizer = ()
 

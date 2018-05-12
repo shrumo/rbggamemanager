@@ -31,7 +31,7 @@
 
 #players = white, black
 #pieces = allPieces, empty
-#variables = pawnDoubleMove, whiteKingMoved, blackKingMoved
+#variables = pawnDoubleMove, whiteKingMoved, blackKingMoved, turn, debug
 
 #anySquare = (((1,0)^*+(-1,0)^*)((0,1)^*+(0,-1)^*))
 
@@ -117,14 +117,14 @@
     ((1, forwardDirection 1) + (-1, forwardDirection 1))(opponentColor~Pawn)
 
 #isNotAttackedBy(opponentColor; forwardDirection) =
-    (? not (!
+    (!
         isAttackedByBishopOrQueen(opponentColor)
       + isAttackedByRookOrQueen(opponentColor)
 //      + isAttackedByQueen(opponentColor)
       + isAttackedByKnight(opponentColor)
       + isAttackedByKing(opponentColor)
       + isAttackedByPawn(opponentColor; forwardDirection)
-    ))
+    )
 
 #checked(color; opponentColor; forwardDirection) =
     (!
@@ -168,15 +168,15 @@
 
 #checkForPromotion(forwardDirection; color) =
     (
-        (?(!(0, forwardDirection 1)))[color~Pawn]
-      + (? not (!(0, forwardDirection 1)))[majorPieces(color)]
+        (? (0, forwardDirection 1))[color~Pawn]
+      + (! (0, forwardDirection 1))[majorPieces(color)]
     )
 
 #standardPawnMove(forwardDirection; backDirection; color; opponentColor) =
     pickUpPiece(color~Pawn)
     (
         // promotion cannot occur
-        (? not (!(0, backDirection 2)))
+        (!(0, backDirection 2))
         (0, forwardDirection 1)(empty)
         (0, forwardDirection 1)(empty)
         [color~Pawn]
@@ -218,8 +218,10 @@
     )
     ->
     (
-        (? $opponentColor~King > 0)[$color=5,$opponentColor=5]
-      + (? $opponentColor~King == 0)[$color=10,$opponentColor=0]
+        [$debug = $opponentColor~King]
+        ->
+        ((? $opponentColor~King > 0)[$color=5,$opponentColor=5]
+      + (? $opponentColor~King == 0)[$color=10,$opponentColor=0])
     )
     ->
     (
@@ -230,10 +232,12 @@
 
 
 #rules =
+    ->white
     (
         allMoves(+;-;white;black)
+        [$turn = $turn + 1]
         allMoves(-;+;black;white)
+        [$turn = $turn + 1]
     )^*
 
-#finalizer = ()
 

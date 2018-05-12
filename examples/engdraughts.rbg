@@ -18,7 +18,7 @@
 #players = black, white
 #bound = 1000000
 #pieces = empty, whiteMan, whiteKing, blackMan, blackKing
-#variables =
+#variables = turn
 
 #anySquare = (((1,0)^*+(-1,0)^*)((0,1)^*+(0,-1)^*))
 
@@ -70,7 +70,7 @@
       jumpInGivenDirection(+;forward;color;oppColor)
      +jumpInGivenDirection(-;forward;color;oppColor)
     )^*
-    (? not (! canManJump(forward;oppColor)))
+    (! canManJump(forward;oppColor))
   )
 #capturingKingMove(color; oppColor) = (
     (
@@ -85,17 +85,17 @@
      +jumpInGivenDirection(+;-;color;oppColor)
      +jumpInGivenDirection(-;-;color;oppColor)
     )^*
-    (? not (! canKingJump(oppColor)))
+    (! canKingJump(oppColor))
   )
 #placeMan(forward; color) =
     (
-        (?(!(0,forward 1)))[color~Man]
-      + (?not (!(0, forward 1)))[color~King]
+        (?(0,forward 1))[color~Man]
+      + (!(0, forward 1))[color~King]
     )
 
 #allMoves(forward; color; oppColor) =
     (
-        (? not (!canCapture(forward; color; oppColor)))
+        (!canCapture(forward; color; oppColor))
         anySquare
         (
             (color~Man)[empty]
@@ -123,9 +123,11 @@
     )
     
 #rules =
+    ->white
     (
         allMoves(+;white;black)
+        [$turn = $turn + 1]
         allMoves(-;black;white)
+        [$turn = $turn + 1]
     )^*
 
-#finalizer = ()
