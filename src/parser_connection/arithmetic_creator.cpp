@@ -18,6 +18,7 @@ public:
 private:
   void dispatch(const rbg_parser::sum &) override {}
   void dispatch(const rbg_parser::concatenation &) override {}
+  void dispatch(const rbg_parser::sloth &) override {};
   void dispatch(const rbg_parser::conditional_sum&) override {}
   void dispatch(const rbg_parser::power_move&) override {}
   void dispatch(const rbg_parser::star_move&) override {}

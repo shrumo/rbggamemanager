@@ -6,14 +6,13 @@
 #include "../game_components/game_state.h"
 
 ActionResult actions::Shift::Apply(GameState *b) const {
-  b->current_x_ += delta_x_;
-  b->current_y_ += delta_y_;
-  return b->x() < b->width() && b->y() < b->height();
+  vertex_t previous_pos = b->current_pos_;
+  b->current_pos_ = b->current_board_.Next(b->current_pos_,edge_name_);
+  return {b->current_pos_ >= 0, previous_pos};
 }
 
-void actions::Shift::Revert(GameState *state, const ActionResult &) const {
-  state->current_x_ -= delta_x_;
-  state->current_y_ -= delta_y_;
+void actions::Shift::Revert(GameState *state, const ActionResult & r) const {
+  state->current_pos_ = r.revert_pos();
 }
 
 ActionResult actions::On::Apply(GameState *b) const {

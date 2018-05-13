@@ -15,13 +15,11 @@
 // information about move.
 class MoveResult {
 public:
-  MoveResult(std::vector<ActionResult> actions_results, size_t previous_x,
-             size_t previous_y,
+  MoveResult(std::vector<ActionResult> actions_results, size_t previous_pos,
              fsm::state_id_t previous_state,
              std::vector<ActionApplication> applied_modifiers)
       : actions_results_(std::move(actions_results)),
-        previous_x_(previous_x),
-        previous_y_(previous_y),
+        previous_pos_(previous_pos),
         previous_state_(previous_state),
         applied_modifiers_(std::move(applied_modifiers)) {}
 
@@ -33,12 +31,9 @@ public:
     return applied_modifiers_;
   }
 
-  size_t previous_x() const {
-    return previous_x_;
-  }
-
-  size_t previous_y() const {
-    return previous_y_;
+  vertex_t previous_pos() const
+  {
+    return previous_pos_;
   }
 
   fsm::state_id_t previous_state() const {
@@ -47,7 +42,7 @@ public:
 
 private:
   std::vector<ActionResult> actions_results_;
-  size_t previous_x_, previous_y_;
+  vertex_t previous_pos_;
   fsm::state_id_t previous_state_;
   std::vector<ActionApplication> applied_modifiers_;
 };
@@ -77,30 +72,25 @@ public:
   explicit GameState(const GameDescription &description)
       : parent_(description),
         current_board_(description.initial_board()),
-        current_x_(0), current_y_(0),
+        current_pos_(0),
         current_state_(description.moves_description().nfa().initial()),
         sigma_(description.VariablesCount(), 0),
-        current_player_(description.resolver().Id("_epsilon")) {
-    for (size_t y = 0; y < current_board_.height(); y++) {
-      for (size_t x = 0; x < current_board_.width(); x++) {
-        sigma_[current_board_(x, y)]++;
-      }
+        current_player_(description.resolver().Id("*")) {
+    for (vertex_t v= 0; v < current_board_.size(); v++) {
+        sigma_[current_board_[v]]++;
     }
   }
 
   // Resets the game to the initial state_.
   void Reset() {
     current_board_ = parent_.initial_board();
-    current_x_ = 0;
-    current_y_ = 0;
+    current_pos_ = 0;
     current_state_ = parent_.moves_description().nfa().initial();
     std::fill(sigma_.begin(), sigma_.end(), 0);
-    for (size_t y = 0; y < current_board_.height(); y++) {
-      for (size_t x = 0; x < current_board_.width(); x++) {
-        sigma_[current_board_(x, y)]++;
-      }
+    for (vertex_t v= 0; v < current_board_.size(); v++) {
+      sigma_[current_board_[v]]++;
     }
-    current_player_ = parent_.resolver().Id("_epsilon");
+    current_player_ = parent_.resolver().Id("*");
   }
 
   fsm::state_id_t nfa_state() const {
@@ -109,7 +99,7 @@ public:
 
   // Returns the piece at current position.
   token_id_t CurrentPiece() const {
-    return current_board_(current_x_, current_y_);
+    return current_board_[current_pos_];
   }
 
   const GameDescription &description() const {
@@ -120,24 +110,13 @@ public:
     return sigma_[variable];
   }
 
-  const Board &board() const {
+  const GraphBoard &board() const {
     return current_board_;
   }
 
-  size_t x() const {
-    return current_x_;
-  }
-
-  size_t y() const {
-    return current_y_;
-  }
-
-  size_t width() const {
-    return current_board_.width();
-  }
-
-  size_t height() const {
-    return current_board_.height();
+  vertex_t pos() const
+  {
+    return current_pos_;
   }
 
   token_id_t player() const {
@@ -148,8 +127,7 @@ public:
     for (const auto &block : move.blocks()) {
       current_state_ = parent_.moves_description().CorrespondingState(
           block.id());
-      current_x_ = block.x();
-      current_y_ = block.y();
+      current_pos_ = block.pos();
       while (
           parent_.moves_description().nfa()[current_state_].transitions().size() ==
           1 &&
@@ -165,14 +143,12 @@ public:
   MoveResult MakeRevertibleMove(const Move &move) {
     std::vector<ActionResult> results;
     std::vector<ActionApplication> applied_modifiers;
-    size_t previous_x = current_x_;
-    size_t previous_y = current_y_;
+    vertex_t previous_pos = current_pos_;
     fsm::state_id_t previous_state = current_state_;
     for (const auto &block : move.blocks()) {
       current_state_ = parent_.moves_description().CorrespondingState(
           block.id());
-      current_x_ = block.x();
-      current_y_ = block.y();
+      current_pos_ = block.pos();
       while (
           parent_.moves_description().nfa()[current_state_].transitions().size() ==
           1 &&
@@ -181,12 +157,11 @@ public:
         results.push_back(
             parent_.moves_description().nfa()[current_state_].transitions().front().letter()->Apply(
                 this));
-        applied_modifiers.emplace_back(current_x_, current_y_,
-                                       parent_.moves_description().nfa()[current_state_].transitions().front().letter());
+        applied_modifiers.emplace_back(current_pos_, parent_.moves_description().nfa()[current_state_].transitions().front().letter());
         current_state_ = parent_.moves_description().nfa()[current_state_].transitions().front().target();
       }
     }
-    return {std::move(results), previous_x, previous_y, previous_state,
+    return {std::move(results), previous_pos, previous_state,
             std::move(applied_modifiers)};
   }
 
@@ -195,8 +170,7 @@ public:
       const auto &action = information.applied_modifiers()[i];
       RevertActionApplication(action, information.actions_results()[i]);
     }
-    current_x_ = information.previous_x();
-    current_y_ = information.previous_y();
+    current_pos_ = information.previous_pos();
     current_state_ = information.previous_state();
   }
 
@@ -218,8 +192,9 @@ public:
 private:
   const GameDescription &parent_;
 
-  Board current_board_;
-  size_t current_x_, current_y_;
+
+  GraphBoard current_board_;
+  vertex_t current_pos_;
   fsm::state_id_t current_state_;
 
   std::vector<int> sigma_;
@@ -229,7 +204,7 @@ private:
 
   void SetPiece(token_id_t piece) {
     sigma_[CurrentPiece()]--;
-    current_board_(current_x_, current_y_) = piece;
+    current_board_[current_pos_] = piece;
     sigma_[piece]++;
   }
 

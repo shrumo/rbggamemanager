@@ -15,8 +15,8 @@ find_package(Threads)
 find_package(Boost REQUIRED COMPONENTS system program_options)
 include_directories(${Boost_INCLUDE_DIR})
 
-set(PLAYING_FILES ${PLAYING_FILES} src/game_nfa/automaton.h src/game_components/name_resolver.h src/actions/action.cc src/actions/action.h src/game_components/game_description.h src/game_nfa/game_moves_description.h src/game_components/game_state.cc src/game_components/game_state.h src/game_components/board.h src/actions/arithmetic_operation.cc src/actions/arithmetic_operation.h src/parser_connection/game_nfa_creator.cc src/parser_connection/game_nfa_creator.h src/parser_connection/parser_connection.cc src/parser_connection/parser_connection.h src/game_components/search_context.cc src/game_components/search_context.h src/utils/fast_bit_vector.h src/utils/utilities.h src/actions/action_application.h src/actions/action_types.h src/game_components/move.h
-        src/parser_connection/arithmetic_creator.cpp src/parser_connection/arithmetic_creator.h)
+set(PLAYING_FILES ${PLAYING_FILES} src/game_nfa/automaton.h src/game_components/name_resolver.h src/actions/action.cc src/actions/action.h src/game_components/game_description.h src/game_nfa/game_moves_description.h src/game_components/game_state.cc src/game_components/game_state.h src/actions/arithmetic_operation.cc src/actions/arithmetic_operation.h src/parser_connection/game_nfa_creator.cc src/parser_connection/game_nfa_creator.h src/parser_connection/parser_connection.cc src/parser_connection/parser_connection.h src/game_components/search_context.cc src/game_components/search_context.h src/utils/fast_bit_vector.h src/utils/utilities.h src/actions/action_application.h src/actions/action_types.h src/game_components/move.h
+        src/parser_connection/arithmetic_creator.cpp src/parser_connection/arithmetic_creator.h src/game_components/graph_board.h)
 add_executable(benchmark ${PLAYING_FILES} src/benchmark.cc)
 target_link_libraries(benchmark rbgParser)
 target_link_libraries(benchmark ${Boost_LIBRARIES})

@@ -6,6 +6,8 @@
 #define RBGGAMEMANAGER_GAME_NFA_CREATOR_H
 
 #include "../../rbgParser/src/sum.hpp"
+#include "../../rbgParser/src/conditional_sum.hpp"
+#include "../../rbgParser/src/conditional_star_move.hpp"
 #include "../../rbgParser/src/concatenation.hpp"
 #include "../../rbgParser/src/shift.hpp"
 #include "../../rbgParser/src/ons.hpp"
@@ -50,20 +52,22 @@ public:
 
   friend GameMovesDescription
   create_moves(const rbg_parser::game_move &move, const NameResolver &resolver,
-               token_id_t piece_id_threshold);
+               token_id_t piece_id_threshold, const EdgeResolver &edge_resolver);
 
 
   void dispatch(const rbg_parser::sum &) override;
 
-  void dispatch(const rbg_parser::concatenation &) override;
+  void dispatch(const rbg_parser::conditional_star_move &) override;
 
-  void dispatch(const rbg_parser::conditional_sum&) override;
+  void dispatch(const rbg_parser::sloth &) override {};
+
+  void dispatch(const rbg_parser::conditional_sum &) override;
+
+  void dispatch(const rbg_parser::concatenation &) override;
 
   void dispatch(const rbg_parser::power_move&) override;
 
   void dispatch(const rbg_parser::star_move&) override;
-
-  void dispatch(const rbg_parser::conditional_star_move&) override;
 
   void dispatch(const rbg_parser::shift &) override;
 
@@ -118,15 +122,17 @@ private:
     last_final_ = information.last_final;
   }
 
-  GameNfaCreator(const NameResolver &resolver, token_id_t piece_id_threshold)
+  GameNfaCreator(const NameResolver &resolver, token_id_t piece_id_threshold, const EdgeResolver &edge_resolver)
       : resolver_(resolver),
+        edge_resolver_(edge_resolver),
         nfa_result_(new fsm::Nfa<const Action *>()),
         block_started_(false),
         register_modifiers_(true),
         reuse_final_as_initial_(false),
         last_final_(0),
         piece_id_threshold_(piece_id_threshold),
-        move_pattern_count_(0) {
+        move_pattern_count_(0)
+  {
     blocks_states_.push_back(0);
   }
 
@@ -158,6 +164,7 @@ private:
 
 
   const NameResolver &resolver_;
+  const EdgeResolver &edge_resolver_;
   std::unique_ptr<fsm::Nfa<const Action *>> nfa_result_;
   std::unordered_map<std::string, const Action *> used_actions_;
 

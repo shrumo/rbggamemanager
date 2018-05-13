@@ -7,26 +7,20 @@
 
 ActionResult
 GameState::ApplyActionApplication(const ActionApplication &application) {
-  std::size_t old_x = current_x_;
-  std::size_t old_y = current_y_;
-  current_x_ = application.x();
-  current_y_ = application.y();
+  vertex_t old_pos = current_pos_;
+  current_pos_ = application.pos();
   auto res = application.action()->Apply(this);
-  current_x_ = old_x;
-  current_y_ = old_y;
+  current_pos_ = old_pos;
   return res;
 }
 
 void
 GameState::RevertActionApplication(const ActionApplication &application,
                                    const ActionResult &application_result) {
-  std::size_t old_x = current_x_;
-  std::size_t old_y = current_y_;
-  current_x_ = application.x();
-  current_y_ = application.y();
+  vertex_t old_pos = current_pos_;
+  current_pos_ = application.pos();
   application.action()->Revert(this, application_result);
-  current_x_ = old_x;
-  current_y_ = old_y;
+  current_pos_ = old_pos;
 }
 
 std::ostream &operator<<(std::ostream &s, const GameState &state) {
@@ -39,22 +33,19 @@ std::ostream &operator<<(std::ostream &s, const GameState &state) {
       s << ", ";
   }
   s << "\n";
-  s << "Position: " << state.x() << ", " << state.y() << "[NFA state: "
+  s << "Position: " << state.pos() << "[NFA state: "
     << state.nfa_state() << "]\n";
-  for (size_t y = 0; y < state.height(); y++) {
-    for (size_t x = 0; x < state.width(); x++) {
-      std::string name = state.description().resolver().Name(
-          state.board()(x, y));
-      int width = 2;
-      if (name == "empty") {
-        s << "[" << std::setw(width) << " " << "] ";
-      } else {
-        s << "[" << std::setw(width) << name.substr(0, (unsigned long) width)
-          << "] ";
-      }
+  for (vertex_t v = 0; v < state.board().size(); v++)
+  {
+    std::string name = state.description().resolver().Name(
+        state.board()[v]);
+    int width = 2;
+    if (name == "empty") {
+      s << "[" << std::setw(width) << " " << "] ";
+    } else {
+      s << "[" << std::setw(width) << name.substr(0, (unsigned long) width)
+        << "] ";
     }
-    if (y != state.height() - 1)
-      s << "\n";
   }
   return s;
 }

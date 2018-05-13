@@ -6,12 +6,12 @@
 #include "../game_components/game_state.h"
 
 int arithmetic_operations::Variable::Value(GameState *b) const {
-  return (b->Value(variable_) + b->description().bound()) %
-         b->description().bound();
+  return (b->Value(variable_) + b->description().declarations().bound(variable_)) %
+      b->description().declarations().bound(variable_);
 }
 
 int arithmetic_operations::Constant::Value(GameState *b) const {
-  return (constant_ + b->description().bound()) % b->description().bound();
+  return constant_;
 }
 
 int arithmetic_operations::Sum::Value(GameState *b) const {
@@ -29,5 +29,5 @@ int arithmetic_operations::Product::Value(GameState *b) const {
   {
     result *= child->Value(b);
   }
-  return (result + b->description().bound()) % b->description().bound();
+  return result;
 }

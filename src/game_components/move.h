@@ -7,35 +7,36 @@
 
 #include <vector>
 
+using vertex_t = ssize_t;
+
 class BlockApplication {
 public:
-  BlockApplication(std::size_t applied_x, std::size_t applied_y,
+  BlockApplication(std::size_t applied_vertex,
                    std::size_t block_id)
-      : applied_x_(applied_x), applied_y_(applied_y),
+      : applied_vertex_(applied_vertex),
         block_id_(block_id) {}
 
-  std::size_t x() const {
-    return applied_x_;
-  }
 
-  std::size_t y() const {
-    return applied_y_;
+  vertex_t pos() const
+  {
+    return applied_vertex_;
   }
 
   std::size_t id() const {
     return block_id_;
   }
 
-  bool operator!=(const BlockApplication &b) const {
-    return x() != b.x() || y() != b.y() || block_id_ != b.block_id_;
+  bool operator==(const BlockApplication &b) const {
+    return pos() == b.pos() && id() == b.id();
   }
 
-  bool operator==(const BlockApplication &b) const {
-    return x() == b.x() && y() == b.y() && block_id_ == b.block_id_;
+
+  bool operator!=(const BlockApplication &b) const {
+    return pos() != b.pos() || id() != b.id();
   }
 
 private:
-  std::size_t applied_x_, applied_y_;
+  vertex_t applied_vertex_;
   std::size_t block_id_;
 };
 
@@ -84,7 +85,7 @@ namespace std {
       std::size_t result = 0;
       for (const auto &block : m.blocks()) {
         result *= 2579;
-        result += (block.y() * 31 + block.x()) * 83 + block.id();
+        result += (block.pos()) * 83 + block.id();
       }
       return result;
     }

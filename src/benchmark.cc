@@ -75,7 +75,7 @@ random_play_benchmark(const rbg_parser::parsed_game &pg, size_t iterations) {
   std::unordered_map<token_id_t, PlayerResults> player_scores_sum;
 
   for (const auto &token : pg.get_declarations().get_legal_players()) {
-    std::string name = token.to_string();
+    std::string name = token.first.to_string();
     token_id_t player_id = gd.resolver().Id(name);
     player_scores_sum[player_id] = {0, std::numeric_limits<int>::max(),
                                     std::numeric_limits<int>::min()};

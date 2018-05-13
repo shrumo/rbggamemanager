@@ -23,7 +23,7 @@ void SearchContext::FindAllMovesRec(size_t visited_array_index,
     if (result) {
       if (transition.letter()->IsModifier()) {
         if (!block_started) {
-          move->AddBlock(calculation_state_->x(), calculation_state_->y(),
+          move->AddBlock(calculation_state_->pos(),
                          transition.letter()->index());
           CreateVisitedLayers(visited_array_index, depth + 1);
           InvalidateResults();
@@ -47,22 +47,21 @@ void SearchContext::FindAllMovesRec(size_t visited_array_index,
 size_t
 SearchContext::VisitedIndex(const fsm::Nfa<const Action *> &nfa,
                             fsm::state_id_t current_state) const {
-  return (calculation_state_->y() * calculation_state_->width() +
-          calculation_state_->x()) * nfa.StateCount() + current_state;
+  return (calculation_state_->pos()) * nfa.StateCount() + current_state;
 }
 
 size_t SearchContext::NewVisited(const fsm::Nfa<const Action *> &nfa) {
   if (last_visited_array_index_ < visited_.size()) {
     visited_[last_visited_array_index_].front().resize(
         std::max(visited_[last_visited_array_index_].front().size(),
-                 calculation_state_->width() * calculation_state_->height() *
+                 calculation_state_->board().size() *
                  nfa.StateCount()));
     visited_[last_visited_array_index_].front().reset();
     return last_visited_array_index_++;
   }
   visited_.emplace_back();
   visited_.back().emplace_back(
-      calculation_state_->width() * calculation_state_->height() *
+      calculation_state_->board().size() *
       nfa.StateCount(), false);
   last_visited_array_index_ = visited_.size();
   return visited_.size() - 1;
@@ -72,14 +71,14 @@ size_t SearchContext::NewResultsCache(const fsm::Nfa<const Action *> &nfa) {
   if (last_results_array_index_ < results_.size()) {
     results_[last_results_array_index_].front().resize(
         std::max(results_[last_results_array_index_].front().size(),
-                 calculation_state_->width() * calculation_state_->height() *
+                 calculation_state_->board().size() *
                  nfa.StateCount()));
     results_[last_results_array_index_].front().reset();
     return last_results_array_index_++;
   }
   results_.emplace_back();
   results_.back().emplace_back(
-      calculation_state_->width() * calculation_state_->height() *
+      calculation_state_->board().size() *
       nfa.StateCount(), false);
   last_results_array_index_ = results_.size();
   return results_.size() - 1;
@@ -216,7 +215,7 @@ bool SearchContext::FindFirstMoveRec(std::size_t visited_array_index,
     if (result) {
       if (transition.letter()->IsModifier()) {
         if (!block_started) {
-          move->AddBlock(calculation_state_->x(), calculation_state_->y(),
+          move->AddBlock(calculation_state_->pos(),
                          transition.letter()->index());
           CreateVisitedLayers(visited_array_index, depth + 1);
           InvalidateResults();

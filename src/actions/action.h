@@ -13,6 +13,7 @@
 #include "action_application.h"
 #include "../game_nfa/automaton.h"
 #include "arithmetic_operation.h"
+#include "../game_components/graph_board.h"
 
 class GameState;
 
@@ -63,23 +64,18 @@ namespace actions {
   // Shift changes the current position on board.
   class Shift : public Action {
   public:
-    Shift(long long dx, long long dy) : Action(ActionType::kShiftType),
-                                        delta_x_(dx),
-                                        delta_y_(dy) {}
+    Shift(edge_name_t edge_name) : Action(ActionType::kShiftType), edge_name_(edge_name)
+                                {}
 
     ActionResult Apply(GameState *b) const override;
 
-    void
-    Revert(GameState *state, const ActionResult &apply_result) const override;
+    void Revert(GameState *state, const ActionResult &apply_result) const override;
 
-    // Returns the change in horizontal(x) axis.
-    long long dx() const { return delta_x_; }
-
-    // Returns the change in vertical(y) axis.
-    long long dy() const { return delta_y_; }
+    // Returns the edge this shift travels.
+    edge_name_t edge_name() const { return edge_name_; }
 
   private:
-    long long delta_x_, delta_y_;
+    edge_name_t edge_name_;
   };
 
   // On checks if one of the pieces is on the current position on board.

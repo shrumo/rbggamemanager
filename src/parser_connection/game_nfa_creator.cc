@@ -46,7 +46,7 @@ void GameNfaCreator::dispatch(const rbg_parser::shift &move) {
   std::string move_identifier = move.to_rbg();
   if (used_actions_.find(move_identifier) == used_actions_.end()) {
     std::unique_ptr<Action> action(
-        new actions::Shift(move.get_x(), move.get_y()));
+        new actions::Shift(edge_resolver_.Id(move.get_content().to_string())));
     used_actions_[move_identifier] = action.get();
     actions_.push_back(std::move(action));
   }
@@ -152,11 +152,6 @@ void GameNfaCreator::StopBlock() { block_started_ = false; }
 
 void GameNfaCreator::StartBlock() { block_started_ = true; }
 
-void GameNfaCreator::dispatch(const rbg_parser::conditional_sum &) {
-  // TODO(shrum): Introduce sth new here.
-  exit(0);
-}
-
 void GameNfaCreator::dispatch(const rbg_parser::assignment &move) {
   fsm::state_id_t initial_id = NewInitial();
   fsm::state_id_t final_id = nfa_result_->NewState();
@@ -216,7 +211,7 @@ void GameNfaCreator::dispatch(const rbg_parser::keeper_switch &) {
   fsm::state_id_t final_id = nfa_result_->NewState();
   RegisterModifier(initial_id);
   std::unique_ptr<Action> letter;
-  token_id_t player_id = resolver_.Id("_*");
+  token_id_t player_id = resolver_.Id("*");
   letter = std::unique_ptr<Action>(new actions::PlayerSwitch(player_id,
                                                              (unsigned int) blocks_states_.size() -
                                                              1));
@@ -336,4 +331,9 @@ void GameNfaCreator::dispatch(const rbg_parser::player_check &move) {
   nfa_result_->set_final(final_id);
 
   last_final_ = final_id;
+}
+
+void GameNfaCreator::dispatch(const rbg_parser::conditional_sum &) {
+//TODO(shrum): Do local conditionals
+  exit(0);
 }

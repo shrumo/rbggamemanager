@@ -10,24 +10,28 @@
 #include "name_resolver.h"
 #include "../game_nfa/automaton.h"
 #include "../game_nfa/game_moves_description.h"
-#include "board.h"
 #include "../../rbgParser/src/parsed_game.hpp"
+#include "graph_board.h"
 
 // Declarations keep track of declared token ids.
 class Declarations {
 public:
-  Declarations() = default;
+  explicit Declarations(size_t names_count)
+      : bounds_(names_count, 0)
+  {}
 
-  void AddPlayer(token_id_t player_id) {
+  void AddPlayer(token_id_t player_id, int bound) {
     players_ids_.push_back(player_id);
     max_player_id_ = std::max(player_id, max_player_id_);
     min_player_id_ = std::min(player_id, min_player_id_);
+    bounds_[player_id] = bound;
   }
 
-  void AddVariable(token_id_t variable_id) {
+  void AddVariable(token_id_t variable_id, int bound) {
     variables_ids_.push_back(variable_id);
     max_variable_id_ = std::max(variable_id, max_variable_id_);
     min_variable_id_ = std::min(variable_id, min_variable_id_);
+    bounds_[variable_id] = bound;
   }
 
   void AddPiece(token_id_t piece_id) {
@@ -72,6 +76,11 @@ public:
     return max_piece_id_;
   }
 
+  int bound(token_id_t t) const
+  {
+    return bounds_[t];
+  }
+
 private:
   std::vector<token_id_t> players_ids_{};
   token_id_t min_player_id_ = std::numeric_limits<token_id_t >::max();
@@ -82,6 +91,8 @@ private:
   std::vector<token_id_t> pieces_ids_{};
   token_id_t min_piece_id_ = std::numeric_limits<token_id_t >::max();
   token_id_t max_piece_id_ = std::numeric_limits<token_id_t >::min();
+
+  std::vector<int> bounds_;
 };
 
 class GameDescription {
@@ -110,16 +121,12 @@ public:
     return moves_description_;
   }
 
-  const Board &initial_board() const {
+  const GraphBoard &initial_board() const {
     return initial_board_;
   }
 
   size_t VariablesCount() const {
     return resolver_.NamesCount();
-  }
-
-  uint bound() const {
-    return bound_;
   }
 
   friend GameDescription
@@ -129,22 +136,25 @@ private:
   /* TODO(shrum): Make other ways to Create GameDescription */
   GameDescription(NameResolver name_resolver,
                   GameMovesDescription moves_description,
-                  Board initial_board, Declarations declarations,
-                  std::string game_description,
-                  uint bound)
+                  EdgeResolver edge_resolver,
+                  GraphBoard initial_board,
+                  Declarations declarations,
+                  std::string game_description)
       : resolver_(std::move(name_resolver)),
         moves_description_(std::move(moves_description)),
+        edge_resolver_(std::move(edge_resolver)),
         initial_board_(std::move(initial_board)),
         declarations_(std::move(declarations)),
         game_text_(game_description),
-        deterministic_keeper_id_(resolver_.Id("_epsilon")),
-        nondeterministic_keeper_id_(resolver_.Id("_*")),
-        bound_(bound) {
-  }
+        deterministic_keeper_id_(resolver_.Id("epsilon")),
+        nondeterministic_keeper_id_(resolver_.Id("*"))
+  {}
 
   NameResolver resolver_;
   GameMovesDescription moves_description_;
-  Board initial_board_;
+
+  EdgeResolver edge_resolver_;
+  GraphBoard initial_board_;
 
   Declarations declarations_;
 
@@ -152,8 +162,6 @@ private:
 
   token_id_t deterministic_keeper_id_;
   token_id_t nondeterministic_keeper_id_;
-
-  uint bound_;
 };
 
 

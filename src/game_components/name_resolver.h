@@ -10,6 +10,7 @@
 
 using token_id_t = std::size_t;
 
+/* TODO(shrum): Probably go back to the split version of NameResolver. It is handling too much right now. */
 class NameResolver {
 public:
   NameResolver() = default;

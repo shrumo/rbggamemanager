@@ -6,25 +6,23 @@
 #define RBGGAMEMANAGER_ACTION_APPLICATION_H
 
 #include "../game_components/name_resolver.h"
+#include "../game_components/graph_board.h"
 
 class Action;
 
 // Object representing action application at some position.
 class ActionApplication {
 public:
-  ActionApplication(size_t x, size_t y, const Action *action)
-      : applied_x_(x),
-        applied_y_(y),
+  ActionApplication(vertex_t applied_pos, const Action *action)
+      : applied_pos_(applied_pos),
         applied_action_(action) {}
 
-  size_t x() const { return applied_x_; }
-
-  size_t y() const { return applied_y_; }
+  vertex_t pos() const { return  applied_pos_; }
 
   const Action *action() const { return applied_action_; }
 
 private:
-  size_t applied_x_, applied_y_;
+  vertex_t applied_pos_;
   const Action *applied_action_;
 };
 
@@ -41,6 +39,10 @@ public:
   ActionResult(bool success, int information)
       : success_(success), revert_value_(information) {}
 
+  ActionResult(bool success, vertex_t information)
+      : success_(success), revert_pos_(information)
+  {}
+
   // Returns true when the action was successful.
   operator bool() const { return success_; }
 
@@ -49,6 +51,8 @@ public:
   token_id_t revert_player() const { return revert_player_; }
 
   int revert_value() const { return revert_value_; }
+
+  vertex_t revert_pos() const { return revert_pos_; }
 
 private:
   bool success_;
@@ -59,6 +63,7 @@ private:
     token_id_t information_;
     token_id_t revert_piece_;
     token_id_t revert_player_;
+    vertex_t revert_pos_;
     int revert_value_;
   };
 };

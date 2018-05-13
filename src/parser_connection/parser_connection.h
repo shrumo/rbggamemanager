@@ -20,10 +20,18 @@ class GameDescription;
 
 class Declarations;
 
+class GraphBoard;
+
+class EdgeResolver;
+
 NameResolver CreateResolver(const rbg_parser::declarations &declarations);
 
 Board CreateBoard(const rbg_parser::game_board &parsed_board,
                   const NameResolver &resolver);
+
+EdgeResolver CreateEdgeNamesResolver(const rbg_parser::graph &parsed_graph_board);
+
+GraphBoard CreateGraphBoard(const rbg_parser::graph &parsed_graph_board);
 
 Declarations CreateDeclarations(const rbg_parser::declarations &declarations,
                                 const NameResolver &resolver);
