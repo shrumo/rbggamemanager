@@ -78,6 +78,10 @@ public:
 
   int bound(token_id_t t) const
   {
+    if(min_piece_id_ <= t && t <= max_piece_id_)
+    {
+      return std::numeric_limits<int>::max();
+    }
     return bounds_[t];
   }
 

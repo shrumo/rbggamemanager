@@ -186,6 +186,9 @@ int main(int argc, const char *argv[]) {
 
   if (vm.count("randomseed")) {
     srand(vm["randomseed"].as<uint>());
+  } else
+  {
+    srand(static_cast<unsigned int>(time(nullptr)));
   }
   if (vm.count("help") || !vm.count("input-file")) {
     std::cout << description << std::endl;

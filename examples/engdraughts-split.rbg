@@ -1,3 +1,5 @@
+// notes:
+// - needs to be rewritten for graphs
 #game = "English Checkers"
 
 #line(piece) =

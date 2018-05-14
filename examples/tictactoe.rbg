@@ -1,0 +1,61 @@
+#game = "Tic-Tac-Toe"
+
+// #board = [empty, empty, empty]
+//          [empty, empty, empty]
+//          [empty, empty, empty]
+
+#board = v00 [empty] { m01 : v01, m10 : v10, m11 : v11 }
+         v10 [empty] { mn10 : v00, mn11 : v01, m01 : v11, m10 : v20, m11 : v21 }
+         v20 [empty] { mn10 : v10, mn11 : v11, m01 : v21 }
+         v01 [empty] { m0n1 : v00, m01 : v02, m1n1 : v10, m10 : v11, m11 : v12 }
+         v11 [empty] { mn1n1 : v00, mn10 : v01, mn11 : v02, m0n1 : v10, m01 : v12, m1n1 : v20, m10 : v21, m11 : v22 }
+         v21 [empty] { mn1n1 : v10, mn10 : v11, mn11 : v12, m0n1 : v20, m01 : v22 }
+         v02 [empty] { m0n1 : v01, m1n1 : v11, m10 : v12 }
+         v12 [empty] { mn1n1 : v01, mn10 : v02, m0n1 : v11, m1n1 : v21, m10 : v22 }
+         v22 [empty] { mn1n1 : v11, mn10 : v12, m0n1 : v21 }
+
+
+#players = xplayer(11), oplayer(11)
+#pieces = empty, xpiece, opiece
+#variables =
+
+#anySquare =
+    (
+        m10
+      + m01
+      + mn10
+      + m0n1
+    )^*
+
+#move(piece) =
+    (
+        anySquare
+        {empty}
+        [piece]
+    )
+
+#winLine(piece) =
+    anySquare
+    {piece}
+    (
+        m10 {piece} m10 {piece}
+      + m01 {piece} m01 {piece}
+      + m11 {piece} m11 {piece}
+      + m1n1 {piece} m1n1 {piece}
+    )
+
+#moveAndWinCheck(me; opp) =
+    (
+        (? winLine(opp~piece)) [$me~player=0, $opp~player=10]->()
+      + (! winLine(opp~piece))
+    )
+    move(me~piece)->opp~player
+
+#rules =
+    [$xplayer=5, $oplayer=5]
+    -> xplayer
+    (
+        moveAndWinCheck(x; o)
+        moveAndWinCheck(o; x)
+    )^*
+
