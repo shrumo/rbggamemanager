@@ -12,7 +12,7 @@ std::string MoveDataString(const Move &move) {
   std::stringstream stream;
   for (size_t i = 0; i < move.blocks().size(); i++) {
     const auto &block = move.blocks()[i];
-    stream << block.x() << " " << block.y() << " " << block.id();
+    stream << block.pos() << " " << block.id();
     if (i != move.blocks().size() - 1)
       stream << " ";
   }
@@ -24,9 +24,9 @@ Move DecodeMove(const Message &message) {
                                                            message.body_length()));
   Move result;
   while (stream.peek() != std::char_traits<char>::eof()) {
-    size_t block_x, block_y, block_id;
-    stream >> block_x >> block_y >> block_id >> std::ws;
-    result.AddBlock(block_x, block_y, block_id);
+    size_t block_pos, block_id;
+    stream >> block_pos >> block_id >> std::ws;
+    result.AddBlock(block_pos, block_id);
   }
   return result;
 }
