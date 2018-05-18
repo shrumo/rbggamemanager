@@ -56,9 +56,23 @@ namespace actions {
   // Empty action does not change the game state.
   class Empty : public Action {
   public:
-    Empty() : Action(ActionType::kEmptyType) {};
+    Empty() : Action(ActionType::kEmptyType) {}
 
     ActionResult Apply(GameState *) const override { return true; };
+  };
+
+  class EmptyGreedy : public Action {
+  public:
+    EmptyGreedy(fsm::state_id_t final) : Action(ActionType::kEmptyGreedy), final_(final) {}
+
+    ActionResult Apply(GameState *) const override { return true; };
+
+    fsm::state_id_t final() const
+    {
+      return final_;
+    }
+  private:
+    fsm::state_id_t final_;
   };
 
   // Shift changes the current position on board.

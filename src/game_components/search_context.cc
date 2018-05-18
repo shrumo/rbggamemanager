@@ -89,6 +89,7 @@ bool SearchContext::CheckPlay(size_t visited_array_index, size_t results_index,
                               fsm::state_id_t current_state, size_t depth,
                               bool block_started) {
   size_t index = VisitedIndex(nfa, current_state);
+  // TODO(shrum): Think about nfa.final() case.
   if (current_state == nfa.final() || results_[results_index][depth][index]) {
     results_[results_index][depth].set(index);
     return true;
@@ -105,12 +106,12 @@ bool SearchContext::CheckPlay(size_t visited_array_index, size_t results_index,
         size_t new_depth = depth;
         if (!block_started) {
           CreateVisitedLayers(visited_array_index, depth + 1);
-          CreateResultLayers(visited_array_index, depth + 1);
-          InvalidateResults(visited_array_index);
+          CreateResultLayers(results_index, depth + 1);
+          InvalidateResults(results_index);
           new_depth = depth + 1;
         }
         if (CheckPlay(visited_array_index, results_index, nfa,
-                      transition.target(), new_depth, true))
+                      transition.target(), new_depth, true) || transition.letter()->IsSwitch())
           results_[results_index][depth].set(index);
       } else if (CheckPlay(visited_array_index, results_index, nfa,
                            transition.target(), depth))
