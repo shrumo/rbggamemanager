@@ -106,8 +106,8 @@
         oppositedirection
         ({pla~piece} oppositedirection)^*
         {empty}
-        +
-        (! swapdirectionpossible(pla; opp; direction; oppositedirection))
+        >
+        [$wplayer = $wplayer] // Empty action?
     )
 
 #swapdirections (pla;opp) =
@@ -149,17 +149,16 @@
         ->
         swapdirections(pla; opp)
         [pla~piece]
-        +
-        (! anySquare {empty} movepossible(pla;opp))
+        >
         (? anySquare {empty} movepossible(opp;pla))
     )
 
 #setpoints =
     (
             (? $wpiece > $bpiece) [$bplayer = 0][$wplayer = 100]
-            +
+            >
             (? $wpiece < $bpiece) [$bplayer = 100][$wplayer = 0]
-            +
+            >
             (? $wpiece == $bpiece) [$bplayer = 50][$wplayer = 50]
     )
 

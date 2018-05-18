@@ -46,10 +46,9 @@
 
 #moveAndWinCheck(me; opp) =
     (
-        (? winLine(opp~piece)) [$me~player=0, $opp~player=10]->()
-      + (! winLine(opp~piece))
+        winLine(opp~piece) [$me~player=0, $opp~player=10]->()
+      > move(me~piece)->opp~player
     )
-    move(me~piece)->opp~player
 
 #rules =
     [$xplayer=5, $oplayer=5]

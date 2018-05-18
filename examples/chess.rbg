@@ -247,7 +247,7 @@
 #checkForPromotion(forwardDirection; color) =
     (
         (? forwardDirection)[color~Pawn]
-      + (! forwardDirection)[majorPieces(color)]
+      > [majorPieces(color)]
     )
 
 #standardPawnMove(forwardDirection; backDirection; color; opponentColor) =
@@ -297,12 +297,12 @@
     ->
     (
         (? $turn<=200)
-      + (? $turn>200)[$color=5,$opponentColor=5]->()
+      > [$color=5,$opponentColor=5]->()
     )
     ->
     (
-        (! checked(opponentColor; color; backDirection))[$color=5,$opponentColor=5]
-      + (? checked(opponentColor; color; backDirection))[$color=10,$opponentColor=0]
+        checked(opponentColor; color; backDirection) [$color=10,$opponentColor=0]
+        > [$color=5,$opponentColor=5]
     )
     ->opponentColor
 

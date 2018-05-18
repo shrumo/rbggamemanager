@@ -76,7 +76,8 @@ private:
   void
   CreateResultLayers(std::size_t results_array_index, std::size_t layer_depth);
 
-  void FindAllMovesRec(std::size_t visited_array_index,
+  // Returns true if at least one move is found
+  bool FindAllMovesRec(std::size_t visited_array_index,
                        const fsm::Nfa<const Action *> &nfa,
                        fsm::state_id_t current_state, Move *move,
                        bool block_started = false);

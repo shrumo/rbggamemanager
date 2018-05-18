@@ -7,17 +7,18 @@
 #include <algorithm>
 
 
-void SearchContext::FindAllMovesRec(size_t visited_array_index,
+bool SearchContext::FindAllMovesRec(size_t visited_array_index,
                                     const fsm::Nfa<const Action *> &nfa,
                                     fsm::state_id_t current_state, Move *move,
                                     bool block_started) {
   size_t index = VisitedIndex(nfa, current_state);
   size_t depth = move->blocks().size();
   if (visited_[visited_array_index][depth][index])
-    return;
+    return false;
   visited_[visited_array_index][depth].set(index);
   if ((ssize_t) depth == max_depth_)
-    return;
+    return false;
+  bool found = false;
   for (const auto &transition : nfa[current_state].transitions()) {
     ActionResult result = transition.letter()->Apply(calculation_state_);
     if (result) {
@@ -28,20 +29,30 @@ void SearchContext::FindAllMovesRec(size_t visited_array_index,
           CreateVisitedLayers(visited_array_index, depth + 1);
           InvalidateResults();
         }
-        if (transition.letter()->IsSwitch())
+        if (transition.letter()->IsSwitch()) {
           possible_moves_.push_back(*move);
+          found = true;
+        }
         else {
-          FindAllMovesRec(visited_array_index, nfa, transition.target(), move,
+          found |= FindAllMovesRec(visited_array_index, nfa, transition.target(), move,
                           true);
         }
         if (!block_started) {
           move->PopBlock();
         }
       } else
-        FindAllMovesRec(visited_array_index, nfa, transition.target(), move);
+      {
+        bool rec_result = FindAllMovesRec(visited_array_index,nfa,transition.target(),move);
+        found |= rec_result;
+        if(transition.letter()->type() == ActionType::kEmptyGreedy && rec_result)
+        {
+          break;
+        }
+      }
     }
     transition.letter()->Revert(calculation_state_, result);
   }
+  return found;
 }
 
 size_t

@@ -61,6 +61,8 @@ namespace actions {
     ActionResult Apply(GameState *) const override { return true; };
   };
 
+  // This action is used to implement the greedy mechanism. If you can use the EmptyGreedy edge and get a move
+  // or meet the final_ state then you do not look at other empty or empty greedy transitions from current state.
   class EmptyGreedy : public Action {
   public:
     EmptyGreedy(fsm::state_id_t final) : Action(ActionType::kEmptyGreedy), final_(final) {}

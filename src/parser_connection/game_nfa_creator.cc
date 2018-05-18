@@ -201,9 +201,30 @@ void GameNfaCreator::dispatch(const rbg_parser::power_move &move) {
   last_final_ = nfa_result_->final();
 }
 
-void GameNfaCreator::dispatch(const rbg_parser::conditional_star_move &) {
-  // TODO(shrum): Introduce sth new here.
-  exit(0);
+void GameNfaCreator::dispatch(const rbg_parser::conditional_star_move & move) {
+  fsm::state_id_t new_initial_id = NewInitial();
+  fsm::state_id_t new_final_id = nfa_result_->NewState();
+
+  if (used_actions_.find("epsilon_greedy_" + std::to_string(new_final_id)) == used_actions_.end()) {
+    std::unique_ptr<Action> empty_action(new actions::Empty());
+    used_actions_["epsilon_greedy_" + std::to_string(new_final_id)] = empty_action.get();
+    actions_.push_back(std::move(empty_action));
+  }
+
+  move.get_content()->accept(*this);
+
+  (*nfa_result_)[new_initial_id].AddTransition(new_final_id,
+                                               used_actions_["epsilon_greedy_" + std::to_string(new_final_id)]);
+  (*nfa_result_)[new_initial_id].AddTransition(nfa_result_->initial(),
+                                               used_actions_["epsilon_greedy_" + std::to_string(new_final_id)]);
+  (*nfa_result_)[nfa_result_->final()].AddTransition(new_final_id,
+                                                     used_actions_["epsilon_greedy_" + std::to_string(new_final_id)]);
+  (*nfa_result_)[nfa_result_->final()].AddTransition(nfa_result_->initial(),
+                                                     used_actions_["epsilon_greedy_" + std::to_string(new_final_id)]);
+
+  nfa_result_->set_initial(new_initial_id);
+  nfa_result_->set_final(new_final_id);
+  last_final_ = new_final_id;
 }
 
 void GameNfaCreator::dispatch(const rbg_parser::keeper_switch &) {
@@ -333,7 +354,24 @@ void GameNfaCreator::dispatch(const rbg_parser::player_check &move) {
   last_final_ = final_id;
 }
 
-void GameNfaCreator::dispatch(const rbg_parser::conditional_sum &) {
-//TODO(shrum): Do local conditionals
-  exit(0);
+void GameNfaCreator::dispatch(const rbg_parser::conditional_sum &move) {
+  fsm::state_id_t new_initial_id = NewInitial();
+  fsm::state_id_t new_final_id = nfa_result_->NewState();
+
+  if (used_actions_.find("epsilon_greedy_" + std::to_string(new_final_id)) == used_actions_.end()) {
+    std::unique_ptr<Action> empty_greedy_action(new actions::EmptyGreedy(new_final_id));
+    used_actions_["epsilon_greedy_" + std::to_string(new_final_id)] = empty_greedy_action.get();
+    actions_.push_back(std::move(empty_greedy_action));
+  }
+
+  for (const std::unique_ptr<rbg_parser::game_move> &child : move.get_content()) {
+    child->accept(*this);
+    (*nfa_result_)[new_initial_id].AddTransition(nfa_result_->initial(),
+                                                 used_actions_["epsilon_greedy_" + std::to_string(new_final_id)]);
+    (*nfa_result_)[nfa_result_->final()].AddTransition(new_final_id,
+                                                       used_actions_["epsilon_greedy_" + std::to_string(new_final_id)]);
+  }
+  nfa_result_->set_initial(new_initial_id);
+  nfa_result_->set_final(new_final_id);
+  last_final_ = new_final_id;
 }
