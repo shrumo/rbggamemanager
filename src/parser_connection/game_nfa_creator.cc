@@ -110,7 +110,7 @@ void GameNfaCreator::dispatch(const rbg_parser::condition_check &move) {
     auto r = StartMovePattern();
     move.get_content()->accept(*this);
     std::unique_ptr<Action> action;
-    if(!move.is_negated()) // TODO(shrum): Ask why I need to negate the thing
+    if(move.is_negated()) // TODO(shrum): Ask why I need to negate the thing
     {
       action = std::unique_ptr<Action>(new actions::NegatedConditionCheck(move_pattern_count_++,ExtractNfa()));
     }
