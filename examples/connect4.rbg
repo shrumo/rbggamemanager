@@ -67,7 +67,6 @@
          v66 [e] { mn1n1 : v55, mn10 : v56, m0n1 : v65 }
 
 #players = red(11), yellow(11)
-#bound = 1000000
 #pieces = e, r, y
 #variables =
 

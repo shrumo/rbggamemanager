@@ -76,8 +76,6 @@
          v67 [empty] { mn1n1 : v56, mn10 : v57, m0n1 : v66, m1n1 : v76, m10 : v77 }
          v77 [empty] { mn1n1 : v66, mn10 : v67, m0n1 : v76 }
 
-
-#bound = 1000000
 #players = wplayer(101), bplayer(101)
 
 #pieces = empty, wpiece, bpiece

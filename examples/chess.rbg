@@ -98,8 +98,6 @@
 #m21 = m11  m10
 #m30 = m10  m10  m10
 
-#bound = 1000000
-
 #anyRook(color) = color~RookMoved, color~RookUnmoved
 #majorPieces(color) = color~RookMoved, color~Knight, color~Bishop, color~Queen
 #singleColorPieces(color) = color~Pawn, color~King, anyRook(color), color~Knight, color~Bishop, color~Queen

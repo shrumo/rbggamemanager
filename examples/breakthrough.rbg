@@ -75,7 +75,6 @@
          v77 [b] { mn1n1 : v66, mn10 : v67, m0n1 : v76 }
          
 #players = white(11), black(11)
-#bound = 1000000
 #pieces = e, w, b
 #variables = 
 
