@@ -89,13 +89,13 @@ public:
 
   void dispatch(const rbg_parser::player_check &check) override;
 
-  void dispatch(const rbg_parser::integer_arithmetic &arithmetic) override {}
+  void dispatch(const rbg_parser::integer_arithmetic &) override {}
 
-  void dispatch(const rbg_parser::variable_arithmetic &arithmetic) override {}
+  void dispatch(const rbg_parser::variable_arithmetic &) override {}
 
-  void dispatch(const rbg_parser::multiply_arithmetic &arithmetic) override {}
+  void dispatch(const rbg_parser::multiply_arithmetic &) override {}
 
-  void dispatch(const rbg_parser::sum_arithmetic &arithmetic) override {}
+  void dispatch(const rbg_parser::sum_arithmetic &) override {}
 
 private:
   void RegisterModifier(fsm::state_id_t initial_id);

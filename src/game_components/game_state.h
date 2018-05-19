@@ -15,7 +15,7 @@
 // information about move.
 class MoveResult {
 public:
-  MoveResult(std::vector<ActionResult> actions_results, size_t previous_pos,
+  MoveResult(std::vector<ActionResult> actions_results, vertex_t previous_pos,
              fsm::state_id_t previous_state,
              std::vector<ActionApplication> applied_modifiers)
       : actions_results_(std::move(actions_results)),
@@ -76,7 +76,7 @@ public:
         current_state_(description.moves_description().nfa().initial()),
         sigma_(description.VariablesCount(), 0),
         current_player_(description.resolver().Id("*")) {
-    for (vertex_t v= 0; v < current_board_.size(); v++) {
+    for (vertex_t v= 0; v < static_cast<ssize_t >(current_board_.size()); v++) {
         sigma_[current_board_[v]]++;
     }
   }
@@ -87,7 +87,7 @@ public:
     current_pos_ = 0;
     current_state_ = parent_.moves_description().nfa().initial();
     std::fill(sigma_.begin(), sigma_.end(), 0);
-    for (vertex_t v= 0; v < current_board_.size(); v++) {
+    for (vertex_t v= 0; v < static_cast<ssize_t >(current_board_.size()); v++) {
       sigma_[current_board_[v]]++;
     }
     current_player_ = parent_.resolver().Id("*");

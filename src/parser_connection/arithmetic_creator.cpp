@@ -31,8 +31,8 @@ private:
   void dispatch(const rbg_parser::keeper_switch&) override {}
   void dispatch(const rbg_parser::condition_check &) override {}
   void dispatch(const rbg_parser::modifier_block &) override {}
-  void dispatch(const rbg_parser::arithmetic_comparison &comparison) override {}
-  void dispatch(const rbg_parser::player_check &check) override {}
+  void dispatch(const rbg_parser::arithmetic_comparison &) override {}
+  void dispatch(const rbg_parser::player_check &) override {}
   void dispatch(const rbg_parser::integer_arithmetic &arithmetic) override;
   void dispatch(const rbg_parser::variable_arithmetic &arithmetic) override;
   void dispatch(const rbg_parser::multiply_arithmetic &arithmetic) override;

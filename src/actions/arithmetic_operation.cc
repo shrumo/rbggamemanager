@@ -10,7 +10,7 @@ int arithmetic_operations::Variable::Value(GameState *b) const {
       b->description().declarations().bound(variable_);
 }
 
-int arithmetic_operations::Constant::Value(GameState *b) const {
+int arithmetic_operations::Constant::Value(GameState *) const {
   return constant_;
 }
 

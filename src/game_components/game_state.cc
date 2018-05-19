@@ -36,12 +36,12 @@ std::ostream &operator<<(std::ostream &s, const GameState &state) {
   s << "\n";
   s << "Position: " << state.pos() << "[NFA state: "
     << state.nfa_state() << "]\n";
-  auto edge_size = static_cast<int>(std::sqrt(state.board().size()));
+  auto edge_size = static_cast<size_t>(std::sqrt(state.board().size()));
   if(edge_size*edge_size != state.board().size())
   {
     edge_size = static_cast<int>(state.board().size());
   }
-  for (vertex_t v = 0; v < state.board().size(); v++)
+  for (vertex_t v = 0; v < static_cast<ssize_t >(state.board().size()); v++)
   {
     std::string name = state.description().resolver().Name(
         state.board()[v]);
