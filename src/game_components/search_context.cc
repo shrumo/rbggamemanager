@@ -67,7 +67,7 @@ void SearchContext::FindAllMovesRec(size_t visited_array_index,
   visited_[visited_array_index][depth].set(index);
   if ((ssize_t) depth == max_depth_)
     return;
-  if(!finals_to_find.empty() && current_state == finals_to_find.back())
+  while(!finals_to_find.empty() && current_state == finals_to_find.back())
   {
     finals_to_find.pop_back();
   }
@@ -83,6 +83,7 @@ void SearchContext::FindAllMovesRec(size_t visited_array_index,
         }
         if (transition.letter()->IsSwitch())
           possible_moves_.push_back(*move);
+          // TODO(shrum): If definition stays like this, here we must search forward to check if we meet finals to find.
         else {
           FindAllMovesRec(visited_array_index, nfa, transition.target(), move,
                           true,finals_to_find);

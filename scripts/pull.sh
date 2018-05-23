@@ -8,6 +8,7 @@ rm ../rbgParser/CMakeLists.txt
 echo "Pulling newest commits."
 git submodule update --init
 cd ../rbgParser
+git reset --hard
 git checkout master
 git pull
 cd ../

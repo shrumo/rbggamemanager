@@ -1,4 +1,4 @@
-#game = "Tic-Tac-Toe"
+// #game = "TicTacToe"
 
 // #board = [empty, empty, empty]
 //          [empty, empty, empty]
@@ -17,7 +17,7 @@
 
 #players = xplayer(11), oplayer(11)
 #pieces = empty, xpiece, opiece
-#variables =
+#variables = debug(2)
 
 #anySquare =
     (
@@ -46,7 +46,7 @@
 
 #moveAndWinCheck(me; opp) =
     (
-        winLine(opp~piece) [$me~player=0, $opp~player=10]->()
+        winLine(opp~piece) [$me~player=0, $opp~player=10]->{}
       > move(me~piece)->opp~player
     )
 

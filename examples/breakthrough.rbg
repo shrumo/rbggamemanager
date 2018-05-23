@@ -1,4 +1,4 @@
-#game = "Breakthrough"
+// #game = "Breakthrough"
 
 // #board = [b, b, b, b, b, b, b, b]
 //          [b, b, b, b, b, b, b, b]
@@ -90,8 +90,8 @@
         {w}[e]
         (m01{e} + mn11({e,b}) + m11({e,b}))
         ->
-        ( m0n7 [$white=10, $black=0] ->()
-          + (? m01))
+        ( m0n7 [$white=10, $black=0] ->{}
+          + {? m01})
         [w]
     )
 
@@ -101,8 +101,8 @@
         {b}[e]
         (m0n1{e} + mn1n1({e,w}) + m1n1({e,w}))
         ->
-        ( m07 [$white=0, $black=10] ->()
-          + (? m0n1))
+        ( m07 [$white=0, $black=10] ->{}
+          + {? m0n1})
         [b]
     )
 

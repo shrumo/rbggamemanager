@@ -8,7 +8,7 @@
 #mn3n3 = mn1n1  mn1n1  mn1n1
 // notes:
 
-#game = "Breakthrough"
+// #game = "Connect4"
 
 // #board = [e,e,e,e,e,e,e]
 //          [e,e,e,e,e,e,e]
@@ -84,10 +84,10 @@
  )
 
 #move(color; oppColor; piece) = (
-    anySquare {e} (!m0n1 {e}) ->
+    anySquare {e} {!m0n1 {e}} ->
     (
-        (? winat(piece))[$color=10, $oppColor=0]->()
-      + (!winat(piece))
+        {? winat(piece)}[$color=10, $oppColor=0]->{}
+      + {!winat(piece)}
     )
     [piece]
   )
