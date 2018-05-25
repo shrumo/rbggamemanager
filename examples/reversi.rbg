@@ -144,7 +144,7 @@
         anySquare
         {empty}
         {?  movepossible(pla;opp)}
-        // ->
+        ->
         swapdirections(pla;  opp)
         [pla~piece]
         >
