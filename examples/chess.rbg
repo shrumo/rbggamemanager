@@ -108,8 +108,8 @@
 #pieces = allPieces, empty
 #variables = pawnDoubleMove(2), whiteKingMoved(2), blackKingMoved(2), turn(202)
 
-//#anySquare = ((m10 ^*+mn10 ^*)(m01 ^*+m0n1 ^*))
-#anySquare = (m10 ^*m01 ^*mn7n7 m10 ^*m01 ^*)
+//#anySquare = ((m10 *+mn10 *)(m01 *+m0n1 *))
+#anySquare = (m10 *m01 *mn7n7 m10 *m01 *)
 
 #anyNeighborSquare =
     (
@@ -125,18 +125,18 @@
 
 #diagonalLine =
     (
-        (m11 {empty})^*m11
-      + (m1n1 {empty})^*m1n1
-      + (mn11 {empty})^*mn11
-      + (mn1n1 {empty})^*mn1n1
+        (m11 {empty})*m11
+      + (m1n1 {empty})*m1n1
+      + (mn11 {empty})*mn11
+      + (mn1n1 {empty})*mn1n1
     )
 
 #parallelLine =
     (
-        (m10 {empty})^*m10
-      + (m01 {empty})^*m01
-      + (mn10 {empty})^*mn10
-      + (m0n1 {empty})^*m0n1
+        (m10 {empty})*m10
+      + (m01 {empty})*m01
+      + (mn10 {empty})*mn10
+      + (m0n1 {empty})*m0n1
     )
 
 #anyDirectionLine =
@@ -312,7 +312,7 @@
         [turn = turn + 1]
         allMoves(m0n1;m01;black;white)
         [turn = turn + 1]
-    )^*
+    )*
 
 
 

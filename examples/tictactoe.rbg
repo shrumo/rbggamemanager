@@ -25,7 +25,7 @@
       + m01
       + mn10
       + m0n1
-    )^*
+    )*
 
 #move(piece) =
     (
@@ -56,5 +56,5 @@
     (
         moveAndWinCheck(x; o)
         moveAndWinCheck(o; x)
-    )^*
+    )*
 

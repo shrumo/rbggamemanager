@@ -117,19 +117,19 @@
 #pieces = e, w, b, x
 #variables =
 
-#anySquare = ((m10^*+mn10^*)(m01^*+m0n1^*))
-//#anySquare = (m10^*m01^*(-9,-9)m10^*m01^*)
+#anySquare = ((m10*+mn10*)(m01*+m0n1*))
+//#anySquare = (m10*m01*(-9,-9)m10*m01*)
 
 #queenMove =
     (
-       (m11{e}m11{e})^* +
-       (m10{e}m10{e})^* +
-       (m1n1{e}m1n1{e})^* +
-       (m01{e}m01{e})^* +
-       (m0n1{e}m0n1{e})^* +
-       (mn11{e}mn11{e})^* +
-       (mn10{e}mn10{e})^* +
-       (mn1n1{e}mn1n1{e})^*
+       (m11{e}m11{e})* +
+       (m10{e}m10{e})* +
+       (m1n1{e}m1n1{e})* +
+       (m01{e}m01{e})* +
+       (m0n1{e}m0n1{e})* +
+       (mn11{e}mn11{e})* +
+       (mn10{e}mn10{e})* +
+       (mn1n1{e}mn1n1{e})*
     )
 
 #move(piece; p) = 
@@ -150,5 +150,5 @@
         [$white=10, $black=0] ->black
         move(b;black)
         [$white=0, $black=10] ->white
-    )^*
+    )*
 

@@ -70,7 +70,7 @@
 #pieces = e, r, y
 #variables =
 
-#anySquare = ((m10 ^*+mn10 ^*)(m01 ^*+m0n1 ^*))
+#anySquare = ((m10 *+mn10 *)(m01 *+m0n1 *))
 
 #winat(piece) = (
       (mn1n1 {piece})^2(mn1n1 {piece}+m33 {piece})
@@ -98,6 +98,6 @@
     (
         move(red;yellow;r) ->yellow
         move(yellow;red;y) ->red
-    )^*
+    )*
 
 

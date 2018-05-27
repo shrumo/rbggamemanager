@@ -81,13 +81,13 @@
 #pieces = empty, wpiece, bpiece
 #variables =
 
-#anySquare = ((m10^*+mn10^*)(m01^*+m0n1^*))
+#anySquare = ((m10*+mn10*)(m01*+m0n1*))
 
 #swapdirectionpossible (pla; opp; direction; oppositedirection) =
     (
         direction
         {opp~piece}
-        (direction {opp~piece})^*
+        (direction {opp~piece})*
         direction
         {pla~piece}
     )
@@ -98,11 +98,11 @@
             direction
             {opp~piece}
             [pla~piece]
-        )^*
+        )*
         direction
         {pla~piece}
         oppositedirection
-        ({pla~piece} oppositedirection)^*
+        ({pla~piece} oppositedirection)*
         {empty}
         >
         {empty,wpiece,bpiece}
@@ -172,6 +172,6 @@
         move(b;w)
         setpoints
         ->wplayer
-    )^*
+    )*
 
 

@@ -78,8 +78,8 @@
 #pieces = e, w, b
 #variables = 
 
-#anySquare = ((m10^*+mn10^*)(m01^*+m0n1^*))
-//#anySquare = (m10^*m01^*(-7,-7)m10^*m01^*)
+#anySquare = ((m10*+mn10*)(m01*+m0n1*))
+//#anySquare = (m10*m01*(-7,-7)m10*m01*)
 
 #m0n7 = m0n1 m0n1 m0n1 m0n1 m0n1 m0n1 m0n1
 #m07 = m01 m01 m01 m01 m01 m01 m01
@@ -113,4 +113,4 @@
         [$white=10, $black=0]->black
         moveBlack
         [$white=0, $black=10]->white
-    )^*
+    )*
