@@ -44,7 +44,7 @@ void actions::PlayerSwitch::Revert(GameState *b,
 ActionResult actions::Assignment::Apply(GameState *b) const {
   int previous_value = b->Value(variable);
   b->sigma_[variable] = value->Value(b);
-  return {true, previous_value};
+  return {0 <= b->sigma_[variable] && b->sigma_[variable] < b->description().declarations().bound(variable), previous_value};
 }
 
 void actions::Assignment::Revert(GameState *b,

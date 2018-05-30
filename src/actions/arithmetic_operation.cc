@@ -6,8 +6,7 @@
 #include "../game_components/game_state.h"
 
 int arithmetic_operations::Variable::Value(GameState *b) const {
-  return (b->Value(variable_) + b->description().declarations().bound(variable_)) %
-      b->description().declarations().bound(variable_);
+  return b->Value(variable_);
 }
 
 int arithmetic_operations::Constant::Value(GameState *) const {
