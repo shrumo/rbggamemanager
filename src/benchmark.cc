@@ -106,9 +106,9 @@ random_play_benchmark(const rbg_parser::parsed_game &pg, size_t iterations) {
         moves = state.FindFirstMove(&context);
       } else {
         moves = state.FindMoves(&context);
+        state_turns++;
       }
       moves_count += moves.size();
-      state_turns++;
     }
     for (auto &player_score : player_scores_sum) {
       const auto &score = state.Value(player_score.first);
@@ -124,24 +124,32 @@ random_play_benchmark(const rbg_parser::parsed_game &pg, size_t iterations) {
   }
   auto end = std::chrono::system_clock::now();
   auto duration = std::chrono::duration<double>(end - begin).count();
-  std::cout << "Calculated " << iterations << " games in " << duration << "s"
+  std::cout << "Calculated " << iterations << " games in "
+            << std::fixed << std::showpoint
+            << duration << "s"
             << std::endl;
   std::cout << "Time for one game: " << duration / iterations << "s" << " ("
+            << std::fixed << std::showpoint
             << iterations / duration << " games/sec)"
             << std::endl;
   std::cout << "Avarage number of turns in game: "
+            << std::fixed << std::showpoint
             << static_cast<double>(turns) / iterations << std::endl;
   std::cout << "Avarage number of moves in one state_: "
+            << std::fixed << std::showpoint
             << static_cast<double>(avgmoves) / iterations << std::endl;
   std::cout << "Number of traveled states: " << turns << " ("
+            << std::fixed << std::showpoint
             << turns / duration
             << " states/sec)" << std::endl;
   std::cout << "Number of calculated moves: " << all_moves_count << " ("
+            << std::fixed << std::showpoint
             << all_moves_count / duration
             << " moves/sec)" << std::endl;
   std::cout << "Avarage player scores: " << "\n";
   for (auto &player_score : player_scores_sum) {
     std::cout << "\t" << gd.resolver().Name(player_score.first) << " : "
+              << std::fixed << std::showpoint
               << static_cast<double>(player_score.second.sum) / iterations
               << " (Min: " << player_score.second.min << ", Max: "
               << player_score.second.max << ")\n";
@@ -156,10 +164,13 @@ void perft_benchmark(const rbg_parser::parsed_game &pg, size_t depth) {
   auto result = perft(&context, &state, depth);
   auto end = std::chrono::system_clock::now();
   auto duration = std::chrono::duration<double>(end - begin).count();
-  std::cout << "Calculated perft for depth " << depth << " in " << duration
+  std::cout << "Calculated perft for depth " << depth << " in "
+            << std::fixed << std::showpoint
+            << duration
             << "s" << std::endl;
   std::cout << "There are " << result.leaf_count << " leaves" << std::endl;
   std::cout << "Number of traveled states: " << result.node_count << " ("
+            << std::fixed << std::showpoint
             << result.node_count / duration
             << " states/sec)" << std::endl;
 }
