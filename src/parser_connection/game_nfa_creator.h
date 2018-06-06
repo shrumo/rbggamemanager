@@ -6,18 +6,16 @@
 #define RBGGAMEMANAGER_GAME_NFA_CREATOR_H
 
 #include "../../rbgParser/src/sum.hpp"
-#include "../../rbgParser/src/conditional_sum.hpp"
-#include "../../rbgParser/src/conditional_star_move.hpp"
 #include "../../rbgParser/src/concatenation.hpp"
 #include "../../rbgParser/src/shift.hpp"
 #include "../../rbgParser/src/ons.hpp"
 #include "../../rbgParser/src/offs.hpp"
 #include "../../rbgParser/src/assignments.hpp"
 #include "../../rbgParser/src/switch.hpp"
-#include "../../rbgParser/src/condition_check.hpp"
 #include "../../rbgParser/src/power_move.hpp"
 #include "../../rbgParser/src/star_move.hpp"
 #include "../../rbgParser/src/modifier_block.hpp"
+#include "../../rbgParser/src/move_check.hpp"
 #include "../actions/action.h"
 #include "../game_nfa/game_moves_description.h"
 
@@ -57,12 +55,6 @@ public:
 
   void dispatch(const rbg_parser::sum &) override;
 
-  void dispatch(const rbg_parser::conditional_star_move &) override;
-
-  void dispatch(const rbg_parser::sloth &) override {};
-
-  void dispatch(const rbg_parser::conditional_sum &) override;
-
   void dispatch(const rbg_parser::concatenation &) override;
 
   void dispatch(const rbg_parser::power_move&) override;
@@ -81,21 +73,17 @@ public:
 
   void dispatch(const rbg_parser::keeper_switch&) override;
 
-  void dispatch(const rbg_parser::condition_check &) override;
-
   void dispatch(const rbg_parser::modifier_block &) override;
 
   void dispatch(const rbg_parser::arithmetic_comparison &comparison) override;
 
-  void dispatch(const rbg_parser::player_check &check) override;
+  void dispatch(const rbg_parser::move_check &check) override;
 
   void dispatch(const rbg_parser::integer_arithmetic &) override {}
 
   void dispatch(const rbg_parser::variable_arithmetic &) override {}
 
-  void dispatch(const rbg_parser::multiply_arithmetic &) override {}
-
-  void dispatch(const rbg_parser::sum_arithmetic &) override {}
+  void dispatch(const rbg_parser::arithmetic_operation &) override {}
 
 private:
   void RegisterModifier(fsm::state_id_t initial_id);
