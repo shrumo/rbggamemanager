@@ -22,11 +22,11 @@ public:
     names_ids_[name] = names_.size() - 1;
   }
 
-  token_id_t Id(const std::string &name) const {
+  edge_name_t Id(const std::string &name) const {
     return names_ids_.at(name);
   }
 
-  const std::string &Name(token_id_t id) const {
+  const std::string &Name(edge_name_t id) const {
     return names_[id];
   }
 
@@ -36,7 +36,36 @@ public:
 
 private:
   std::vector<std::string> names_;
-  std::unordered_map<std::string, token_id_t> names_ids_;
+  std::unordered_map<std::string, edge_name_t> names_ids_;
+};
+
+class VertexResolver
+{
+  public:
+  VertexResolver(std::size_t vertices_count)
+      : names_(vertices_count)
+  {}
+
+  void SetName(vertex_t index, const std::string &name) {
+    names_[index] = name;
+    names_ids_[name] = index;
+  }
+
+  vertex_t Id(const std::string &name) const {
+    return names_ids_.at(name);
+  }
+
+  const std::string &Name(vertex_t id) const {
+    return names_[id];
+  }
+
+  size_t VerticesCount() const {
+    return names_.size();
+  }
+
+  private:
+  std::vector<std::string> names_;
+  std::unordered_map<std::string, vertex_t> names_ids_;
 };
 
 class GraphBoard

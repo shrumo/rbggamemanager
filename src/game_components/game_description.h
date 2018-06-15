@@ -121,6 +121,14 @@ public:
     return resolver_;
   }
 
+  const EdgeResolver &edge_resolver() const{
+    return edge_resolver_;
+  }
+
+  const VertexResolver &vertex_resolver() const{
+    return vertex_resolver_;
+  }
+
   const GameMovesDescription &moves_description() const {
     return moves_description_;
   }
@@ -141,12 +149,14 @@ private:
   GameDescription(NameResolver name_resolver,
                   GameMovesDescription moves_description,
                   EdgeResolver edge_resolver,
+                  VertexResolver vertex_resolver,
                   GraphBoard initial_board,
                   Declarations declarations,
                   std::string game_description)
       : resolver_(std::move(name_resolver)),
         moves_description_(std::move(moves_description)),
         edge_resolver_(std::move(edge_resolver)),
+        vertex_resolver_(std::move(vertex_resolver)),
         initial_board_(std::move(initial_board)),
         declarations_(std::move(declarations)),
         game_text_(game_description),
@@ -158,6 +168,7 @@ private:
   GameMovesDescription moves_description_;
 
   EdgeResolver edge_resolver_;
+  VertexResolver vertex_resolver_;
   GraphBoard initial_board_;
 
   Declarations declarations_;
