@@ -27,6 +27,8 @@
 namespace po = boost::program_options;
 using uint = unsigned int;
 
+extern uint kTextWidth;
+
 struct PlayerResults {
   int sum, min, max;
 };
@@ -182,7 +184,8 @@ int main(int argc, const char *argv[]) {
       ("help,h", "produce help message")
       ("input-file,i", po::value<std::string>(), "input file")
       ("randomseed,s", po::value<uint>(), "random seed for random player")
-      ("depth,d", po::value<uint>(), "depth of perft calculation");
+      ("depth,d", po::value<uint>(), "depth of perft calculation")
+      ("textwidth", po::value<unsigned int>(), "The width of the tokens in printing of the board");
 
   po::variables_map vm;
   po::store(po::parse_command_line(argc, argv, description), vm);
@@ -194,6 +197,11 @@ int main(int argc, const char *argv[]) {
   po::store(po::command_line_parser(argc, argv).
       options(description).positional(p).run(), vm);
   po::notify(vm);
+
+  if (vm.count("textwidth"))
+  {
+    kTextWidth = vm["textwidth"].as<uint>();
+  }
 
   if (vm.count("randomseed")) {
     srand(vm["randomseed"].as<uint>());

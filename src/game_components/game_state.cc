@@ -8,6 +8,8 @@
 #include "game_state.h"
 #include <algorithm>
 
+extern unsigned int kTextWidth;
+
 ActionResult
 GameState::ApplyActionApplication(const ActionApplication &application) {
   vertex_t old_pos = current_pos_;
@@ -86,16 +88,15 @@ std::ostream &outRectangleBoard(std::ostream &s,const GameState &state)
     stream >> x >> placeholder >> y;
     board[x + y * width] = state.board()[v];
   }
-  int text_width = 2;
   for(size_t y = 0; y < height; y++)
   {
     for(size_t x = 0; x < width; x++)
     {
       std::string name = state.description().resolver().Name(board[x + y * width]);
       if (name == "empty" || name == "e") {
-        s << "[" << std::setw(text_width) << " " << "] ";
+        s << "[" << std::setw(kTextWidth) << " " << "] ";
       } else {
-        s << "[" << std::setw(text_width) << name.substr(0, (unsigned long) text_width)
+        s << "[" << std::setw(kTextWidth) << name.substr(0, (unsigned long) kTextWidth)
           << "] ";
       }
     }
@@ -140,25 +141,24 @@ std::ostream &outHexagonBoard(std::ostream &s,const GameState &state)
     stream >> x >> placeholder >> y;
     board[x + y * width] = state.board()[v];
   }
-  int text_width = 2;
   for(size_t y = 0; y < height; y++)
   {
-    for(size_t x = 0; x < std::max(y,height-y-1) * (text_width + 3) / 2; x++)
+    for(size_t x = 0; x < std::max(y,height-y-1) * (kTextWidth + 3) / 2; x++)
       std::cout << " ";
     for(size_t x = 0; x < width; x++)
     {
       if(board[x + y * width] != state.description().resolver().NamesCount()) {
         std::string name = state.description().resolver().Name(board[x + y * width]);
         if (name == "empty" || name == "e") {
-          s << "[" << std::setw(text_width) << " " << "] ";
+          s << "[" << std::setw(kTextWidth) << " " << "] ";
         } else {
-          s << "[" << std::setw(text_width) << name.substr(0, (unsigned long) text_width)
+          s << "[" << std::setw(kTextWidth) << name.substr(0, (unsigned long) kTextWidth)
             << "] ";
         }
       }
       else
       {
-          s << std::setw(text_width+3) << " ";
+          s << std::setw(kTextWidth+3) << " ";
       }
     }
     s << '\n';
