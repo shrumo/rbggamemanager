@@ -79,8 +79,7 @@ NameResolver CreateResolver(const rbg_parser::declarations &declarations) {
     std::string variable_name = variable_token.first.to_string();
     result.AddName(variable_name);
   }
-  result.AddName("epsilon");
-  result.AddName("*");
+  result.AddName(">");
   return result;
 }
 

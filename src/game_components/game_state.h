@@ -75,7 +75,7 @@ public:
         current_pos_(0),
         current_state_(description.moves_description().nfa().initial()),
         sigma_(description.VariablesCount(), 0),
-        current_player_(description.resolver().Id("*")) {
+        current_player_(description.keeper_player_id()) {
     for (vertex_t v= 0; v < static_cast<ssize_t >(current_board_.size()); v++) {
         sigma_[current_board_[v]]++;
     }
@@ -90,7 +90,7 @@ public:
     for (vertex_t v= 0; v < static_cast<ssize_t >(current_board_.size()); v++) {
       sigma_[current_board_[v]]++;
     }
-    current_player_ = parent_.resolver().Id("*");
+    current_player_ = parent_.keeper_player_id();
   }
 
   fsm::state_id_t nfa_state() const {

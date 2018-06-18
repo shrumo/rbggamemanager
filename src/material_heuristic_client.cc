@@ -17,12 +17,12 @@ static void collect_move_usages(token_id_t previous_player, const GameState &s,
                                 const Move &m,
                                 std::vector<std::vector<size_t> > *result) {
   token_id_t player = s.player();
-  if (player == s.description().deterministic_keeper_player_id() ||
-      player == s.description().nondeterministic_keeper_player_id()) {
+  if (player == s.description().keeper_player_id() ||
+      player == s.description().keeper_player_id()) {
     player = previous_player;
   }
-  if (player == s.description().deterministic_keeper_player_id() ||
-      player == s.description().nondeterministic_keeper_player_id()) {
+  if (player == s.description().keeper_player_id() ||
+      player == s.description().keeper_player_id()) {
     return;
   }
   for (const auto &block : m.blocks()) {
@@ -44,7 +44,7 @@ pieces_player_usages(const GameDescription &gd, size_t iters = 10) {
                                            std::vector<size_t>(
                                                gd.resolver().NamesCount(), 0));
   SearchContext context;
-  token_id_t previous_player = gd.deterministic_keeper_player_id();
+  token_id_t previous_player = gd.keeper_player_id();
   for (size_t i = 0; i < iters; i++) {
     GameState s(gd);
     auto moves = s.FindMoves(&context);
@@ -74,7 +74,7 @@ perft(SearchContext *context, GameState *state, size_t depth) {
   std::vector<Move> moves;
   size_t new_depth = depth - 1;
   if (state->player() ==
-      state->description().deterministic_keeper_player_id()) {
+      state->description().keeper_player_id()) {
     moves = state->FindFirstMove(context);
     new_depth = depth;
   } else {

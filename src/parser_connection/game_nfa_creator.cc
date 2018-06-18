@@ -216,7 +216,7 @@ void GameNfaCreator::dispatch(const rbg_parser::keeper_switch &) {
   fsm::state_id_t final_id = nfa_result_->NewState();
   RegisterModifier(initial_id);
   std::unique_ptr<Action> letter;
-  token_id_t player_id = resolver_.Id("epsilon");
+  token_id_t player_id = resolver_.Id(">");
   letter = std::unique_ptr<Action>(new actions::PlayerSwitch(player_id,
                                                              (unsigned int) blocks_states_.size() -
                                                              1));

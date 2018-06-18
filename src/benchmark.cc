@@ -44,11 +44,11 @@ PerftResult perft(SearchContext *context, GameState *state, size_t depth) {
   std::vector<Move> moves;
   size_t new_depth = depth - 1;
   if (state->player() ==
-      state->description().deterministic_keeper_player_id())
+      state->description().keeper_player_id())
   {
     moves = state->FindFirstMove(context);
     new_depth = depth;
-  } else if (state->player() == state->description().nondeterministic_keeper_player_id())
+  } else if (state->player() == state->description().keeper_player_id())
   {
     moves = state->FindMoves(context);
     new_depth = depth;
@@ -57,7 +57,7 @@ PerftResult perft(SearchContext *context, GameState *state, size_t depth) {
     moves = state->FindMoves(context);
   }
   size_t leaf_count = 0;
-  size_t node_count = static_cast<size_t>(state->player() != state->description().deterministic_keeper_player_id());
+  size_t node_count = static_cast<size_t>(state->player() != state->description().keeper_player_id());
   for (const auto &move : moves) {
     auto revert_info = state->MakeRevertibleMove(move);
     auto rec_res = perft(context, state, new_depth);
@@ -102,7 +102,7 @@ random_play_benchmark(const rbg_parser::parsed_game &pg, size_t iterations) {
         std::cout << state << std::endl;
       }
       if (state.player() ==
-          state.description().deterministic_keeper_player_id()) {
+          state.description().keeper_player_id()) {
         moves = state.FindFirstMove(&context);
       } else {
         moves = state.FindMoves(&context);

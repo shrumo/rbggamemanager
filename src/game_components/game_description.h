@@ -101,12 +101,8 @@ private:
 
 class GameDescription {
 public:
-  token_id_t deterministic_keeper_player_id() const {
-    return deterministic_keeper_id_;
-  }
-
-  token_id_t nondeterministic_keeper_player_id() const {
-    return nondeterministic_keeper_id_;
+  token_id_t keeper_player_id() const {
+    return keeper_id_;
   }
 
   const std::string text_description() const {
@@ -160,8 +156,7 @@ private:
         initial_board_(std::move(initial_board)),
         declarations_(std::move(declarations)),
         game_text_(game_description),
-        deterministic_keeper_id_(resolver_.Id("epsilon")),
-        nondeterministic_keeper_id_(resolver_.Id("*"))
+        keeper_id_(resolver_.Id(">"))
   {}
 
   NameResolver resolver_;
@@ -176,7 +171,7 @@ private:
   std::string game_text_;
 
   token_id_t deterministic_keeper_id_;
-  token_id_t nondeterministic_keeper_id_;
+  token_id_t keeper_id_;
 };
 
 

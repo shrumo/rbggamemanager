@@ -174,11 +174,11 @@ private:
 
   void MakeKeeperMoves() {
     while (state_.player() ==
-           state_.description().deterministic_keeper_player_id() ||
+               state_.description().keeper_player_id() ||
            state_.player() ==
-           state_.description().nondeterministic_keeper_player_id()) {
+               state_.description().keeper_player_id()) {
       if (state_.player() ==
-          state_.description().deterministic_keeper_player_id()) {
+          state_.description().keeper_player_id()) {
         auto moves = state_.FindMoves(&context_);
         if (moves.empty()) {
           Stop();
@@ -188,7 +188,7 @@ private:
         state_.MakeMove(move);
         Deliver(Message::ClientMoveMessage(move));
       } else if (state_.player() ==
-                 state_.description().nondeterministic_keeper_player_id()) {
+          state_.description().keeper_player_id()) {
         auto moves = state_.FindFirstMove(&context_);
         if (moves.empty()) {
           Stop();
