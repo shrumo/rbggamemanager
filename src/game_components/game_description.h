@@ -170,7 +170,6 @@ private:
 
   std::string game_text_;
 
-  token_id_t deterministic_keeper_id_;
   token_id_t keeper_id_;
 };
 

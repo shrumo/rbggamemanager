@@ -38,78 +38,7 @@ void SearchContext::FindAllMovesRec(size_t visited_array_index,
           move->PopBlock();
         }
       } else {
-        if(transition.letter()->type() == ActionType::kEmptyGreedy)
-        {
-          std::vector<fsm::state_id_t> finals_to_find = {dynamic_cast<const actions::EmptyGreedy*>(transition.letter())->final()};
-          FindAllMovesRec(visited_array_index, nfa,transition.target(), move, false, finals_to_find);
-          if(finals_to_find.empty())
-          {
-            break;
-          }
-        }
-        else {
           FindAllMovesRec(visited_array_index, nfa, transition.target(), move);
-        }
-      }
-    }
-    transition.letter()->Revert(calculation_state_, result);
-  }
-}
-
-void SearchContext::FindAllMovesRec(size_t visited_array_index,
-                                    const fsm::Nfa<const Action *> &nfa,
-                                    fsm::state_id_t current_state, Move *move,
-                                    bool block_started, std::vector<fsm::state_id_t>& finals_to_find) {
-  size_t index = VisitedIndex(nfa, current_state);
-  size_t depth = move->blocks().size();
-  if (visited_[visited_array_index][depth][index])
-    return;
-  visited_[visited_array_index][depth].set(index);
-  if ((ssize_t) depth == max_depth_)
-    return;
-  while(!finals_to_find.empty() && current_state == finals_to_find.back())
-  {
-    finals_to_find.pop_back();
-  }
-  for (const auto &transition : nfa[current_state].transitions()) {
-    ActionResult result = transition.letter()->Apply(calculation_state_);
-    if (result) {
-      if (transition.letter()->IsModifier()) {
-        if (!block_started) {
-          move->AddBlock(calculation_state_->pos(),
-                         transition.letter()->index());
-          CreateVisitedLayers(visited_array_index, depth + 1);
-          InvalidateResults();
-        }
-        if (transition.letter()->IsSwitch()) {
-          possible_moves_.push_back(*move);
-          SearchForFinalsRec(visited_array_index, nfa, transition.target(), move,
-                             true, finals_to_find);
-        }
-        else {
-          FindAllMovesRec(visited_array_index, nfa, transition.target(), move,
-                          true,finals_to_find);
-        }
-        if (!block_started) {
-          move->PopBlock();
-        }
-      } else {
-        if(transition.letter()->type() == ActionType::kEmptyGreedy)
-        {
-          size_t to_look_for = finals_to_find.size();
-          finals_to_find.push_back(dynamic_cast<const actions::EmptyGreedy*>(transition.letter())->final());
-          FindAllMovesRec(visited_array_index, nfa,transition.target(), move, false, finals_to_find);
-          if(finals_to_find.size() <= to_look_for)
-          {
-            break;
-          }
-          else{
-            finals_to_find.pop_back();
-          }
-        }
-        else {
-          FindAllMovesRec(visited_array_index, nfa, transition.target(), move,false, finals_to_find);
-        }
       }
     }
     transition.letter()->Revert(calculation_state_, result);
@@ -161,7 +90,6 @@ bool SearchContext::CheckPlay(size_t visited_array_index, size_t results_index,
                               fsm::state_id_t current_state, size_t depth,
                               bool block_started) {
   size_t index = VisitedIndex(nfa, current_state);
-  // TODO(shrum): Think about nfa.final() case.
   if (current_state == nfa.final() || results_[results_index][depth][index]) {
     results_[results_index][depth].set(index);
     return true;
@@ -332,66 +260,4 @@ bool SearchContext::CheckPattern(const fsm::Nfa<const Action *> &nfa,
   DumpVisited(visited_index);
   return result;
 }
-
-void SearchContext::SearchForFinalsRec(std::size_t visited_array_index, const fsm::Nfa<const Action *> &nfa,
-                                       fsm::state_id_t current_state, Move *move, bool block_started,
-                                       std::vector<fsm::state_id_t> &finals_to_find) {
-  size_t index = VisitedIndex(nfa, current_state);
-  size_t depth = move->blocks().size();
-  if (visited_[visited_array_index][depth][index])
-    return;
-  visited_[visited_array_index][depth].set(index);
-  if ((ssize_t) depth == max_depth_)
-    return;
-  while(!finals_to_find.empty() && current_state == finals_to_find.back())
-  {
-    finals_to_find.pop_back();
-  }
-  if(finals_to_find.empty())
-  {
-    return;
-  }
-  for (const auto &transition : nfa[current_state].transitions()) {
-    ActionResult result = transition.letter()->Apply(calculation_state_);
-    if (result) {
-      if (transition.letter()->IsModifier()) {
-        if (!block_started) {
-          move->AddBlock(calculation_state_->pos(),
-                         transition.letter()->index());
-          CreateVisitedLayers(visited_array_index, depth + 1);
-          InvalidateResults();
-        }
-        if (transition.letter()->IsSwitch())
-          SearchForFinalsRec(visited_array_index, nfa, transition.target(), move,
-                          true,finals_to_find);
-        else {
-          SearchForFinalsRec(visited_array_index, nfa, transition.target(), move,
-                          true,finals_to_find);
-        }
-        if (!block_started) {
-          move->PopBlock();
-        }
-      } else {
-        if(transition.letter()->type() == ActionType::kEmptyGreedy)
-        {
-          size_t to_look_for = finals_to_find.size();
-          finals_to_find.push_back(dynamic_cast<const actions::EmptyGreedy*>(transition.letter())->final());
-          SearchForFinalsRec(visited_array_index, nfa,transition.target(), move, false, finals_to_find);
-          if(finals_to_find.size() <= to_look_for)
-          {
-            break;
-          }
-          else{
-            finals_to_find.pop_back();
-          }
-        }
-        else {
-          SearchForFinalsRec(visited_array_index, nfa, transition.target(), move,false, finals_to_find);
-        }
-      }
-    }
-    transition.letter()->Revert(calculation_state_, result);
-  }
-}
-
 

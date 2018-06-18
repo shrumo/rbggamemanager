@@ -17,7 +17,6 @@
 
 class GameState;
 
-// TODO(shrum): Add greedy actions and implement them in the search.
 // Represents abstract action that can be called on a game state.
 // Actions can be applied and reverted.
 // Example:
@@ -59,22 +58,6 @@ namespace actions {
     Empty() : Action(ActionType::kEmptyType) {}
 
     ActionResult Apply(GameState *) const override { return true; };
-  };
-
-  // This action is used to implement the greedy mechanism. If you can use the EmptyGreedy edge and get a move
-  // or meet the final_ state then you do not look at other empty or empty greedy transitions from current state.
-  class EmptyGreedy : public Action {
-  public:
-    EmptyGreedy(fsm::state_id_t final) : Action(ActionType::kEmptyGreedy), final_(final) {}
-
-    ActionResult Apply(GameState *) const override { return true; };
-
-    fsm::state_id_t final() const
-    {
-      return final_;
-    }
-  private:
-    fsm::state_id_t final_;
   };
 
   // Shift changes the current position on board.

@@ -133,21 +133,6 @@ private:
     return nfa_result_->NewState();
   }
 
-//  std::unique_ptr<ArithmeticOperation>
-//  CreateOperation(const rbg_parser::token &token) {
-//    std::unique_ptr<ArithmeticOperation> result;
-//    if (token.get_type() == rbg_parser::number) {
-//      result = std::unique_ptr<ArithmeticOperation>(
-//          new arithmetic_operations::Constant(token.get_value()));
-//    } else {
-//      token_id_t variable_id = resolver_.Id(token.to_string());
-//      result = std::unique_ptr<ArithmeticOperation>(
-//          new arithmetic_operations::Variable(variable_id));
-//    }
-//    return result;
-//  }
-
-
   const NameResolver &resolver_;
   const EdgeResolver &edge_resolver_;
   std::unique_ptr<fsm::Nfa<const Action *>> nfa_result_;

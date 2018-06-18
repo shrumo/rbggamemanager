@@ -30,8 +30,6 @@ enum class ActionType {
   kArithmeticNotEqualComparisonType,
 
   kPlayerCheck,
-
-  kEmptyGreedy,
 };
 
 constexpr bool IsSwitchType(ActionType type) {

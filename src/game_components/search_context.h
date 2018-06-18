@@ -81,18 +81,6 @@ private:
                        fsm::state_id_t current_state, Move *move,
                        bool block_started = false);
 
-  // Pops the finals that are found on the way of the search.
-  void FindAllMovesRec(std::size_t visited_array_index,
-                       const fsm::Nfa<const Action *> &nfa,
-                       fsm::state_id_t current_state, Move *move,
-                       bool block_started, std::vector<fsm::state_id_t>& finals_to_find);
-
-  // Searches skipping switches and pops the finals that are reachable.
-  void SearchForFinalsRec(std::size_t visited_array_index,
-                          const fsm::Nfa<const Action *> &nfa,
-                          fsm::state_id_t current_state, Move *move,
-                          bool block_started, std::vector<fsm::state_id_t>& finals_to_find);
-
   bool FindFirstMoveRec(std::size_t visited_array_index,
                         const fsm::Nfa<const Action *> &nfa,
                         fsm::state_id_t current_state, Move *move,

@@ -26,7 +26,7 @@ public:
   friend class GameNfaCreator;
 
 private:
-  /* TODO(shrum): Create other way of creating gamemovesdescription. */
+  /* TODO(shrum): Create other way of creating GameMovesDescription. */
   GameMovesDescription(std::unique_ptr<fsm::Nfa<const Action *>> nfa,
                        std::vector<fsm::state_id_t> blocks_states,
                        std::vector<std::unique_ptr<Action>> actions,
