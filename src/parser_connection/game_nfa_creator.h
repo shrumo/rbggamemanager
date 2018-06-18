@@ -14,7 +14,6 @@
 #include "../../rbgParser/src/switch.hpp"
 #include "../../rbgParser/src/power_move.hpp"
 #include "../../rbgParser/src/star_move.hpp"
-#include "../../rbgParser/src/modifier_block.hpp"
 #include "../../rbgParser/src/move_check.hpp"
 #include "../actions/action.h"
 #include "../game_nfa/game_moves_description.h"
@@ -72,8 +71,6 @@ public:
   void dispatch(const rbg_parser::player_switch &) override;
 
   void dispatch(const rbg_parser::keeper_switch&) override;
-
-  void dispatch(const rbg_parser::modifier_block &) override;
 
   void dispatch(const rbg_parser::arithmetic_comparison &comparison) override;
 

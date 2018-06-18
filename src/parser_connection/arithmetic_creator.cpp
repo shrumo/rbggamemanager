@@ -26,7 +26,6 @@ private:
   void dispatch(const rbg_parser::assignment &) override {}
   void dispatch(const rbg_parser::player_switch &) override {}
   void dispatch(const rbg_parser::keeper_switch&) override {}
-  void dispatch(const rbg_parser::modifier_block &) override {}
   void dispatch(const rbg_parser::arithmetic_comparison &) override {}
   void dispatch(const rbg_parser::move_check &) override {}
   void dispatch(const rbg_parser::integer_arithmetic &arithmetic) override;

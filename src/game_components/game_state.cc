@@ -139,12 +139,11 @@ std::ostream &outHexagonBoard(std::ostream &s,const GameState &state)
     size_t x,y;
     stream >> x >> placeholder >> y;
     board[x + y * width] = state.board()[v];
-    padding[y] = std::min(width - x - 1,padding[y]);
   }
   int text_width = 2;
   for(size_t y = 0; y < height; y++)
   {
-    for(size_t x = 0; x < padding[y] * (text_width + 3) / 2; x++)
+    for(size_t x = 0; x < std::max(y,height-y-1) * (text_width + 3) / 2; x++)
       std::cout << " ";
     for(size_t x = 0; x < width; x++)
     {
@@ -156,6 +155,10 @@ std::ostream &outHexagonBoard(std::ostream &s,const GameState &state)
           s << "[" << std::setw(text_width) << name.substr(0, (unsigned long) text_width)
             << "] ";
         }
+      }
+      else
+      {
+          s << std::setw(text_width+3) << " ";
       }
     }
     s << '\n';

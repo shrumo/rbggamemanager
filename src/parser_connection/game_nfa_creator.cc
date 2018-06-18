@@ -132,22 +132,6 @@ void GameNfaCreator::dispatch(const rbg_parser::move_check &move) {
   last_final_ = final_id;
 }
 
-void GameNfaCreator::dispatch(const rbg_parser::modifier_block &move) {
-
-  move.get_content().front()->accept(*this);
-
-  fsm::state_id_t initial = nfa_result_->initial();
-  StartBlock();
-  for (size_t i = 1; i < move.get_content().size(); i++) {
-    const auto &child = move.get_content()[i];
-    ReuseFinal();
-    child->accept(*this);
-  }
-  StopBlock();
-  nfa_result_->set_initial(initial);
-  last_final_ = nfa_result_->final();
-}
-
 void GameNfaCreator::StopBlock() { block_started_ = false; }
 
 void GameNfaCreator::StartBlock() { block_started_ = true; }
