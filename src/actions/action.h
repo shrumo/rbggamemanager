@@ -7,6 +7,7 @@
 
 #include <unordered_set>
 #include <memory>
+#include <iostream>
 
 #include "../game_components/name_resolver.h"
 #include "action_types.h"
@@ -75,6 +76,24 @@ namespace actions {
 
   private:
     edge_name_t edge_name_;
+  };
+
+  // Shift changes the current position on board.
+  class ShiftTable : public Action {
+  public:
+    explicit ShiftTable(std::vector<std::vector<vertex_t> > table) : Action(ActionType::kShiftTableType), table_(std::move(table))
+    {}
+
+    ActionResult Apply(GameState *b) const override {
+      std::cerr << "ShiftTable action should not be applied." << std::endl;
+    }
+    void Revert(GameState *state, const ActionResult &apply_result) const override {};
+
+    // Returns the edge this shift travels.
+    const std::vector<std::vector<vertex_t> >& table() const { return table_; }
+
+  private:
+    std::vector<std::vector<vertex_t> > table_;
   };
 
   // On checks if one of the pieces is on the current position on board.

@@ -48,8 +48,8 @@ public:
   }
 
   friend GameMovesDescription
-  create_moves(const rbg_parser::game_move &move, const NameResolver &resolver,
-               token_id_t piece_id_threshold, const EdgeResolver &edge_resolver);
+  CreateMoves(const rbg_parser::game_move &move, const NameResolver &resolver,
+              token_id_t piece_id_threshold, const EdgeResolver &edge_resolver, const GraphBoard &board);
 
 
   void dispatch(const rbg_parser::sum &) override;
@@ -107,9 +107,11 @@ private:
     last_final_ = information.last_final;
   }
 
-  GameNfaCreator(const NameResolver &resolver, token_id_t piece_id_threshold, const EdgeResolver &edge_resolver)
+  GameNfaCreator(const NameResolver &resolver, token_id_t piece_id_threshold, const EdgeResolver &edge_resolver,
+                 const GraphBoard& board)
       : resolver_(resolver),
         edge_resolver_(edge_resolver),
+        graph_board_(board),
         nfa_result_(new fsm::Nfa<const Action *>()),
         block_started_(false),
         register_modifiers_(true),
@@ -135,6 +137,7 @@ private:
 
   const NameResolver &resolver_;
   const EdgeResolver &edge_resolver_;
+  const GraphBoard &graph_board_;
   std::unique_ptr<fsm::Nfa<const Action *>> nfa_result_;
   std::unordered_map<std::string, const Action *> used_actions_;
 

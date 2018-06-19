@@ -20,6 +20,7 @@ enum class ActionType {
   // Others
       kEmptyType,
   kShiftType,
+  kShiftTableType,
   kOnType,
   kConditionCheckType,
   kNegatedConditionCheckType,

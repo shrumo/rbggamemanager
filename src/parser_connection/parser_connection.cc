@@ -85,9 +85,9 @@ NameResolver CreateResolver(const rbg_parser::declarations &declarations) {
 
 
 GameMovesDescription
-create_moves(const rbg_parser::game_move &move, const NameResolver &resolver,
-             token_id_t piece_id_threshold, const EdgeResolver &edge_resolver) {
-  GameNfaCreator creator(resolver, piece_id_threshold, edge_resolver);
+CreateMoves(const rbg_parser::game_move &move, const NameResolver &resolver,
+            token_id_t piece_id_threshold, const EdgeResolver &edge_resolver, const GraphBoard &board) {
+  GameNfaCreator creator(resolver, piece_id_threshold, edge_resolver, board);
   move.accept(creator);
   return creator.ExtractDescription();
 }
@@ -98,8 +98,9 @@ GameDescription CreateDescription(const rbg_parser::parsed_game &game) {
   EdgeResolver edge_resolver(CreateEdgeNamesResolver(game.get_board()));
   VertexResolver vertex_resolver(CreateVertexResolver(game.get_board()));
   GraphBoard initial_board(CreateGraphBoard(game.get_board(),edge_resolver, resolver));
-  GameMovesDescription moves(create_moves(*game.get_moves(), resolver,
-                                          game.get_declarations().get_legal_pieces().size(),edge_resolver));
+  GameMovesDescription moves(CreateMoves(*game.get_moves(), resolver,
+                                         game.get_declarations().get_legal_pieces().size(), edge_resolver,
+                                         initial_board));
   Declarations declarations(
       CreateDeclarations(game.get_declarations(), resolver));
   return std::move(GameDescription(std::move(resolver), std::move(moves),

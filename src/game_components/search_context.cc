@@ -19,6 +19,20 @@ void SearchContext::FindAllMovesRec(size_t visited_array_index,
   if ((ssize_t) depth == max_depth_)
     return;
   for (const auto &transition : nfa[current_state].transitions()) {
+    if(transition.letter()->type() == ActionType::kShiftTableType)
+    {
+      auto shift_table = dynamic_cast<const actions::ShiftTable*>(transition.letter());
+      auto previous_pos = calculation_state_->pos();
+      for(auto next_pos : shift_table->table()[previous_pos])
+      {
+        if(next_pos != -1) {
+          calculation_state_->SetPos(next_pos);
+          FindAllMovesRec(visited_array_index, nfa, transition.target(), move);
+        }
+      }
+      calculation_state_->SetPos(previous_pos);
+      continue;
+    }
     ActionResult result = transition.letter()->Apply(calculation_state_);
     if (result) {
       if (transition.letter()->IsModifier()) {
@@ -100,6 +114,25 @@ bool SearchContext::CheckPlay(size_t visited_array_index, size_t results_index,
   if ((ssize_t) depth == max_depth_)
     return false;
   for (const auto &transition : nfa[current_state].transitions()) {
+    if(transition.letter()->type() == ActionType::kShiftTableType)
+    {
+      auto shift_table = dynamic_cast<const actions::ShiftTable*>(transition.letter());
+      auto previous_pos = calculation_state_->pos();
+      for(auto next_pos : shift_table->table()[previous_pos])
+      {
+        if(next_pos != -1) {
+          calculation_state_->SetPos(next_pos);
+          if (CheckPlay(visited_array_index, results_index, nfa,
+                        transition.target(), depth)) {
+            results_[results_index][depth].set(index);
+            calculation_state_->SetPos(previous_pos);
+            return true;
+          }
+        }
+        calculation_state_->SetPos(previous_pos);
+      }
+      continue;
+    }
     ActionResult result = transition.letter()->Apply(calculation_state_);
     if (result) {
       if (transition.letter()->IsModifier()) {
@@ -212,6 +245,24 @@ bool SearchContext::FindFirstMoveRec(std::size_t visited_array_index,
     return false;
   bool rec_result = false;
   for (const auto &transition : nfa[current_state].transitions()) {
+    if(transition.letter()->type() == ActionType::kShiftTableType)
+    {
+      auto shift_table = dynamic_cast<const actions::ShiftTable*>(transition.letter());
+      auto previous_pos = calculation_state_->pos();
+      for(auto next_pos : shift_table->table()[previous_pos])
+      {
+        if(next_pos != -1) {
+          calculation_state_->SetPos(next_pos);
+          rec_result = FindFirstMoveRec(visited_array_index, nfa, transition.target(), move);
+          if (rec_result) {
+            calculation_state_->SetPos(previous_pos);
+            return true;
+          }
+        }
+      }
+      calculation_state_->SetPos(previous_pos);
+      continue;
+    }
     ActionResult result = transition.letter()->Apply(calculation_state_);
     if (result) {
       if (transition.letter()->IsModifier()) {

@@ -119,6 +119,11 @@ public:
     return current_pos_;
   }
 
+  void SetPos(vertex_t new_pos)
+  {
+    current_pos_ = new_pos;
+  }
+
   token_id_t player() const {
     return current_player_;
   }
