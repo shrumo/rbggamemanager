@@ -186,6 +186,13 @@ public:
     return std::move(result);
   }
 
+  PerftResult FindMovesDeep(SearchContext *context, size_t perft_depth, ssize_t max_depth=-1) {
+    current_search_ = context;
+    auto result = current_search_->FindMovesDeep(this, perft_depth, max_depth);
+    current_search_ = nullptr;
+    return std::move(result);
+  }
+
   std::vector<Move>
   FindFirstMove(SearchContext *context, ssize_t max_depth = -1) {
     current_search_ = context;

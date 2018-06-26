@@ -61,11 +61,6 @@ pieces_player_usages(const GameDescription &gd, size_t iters = 10) {
   return result;
 }
 
-struct PerftResult {
-  size_t leaf_count;
-  size_t node_count;
-};
-
 static PerftResult
 perft(SearchContext *context, GameState *state, size_t depth) {
   if (depth == 0)

@@ -33,11 +33,6 @@ struct PlayerResults {
   int sum, min, max;
 };
 
-struct PerftResult {
-  size_t leaf_count;
-  size_t node_count;
-};
-
 PerftResult perft(SearchContext *context, GameState *state, size_t depth) {
   if (depth == 0) {
     return {1, 1};
@@ -50,16 +45,13 @@ PerftResult perft(SearchContext *context, GameState *state, size_t depth) {
   {
     moves = state->FindFirstMove(context);
     new_depth = depth;
-  } else if (state->player() == state->description().keeper_player_id())
-  {
-    moves = state->FindMoves(context);
-    new_depth = depth;
-  } else
+  }
+  else
   {
     moves = state->FindMoves(context);
   }
   size_t leaf_count = 0;
-  size_t node_count = static_cast<size_t>(state->player() != state->description().keeper_player_id());
+  auto node_count = static_cast<size_t>(state->player() != state->description().keeper_player_id());
   for (const auto &move : moves) {
     auto revert_info = state->MakeRevertibleMove(move);
     auto rec_res = perft(context, state, new_depth);
@@ -177,6 +169,26 @@ void perft_benchmark(const rbg_parser::parsed_game &pg, size_t depth) {
             << " states/sec)" << std::endl;
 }
 
+void fast_perft_benchmark(const rbg_parser::parsed_game &pg, size_t depth) {
+  GameDescription gd = CreateDescription(pg);
+  auto begin = std::chrono::system_clock::now();
+  SearchContext context;
+  GameState state(gd);
+  auto result = state.FindMovesDeep(&context, depth);
+  auto end = std::chrono::system_clock::now();
+  auto duration = std::chrono::duration<double>(end - begin).count();
+  std::cout << "Calculated perft for depth " << depth << " in "
+            << std::fixed << std::showpoint
+            << duration
+            << "s" << std::endl;
+  std::cout << "There are " << result.leaf_count << " leaves" << std::endl;
+  std::cout << "Number of traveled states: " << result.node_count << " ("
+            << std::fixed << std::showpoint
+            << result.node_count / duration
+            << " states/sec)" << std::endl;
+}
+
+
 int main(int argc, const char *argv[]) {
   po::options_description description("Allowed options");
   description.add_options()
@@ -234,7 +246,7 @@ int main(int argc, const char *argv[]) {
 
   if (vm.count("depth")) {
     size_t depth = vm["depth"].as<uint>();
-    perft_benchmark(*pg, depth);
+    fast_perft_benchmark(*pg, depth);
   } else {
     size_t iterations = 1;
     if (vm.count("number"))

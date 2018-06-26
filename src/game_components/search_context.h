@@ -19,6 +19,11 @@ namespace actions {
   class NegatedConditionCheck;
 }
 
+struct PerftResult {
+  size_t leaf_count;
+  size_t node_count;
+};
+
 class SearchContext {
 public:
   friend class actions::ConditionCheck;
@@ -54,6 +59,8 @@ public:
 
   std::vector<Move> FindMoves(GameState *state, ssize_t max_depth = -1);
 
+  PerftResult FindMovesDeep(GameState *state, size_t perft_depth, ssize_t max_depth=-1);
+
   std::vector<Move> FindFirstMove(GameState *state, ssize_t max_depth = -1);
 
   bool CheckPattern(GameState *state, const fsm::Nfa<const Action *> &nfa,
@@ -75,6 +82,11 @@ private:
 
   void
   CreateResultLayers(std::size_t results_array_index, std::size_t layer_depth);
+
+  PerftResult FastPerft(std::size_t visited_array_index,
+                   const fsm::Nfa<const Action *> &nfa,
+                   fsm::state_id_t current_state, size_t depth,
+                   bool block_started = false, size_t depth_result = 3);
 
   void FindAllMovesRec(std::size_t visited_array_index,
                        const fsm::Nfa<const Action *> &nfa,

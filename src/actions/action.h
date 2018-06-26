@@ -84,10 +84,11 @@ namespace actions {
     explicit ShiftTable(std::vector<std::vector<vertex_t> > table) : Action(ActionType::kShiftTableType), table_(std::move(table))
     {}
 
-    ActionResult Apply(GameState *b) const override {
+    ActionResult Apply(GameState *) const override {
       std::cerr << "ShiftTable action should not be applied." << std::endl;
+      return false;
     }
-    void Revert(GameState *state, const ActionResult &apply_result) const override {};
+    void Revert(GameState *, const ActionResult &) const override {};
 
     // Returns the edge this shift travels.
     const std::vector<std::vector<vertex_t> >& table() const { return table_; }

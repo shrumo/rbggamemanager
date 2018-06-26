@@ -24,12 +24,12 @@ public:
 
   void ResetResult()
   {
-    for(size_t i = 0; i < result_.size(); i++)
+    for(ssize_t i = 0; i < static_cast<ssize_t >(result_.size()); i++)
     {
       result_[i] = {i};
     }
     clear_length_ = 0;
-    concat_begins_ = {};
+    concat_ends_ = {};
     concat_results_ = {};
     concat_clear_lengths_ = {};
   }
@@ -54,41 +54,41 @@ public:
 
   const std::vector<unsigned int>& concat_begins() const
   {
-    return concat_begins_;
+    return concat_ends_;
   }
 
 private:
   void dispatch(const rbg_parser::sum &sum) override {
-    unsigned int tmp_clear_length = 0;
+    unsigned int result_clear_length = 0;
     std::vector < std::unordered_set< vertex_t > > tmp_result = std::vector<std::unordered_set<vertex_t> >(board_.size());
     for(auto& item : sum.get_content())
     {
       item->accept(*this);
       if(!clear_length_)
         return;
-      tmp_clear_length = std::max(clear_length_+1, tmp_clear_length);
-      auto tmp_rec_result = ExtractResult();
-      for(vertex_t v = 0; v < tmp_rec_result.size(); v++)
+      result_clear_length = std::max(clear_length_+1, result_clear_length);
+      auto rec_result = ExtractResult();
+      for(vertex_t v = 0; v < static_cast<ssize_t >(rec_result.size()); v++)
       {
-        tmp_result[v].insert(tmp_rec_result[v].begin(),tmp_rec_result[v].end());
+        tmp_result[v].insert(rec_result[v].begin(),rec_result[v].end());
       }
       ResetResult();
     }
     result_ = tmp_result;
-    clear_length_ = tmp_clear_length;
+    clear_length_ = result_clear_length;
   }
 
   void dispatch(const rbg_parser::concatenation &concat) override {
-    unsigned int tmp_clear_length = 0;
-    std::vector < std::unordered_set< vertex_t > > tmp_result = std::vector<std::unordered_set<vertex_t> >(board_.size());
+    unsigned int result_clear_length = 0;
+    std::vector < std::unordered_set< vertex_t > > result_table = std::vector<std::unordered_set<vertex_t> >(board_.size());
 
-    std::vector< std::vector < std::unordered_set<vertex_t> > > concat_results_tmp;
-    std::vector< unsigned int> concat_clear_lengths_tmp;
-    std::vector< unsigned int> concat_begins_tmp;
+    std::vector< std::vector < std::unordered_set<vertex_t> > > concat_tables;
+    std::vector< unsigned int> result_concat_clear_lengths;
+    std::vector< unsigned int> result_concat_begins;
 
-    for(size_t j = 0; j < tmp_result.size(); j++)
+    for(ssize_t j = 0; j < static_cast<ssize_t >(result_table.size()); j++)
     {
-      tmp_result[j] = {j};
+      result_table[j] = {j};
     }
     for(size_t i = 0; i < concat.get_content().size(); i++)
     {
@@ -96,90 +96,90 @@ private:
       item->accept(*this);
       if(!clear_length_ && i != 0)
       {
-        concat_results_tmp.push_back(std::move(tmp_result));
-        concat_clear_lengths_tmp.push_back(tmp_clear_length);
-        concat_begins_tmp.push_back(static_cast<unsigned int &&>(i));
-        tmp_clear_length = 0;
-        tmp_result = std::vector< std::unordered_set<vertex_t> >(board_.size());
-        for(size_t j = 0; j < tmp_result.size(); j++)
+        concat_tables.push_back(std::move(result_table));
+        result_concat_clear_lengths.push_back(result_clear_length);
+        result_concat_begins.push_back(static_cast<unsigned int &&>(i));
+        result_clear_length = 0;
+        result_table = std::vector< std::unordered_set<vertex_t> >(board_.size());
+        for(ssize_t j = 0; j < static_cast<ssize_t >(result_table.size()); j++)
         {
-          tmp_result[j] = {j};
+          result_table[j] = {j};
         }
         continue;
       }
-      else if(tmp_clear_length == 0 && clear_length_ && i != 0)
+      else if(result_clear_length == 0 && clear_length_ && i != 0)
       {
-        concat_results_tmp.push_back(std::move(tmp_result));
-        concat_clear_lengths_tmp.push_back(tmp_clear_length);
-        concat_begins_tmp.push_back(static_cast<unsigned int &&>(i));
-        tmp_clear_length = 0;
-        tmp_result = std::vector< std::unordered_set<vertex_t> >(board_.size());
-        for(size_t j = 0; j < tmp_result.size(); j++)
+        concat_tables.push_back(std::move(result_table));
+        result_concat_clear_lengths.push_back(result_clear_length);
+        result_concat_begins.push_back(static_cast<unsigned int &&>(i));
+        result_clear_length = 0;
+        result_table = std::vector< std::unordered_set<vertex_t> >(board_.size());
+        for(ssize_t j = 0; j < static_cast<ssize_t >(result_table.size()); j++)
         {
-          tmp_result[j] = {j};
+          result_table[j] = {j};
         }
         continue;
       }
-      tmp_clear_length += clear_length_;
+      result_clear_length += clear_length_;
       auto tmp_rec_result = ExtractResult();
-      std::vector < std::unordered_set< vertex_t > > next_result(tmp_result.size());
-      for(vertex_t v = 0; v < tmp_result.size(); v++)
+      std::vector < std::unordered_set< vertex_t > > next_result(result_table.size());
+      for(vertex_t v = 0; v < static_cast<ssize_t >(result_table.size()); v++)
       {
-        for(auto neighbour : tmp_result[v])
+        for(auto neighbour : result_table[v])
         {
           if(neighbour != -1)
             next_result[v].insert(tmp_rec_result[neighbour].begin(),tmp_rec_result[neighbour].end());
         }
       }
-      tmp_result = next_result;
+      result_table = next_result;
       ResetResult();
     }
-    concat_results_tmp.push_back(tmp_result);
-    concat_clear_lengths_tmp.push_back(tmp_clear_length);
-    concat_begins_tmp.push_back(static_cast<unsigned int &&>(concat.get_content().size()));
-    result_ = tmp_result;
-    clear_length_ = *std::min_element(concat_clear_lengths_tmp.begin(),concat_clear_lengths_tmp.end());
+    concat_tables.push_back(result_table);
+    result_concat_clear_lengths.push_back(result_clear_length);
+    result_concat_begins.push_back(static_cast<unsigned int &&>(concat.get_content().size()));
+    result_ = result_table;
+    clear_length_ = *std::min_element(result_concat_clear_lengths.begin(),result_concat_clear_lengths.end());
 
-    concat_results_ = concat_results_tmp;
-    concat_clear_lengths_ = concat_clear_lengths_tmp;
-    concat_begins_ = concat_begins_tmp;
+    concat_results_ = concat_tables;
+    concat_clear_lengths_ = result_concat_clear_lengths;
+    concat_ends_ = result_concat_begins;
   }
 
   void dispatch(const rbg_parser::power_move& move) override {
-    unsigned int tmp_clear_length = 0;
-    std::vector < std::unordered_set< vertex_t > > tmp_result = std::vector<std::unordered_set<vertex_t> >(board_.size());
-    for(size_t j = 0; j < tmp_result.size(); j++)
+    unsigned int result_clear_length = 0;
+    std::vector < std::unordered_set< vertex_t > > result_table = std::vector<std::unordered_set<vertex_t> >(board_.size());
+    for(ssize_t j = 0; j < static_cast<ssize_t >(result_table.size()); j++)
     {
-      tmp_result[j] = {j};
+      result_table[j] = {j};
     }
 
     move.get_content()->accept(*this);
     if(!clear_length_)
       return;
-    tmp_clear_length += clear_length_ * move.get_number_of_repetitions();
+    result_clear_length += clear_length_ * move.get_number_of_repetitions();
     auto tmp_rec_result = ExtractResult();
 
     for(uint i = 0; i < move.get_number_of_repetitions(); i++)
     {
-      std::vector < std::unordered_set< vertex_t > > next_result(tmp_result.size());
-      for(vertex_t v = 0; v < tmp_result.size(); v++)
+      std::vector < std::unordered_set< vertex_t > > next_result(result_table.size());
+      for(vertex_t v = 0; v < static_cast<ssize_t >(result_table.size()); v++)
       {
-        for(auto neighbour : tmp_result[v])
+        for(auto neighbour : result_table[v])
         {
           if(neighbour != -1)
             next_result[v].insert(tmp_rec_result[neighbour].begin(),tmp_rec_result[neighbour].end());
         }
       }
-      tmp_result = next_result;
+      result_table = next_result;
     }
-    result_ = tmp_result;
-    clear_length_ = tmp_clear_length;
+    result_ = result_table;
+    clear_length_ = result_clear_length;
   }
 
   void dispatch(const rbg_parser::star_move& move) override {
     unsigned int tmp_clear_length = 0;
     std::vector < std::unordered_set< vertex_t > > tmp_result = std::vector<std::unordered_set<vertex_t> >(board_.size());
-    for(size_t j = 0; j < tmp_result.size(); j++)
+    for(ssize_t j = 0; j < static_cast<ssize_t >(tmp_result.size()); j++)
     {
       tmp_result[j] = {j};
     }
@@ -192,7 +192,7 @@ private:
 
     for(uint i = 0; i < board_.size(); i++)
     {
-      for(vertex_t v = 0; v < tmp_result.size(); v++)
+      for(vertex_t v = 0; v < static_cast<ssize_t >(tmp_result.size()); v++)
       {
         for(auto neighbour : tmp_result[v])
         {
@@ -208,7 +208,7 @@ private:
 
   void dispatch(const rbg_parser::shift & action) override {
     ResetResult();
-    for(vertex_t v = 0; v < result_.size(); v++)
+    for(vertex_t v = 0; v < static_cast<ssize_t >(result_.size()); v++)
     {
       result_[v] = {board_.Next(v,edge_resolver_.Id(action.get_content().to_string()))};
     }
@@ -222,9 +222,9 @@ private:
   void dispatch(const rbg_parser::keeper_switch&) override { ResetResult();}
   void dispatch(const rbg_parser::arithmetic_comparison &) override { ResetResult();}
   void dispatch(const rbg_parser::move_check &) override { ResetResult(); }
-  void dispatch(const rbg_parser::integer_arithmetic &arithmetic) override { ResetResult();};
-  void dispatch(const rbg_parser::variable_arithmetic &arithmetic) override { ResetResult();};
-  void dispatch(const rbg_parser::arithmetic_operation &arithmetic) override { ResetResult();};
+  void dispatch(const rbg_parser::integer_arithmetic &) override { ResetResult();};
+  void dispatch(const rbg_parser::variable_arithmetic &) override { ResetResult();};
+  void dispatch(const rbg_parser::arithmetic_operation &) override { ResetResult();};
   const NameResolver& resolver_;
   const GraphBoard& board_;
   const EdgeResolver& edge_resolver_;
@@ -234,7 +234,7 @@ private:
 
   std::vector< std::vector < std::unordered_set<vertex_t> > > concat_results_;
   std::vector< unsigned int> concat_clear_lengths_;
-  std::vector< unsigned int> concat_begins_;
+  std::vector< unsigned int> concat_ends_;
 };
 
 

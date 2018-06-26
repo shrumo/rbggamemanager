@@ -312,3 +312,81 @@ bool SearchContext::CheckPattern(const fsm::Nfa<const Action *> &nfa,
   return result;
 }
 
+PerftResult SearchContext::FastPerft(std::size_t visited_array_index, const fsm::Nfa<const Action *> &nfa,
+                                fsm::state_id_t current_state, size_t depth, bool block_started, size_t perft_depth) {
+  size_t index = VisitedIndex(nfa, current_state);
+  if (visited_[visited_array_index][depth][index])
+    return {0,0};
+  visited_[visited_array_index][depth].set(index);
+  if ((ssize_t) depth == max_depth_)
+    return {0,0};
+  size_t node_count = 0;
+  size_t leaf_count = 0;
+  for (const auto &transition : nfa[current_state].transitions()) {
+    if(transition.letter()->type() == ActionType::kShiftTableType)
+    {
+      auto shift_table = dynamic_cast<const actions::ShiftTable*>(transition.letter());
+      auto previous_pos = calculation_state_->pos();
+      for(auto next_pos : shift_table->table()[previous_pos])
+      {
+        if(next_pos != -1) {
+          calculation_state_->SetPos(next_pos);
+          auto rec_result = FastPerft(visited_array_index, nfa, transition.target(), depth, false, perft_depth);
+          node_count += rec_result.node_count;
+          leaf_count += rec_result.leaf_count;
+        }
+      }
+      calculation_state_->SetPos(previous_pos);
+      continue;
+    }
+    ActionResult result = transition.letter()->Apply(calculation_state_);
+    if (result) {
+      if (transition.letter()->IsModifier()) {
+        size_t new_depth = depth;
+        if (!block_started) {
+          new_depth = depth + 1;
+          CreateVisitedLayers(visited_array_index, depth + 1);
+          InvalidateResults();
+        }
+        if (transition.letter()->IsSwitch()) {
+          node_count +=  static_cast<size_t>(result.revert_player() != calculation_state_->description().keeper_player_id());
+          size_t next_perft = calculation_state_->player() == calculation_state_->description().keeper_player_id() ? perft_depth : perft_depth - 1;
+          if (next_perft > 0) {
+            auto rec_result = FastPerft(visited_array_index, nfa, transition.target(), new_depth, true, next_perft);
+            node_count += rec_result.node_count;
+            leaf_count += rec_result.leaf_count;
+          }
+          else {
+            leaf_count += 1;
+          }
+        }
+        else {
+          auto rec_result = FastPerft(visited_array_index, nfa, transition.target(), new_depth, true, perft_depth);
+          node_count += rec_result.node_count;
+          leaf_count += rec_result.leaf_count;
+        }
+      } else {
+        auto rec_result = FastPerft(visited_array_index, nfa, transition.target(), depth, false, perft_depth);
+        node_count += rec_result.node_count;
+        leaf_count += rec_result.leaf_count;
+      }
+    }
+    transition.letter()->Revert(calculation_state_, result);
+  }
+  return {leaf_count, node_count};
+}
+
+PerftResult SearchContext::FindMovesDeep(GameState *state, size_t perft_depth, ssize_t maximal_depth) {
+  calculation_state_ = state;
+  if (maximal_depth >= 0)
+    max_depth_ = (size_t) maximal_depth;
+  size_t visited_index = NewVisited(
+      state->description().moves_description().nfa());
+  Move empty;
+  auto perft = FastPerft(visited_index, state->description().moves_description().nfa(),
+                  state->nfa_state(), 0, false, perft_depth+1);
+  DumpVisited(visited_index);
+  calculation_state_ = nullptr;
+  return perft;
+}
+
