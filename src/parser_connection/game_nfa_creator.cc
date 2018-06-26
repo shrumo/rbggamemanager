@@ -94,7 +94,7 @@ private:
     {
       auto& item = concat.get_content()[i];
       item->accept(*this);
-      if(!clear_length_)
+      if(!clear_length_ && i != 0)
       {
         concat_results_tmp.push_back(std::move(tmp_result));
         concat_clear_lengths_tmp.push_back(tmp_clear_length);
@@ -105,10 +105,13 @@ private:
         {
           tmp_result[j] = {j};
         }
-
+        continue;
+      }
+      else if(tmp_clear_length == 0 && clear_length_ && i != 0)
+      {
         concat_results_tmp.push_back(std::move(tmp_result));
         concat_clear_lengths_tmp.push_back(tmp_clear_length);
-        concat_begins_tmp.push_back(static_cast<unsigned int &&>(i+1));
+        concat_begins_tmp.push_back(static_cast<unsigned int &&>(i));
         tmp_clear_length = 0;
         tmp_result = std::vector< std::unordered_set<vertex_t> >(board_.size());
         for(size_t j = 0; j < tmp_result.size(); j++)
@@ -184,7 +187,7 @@ private:
     move.get_content()->accept(*this);
     if(!clear_length_)
       return;
-    tmp_clear_length = clear_length_+1;
+    tmp_clear_length += clear_length_;
     auto tmp_rec_result = ExtractResult();
 
     for(uint i = 0; i < board_.size(); i++)

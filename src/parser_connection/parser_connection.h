@@ -5,7 +5,7 @@
 #ifndef RBGGAMEMANAGER_PARSER_CONNECTION_H
 #define RBGGAMEMANAGER_PARSER_CONNECTION_H
 
-#include "../../rbgParser/src/game_board.hpp"
+#include "../../rbgParser/src/graph.hpp"
 #include "../../rbgParser/src/declarations.hpp"
 #include "../../rbgParser/src/game_move.hpp"
 #include "../../rbgParser/src/parsed_game.hpp"
@@ -26,7 +26,7 @@ class EdgeResolver;
 
 NameResolver CreateResolver(const rbg_parser::declarations &declarations);
 
-Board CreateBoard(const rbg_parser::game_board &parsed_board,
+Board CreateBoard(const rbg_parser::graph &parsed_board,
                   const NameResolver &resolver);
 
 EdgeResolver CreateEdgeNamesResolver(const rbg_parser::graph &parsed_graph_board);
