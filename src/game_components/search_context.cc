@@ -372,6 +372,10 @@ PerftResult SearchContext::FastPerft(std::size_t visited_array_index, const fsm:
       }
     }
     transition.letter()->Revert(calculation_state_, result);
+    if(calculation_state_->player() == calculation_state_->description().keeper_player_id() && node_count > 0)
+    {
+      return {leaf_count, node_count};
+    }
   }
   return {leaf_count, node_count};
 }
@@ -387,6 +391,6 @@ PerftResult SearchContext::FindMovesDeep(GameState *state, size_t perft_depth, s
                   state->nfa_state(), 0, false, perft_depth+1);
   DumpVisited(visited_index);
   calculation_state_ = nullptr;
-  return perft;
+  return {perft.leaf_count, perft.node_count + 1};
 }
 
