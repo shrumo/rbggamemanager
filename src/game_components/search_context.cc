@@ -6,6 +6,7 @@
 #include "game_state.h"
 #include <algorithm>
 
+// TODO(shrum): Add blocks of modifiers later as they are re-introduced in parser.
 
 void SearchContext::FindAllMovesRec(size_t visited_array_index,
                                     const fsm::Nfa<const Action *> &nfa,
@@ -46,7 +47,7 @@ void SearchContext::FindAllMovesRec(size_t visited_array_index,
           possible_moves_.push_back(*move);
         else {
           FindAllMovesRec(visited_array_index, nfa, transition.target(), move,
-                          true);
+                          false);
         }
         if (!block_started) {
           move->PopBlock();
@@ -144,7 +145,7 @@ bool SearchContext::CheckPlay(size_t visited_array_index, size_t results_index,
           new_depth = depth + 1;
         }
         if (CheckPlay(visited_array_index, results_index, nfa,
-                      transition.target(), new_depth, true) || transition.letter()->IsSwitch())
+                      transition.target(), new_depth, false) || transition.letter()->IsSwitch())
           results_[results_index][depth].set(index);
       } else if (CheckPlay(visited_array_index, results_index, nfa,
                            transition.target(), depth))
@@ -277,7 +278,7 @@ bool SearchContext::FindFirstMoveRec(std::size_t visited_array_index,
           rec_result = true;
         } else {
           rec_result = FindFirstMoveRec(visited_array_index, nfa,
-                                        transition.target(), move, true);
+                                        transition.target(), move, false);
         }
         if (!block_started) {
           move->PopBlock();
@@ -352,7 +353,7 @@ PerftResult SearchContext::FastPerft(std::size_t visited_array_index, const fsm:
           node_count +=  static_cast<size_t>(result.revert_player() != calculation_state_->description().keeper_player_id());
           size_t next_perft = calculation_state_->player() == calculation_state_->description().keeper_player_id() ? perft_depth : perft_depth - 1;
           if (next_perft > 0) {
-            auto rec_result = FastPerft(visited_array_index, nfa, transition.target(), new_depth, true, next_perft);
+            auto rec_result = FastPerft(visited_array_index, nfa, transition.target(), new_depth, false, next_perft);
             node_count += rec_result.node_count;
             leaf_count += rec_result.leaf_count;
           }
@@ -361,7 +362,7 @@ PerftResult SearchContext::FastPerft(std::size_t visited_array_index, const fsm:
           }
         }
         else {
-          auto rec_result = FastPerft(visited_array_index, nfa, transition.target(), new_depth, true, perft_depth);
+          auto rec_result = FastPerft(visited_array_index, nfa, transition.target(), new_depth, false, perft_depth);
           node_count += rec_result.node_count;
           leaf_count += rec_result.leaf_count;
         }

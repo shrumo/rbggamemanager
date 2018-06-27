@@ -34,17 +34,18 @@ struct PlayerResults {
 };
 
 PerftResult perft(SearchContext *context, GameState *state, size_t depth) {
-  if (depth == 0) {
-    return {1, 1};
+  size_t next_perft = state->player() == state->description().keeper_player_id() ? depth : depth - 1;
+
+  if(next_perft <= 0)
+  {
+    return {1,1};
   }
 
   std::vector<Move> moves;
-  size_t new_depth = depth - 1;
   if (state->player() ==
       state->description().keeper_player_id())
   {
     moves = state->FindFirstMove(context);
-    new_depth = depth;
   }
   else
   {
@@ -54,7 +55,7 @@ PerftResult perft(SearchContext *context, GameState *state, size_t depth) {
   auto node_count = static_cast<size_t>(state->player() != state->description().keeper_player_id());
   for (const auto &move : moves) {
     auto revert_info = state->MakeRevertibleMove(move);
-    auto rec_res = perft(context, state, new_depth);
+    auto rec_res = perft(context, state, next_perft);
     leaf_count += rec_res.leaf_count;
     node_count += rec_res.node_count;
     state->RevertMove(revert_info);
@@ -155,7 +156,7 @@ void perft_benchmark(const rbg_parser::parsed_game &pg, size_t depth) {
   auto begin = std::chrono::system_clock::now();
   SearchContext context;
   GameState state(gd);
-  auto result = perft(&context, &state, depth);
+  auto result = perft(&context, &state, depth + 1); // + 1 for the first
   auto end = std::chrono::system_clock::now();
   auto duration = std::chrono::duration<double>(end - begin).count();
   std::cout << "Calculated perft for depth " << depth << " in "
