@@ -64,7 +64,7 @@ PerftResult perft(SearchContext *context, GameState *state, size_t depth) {
 }
 
 void
-random_play_benchmark(const rbg_parser::parsed_game &pg, size_t iterations) {
+random_play_benchmark(const rbg_parser::parsed_game &pg, size_t iterations, bool show_keeper=false) {
   GameDescription gd = CreateDescription(pg);
 
   std::unordered_map<token_id_t, PlayerResults> player_scores_sum;
@@ -87,13 +87,13 @@ random_play_benchmark(const rbg_parser::parsed_game &pg, size_t iterations) {
     GameState state(gd);
     auto moves = state.FindMoves(&context);
     moves_count += moves.size();
-    if (iterations == 1)
+    if (iterations == 1 && (show_keeper || state.player() != state.description().keeper_player_id()))
       std::cout << state << std::endl;
     while (!moves.empty()) {
-      if (iterations == 1)
+      if (iterations == 1  && (show_keeper || state.player() != state.description().keeper_player_id()))
         std::cout << "\n";
       state.MakeMove(moves[rand() % moves.size()]);
-      if (iterations == 1) {
+      if (iterations == 1  && (show_keeper || state.player() != state.description().keeper_player_id())) {
         std::cout << state << std::endl;
       }
       if (state.player() ==
@@ -198,7 +198,8 @@ int main(int argc, const char *argv[]) {
       ("input-file,i", po::value<std::string>(), "input file")
       ("randomseed,s", po::value<uint>(), "random seed for random player")
       ("depth,d", po::value<uint>(), "depth of perft calculation")
-      ("textwidth", po::value<unsigned int>(), "The width of the tokens in printing of the board");
+      ("keeper,k", po::value<uint>(), "show keeper states while displaying games in random play benchmark")
+      ("textwidth", po::value<uint>(), "The width of the tokens in printing of the board");
 
   po::variables_map vm;
   po::store(po::parse_command_line(argc, argv, description), vm);
@@ -227,6 +228,8 @@ int main(int argc, const char *argv[]) {
     return 1;
   }
 
+  auto begin = std::chrono::system_clock::now();
+
   rbg_parser::messages_container msg;
   std::ifstream t(vm["input-file"].as<std::string>());
   std::stringstream buffer;
@@ -244,6 +247,10 @@ int main(int argc, const char *argv[]) {
     std::cout << m.as_error() << std::endl;
     return 1;
   }
+  auto end = std::chrono::system_clock::now();
+  auto duration = std::chrono::duration<double>(end - begin).count();
+
+  std::cout << "Preprocessing took " << duration << "s" << std::endl;
 
   if (vm.count("depth")) {
     size_t depth = vm["depth"].as<uint>();
@@ -252,6 +259,6 @@ int main(int argc, const char *argv[]) {
     size_t iterations = 1;
     if (vm.count("number"))
       iterations = vm["number"].as<uint>();
-    random_play_benchmark(*pg, iterations);
+    random_play_benchmark(*pg, iterations, vm.count("keeper") && vm["keeper"].as<uint>());
   }
 }
