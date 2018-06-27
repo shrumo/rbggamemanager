@@ -389,9 +389,9 @@ PerftResult SearchContext::FindMovesDeep(GameState *state, size_t perft_depth, s
       state->description().moves_description().nfa());
   Move empty;
   auto perft = FastPerft(visited_index, state->description().moves_description().nfa(),
-                  state->nfa_state(), 0, false, perft_depth+1);
+                  state->nfa_state(), 0, false, perft_depth);
   DumpVisited(visited_index);
   calculation_state_ = nullptr;
-  return {perft.leaf_count, perft.node_count + 1};
+  return {perft.leaf_count, perft.node_count};
 }
 

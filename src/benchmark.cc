@@ -77,6 +77,7 @@ random_play_benchmark(const rbg_parser::parsed_game &pg, size_t iterations, bool
   }
 
   size_t turns = 0;
+  size_t keeper_turns = 0;
   size_t avgmoves = 0;
   size_t all_moves_count = 0;
   auto begin = std::chrono::system_clock::now();
@@ -84,6 +85,7 @@ random_play_benchmark(const rbg_parser::parsed_game &pg, size_t iterations, bool
   for (size_t i = 0; i < iterations; i++) {
     size_t moves_count = 0;
     size_t state_turns = 0;
+    size_t keeper_state_turns = 0;
     GameState state(gd);
     auto moves = state.FindMoves(&context);
     moves_count += moves.size();
@@ -99,6 +101,7 @@ random_play_benchmark(const rbg_parser::parsed_game &pg, size_t iterations, bool
       if (state.player() ==
           state.description().keeper_player_id()) {
         moves = state.FindFirstMove(&context);
+        keeper_state_turns++;
       } else {
         moves = state.FindMoves(&context);
         state_turns++;
@@ -113,8 +116,9 @@ random_play_benchmark(const rbg_parser::parsed_game &pg, size_t iterations, bool
       if (score > player_score.second.max)
         player_score.second.max = score;
     }
-    turns += state_turns + 1;
-    avgmoves += moves_count / (state_turns + 1);
+    turns += state_turns;
+    keeper_turns = keeper_state_turns;
+    avgmoves += moves_count / state_turns;
     all_moves_count += moves_count;
   }
   auto end = std::chrono::system_clock::now();
@@ -133,9 +137,17 @@ random_play_benchmark(const rbg_parser::parsed_game &pg, size_t iterations, bool
   std::cout << "Avarage number of moves in one state_: "
             << std::fixed << std::showpoint
             << static_cast<double>(avgmoves) / iterations << std::endl;
-  std::cout << "Number of traveled states: " << turns << " ("
+  std::cout << "Number of traveled player states: " << turns << " ("
             << std::fixed << std::showpoint
             << turns / duration
+            << " states/sec)" << std::endl;
+  std::cout << "Number of traveled keeper states: " << keeper_turns << " ("
+            << std::fixed << std::showpoint
+            << keeper_turns / duration
+            << " states/sec)" << std::endl;
+  std::cout << "Number of traveled states: " << turns + keeper_turns << " ("
+            << std::fixed << std::showpoint
+            << (turns + keeper_turns)/ duration
             << " states/sec)" << std::endl;
   std::cout << "Number of calculated moves: " << all_moves_count << " ("
             << std::fixed << std::showpoint
@@ -156,7 +168,7 @@ void perft_benchmark(const rbg_parser::parsed_game &pg, size_t depth) {
   auto begin = std::chrono::system_clock::now();
   SearchContext context;
   GameState state(gd);
-  auto result = perft(&context, &state, depth + 1); // + 1 for the first
+  auto result = perft(&context, &state, depth + 1);
   auto end = std::chrono::system_clock::now();
   auto duration = std::chrono::duration<double>(end - begin).count();
   std::cout << "Calculated perft for depth " << depth << " in "
@@ -175,7 +187,7 @@ void fast_perft_benchmark(const rbg_parser::parsed_game &pg, size_t depth) {
   auto begin = std::chrono::system_clock::now();
   SearchContext context;
   GameState state(gd);
-  auto result = state.FindMovesDeep(&context, depth);
+  auto result = state.FindMovesDeep(&context, depth + 1);
   auto end = std::chrono::system_clock::now();
   auto duration = std::chrono::duration<double>(end - begin).count();
   std::cout << "Calculated perft for depth " << depth << " in "
@@ -250,7 +262,7 @@ int main(int argc, const char *argv[]) {
   auto end = std::chrono::system_clock::now();
   auto duration = std::chrono::duration<double>(end - begin).count();
 
-  std::cout << "Preprocessing took " << duration << "s" << std::endl;
+  std::cout << "Preprocessing took: " << duration << "s" << std::endl;
 
   if (vm.count("depth")) {
     size_t depth = vm["depth"].as<uint>();
