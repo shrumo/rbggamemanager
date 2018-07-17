@@ -18,7 +18,6 @@ public:
 private:
   void dispatch(const rbg_parser::sum &) override {}
   void dispatch(const rbg_parser::concatenation &) override {}
-  void dispatch(const rbg_parser::power_move&) override {}
   void dispatch(const rbg_parser::star_move&) override {}
   void dispatch(const rbg_parser::shift &) override {}
   void dispatch(const rbg_parser::ons &) override {}
@@ -31,6 +30,7 @@ private:
   void dispatch(const rbg_parser::integer_arithmetic &arithmetic) override;
   void dispatch(const rbg_parser::variable_arithmetic &arithmetic) override;
   void dispatch(const rbg_parser::arithmetic_operation &arithmetic) override;
+  void dispatch(const rbg_parser::actions_block &) override  {};
   const NameResolver& resolver_;
 
   std::unique_ptr<ArithmeticOperation> operation_;

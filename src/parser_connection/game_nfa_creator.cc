@@ -145,37 +145,6 @@ private:
     concat_ends_ = result_concat_begins;
   }
 
-  void dispatch(const rbg_parser::power_move& move) override {
-    unsigned int result_clear_length = 0;
-    std::vector < std::unordered_set< vertex_t > > result_table = std::vector<std::unordered_set<vertex_t> >(board_.size());
-    for(ssize_t j = 0; j < static_cast<ssize_t >(result_table.size()); j++)
-    {
-      result_table[j] = {j};
-    }
-
-    move.get_content()->accept(*this);
-    if(!clear_length_)
-      return;
-    result_clear_length += clear_length_ * move.get_number_of_repetitions();
-    auto tmp_rec_result = ExtractResult();
-
-    for(uint i = 0; i < move.get_number_of_repetitions(); i++)
-    {
-      std::vector < std::unordered_set< vertex_t > > next_result(result_table.size());
-      for(vertex_t v = 0; v < static_cast<ssize_t >(result_table.size()); v++)
-      {
-        for(auto neighbour : result_table[v])
-        {
-          if(neighbour != -1)
-            next_result[v].insert(tmp_rec_result[neighbour].begin(),tmp_rec_result[neighbour].end());
-        }
-      }
-      result_table = next_result;
-    }
-    result_ = result_table;
-    clear_length_ = result_clear_length;
-  }
-
   void dispatch(const rbg_parser::star_move& move) override {
     unsigned int tmp_clear_length = 0;
     std::vector < std::unordered_set< vertex_t > > tmp_result = std::vector<std::unordered_set<vertex_t> >(board_.size());
@@ -225,6 +194,73 @@ private:
   void dispatch(const rbg_parser::integer_arithmetic &) override { ResetResult();};
   void dispatch(const rbg_parser::variable_arithmetic &) override { ResetResult();};
   void dispatch(const rbg_parser::arithmetic_operation &) override { ResetResult();};
+  void dispatch(const rbg_parser::actions_block &concat) override
+  {
+    unsigned int result_clear_length = 0;
+    std::vector < std::unordered_set< vertex_t > > result_table = std::vector<std::unordered_set<vertex_t> >(board_.size());
+
+    std::vector< std::vector < std::unordered_set<vertex_t> > > concat_tables;
+    std::vector< unsigned int> result_concat_clear_lengths;
+    std::vector< unsigned int> result_concat_begins;
+
+    for(ssize_t j = 0; j < static_cast<ssize_t >(result_table.size()); j++)
+    {
+      result_table[j] = {j};
+    }
+    for(size_t i = 0; i < concat.get_content().size(); i++)
+    {
+      auto& item = concat.get_content()[i];
+      item->accept(*this);
+      if(!clear_length_ && i != 0)
+      {
+        concat_tables.push_back(std::move(result_table));
+        result_concat_clear_lengths.push_back(result_clear_length);
+        result_concat_begins.push_back(static_cast<unsigned int &&>(i));
+        result_clear_length = 0;
+        result_table = std::vector< std::unordered_set<vertex_t> >(board_.size());
+        for(ssize_t j = 0; j < static_cast<ssize_t >(result_table.size()); j++)
+        {
+          result_table[j] = {j};
+        }
+        continue;
+      }
+      else if(result_clear_length == 0 && clear_length_ && i != 0)
+      {
+        concat_tables.push_back(std::move(result_table));
+        result_concat_clear_lengths.push_back(result_clear_length);
+        result_concat_begins.push_back(static_cast<unsigned int &&>(i));
+        result_clear_length = 0;
+        result_table = std::vector< std::unordered_set<vertex_t> >(board_.size());
+        for(ssize_t j = 0; j < static_cast<ssize_t >(result_table.size()); j++)
+        {
+          result_table[j] = {j};
+        }
+        continue;
+      }
+      result_clear_length += clear_length_;
+      auto tmp_rec_result = ExtractResult();
+      std::vector < std::unordered_set< vertex_t > > next_result(result_table.size());
+      for(vertex_t v = 0; v < static_cast<ssize_t >(result_table.size()); v++)
+      {
+        for(auto neighbour : result_table[v])
+        {
+          if(neighbour != -1)
+            next_result[v].insert(tmp_rec_result[neighbour].begin(),tmp_rec_result[neighbour].end());
+        }
+      }
+      result_table = next_result;
+      ResetResult();
+    }
+    concat_tables.push_back(result_table);
+    result_concat_clear_lengths.push_back(result_clear_length);
+    result_concat_begins.push_back(static_cast<unsigned int &&>(concat.get_content().size()));
+    result_ = result_table;
+    clear_length_ = *std::min_element(result_concat_clear_lengths.begin(),result_concat_clear_lengths.end());
+
+    concat_results_ = concat_tables;
+    concat_clear_lengths_ = result_concat_clear_lengths;
+    concat_ends_ = result_concat_begins;
+  }
   const NameResolver& resolver_;
   const GraphBoard& board_;
   const EdgeResolver& edge_resolver_;
@@ -526,48 +562,6 @@ void GameNfaCreator::dispatch(const rbg_parser::player_switch &move) {
   last_final_ = final_id;
 }
 
-void GameNfaCreator::dispatch(const rbg_parser::power_move &move) {
-  ShiftTableCreator creator(resolver_, graph_board_, edge_resolver_);
-  move.accept(creator);
-  if(creator.clear_length() >= kShiftTableClearLength)
-  {
-    std::string move_identifier = move.to_rbg();
-    if (used_actions_.find(move_identifier) == used_actions_.end()) {
-      std::vector< std::vector<vertex_t > > table(graph_board_.size());
-      auto result = creator.ExtractResult();
-      for(vertex_t v = 0; v < static_cast<unsigned int>(graph_board_.size()); v++)
-      {
-        table[v] = std::vector<vertex_t >(result[v].begin(),result[v].end());
-        std::sort(table[v].begin(),table[v].end());
-      }
-      std::unique_ptr<Action> action(
-          new actions::ShiftTable(std::move(table)));
-      used_actions_[move_identifier] = action.get();
-      actions_.push_back(std::move(action));
-    }
-    fsm::state_id_t initial_id = NewInitial();
-    fsm::state_id_t final_id = nfa_result_->NewState();
-    (*nfa_result_)[initial_id].AddTransition(final_id,
-                                             used_actions_[move_identifier]);
-    nfa_result_->set_initial(initial_id);
-    nfa_result_->set_final(final_id);
-
-    last_final_ = final_id;
-    return;
-  }
-
-  move.get_content()->accept(*this);
-
-  fsm::state_id_t initial = nfa_result_->initial();
-
-  for (size_t i = 1; i < move.get_number_of_repetitions(); i++) {
-    ReuseFinal();
-    move.get_content()->accept(*this);
-  }
-  nfa_result_->set_initial(initial);
-  last_final_ = nfa_result_->final();
-}
-
 void GameNfaCreator::dispatch(const rbg_parser::keeper_switch &) {
   fsm::state_id_t initial_id = NewInitial();
   fsm::state_id_t final_id = nfa_result_->NewState();
@@ -704,4 +698,110 @@ void GameNfaCreator::dispatch(const rbg_parser::arithmetic_comparison &compariso
   nfa_result_->set_final(final_id);
 
   last_final_ = final_id;
+}
+
+void GameNfaCreator::dispatch(const rbg_parser::actions_block& move) {
+  ShiftTableCreator creator(resolver_, graph_board_, edge_resolver_);
+  move.accept(creator);
+  if(creator.clear_length() >= kShiftTableClearLength)
+  {
+    std::string move_identifier = move.to_rbg();
+    if (used_actions_.find(move_identifier) == used_actions_.end()) {
+      std::vector< std::vector<vertex_t > > table(graph_board_.size());
+      auto result = creator.ExtractResult();
+      for(vertex_t v = 0; v < static_cast<unsigned int>(graph_board_.size()); v++)
+      {
+        table[v] = std::vector<vertex_t >(result[v].begin(),result[v].end());
+        std::sort(table[v].begin(),table[v].end());
+      }
+      std::unique_ptr<Action> action(
+          new actions::ShiftTable(std::move(table)));
+      used_actions_[move_identifier] = action.get();
+      actions_.push_back(std::move(action));
+    }
+    fsm::state_id_t initial_id = NewInitial();
+    fsm::state_id_t final_id = nfa_result_->NewState();
+    (*nfa_result_)[initial_id].AddTransition(final_id,
+                                             used_actions_[move_identifier]);
+    nfa_result_->set_initial(initial_id);
+    nfa_result_->set_final(final_id);
+
+    last_final_ = final_id;
+    return;
+  }
+
+  unsigned int concat_pos = 0;
+  unsigned int concat_table_pos = 0;
+
+  fsm::state_id_t initial = 0;
+  unsigned int shift_clear_length = creator.concat_clear_lengths()[concat_table_pos];
+  if(shift_clear_length >= kShiftTableClearLength)
+  {
+    std::vector< std::vector<vertex_t > > table(graph_board_.size());
+    auto result = creator.concat_results()[concat_table_pos];
+    for(vertex_t v = 0; v < static_cast<unsigned int>(graph_board_.size()); v++)
+    {
+      table[v] = std::vector<vertex_t >(result[v].begin(),result[v].end());
+      std::sort(table[v].begin(),table[v].end());
+    }
+    std::unique_ptr<Action> action(
+        new actions::ShiftTable(std::move(table)));
+    actions_.push_back(std::move(action));
+
+    initial = NewInitial();
+    fsm::state_id_t final_id = nfa_result_->NewState();
+    (*nfa_result_)[initial].AddTransition(final_id, actions_.back().get());
+    nfa_result_->set_initial(initial);
+    nfa_result_->set_final(final_id);
+
+    last_final_ = final_id;
+
+    concat_pos = creator.concat_begins()[concat_table_pos];
+    concat_table_pos++;
+  }
+  else {
+    move.get_content()[concat_pos]->accept(*this);
+    initial = nfa_result_->initial();
+    concat_pos++;
+  }
+
+  for (; concat_pos < move.get_content().size(); concat_pos++) {
+    const auto &child = move.get_content()[concat_pos];
+    ReuseFinal();
+    unsigned int shift_clear_length = creator.concat_clear_lengths()[concat_table_pos];
+    if(shift_clear_length >= kShiftTableClearLength)
+    {
+      std::vector< std::vector<vertex_t > > table(graph_board_.size());
+      auto result = creator.concat_results()[concat_table_pos];
+      for(vertex_t v = 0; v < static_cast<unsigned int>(graph_board_.size()); v++)
+      {
+        table[v] = std::vector<vertex_t >(result[v].begin(),result[v].end());
+        std::sort(table[v].begin(),table[v].end());
+      }
+      std::unique_ptr<Action> action(
+          new actions::ShiftTable(std::move(table)));
+      ReuseFinal();
+      actions_.push_back(std::move(action));
+
+      fsm::state_id_t initial_id = NewInitial();
+      fsm::state_id_t final_id = nfa_result_->NewState();
+      (*nfa_result_)[initial_id].AddTransition(final_id, actions_.back().get());
+      nfa_result_->set_initial(initial_id);
+      nfa_result_->set_final(final_id);
+
+      last_final_ = final_id;
+
+      concat_pos = creator.concat_begins()[concat_table_pos]-1;
+      concat_table_pos++;
+    }
+    else {
+      child->accept(*this);
+      while(concat_pos + 1 >= creator.concat_begins()[concat_table_pos])
+      {
+        concat_table_pos++;
+      }
+    }
+  }
+  nfa_result_->set_initial(initial);
+  last_final_ = nfa_result_->final();
 }

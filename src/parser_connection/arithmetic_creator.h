@@ -7,7 +7,6 @@
 
 #include"../../rbgParser/src/sum.hpp"
 #include"../../rbgParser/src/concatenation.hpp"
-#include"../../rbgParser/src/power_move.hpp"
 #include"../../rbgParser/src/star_move.hpp"
 #include"../../rbgParser/src/shift.hpp"
 #include"../../rbgParser/src/ons.hpp"

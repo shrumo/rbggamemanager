@@ -7,12 +7,12 @@
 
 #include "../../rbgParser/src/sum.hpp"
 #include "../../rbgParser/src/concatenation.hpp"
+#include "../../rbgParser/src/actions_block.hpp"
 #include "../../rbgParser/src/shift.hpp"
 #include "../../rbgParser/src/ons.hpp"
 #include "../../rbgParser/src/offs.hpp"
 #include "../../rbgParser/src/assignments.hpp"
 #include "../../rbgParser/src/switch.hpp"
-#include "../../rbgParser/src/power_move.hpp"
 #include "../../rbgParser/src/star_move.hpp"
 #include "../../rbgParser/src/move_check.hpp"
 #include "../actions/action.h"
@@ -56,8 +56,6 @@ public:
 
   void dispatch(const rbg_parser::concatenation &) override;
 
-  void dispatch(const rbg_parser::power_move&) override;
-
   void dispatch(const rbg_parser::star_move&) override;
 
   void dispatch(const rbg_parser::shift &) override;
@@ -81,6 +79,8 @@ public:
   void dispatch(const rbg_parser::variable_arithmetic &) override {}
 
   void dispatch(const rbg_parser::arithmetic_operation &) override {}
+
+  void dispatch(const rbg_parser::actions_block&) override;
 
 private:
   void RegisterModifier(fsm::state_id_t initial_id);
