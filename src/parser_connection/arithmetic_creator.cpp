@@ -57,7 +57,15 @@ void ArithmeticCreator::dispatch(const rbg_parser::arithmetic_operation &arithme
       operation_ = std::unique_ptr<ArithmeticOperation>(new arithmetic_operations::Sum(std::move(operations)));
     }
       break;
-    case rbg_parser::subtraction:break;
+    case rbg_parser::subtraction: {
+      std::vector<std::unique_ptr<ArithmeticOperation> > operations;
+      for (const auto &child : arithmetic.get_content()) {
+        child->accept(*this);
+        operations.push_back(ExtractOperation());
+      }
+      operation_ = std::unique_ptr<ArithmeticOperation>(new arithmetic_operations::Subtraction(std::move(operations)));
+    }
+      break;
     case rbg_parser::multiplication: {
       std::vector<std::unique_ptr<ArithmeticOperation> > operations;
       for (const auto &child : arithmetic.get_content()) {
@@ -67,7 +75,15 @@ void ArithmeticCreator::dispatch(const rbg_parser::arithmetic_operation &arithme
       operation_ = std::unique_ptr<ArithmeticOperation>(new arithmetic_operations::Product(std::move(operations)));
     }
       break;
-    case rbg_parser::division:break;
+    case rbg_parser::division: {
+      std::vector<std::unique_ptr<ArithmeticOperation> > operations;
+      for (const auto &child : arithmetic.get_content()) {
+        child->accept(*this);
+        operations.push_back(ExtractOperation());
+      }
+      operation_ = std::unique_ptr<ArithmeticOperation>(new arithmetic_operations::Division(std::move(operations)));
+    }
+      break;
   }
 }
 

@@ -6,7 +6,7 @@
 #include "game_state.h"
 #include <algorithm>
 
-// TODO(shrum): Add blocks of modifiers later as they are re-introduced in parser.
+// TODO(shrum): Add blocks of modifiers.
 
 void SearchContext::FindAllMovesRec(size_t visited_array_index,
                                     const fsm::Nfa<const Action *> &nfa,

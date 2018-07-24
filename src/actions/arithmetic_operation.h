@@ -85,6 +85,23 @@ namespace arithmetic_operations {
     std::vector<std::unique_ptr<ArithmeticOperation> > operations_;
   };
 
+  class Subtraction : public ArithmeticOperation {
+  public:
+    explicit Subtraction(std::vector<std::unique_ptr<ArithmeticOperation> > operations) :
+    ArithmeticOperation(ArithmeticOperationType::kSubtractionType),
+    operations_(std::move(operations))
+    {}
+
+    int Value(GameState *b) const override;
+
+    const std::vector<std::unique_ptr<ArithmeticOperation> >& operations() const
+    {
+      return operations_;
+    }
+  private:
+    std::vector<std::unique_ptr<ArithmeticOperation> > operations_;
+  };
+
   class Product : public ArithmeticOperation {
   public:
     explicit Product(std::vector<std::unique_ptr<ArithmeticOperation> > operations) :
@@ -100,6 +117,23 @@ namespace arithmetic_operations {
     }
   private:
     std::vector<std::unique_ptr<ArithmeticOperation>> operations_;
+  };
+
+  class Division : public ArithmeticOperation {
+  public:
+    explicit Division(std::vector<std::unique_ptr<ArithmeticOperation> > operations) :
+        ArithmeticOperation(ArithmeticOperationType::kDivisionType),
+        operations_(std::move(operations))
+    {}
+
+    int Value(GameState *b) const override;
+
+    const std::vector<std::unique_ptr<ArithmeticOperation> >& operations() const
+    {
+      return operations_;
+    }
+  private:
+    std::vector<std::unique_ptr<ArithmeticOperation> > operations_;
   };
 }
 

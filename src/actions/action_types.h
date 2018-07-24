@@ -45,7 +45,9 @@ enum class ArithmeticOperationType : char {
   kVariableType,
   kConstantType,
   kSumType,
+  kSubtractionType,
   kProductType,
+  kDivisionType,
 };
 
 #endif //RBGGAMEMANAGER_ACTION_TYPES_H

@@ -30,3 +30,25 @@ int arithmetic_operations::Product::Value(GameState *b) const {
   }
   return result;
 }
+
+int arithmetic_operations::Subtraction::Value(GameState *b) const {
+  // TODO(shrumo): Ask about the semantics of this operation.
+  int result = operations_[0]->Value(b);
+  for(size_t i = 1; i < operations_.size(); i++)
+  {
+    const auto& child = operations_[i];
+    result -= child->Value(b);
+  }
+  return result;
+}
+
+int arithmetic_operations::Division::Value(GameState *b) const {
+  // TODO(shrumo): Ask about the semantics of this operation.
+  int result = operations_[0]->Value(b);
+  for(size_t i = 1; i < operations_.size(); i++)
+  {
+    const auto& child = operations_[i];
+    result /= child->Value(b);
+  }
+  return result;
+}
