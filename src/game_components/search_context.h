@@ -86,22 +86,22 @@ private:
   PerftResult FastPerft(std::size_t visited_array_index,
                    const fsm::Nfa<const Action *> &nfa,
                    fsm::state_id_t current_state, size_t depth,
-                   bool block_started = false, size_t depth_result = 3);
+                        ssize_t last_block_started=-1, size_t depth_result = 3);
 
   void FindAllMovesRec(std::size_t visited_array_index,
                        const fsm::Nfa<const Action *> &nfa,
                        fsm::state_id_t current_state, Move *move,
-                       bool block_started = false);
+                       ssize_t last_block_started=-1);
 
   bool FindFirstMoveRec(std::size_t visited_array_index,
                         const fsm::Nfa<const Action *> &nfa,
                         fsm::state_id_t current_state, Move *move,
-                        bool block_started = false);
+                        ssize_t last_block_started=-1);
 
   bool CheckPlay(std::size_t visited_array_index, std::size_t results_index,
                  const fsm::Nfa<const Action *> &nfa,
                  fsm::state_id_t current_state, std::size_t depth,
-                 bool block_started = false);
+                 ssize_t last_block_started=-1);
 
   std::size_t VisitedIndex(const fsm::Nfa<const Action *> &nfa,
                            fsm::state_id_t current_state) const;

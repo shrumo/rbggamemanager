@@ -422,12 +422,14 @@ void GameNfaCreator::dispatch(const rbg_parser::concatenation &move) {
     }
     else {
       child->accept(*this);
+
       while(concat_pos + 1 >= creator.concat_begins()[concat_table_pos])
       {
         concat_table_pos++;
       }
     }
   }
+  StopBlock();
   nfa_result_->set_initial(initial);
   last_final_ = nfa_result_->final();
 }
@@ -761,6 +763,10 @@ void GameNfaCreator::dispatch(const rbg_parser::actions_block& move) {
   }
   else {
     move.get_content()[concat_pos]->accept(*this);
+    if((*nfa_result_)[nfa_result_->StateCount()-2].transitions().front().letter()->IsModifier())
+      StartBlock();
+    else
+      StopBlock();
     initial = nfa_result_->initial();
     concat_pos++;
   }
@@ -796,12 +802,17 @@ void GameNfaCreator::dispatch(const rbg_parser::actions_block& move) {
     }
     else {
       child->accept(*this);
+      if((*nfa_result_)[nfa_result_->StateCount()-2].transitions().front().letter()->IsModifier())
+        StartBlock();
+      else
+        StopBlock();
       while(concat_pos + 1 >= creator.concat_begins()[concat_table_pos])
       {
         concat_table_pos++;
       }
     }
   }
+  StopBlock();
   nfa_result_->set_initial(initial);
   last_final_ = nfa_result_->final();
 }

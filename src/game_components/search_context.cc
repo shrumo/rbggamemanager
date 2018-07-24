@@ -11,7 +11,7 @@
 void SearchContext::FindAllMovesRec(size_t visited_array_index,
                                     const fsm::Nfa<const Action *> &nfa,
                                     fsm::state_id_t current_state, Move *move,
-                                    bool block_started) {
+                                    ssize_t last_block_started) {
   size_t index = VisitedIndex(nfa, current_state);
   size_t depth = move->blocks().size();
   if (visited_[visited_array_index][depth][index])
@@ -28,7 +28,7 @@ void SearchContext::FindAllMovesRec(size_t visited_array_index,
       {
         if(next_pos != -1) {
           calculation_state_->SetPos(next_pos);
-          FindAllMovesRec(visited_array_index, nfa, transition.target(), move);
+          FindAllMovesRec(visited_array_index, nfa, transition.target(), move,last_block_started);
         }
       }
       calculation_state_->SetPos(previous_pos);
@@ -37,7 +37,7 @@ void SearchContext::FindAllMovesRec(size_t visited_array_index,
     ActionResult result = transition.letter()->Apply(calculation_state_);
     if (result) {
       if (transition.letter()->IsModifier()) {
-        if (!block_started) {
+        if (last_block_started != transition.letter()->index()) {
           move->AddBlock(calculation_state_->pos(),
                          transition.letter()->index());
           CreateVisitedLayers(visited_array_index, depth + 1);
@@ -47,13 +47,13 @@ void SearchContext::FindAllMovesRec(size_t visited_array_index,
           possible_moves_.push_back(*move);
         else {
           FindAllMovesRec(visited_array_index, nfa, transition.target(), move,
-                          false);
+                          transition.letter()->index());
         }
-        if (!block_started) {
+        if (last_block_started != transition.letter()->index()) {
           move->PopBlock();
         }
       } else {
-          FindAllMovesRec(visited_array_index, nfa, transition.target(), move);
+          FindAllMovesRec(visited_array_index, nfa, transition.target(), move,last_block_started);
       }
     }
     transition.letter()->Revert(calculation_state_, result);
@@ -103,7 +103,7 @@ size_t SearchContext::NewResultsCache(const fsm::Nfa<const Action *> &nfa) {
 bool SearchContext::CheckPlay(size_t visited_array_index, size_t results_index,
                               const fsm::Nfa<const Action *> &nfa,
                               fsm::state_id_t current_state, size_t depth,
-                              bool block_started) {
+                              ssize_t last_block_started) {
   size_t index = VisitedIndex(nfa, current_state);
   if (current_state == nfa.final() || results_[results_index][depth][index]) {
     results_[results_index][depth].set(index);
@@ -124,7 +124,7 @@ bool SearchContext::CheckPlay(size_t visited_array_index, size_t results_index,
         if(next_pos != -1) {
           calculation_state_->SetPos(next_pos);
           if (CheckPlay(visited_array_index, results_index, nfa,
-                        transition.target(), depth)) {
+                        transition.target(), depth,last_block_started)) {
             results_[results_index][depth].set(index);
             calculation_state_->SetPos(previous_pos);
             return true;
@@ -138,17 +138,17 @@ bool SearchContext::CheckPlay(size_t visited_array_index, size_t results_index,
     if (result) {
       if (transition.letter()->IsModifier()) {
         size_t new_depth = depth;
-        if (!block_started) {
+        if (last_block_started != transition.letter()->index()) {
           CreateVisitedLayers(visited_array_index, depth + 1);
           CreateResultLayers(results_index, depth + 1);
           InvalidateResults(results_index);
           new_depth = depth + 1;
         }
         if (CheckPlay(visited_array_index, results_index, nfa,
-                      transition.target(), new_depth, false) || transition.letter()->IsSwitch())
+                      transition.target(), new_depth, transition.letter()->index()) || transition.letter()->IsSwitch())
           results_[results_index][depth].set(index);
       } else if (CheckPlay(visited_array_index, results_index, nfa,
-                           transition.target(), depth))
+                           transition.target(), depth, last_block_started))
         results_[results_index][depth].set(index);
     }
     transition.letter()->Revert(calculation_state_, result);
@@ -236,7 +236,7 @@ SearchContext::FindFirstMove(GameState *state, ssize_t maximal_depth) {
 bool SearchContext::FindFirstMoveRec(std::size_t visited_array_index,
                                      const fsm::Nfa<const Action *> &nfa,
                                      fsm::state_id_t current_state, Move *move,
-                                     bool block_started) {
+                                     ssize_t last_block_started) {
   size_t index = VisitedIndex(nfa, current_state);
   size_t depth = move->blocks().size();
   if (visited_[visited_array_index][depth][index])
@@ -254,7 +254,7 @@ bool SearchContext::FindFirstMoveRec(std::size_t visited_array_index,
       {
         if(next_pos != -1) {
           calculation_state_->SetPos(next_pos);
-          rec_result = FindFirstMoveRec(visited_array_index, nfa, transition.target(), move);
+          rec_result = FindFirstMoveRec(visited_array_index, nfa, transition.target(), move, last_block_started);
           if (rec_result) {
             calculation_state_->SetPos(previous_pos);
             return true;
@@ -267,7 +267,7 @@ bool SearchContext::FindFirstMoveRec(std::size_t visited_array_index,
     ActionResult result = transition.letter()->Apply(calculation_state_);
     if (result) {
       if (transition.letter()->IsModifier()) {
-        if (!block_started) {
+        if (last_block_started != transition.letter()->index()) {
           move->AddBlock(calculation_state_->pos(),
                          transition.letter()->index());
           CreateVisitedLayers(visited_array_index, depth + 1);
@@ -278,14 +278,14 @@ bool SearchContext::FindFirstMoveRec(std::size_t visited_array_index,
           rec_result = true;
         } else {
           rec_result = FindFirstMoveRec(visited_array_index, nfa,
-                                        transition.target(), move, false);
+                                        transition.target(), move, transition.letter()->index());
         }
-        if (!block_started) {
+        if (last_block_started != transition.letter()->index()) {
           move->PopBlock();
         }
       } else
         rec_result = FindFirstMoveRec(visited_array_index, nfa,
-                                      transition.target(), move);
+                                      transition.target(), move, last_block_started);
     }
     transition.letter()->Revert(calculation_state_, result);
     if (rec_result)
@@ -314,7 +314,7 @@ bool SearchContext::CheckPattern(const fsm::Nfa<const Action *> &nfa,
 }
 
 PerftResult SearchContext::FastPerft(std::size_t visited_array_index, const fsm::Nfa<const Action *> &nfa,
-                                fsm::state_id_t current_state, size_t depth, bool block_started, size_t perft_depth) {
+                                fsm::state_id_t current_state, size_t depth, ssize_t last_block_started, size_t perft_depth) {
   size_t index = VisitedIndex(nfa, current_state);
   if (visited_[visited_array_index][depth][index])
     return {0,0};
@@ -332,7 +332,7 @@ PerftResult SearchContext::FastPerft(std::size_t visited_array_index, const fsm:
       {
         if(next_pos != -1) {
           calculation_state_->SetPos(next_pos);
-          auto rec_result = FastPerft(visited_array_index, nfa, transition.target(), depth, false, perft_depth);
+          auto rec_result = FastPerft(visited_array_index, nfa, transition.target(), depth,last_block_started , perft_depth);
           node_count += rec_result.node_count;
           leaf_count += rec_result.leaf_count;
         }
@@ -344,7 +344,7 @@ PerftResult SearchContext::FastPerft(std::size_t visited_array_index, const fsm:
     if (result) {
       if (transition.letter()->IsModifier()) {
         size_t new_depth = depth;
-        if (!block_started) {
+        if (last_block_started != transition.letter()->index()) {
           new_depth = depth + 1;
           CreateVisitedLayers(visited_array_index, depth + 1);
           InvalidateResults();
@@ -353,7 +353,7 @@ PerftResult SearchContext::FastPerft(std::size_t visited_array_index, const fsm:
           node_count +=  static_cast<size_t>(result.revert_player() != calculation_state_->description().keeper_player_id());
           size_t next_perft = calculation_state_->player() == calculation_state_->description().keeper_player_id() ? perft_depth : perft_depth - 1;
           if (next_perft > 0) {
-            auto rec_result = FastPerft(visited_array_index, nfa, transition.target(), new_depth, false, next_perft);
+            auto rec_result = FastPerft(visited_array_index, nfa, transition.target(), new_depth, transition.letter()->index(), next_perft);
             node_count += rec_result.node_count;
             leaf_count += rec_result.leaf_count;
           }
@@ -362,12 +362,12 @@ PerftResult SearchContext::FastPerft(std::size_t visited_array_index, const fsm:
           }
         }
         else {
-          auto rec_result = FastPerft(visited_array_index, nfa, transition.target(), new_depth, false, perft_depth);
+          auto rec_result = FastPerft(visited_array_index, nfa, transition.target(), new_depth, last_block_started, perft_depth);
           node_count += rec_result.node_count;
           leaf_count += rec_result.leaf_count;
         }
       } else {
-        auto rec_result = FastPerft(visited_array_index, nfa, transition.target(), depth, false, perft_depth);
+        auto rec_result = FastPerft(visited_array_index, nfa, transition.target(), depth, last_block_started, perft_depth);
         node_count += rec_result.node_count;
         leaf_count += rec_result.leaf_count;
       }
