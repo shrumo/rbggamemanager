@@ -423,7 +423,7 @@ void GameNfaCreator::dispatch(const rbg_parser::concatenation &move) {
     else {
       child->accept(*this);
 
-      while(concat_pos + 1 >= creator.concat_begins()[concat_table_pos])
+      while(concat_table_pos < creator.concat_begins().size() && concat_pos + 1 >= creator.concat_begins()[concat_table_pos])
       {
         concat_table_pos++;
       }
@@ -806,7 +806,7 @@ void GameNfaCreator::dispatch(const rbg_parser::actions_block& move) {
         StartBlock();
       else
         StopBlock();
-      while(concat_pos + 1 >= creator.concat_begins()[concat_table_pos])
+      while(concat_table_pos < creator.concat_begins().size() && concat_pos + 1 >= creator.concat_begins()[concat_table_pos])
       {
         concat_table_pos++;
       }
