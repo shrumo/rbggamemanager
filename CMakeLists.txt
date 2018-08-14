@@ -1,11 +1,15 @@
 cmake_minimum_required(VERSION 3.5.0)
 project(rbggamemanager)
 
+if(NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE Release)
+endif()
+
 set(CMAKE_CXX_STANDARD 11)
 
 set(CMAKE_CXX_FLAGS "-Wall -Wextra")
 set(CMAKE_CXX_FLAGS_DEBUG "-g -O0")
-#set(CMAKE_CXX_FLAGS_RELEASE "-Ofast -march=native")
+set(CMAKE_CXX_FLAGS_RELEASE "-Ofast -march=native")
 
 add_subdirectory(rbgParser)
 
