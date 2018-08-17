@@ -33,7 +33,6 @@ public:
       :
       max_depth_(-1),
       last_visited_array_index_(0),
-      last_results_array_index_(0),
       calculation_state_(nullptr) {
   }
 
@@ -43,18 +42,6 @@ public:
 
   void clear() {
     last_visited_array_index_ = 0;
-    last_results_array_index_ = 0;
-    move_pattern_results_.clear();
-  }
-
-  void InvalidateResults(ssize_t omit = -1) {
-    for (size_t i = 0; i < results_.size(); i++) {
-      if ((ssize_t) i != omit) {
-        for (auto &depth_results : results_[i]) {
-          depth_results.reset();
-        }
-      }
-    }
   }
 
   std::vector<Move> FindMoves(GameState *state, ssize_t max_depth = -1);
@@ -98,7 +85,7 @@ private:
                         fsm::state_id_t current_state, Move *move,
                         ssize_t last_block_started=-1);
 
-  bool CheckPlay(std::size_t visited_array_index, std::size_t results_index,
+  bool CheckPlay(std::size_t visited_array_index,
                  const fsm::Nfa<const Action *> &nfa,
                  fsm::state_id_t current_state, std::size_t depth,
                  ssize_t last_block_started=-1);
@@ -110,12 +97,8 @@ private:
   ssize_t max_depth_;
 
   std::vector<std::vector<FastBitVector> > visited_;
-  std::vector<std::vector<FastBitVector> > results_;
 
   std::size_t last_visited_array_index_;
-  std::size_t last_results_array_index_;
-
-  std::unordered_map<unsigned int, std::size_t> move_pattern_results_;
 
   GameState *calculation_state_;
 
