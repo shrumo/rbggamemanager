@@ -64,7 +64,7 @@ PerftResult perft(SearchContext *context, GameState *state, size_t depth) {
 }
 
 void
-random_play_benchmark(const rbg_parser::parsed_game &pg, size_t iterations, bool show_keeper=false) {
+random_play_benchmark_desc(const rbg_parser::parsed_game &pg, size_t iterations, bool show_keeper=false) {
   GameDescription gd = CreateDescription(pg);
 
   std::unordered_map<token_id_t, PlayerResults> player_scores_sum;
@@ -117,7 +117,112 @@ random_play_benchmark(const rbg_parser::parsed_game &pg, size_t iterations, bool
         player_score.second.max = score;
     }
     turns += state_turns;
-    keeper_turns = keeper_state_turns;
+    keeper_turns += keeper_state_turns;
+    avgmoves += moves_count / state_turns;
+    all_moves_count += moves_count;
+  }
+  auto end = std::chrono::system_clock::now();
+  auto duration = std::chrono::duration<double>(end - begin).count();
+  std::cout << "Calculated " << iterations << " games in "
+            << std::fixed << std::showpoint
+            << duration << "s"
+            << std::endl;
+  std::cout << "Time for one game: " << duration / iterations << "s" << " ("
+            << std::fixed << std::showpoint
+            << iterations / duration << " games/sec)"
+            << std::endl;
+  std::cout << "Avarage number of turns in game: "
+            << std::fixed << std::showpoint
+            << static_cast<double>(turns) / iterations << std::endl;
+  std::cout << "Avarage number of moves in one state_: "
+            << std::fixed << std::showpoint
+            << static_cast<double>(avgmoves) / iterations << std::endl;
+  std::cout << "Number of traveled player states: " << turns << " ("
+            << std::fixed << std::showpoint
+            << turns / duration
+            << " states/sec)" << std::endl;
+  std::cout << "Number of traveled keeper states: " << keeper_turns << " ("
+            << std::fixed << std::showpoint
+            << keeper_turns / duration
+            << " states/sec)" << std::endl;
+  std::cout << "Number of traveled states: " << turns + keeper_turns << " ("
+            << std::fixed << std::showpoint
+            << (turns + keeper_turns)/ duration
+            << " states/sec)" << std::endl;
+  std::cout << "Number of calculated moves: " << all_moves_count << " ("
+            << std::fixed << std::showpoint
+            << all_moves_count / duration
+            << " moves/sec)" << std::endl;
+  std::cout << "Avarage player scores: " << "\n";
+  for (auto &player_score : player_scores_sum) {
+    std::cout << "\t" << gd.resolver().Name(player_score.first) << " : "
+              << std::fixed << std::showpoint
+              << static_cast<double>(player_score.second.sum) / iterations
+              << " (Min: " << player_score.second.min << ", Max: "
+              << player_score.second.max << ")\n";
+  }
+}
+
+void random_play_benchmark_fast(const rbg_parser::parsed_game &pg, const uint iterations) {
+  GameDescription gd = CreateDescription(pg);
+
+  std::unordered_map<token_id_t, PlayerResults> player_scores_sum;
+
+  for (const auto &token : pg.get_declarations().get_legal_players()) {
+    std::string name = token.first.to_string();
+    token_id_t player_id = gd.resolver().Id(name);
+    player_scores_sum[player_id] = {0, std::numeric_limits<int>::max(),
+                                    std::numeric_limits<int>::min()};
+  }
+
+  size_t turns = 0;
+  size_t keeper_turns = 0;
+  size_t avgmoves = 0;
+  size_t all_moves_count = 0;
+  SearchContext context;
+  GameState initial_state(gd);
+  while (initial_state.player() == initial_state.description().keeper_player_id()) {
+    auto moves = initial_state.FindFirstMove(&context);
+    initial_state.MakeMove(moves[0]);
+  }
+  
+  auto begin = std::chrono::system_clock::now();
+  for (uint i = 0; i < iterations; i++) {
+    size_t moves_count = 0;
+    size_t state_turns = 0;
+    size_t keeper_state_turns = 0;
+    GameState state = initial_state;
+    
+    while (true) {
+      std::vector<Move> moves;
+      
+      if (state.player() == state.description().keeper_player_id()) {
+        moves = state.FindFirstMove(&context);
+        keeper_state_turns++;
+        if (moves.size()) {
+          state.MakeMove(moves[0]);
+          continue;
+        }
+      } else {
+        moves = state.FindMoves(&context);
+        state_turns++;
+      }
+      
+      if (moves.size() == 0) break;
+      moves_count += moves.size();
+      state.MakeMove(moves[rand() % moves.size()]);
+    }
+    
+    for (auto &player_score : player_scores_sum) {
+      const auto &score = state.Value(player_score.first);
+      player_score.second.sum += score;
+      if (score < player_score.second.min)
+        player_score.second.min = score;
+      if (score > player_score.second.max)
+        player_score.second.max = score;
+    }
+    turns += state_turns;
+    keeper_turns += keeper_state_turns;
     avgmoves += moves_count / state_turns;
     all_moves_count += moves_count;
   }
@@ -271,6 +376,8 @@ int main(int argc, const char *argv[]) {
     size_t iterations = 1;
     if (vm.count("number"))
       iterations = vm["number"].as<uint>();
-    random_play_benchmark(*pg, iterations, vm.count("keeper") && vm["keeper"].as<uint>());
+    if (iterations == 1)
+      random_play_benchmark_desc(*pg, iterations, vm.count("keeper") && vm["keeper"].as<uint>()); else
+      random_play_benchmark_fast(*pg, iterations);
   }
 }
