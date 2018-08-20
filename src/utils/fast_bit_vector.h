@@ -8,6 +8,8 @@
 #include <vector>
 #include <limits>
 
+typedef unsigned int uint;
+
 // This is vector of booleans supporting fast reset function. Reset
 // is done in constant time, independent from the size of the vector.
 // Example:
@@ -21,11 +23,11 @@ public:
     threshold_ = 1;
   }
 
-  bool operator[](std::size_t index) const {
+  bool operator[](const uint index) const {
     return data_[index] >= threshold_;
   }
 
-  void set(std::size_t index) {
+  void set(const uint index) {
     data_[index] = threshold_;
   }
 
