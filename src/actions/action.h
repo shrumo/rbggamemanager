@@ -82,7 +82,17 @@ namespace actions {
   class ShiftTable : public Action {
   public:
     explicit ShiftTable(std::vector<std::vector<vertex_t> > table) : Action(ActionType::kShiftTableType), table_(std::move(table))
-    {}
+    {
+        for (uint i = 0; i < table_.size(); i++) {
+          std::vector<vertex_t> new_row;
+          new_row.reserve(table_[i].size());
+          for (uint j = 0; j < table_[i].size(); j++) {
+            if (table_[i][j] != -1) new_row.push_back(table_[i][j]);
+          }
+          table_[i] = std::move(new_row);
+          table_[i].shrink_to_fit();
+        }
+    }
 
     ActionResult Apply(GameState *) const override {
       std::cerr << "ShiftTable action should not be applied." << std::endl;

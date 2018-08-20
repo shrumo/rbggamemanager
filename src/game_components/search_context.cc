@@ -26,10 +26,8 @@ void SearchContext::FindAllMovesRec(size_t visited_array_index,
       const auto previous_pos = calculation_state_->pos();
       for(auto next_pos : shift_table->table()[previous_pos])
       {
-        if(next_pos != -1) {
-          calculation_state_->SetPos(next_pos);
-          FindAllMovesRec(visited_array_index, nfa, transition.target(), move,last_block_started);
-        }
+        calculation_state_->SetPos(next_pos);
+        FindAllMovesRec(visited_array_index, nfa, transition.target(), move,last_block_started);
       }
       calculation_state_->SetPos(previous_pos);
       continue;
@@ -40,7 +38,8 @@ void SearchContext::FindAllMovesRec(size_t visited_array_index,
         if (last_block_started != transition.letter()->index()) {
           move->AddBlock(calculation_state_->pos(),
                          transition.letter()->index());
-          CreateVisitedLayers(visited_array_index, depth + 1);
+          //if (!transition.letter()->IsSwitch())
+            CreateVisitedLayers(visited_array_index, depth + 1);
         }
         if (transition.letter()->IsSwitch())
           possible_moves_.push_back(*move);
@@ -102,13 +101,11 @@ bool SearchContext::CheckPlay(size_t visited_array_index,
       const auto previous_pos = calculation_state_->pos();
       for(auto next_pos : shift_table->table()[previous_pos])
       {
-        if(next_pos != -1) {
-          calculation_state_->SetPos(next_pos);
-          if (CheckPlay(visited_array_index, nfa,
-                        transition.target(), depth,last_block_started)) {
-            calculation_state_->SetPos(previous_pos);
-            return true;
-          }
+        calculation_state_->SetPos(next_pos);
+        if (CheckPlay(visited_array_index, nfa,
+                      transition.target(), depth,last_block_started)) {
+          calculation_state_->SetPos(previous_pos);
+          return true;
         }
       }
       calculation_state_->SetPos(previous_pos);
@@ -217,13 +214,11 @@ bool SearchContext::FindFirstMoveRec(std::size_t visited_array_index,
       auto previous_pos = calculation_state_->pos();
       for(auto next_pos : shift_table->table()[previous_pos])
       {
-        if(next_pos != -1) {
-          calculation_state_->SetPos(next_pos);
-          rec_result = FindFirstMoveRec(visited_array_index, nfa, transition.target(), move, last_block_started);
-          if (rec_result) {
-            calculation_state_->SetPos(previous_pos);
-            return true;
-          }
+        calculation_state_->SetPos(next_pos);
+        rec_result = FindFirstMoveRec(visited_array_index, nfa, transition.target(), move, last_block_started);
+        if (rec_result) {
+          calculation_state_->SetPos(previous_pos);
+          return true;
         }
       }
       calculation_state_->SetPos(previous_pos);
@@ -235,7 +230,8 @@ bool SearchContext::FindFirstMoveRec(std::size_t visited_array_index,
         if (last_block_started != transition.letter()->index()) {
           move->AddBlock(calculation_state_->pos(),
                          transition.letter()->index());
-          CreateVisitedLayers(visited_array_index, depth + 1);
+          //if (!transition.letter()->IsSwitch())
+            CreateVisitedLayers(visited_array_index, depth + 1);
         }
         if (transition.letter()->IsSwitch()) {
           possible_moves_.push_back(*move);
@@ -286,12 +282,10 @@ PerftResult SearchContext::FastPerft(std::size_t visited_array_index, const fsm:
       auto previous_pos = calculation_state_->pos();
       for(auto next_pos : shift_table->table()[previous_pos])
       {
-        if(next_pos != -1) {
-          calculation_state_->SetPos(next_pos);
-          auto rec_result = FastPerft(visited_array_index, nfa, transition.target(), depth,last_block_started , perft_depth);
-          node_count += rec_result.node_count;
-          leaf_count += rec_result.leaf_count;
-        }
+        calculation_state_->SetPos(next_pos);
+        auto rec_result = FastPerft(visited_array_index, nfa, transition.target(), depth,last_block_started , perft_depth);
+        node_count += rec_result.node_count;
+        leaf_count += rec_result.leaf_count;
       }
       calculation_state_->SetPos(previous_pos);
       continue;
