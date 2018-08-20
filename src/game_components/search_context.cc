@@ -32,21 +32,24 @@ void SearchContext::FindAllMovesRec(size_t visited_array_index,
       calculation_state_->SetPos(previous_pos);
       continue;
     }
+    if (transition.letter()->IsSwitch()) {
+        if (last_block_started != transition.letter()->index()) {
+          move->AddBlock(calculation_state_->pos(),transition.letter()->index());
+          possible_moves_.push_back(*move);
+          move->PopBlock();
+        } else possible_moves_.push_back(*move);
+        continue;
+    }
     ActionResult result = transition.letter()->Apply(calculation_state_);
     if (result) {
       if (transition.letter()->IsModifier()) {
         if (last_block_started != transition.letter()->index()) {
           move->AddBlock(calculation_state_->pos(),
                          transition.letter()->index());
-          //if (!transition.letter()->IsSwitch())
-            CreateVisitedLayers(visited_array_index, depth + 1);
+          CreateVisitedLayers(visited_array_index, depth + 1);
         }
-        if (transition.letter()->IsSwitch())
-          possible_moves_.push_back(*move);
-        else {
-          FindAllMovesRec(visited_array_index, nfa, transition.target(), move,
-                          transition.letter()->index());
-        }
+        FindAllMovesRec(visited_array_index, nfa, transition.target(), move,
+                        transition.letter()->index());
         if (last_block_started != transition.letter()->index()) {
           move->PopBlock();
         }
@@ -224,22 +227,25 @@ bool SearchContext::FindFirstMoveRec(std::size_t visited_array_index,
       calculation_state_->SetPos(previous_pos);
       continue;
     }
+    if (transition.letter()->IsSwitch()) {
+      if (last_block_started != transition.letter()->index()) {
+        move->AddBlock(calculation_state_->pos(),
+                       transition.letter()->index());
+        possible_moves_.push_back(*move);
+        move->PopBlock();
+      } else possible_moves_.push_back(*move);
+      return true;
+    }
     ActionResult result = transition.letter()->Apply(calculation_state_);
     if (result) {
       if (transition.letter()->IsModifier()) {
         if (last_block_started != transition.letter()->index()) {
           move->AddBlock(calculation_state_->pos(),
                          transition.letter()->index());
-          //if (!transition.letter()->IsSwitch())
-            CreateVisitedLayers(visited_array_index, depth + 1);
+          CreateVisitedLayers(visited_array_index, depth + 1);
         }
-        if (transition.letter()->IsSwitch()) {
-          possible_moves_.push_back(*move);
-          rec_result = true;
-        } else {
-          rec_result = FindFirstMoveRec(visited_array_index, nfa,
-                                        transition.target(), move, transition.letter()->index());
-        }
+        rec_result = FindFirstMoveRec(visited_array_index, nfa,
+                                      transition.target(), move, transition.letter()->index());
         if (last_block_started != transition.letter()->index()) {
           move->PopBlock();
         }
