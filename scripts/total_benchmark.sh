@@ -3,7 +3,7 @@
 cd "${0%/*}"
 ./make.sh
 echo -e "\n\tAmazons"
-../build/benchmark ../rbgParser/examples/amazons.rbg -s 0 -n 2000
+../build/benchmark ../rbgParser/examples/amazons.rbg -n 2000 -s 0
 ../build/benchmark ../rbgParser/examples/amazons.rbg -d 2
 
 echo -e "\n\tBreakthrough"
@@ -15,8 +15,8 @@ echo -e "\n\tChess-cap"
 ../build/benchmark ../rbgParser/examples/chess-cap.rbg  -d 5
 
 echo -e "\n\tChess"
-../build/benchmark ../rbgParser/examples/chess-opt.rbg -n 1000 -s 0
-../build/benchmark ../rbgParser/examples/chess-opt.rbg -d 5
+../build/benchmark ../rbgParser/examples/chess.rbg -n 1000 -s 0
+../build/benchmark ../rbgParser/examples/chess.rbg -d 5
 
 echo -e "\n\tChineseCheckers6"
 ../build/benchmark ../rbgParser/examples/chineseCheckers6.rbg -n 1000 -s 0
