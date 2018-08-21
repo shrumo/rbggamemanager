@@ -193,18 +193,19 @@ void random_play_benchmark_fast(const rbg_parser::parsed_game &pg, const uint it
     size_t keeper_state_turns = 0;
     GameState state = initial_state;
     
+    std::vector<Move> moves;
     while (true) {
-      std::vector<Move> moves;
+      moves.clear();
       
       if (state.player() == state.description().keeper_player_id()) {
-        moves = state.FindFirstMove(&context);
+        state.FindFirstMove(&context,&moves);
         keeper_state_turns++;
         if (moves.size()) {
           state.MakeMove(moves[0]);
           continue;
         }
       } else {
-        moves = state.FindMoves(&context);
+        state.FindMoves(&context,&moves);
         state_turns++;
       }
       

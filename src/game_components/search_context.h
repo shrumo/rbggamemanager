@@ -31,6 +31,7 @@ public:
 
   SearchContext()
       :
+      possible_moves_(nullptr),
       max_depth_(-1),
       last_visited_array_index_(0),
       calculation_state_(nullptr) {
@@ -44,11 +45,15 @@ public:
     last_visited_array_index_ = 0;
   }
 
-  std::vector<Move> FindMoves(GameState *state, ssize_t max_depth = -1);
+  void FindMoves(GameState *state, std::vector<Move> *moves, ssize_t max_depth = -1);
+  
+  std::vector<Move> FindMoves(GameState *state, ssize_t max_depth = -1);// TODO remove
 
   PerftResult FindMovesDeep(GameState *state, size_t perft_depth, ssize_t max_depth=-1);
 
-  std::vector<Move> FindFirstMove(GameState *state, ssize_t max_depth = -1);
+  void FindFirstMove(GameState *state, std::vector<Move> *moves, ssize_t max_depth = -1);
+  
+  std::vector<Move> FindFirstMove(GameState *state, ssize_t max_depth = -1);// TODO remove
 
   bool CheckPattern(GameState *state, const fsm::Nfa<const Action *> &nfa,
                     unsigned int move_pattern_index,
@@ -93,7 +98,7 @@ private:
   std::size_t VisitedIndex(const fsm::Nfa<const Action *> &nfa,
                            fsm::state_id_t current_state) const;
 
-  std::vector<Move> possible_moves_;
+  std::vector<Move> *possible_moves_;
   ssize_t max_depth_;
 
   std::vector<std::vector<FastBitVector> > visited_;

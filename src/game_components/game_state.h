@@ -186,6 +186,12 @@ public:
     return std::move(result);
   }
 
+  void FindMoves(SearchContext *context, std::vector<Move> *moves) {
+    current_search_ = context;
+    current_search_->FindMoves(this, moves, -1);
+    current_search_ = nullptr;
+  }
+  
   PerftResult FindMovesDeep(SearchContext *context, size_t perft_depth, ssize_t max_depth=-1) {
     current_search_ = context;
     auto result = current_search_->FindMovesDeep(this, perft_depth, max_depth);
@@ -201,6 +207,12 @@ public:
     return std::move(result);
   }
 
+  void FindFirstMove(SearchContext *context, std::vector<Move> *moves) {
+    current_search_ = context;
+    current_search_->FindFirstMove(this, moves, -1);
+    current_search_ = nullptr;
+  }
+  
 private:
   const GameDescription &parent_;
 

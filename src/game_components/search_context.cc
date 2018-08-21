@@ -12,7 +12,7 @@ void SearchContext::FindAllMovesRec(size_t visited_array_index,
                                     const fsm::Nfa<const Action *> &nfa,
                                     fsm::state_id_t current_state, Move *move,
                                     ssize_t last_block_started) {
-  const size_t index = VisitedIndex(nfa, current_state);
+  const uint index = VisitedIndex(nfa, current_state);
   const size_t depth = move->blocks().size();
   if (visited_[visited_array_index][depth][index])
     return;
@@ -35,9 +35,9 @@ void SearchContext::FindAllMovesRec(size_t visited_array_index,
     if (transition.letter()->IsSwitch()) {
         if (last_block_started != transition.letter()->index()) {
           move->AddBlock(calculation_state_->pos(),transition.letter()->index());
-          possible_moves_.push_back(*move);
+          possible_moves_->push_back(*move);
           move->PopBlock();
-        } else possible_moves_.push_back(*move);
+        } else possible_moves_->push_back(*move);
         continue;
     }
     ActionResult result = transition.letter()->Apply(calculation_state_);
@@ -91,7 +91,7 @@ bool SearchContext::CheckPlay(size_t visited_array_index,
   if (current_state == nfa.final()) {
     return true;
   }
-  const size_t index = VisitedIndex(nfa, current_state);
+  const uint index = VisitedIndex(nfa, current_state);
   if (visited_[visited_array_index][depth][index])
     return false;
   visited_[visited_array_index][depth].set(index);
@@ -124,7 +124,7 @@ bool SearchContext::CheckPlay(size_t visited_array_index,
           new_depth = depth + 1;
         }
         if (CheckPlay(visited_array_index, nfa,
-                      transition.target(), new_depth, transition.letter()->index()) || transition.letter()->IsSwitch())
+                      transition.target(), new_depth, transition.letter()->index()))
           eval = true;
       } else if (CheckPlay(visited_array_index, nfa,
                            transition.target(), depth, last_block_started))
@@ -137,9 +137,10 @@ bool SearchContext::CheckPlay(size_t visited_array_index,
   return false;
 }
 
-std::vector<Move>
-SearchContext::FindMoves(GameState *state, ssize_t maximal_depth) {
+void
+SearchContext::FindMoves(GameState *state, std::vector<Move> *moves, ssize_t maximal_depth) {
   calculation_state_ = state;
+  possible_moves_ = moves;
   if (maximal_depth >= 0)
     max_depth_ = (size_t) maximal_depth;
   size_t visited_index = NewVisited(
@@ -149,7 +150,24 @@ SearchContext::FindMoves(GameState *state, ssize_t maximal_depth) {
                   state->nfa_state(), &empty);
   DumpVisited(visited_index);
   calculation_state_ = nullptr;
-  return std::move(possible_moves_);
+  //return std::move(possible_moves_);
+}
+
+std::vector<Move>
+SearchContext::FindMoves(GameState *state, ssize_t maximal_depth) {
+  calculation_state_ = state;
+  std::vector<Move> moves;
+  possible_moves_ = &moves;
+  if (maximal_depth >= 0)
+    max_depth_ = (size_t) maximal_depth;
+  size_t visited_index = NewVisited(
+      state->description().moves_description().nfa());
+  Move empty;
+  FindAllMovesRec(visited_index, state->description().moves_description().nfa(),
+                  state->nfa_state(), &empty);
+  DumpVisited(visited_index);
+  calculation_state_ = nullptr;
+  return std::move(moves);
 }
 
 bool SearchContext::CheckPattern(GameState *state,
@@ -182,9 +200,10 @@ void SearchContext::DumpVisited(std::size_t visited_array_index) {
   }
 }
 
-std::vector<Move>
-SearchContext::FindFirstMove(GameState *state, ssize_t maximal_depth) {
+void
+SearchContext::FindFirstMove(GameState *state, std::vector<Move> *moves, ssize_t maximal_depth) {
   calculation_state_ = state;
+  possible_moves_ = moves;
   if (maximal_depth >= 0)
     max_depth_ = (size_t) maximal_depth;
   size_t visited_index = NewVisited(
@@ -195,31 +214,46 @@ SearchContext::FindFirstMove(GameState *state, ssize_t maximal_depth) {
                    state->nfa_state(), &empty);
   DumpVisited(visited_index);
   calculation_state_ = nullptr;
-  return std::move(possible_moves_);
+  //return std::move(possible_moves_);
+}
+
+std::vector<Move>
+SearchContext::FindFirstMove(GameState *state, ssize_t maximal_depth) {
+  calculation_state_ = state;
+  std::vector<Move> moves;
+  possible_moves_ = &moves;
+  if (maximal_depth >= 0)
+    max_depth_ = (size_t) maximal_depth;
+  size_t visited_index = NewVisited(
+      state->description().moves_description().nfa());
+  Move empty;
+  FindFirstMoveRec(visited_index,
+                   state->description().moves_description().nfa(),
+                   state->nfa_state(), &empty);
+  DumpVisited(visited_index);
+  calculation_state_ = nullptr;
+  return std::move(moves);
 }
 
 bool SearchContext::FindFirstMoveRec(std::size_t visited_array_index,
                                      const fsm::Nfa<const Action *> &nfa,
                                      fsm::state_id_t current_state, Move *move,
                                      ssize_t last_block_started) {
-  const size_t index = VisitedIndex(nfa, current_state);
+  const uint index = VisitedIndex(nfa, current_state);
   const size_t depth = move->blocks().size();
   if (visited_[visited_array_index][depth][index])
     return false;
   visited_[visited_array_index][depth].set(index);
   if ((ssize_t) depth == max_depth_)
     return false;
-  bool rec_result = false;
   for (const auto &transition : nfa[current_state].transitions()) {
     if(transition.letter()->type() == ActionType::kShiftTableType)
     {
       auto shift_table = static_cast<const actions::ShiftTable*>(transition.letter());
       auto previous_pos = calculation_state_->pos();
-      for(auto next_pos : shift_table->table()[previous_pos])
-      {
+      for(auto next_pos : shift_table->table()[previous_pos]) {
         calculation_state_->SetPos(next_pos);
-        rec_result = FindFirstMoveRec(visited_array_index, nfa, transition.target(), move, last_block_started);
-        if (rec_result) {
+        if (FindFirstMoveRec(visited_array_index, nfa, transition.target(), move, last_block_started)) {
           calculation_state_->SetPos(previous_pos);
           return true;
         }
@@ -231,12 +265,13 @@ bool SearchContext::FindFirstMoveRec(std::size_t visited_array_index,
       if (last_block_started != transition.letter()->index()) {
         move->AddBlock(calculation_state_->pos(),
                        transition.letter()->index());
-        possible_moves_.push_back(*move);
+        possible_moves_->push_back(*move);
         move->PopBlock();
-      } else possible_moves_.push_back(*move);
+      } else possible_moves_->push_back(*move);
       return true;
     }
     ActionResult result = transition.letter()->Apply(calculation_state_);
+    bool rec_result = false;
     if (result) {
       if (transition.letter()->IsModifier()) {
         if (last_block_started != transition.letter()->index()) {
@@ -273,7 +308,7 @@ bool SearchContext::CheckPattern(const fsm::Nfa<const Action *> &nfa,
 
 PerftResult SearchContext::FastPerft(std::size_t visited_array_index, const fsm::Nfa<const Action *> &nfa,
                                 fsm::state_id_t current_state, size_t depth, ssize_t last_block_started, size_t perft_depth) {
-  const size_t index = VisitedIndex(nfa, current_state);
+  const uint index = VisitedIndex(nfa, current_state);
   if (visited_[visited_array_index][depth][index])
     return {0,0};
   visited_[visited_array_index][depth].set(index);
