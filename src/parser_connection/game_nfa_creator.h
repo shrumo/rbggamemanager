@@ -7,7 +7,6 @@
 
 #include "../../rbgParser/src/sum.hpp"
 #include "../../rbgParser/src/concatenation.hpp"
-#include "../../rbgParser/src/actions_block.hpp"
 #include "../../rbgParser/src/shift.hpp"
 #include "../../rbgParser/src/ons.hpp"
 #include "../../rbgParser/src/offs.hpp"
@@ -79,8 +78,6 @@ public:
   void dispatch(const rbg_parser::variable_arithmetic &) override {}
 
   void dispatch(const rbg_parser::arithmetic_operation &) override {}
-
-  void dispatch(const rbg_parser::actions_block&) override;
 
 private:
   void RegisterModifier(fsm::state_id_t initial_id);

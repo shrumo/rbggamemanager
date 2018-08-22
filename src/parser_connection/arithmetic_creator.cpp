@@ -30,7 +30,6 @@ private:
   void dispatch(const rbg_parser::integer_arithmetic &arithmetic) override;
   void dispatch(const rbg_parser::variable_arithmetic &arithmetic) override;
   void dispatch(const rbg_parser::arithmetic_operation &arithmetic) override;
-  void dispatch(const rbg_parser::actions_block &) override  {};
   const NameResolver& resolver_;
 
   std::unique_ptr<ArithmeticOperation> operation_;
