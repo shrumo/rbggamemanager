@@ -6,6 +6,7 @@
 #define RBGGAMEMANAGER_MOVE_H
 
 #include <vector>
+#include <boost/container/small_vector.hpp>
 
 using vertex_t = ssize_t;
 
@@ -53,7 +54,8 @@ public:
     blocks_.pop_back();
   }
 
-  const std::vector<BlockApplication> &blocks() const {
+  //const std::vector<BlockApplication> &blocks() const {
+  const boost::container::small_vector<BlockApplication,8> &blocks() const {
     return blocks_;
   }
 
@@ -75,7 +77,8 @@ public:
   }
 
 private:
-  std::vector<BlockApplication> blocks_;
+  //std::vector<BlockApplication> blocks_;
+  boost::container::small_vector<BlockApplication,8> blocks_;
 };
 
 namespace std {

@@ -9,7 +9,7 @@ echo -e "\n\tChess"
 # ../build/benchmark ../rbgParser/examples/paperSoccer.rbg -n 2 -s 0
 # ../build/benchmark ../rbgParser/examples/paperSoccer.rbg -s 0 -d 2
  echo -e "\n\tEnglish Checkers"
- ../build/benchmark ../rbgParser/examples/englishCheckers.rbg -n 10 -s 0 
+ ../build/benchmark ../rbgParser/examples/englishCheckers.rbg -n 10 -s 0
  ../build/benchmark ../rbgParser/examples/englishCheckers.rbg -s 0 -d 3
  echo -e "\n\tReversi"
  ../build/benchmark ../rbgParser/examples/reversi.rbg -n 10 -s 0
@@ -27,7 +27,7 @@ echo -e "\n\tChess"
  ../build/benchmark ../rbgParser/examples/ticTacToe.rbg -n 10 -s 0
  ../build/benchmark ../rbgParser/examples/ticTacToe.rbg -s 0 -d 3
  echo -e "\n\tChinese Checkers"
- ../build/benchmark ../rbgParser/examples/chineseCheckers6.rbg -n 10 -s 0 
+ ../build/benchmark ../rbgParser/examples/chineseCheckers6.rbg -n 10 -s 0
  ../build/benchmark ../rbgParser/examples/chineseCheckers6.rbg -s 0 -d 3
 # echo -e "\n\tGo"
 # ../build/benchmark ../rbgParser/examples/go.rbg -n 2 -s 0
