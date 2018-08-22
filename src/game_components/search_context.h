@@ -45,23 +45,21 @@ public:
     last_visited_array_index_ = 0;
   }
 
-  void FindMoves(GameState *state, std::vector<Move> *moves, ssize_t max_depth = -1);
+  void FindMoves(GameState *state, std::vector<Move> *moves);
   
-  std::vector<Move> FindMoves(GameState *state, ssize_t max_depth = -1);// TODO remove
+  std::vector<Move> FindMoves(GameState *state);// TODO remove
 
-  PerftResult FindMovesDeep(GameState *state, size_t perft_depth, ssize_t max_depth=-1);
+  PerftResult FindMovesDeep(GameState *state, size_t perft_depth, ssize_t maximal_depth = -1);
 
-  void FindFirstMove(GameState *state, std::vector<Move> *moves, ssize_t max_depth = -1);
+  void FindFirstMove(GameState *state, std::vector<Move> *moves);// TODO remove
+  bool ApplyFirstMove(GameState *state);
   
-  std::vector<Move> FindFirstMove(GameState *state, ssize_t max_depth = -1);// TODO remove
+  std::vector<Move> FindFirstMove(GameState *state);// TODO remove
 
-  bool CheckPattern(GameState *state, const fsm::Nfa<const Action *> &nfa,
-                    unsigned int move_pattern_index,
-                    ssize_t max_depth = -1);
+  bool CheckPattern(GameState *state, const fsm::Nfa<const Action *> &nfa);
 
 private:
-  bool CheckPattern(const fsm::Nfa<const Action *> &nfa,
-                    unsigned int move_pattern_index, ssize_t max_depth = -1);
+  bool CheckPattern(const fsm::Nfa<const Action *> &nfa);
 
   std::size_t NewVisited(const fsm::Nfa<const Action *> &nfa);
 
@@ -89,6 +87,11 @@ private:
                         const fsm::Nfa<const Action *> &nfa,
                         fsm::state_id_t current_state, Move *move,
                         ssize_t last_block_started=-1);
+
+  bool ApplyFirstMoveRec(std::size_t visited_array_index,
+                         const fsm::Nfa<const Action *> &nfa,
+                         fsm::state_id_t current_state, uint depth,
+                         ssize_t last_block_started=-1);
 
   bool CheckPlay(std::size_t visited_array_index,
                  const fsm::Nfa<const Action *> &nfa,

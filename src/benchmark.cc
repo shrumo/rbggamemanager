@@ -182,8 +182,9 @@ void random_play_benchmark_fast(const rbg_parser::parsed_game &pg, const uint it
   SearchContext context;
   GameState initial_state(gd);
   while (initial_state.player() == initial_state.description().keeper_player_id()) {
-    auto moves = initial_state.FindFirstMove(&context);
-    initial_state.MakeMove(moves[0]);
+    //auto moves = initial_state.FindFirstMove(&context);
+    //initial_state.MakeMove(moves[0]);
+    if (!initial_state.ApplyFirstMove(&context)) break;
   }
   
   auto begin = std::chrono::system_clock::now();
@@ -198,12 +199,10 @@ void random_play_benchmark_fast(const rbg_parser::parsed_game &pg, const uint it
       moves.clear();
       
       if (state.player() == state.description().keeper_player_id()) {
-        state.FindFirstMove(&context,&moves);
         keeper_state_turns++;
-        if (moves.size()) {
-          state.MakeMove(moves[0]);
-          continue;
-        }
+        //state.FindFirstMove(&context,&moves);
+        //if (moves.size()) {state.MakeMove(moves[0]); continue;}
+        if (state.ApplyFirstMove(&context)) continue;
       } else {
         state.FindMoves(&context,&moves);
         state_turns++;

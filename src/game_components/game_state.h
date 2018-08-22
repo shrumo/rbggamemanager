@@ -179,16 +179,16 @@ public:
     current_state_ = information.previous_state();
   }
 
-  std::vector<Move> FindMoves(SearchContext *context, ssize_t max_depth = -1) {
+  std::vector<Move> FindMoves(SearchContext *context) {
     current_search_ = context;
-    auto result = current_search_->FindMoves(this, max_depth);
+    auto result = current_search_->FindMoves(this);
     current_search_ = nullptr;
     return std::move(result);
   }
 
   void FindMoves(SearchContext *context, std::vector<Move> *moves) {
     current_search_ = context;
-    current_search_->FindMoves(this, moves, -1);
+    current_search_->FindMoves(this, moves);
     current_search_ = nullptr;
   }
   
@@ -200,27 +200,34 @@ public:
   }
 
   std::vector<Move>
-  FindFirstMove(SearchContext *context, ssize_t max_depth = -1) {
+  FindFirstMove(SearchContext *context) {
     current_search_ = context;
-    auto result = current_search_->FindFirstMove(this, max_depth);
+    auto result = current_search_->FindFirstMove(this);
     current_search_ = nullptr;
     return std::move(result);
   }
 
   void FindFirstMove(SearchContext *context, std::vector<Move> *moves) {
     current_search_ = context;
-    current_search_->FindFirstMove(this, moves, -1);
+    current_search_->FindFirstMove(this, moves);
     current_search_ = nullptr;
   }
   
-private:
+  bool ApplyFirstMove(SearchContext *context) {
+    current_search_ = context;
+    bool result = current_search_->ApplyFirstMove(this);
+    current_search_ = nullptr;
+    return result;
+  }
+  
+public:  
   const GameDescription &parent_;
-
-
+private:
   GraphBoard current_board_;
   vertex_t current_pos_;
+public:
   fsm::state_id_t current_state_;
-
+private:
   std::vector<int> sigma_;
   token_id_t current_player_;
 

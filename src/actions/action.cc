@@ -53,11 +53,11 @@ void actions::Assignment::Revert(GameState *b,
 }
 
 ActionResult actions::ConditionCheck::Apply(GameState *b) const {
-  return b->search_context().CheckPattern(*move_nfa_, index_);
+  return b->search_context().CheckPattern(*move_nfa_);
 }
 
 ActionResult actions::NegatedConditionCheck::Apply(GameState *b) const {
-  return !b->search_context().CheckPattern(*move_nfa_, index_);
+  return !b->search_context().CheckPattern(*move_nfa_);
 }
 
 ActionResult actions::ArithmeticLessComparison::Apply(GameState *b) const {
