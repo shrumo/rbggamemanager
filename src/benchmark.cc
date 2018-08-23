@@ -375,7 +375,7 @@ int main(int argc, const char *argv[]) {
 
   if (vm.count("depth")) {
     size_t depth = vm["depth"].as<uint>();
-    perft_benchmark(*pg, depth);
+    fast_perft_benchmark(*pg, depth);
   } else {
     size_t iterations = 1;
     if (vm.count("number"))
