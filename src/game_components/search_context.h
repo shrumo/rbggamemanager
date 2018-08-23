@@ -53,7 +53,8 @@ public:
 
   void FindFirstMove(GameState *state, std::vector<Move> *moves);// TODO remove
   bool ApplyFirstMove(GameState *state);
-  
+  bool ApplyFirstRandomMove(GameState *state);
+
   std::vector<Move> FindFirstMove(GameState *state);// TODO remove
 
   bool CheckPattern(GameState *state, const fsm::Nfa<const Action *> &nfa);
@@ -89,6 +90,11 @@ private:
                         ssize_t last_block_started=-1);
 
   bool ApplyFirstMoveRec(std::size_t visited_array_index,
+                         const fsm::Nfa<const Action *> &nfa,
+                         fsm::state_id_t current_state, uint depth,
+                         ssize_t last_block_started=-1);
+
+  bool ApplyFirstRandomMoveRec(std::size_t visited_array_index,
                          const fsm::Nfa<const Action *> &nfa,
                          fsm::state_id_t current_state, uint depth,
                          ssize_t last_block_started=-1);

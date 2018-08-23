@@ -104,10 +104,12 @@ random_play_benchmark_desc(const rbg_parser::parsed_game &pg, size_t iterations,
         keeper_state_turns++;
       } else {
         moves = state.FindMoves(&context);
+        std::cout << "Moves " << moves.size() << "\n";
         state_turns++;
       }
       moves_count += moves.size();
     }
+    if (iterations == 1 && !show_keeper) std::cout << state << std::endl;
     for (auto &player_score : player_scores_sum) {
       const auto &score = state.Value(player_score.first);
       player_score.second.sum += score;
@@ -204,9 +206,11 @@ void random_play_benchmark_fast(const rbg_parser::parsed_game &pg, const uint it
         //if (moves.size()) {state.MakeMove(moves[0]); continue;}
         if (state.ApplyFirstMove(&context)) continue;
       } else {
-        state.FindMoves(&context,&moves);
         state_turns++;
+        state.FindMoves(&context,&moves);
+        //if (state.ApplyFirstRandomMove(&context)) continue;
       }
+      //break;
       
       if (moves.size() == 0) break;
       moves_count += moves.size();

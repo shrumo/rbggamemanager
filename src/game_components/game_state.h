@@ -219,6 +219,13 @@ public:
     current_search_ = nullptr;
     return result;
   }
+
+  bool ApplyFirstRandomMove(SearchContext *context) {
+    current_search_ = context;
+    bool result = current_search_->ApplyFirstRandomMove(this);
+    current_search_ = nullptr;
+    return result;
+  }
   
 public:  
   const GameDescription &parent_;

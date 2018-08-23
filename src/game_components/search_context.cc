@@ -339,59 +339,78 @@ bool SearchContext::ApplyFirstMoveRec(std::size_t visited_array_index,
         }
     }
     transition.letter()->Revert(calculation_state_, result);
-      /*
-      
-      for (const auto &transition : nfa[current_state].transitions()) {
+  }
+  return false;
+}
+
+bool SearchContext::ApplyFirstRandomMove(GameState *state) {
+  calculation_state_ = state;
+  size_t visited_index = NewVisited(
+      state->description().moves_description().nfa());
+  bool result = ApplyFirstRandomMoveRec(visited_index,
+                                  state->description().moves_description().nfa(),
+                                  state->nfa_state(), 0);
+  DumpVisited(visited_index);
+  calculation_state_ = nullptr;
+  return result;
+}
+
+bool SearchContext::ApplyFirstRandomMoveRec(std::size_t visited_array_index,
+                                     const fsm::Nfa<const Action *> &nfa,
+                                     fsm::state_id_t current_state, uint depth,
+                                     ssize_t last_block_started) {
+  const uint index = VisitedIndex(nfa, current_state);
+  visited_[visited_array_index][depth].set(index);
+  boost::container::small_vector<uint,16> order_trans;
+    order_trans.resize(nfa[current_state].transitions().size());
+  for (uint i = 0; i < order_trans.size(); i++) order_trans[i] = i;
+  std::random_shuffle(order_trans.begin(), order_trans.end());
+  for (uint i = 0; i < order_trans.size(); i++) {
+    const auto &transition = nfa[current_state].transitions()[order_trans[i]];
     if(transition.letter()->type() == ActionType::kShiftTableType)
     {
       auto shift_table = static_cast<const actions::ShiftTable*>(transition.letter());
       auto previous_pos = calculation_state_->pos();
-      for(auto next_pos : shift_table->table()[previous_pos])
-      {
-        calculation_state_->SetPos(next_pos);
-        rec_result = ApplyFirstMoveRec(visited_array_index, nfa, transition.target(), last_block_started);
-        if (rec_result) {
-            //calculation_state_->SetPos(previous_pos);
-            return true;
-        }
+      boost::container::small_vector<uint,16> order_table;
+      order_table.resize(shift_table->table()[previous_pos].size());
+      for (uint j = 0; j < order_table.size(); j++) order_table[j] = j;
+      std::random_shuffle(order_table.begin(), order_table.end());
+      for (uint j = 0; j < order_table.size(); j++) {
+        calculation_state_->SetPos(shift_table->table()[previous_pos][order_table[j]]);
+        if (ApplyFirstRandomMoveRec(visited_array_index, nfa, transition.target(), depth, last_block_started))
+          return true;
       }
       calculation_state_->SetPos(previous_pos);
       continue;
     }
+    if (transition.letter()->IsSwitch()) {
+      transition.letter()->Apply(calculation_state_);
+      calculation_state_->current_state_ = calculation_state_->parent_.moves_description().CorrespondingState(transition.letter()->index());
+       while (
+          calculation_state_->parent_.moves_description().nfa()[calculation_state_->current_state_].transitions().size() == 1 &&
+          calculation_state_->parent_.moves_description().nfa()[calculation_state_->current_state_].transitions().front().letter()->index() == transition.letter()->index()) {
+        calculation_state_->current_state_ = calculation_state_->parent_.moves_description().nfa()[calculation_state_->current_state_].transitions().front().target();
+      }
+      return true;
+    }
     ActionResult result = transition.letter()->Apply(calculation_state_);
     if (result) {
       if (transition.letter()->IsModifier()) {
+        uint new_depth;
         if (last_block_started != transition.letter()->index()) {
-          move->AddBlock(calculation_state_->pos(),
-                         transition.letter()->index());
-          CreateVisitedLayers(visited_array_index, depth + 1);
-        }
-        if (transition.letter()->IsSwitch()) {
-          possible_moves_.push_back(*move);
-          calculation_state_->current_state_ = calculation_state_->parent_.moves_description().CorrespondingState(transition.letter()->index());
-       while (
-          calculation_state_->parent_.moves_description().nfa()[calculation_state_->current_state_].transitions().size() ==
-          1 &&
-          calculation_state_->parent_.moves_description().nfa()[calculation_state_->current_state_].transitions().front().letter()->index() ==
-          transition.letter()->index()) {
-        calculation_state_->current_state_ = calculation_state_->parent_.moves_description().nfa()[calculation_state_->current_state_].transitions().front().target();
-      }
-          //std::cout << "first " <<(*calculation_state_) << "\n";
-          rec_result = true;
+          new_depth = depth+1;
+          CreateVisitedLayers(visited_array_index, new_depth);
+        } else new_depth = depth;
+        if (ApplyFirstRandomMoveRec(visited_array_index, nfa,
+                              transition.target(), new_depth, transition.letter()->index()))
           return true;
-        } else {
-          rec_result = FindFirstMoveRec(visited_array_index, nfa,
-                                        transition.target(), move, transition.letter()->index());
+      } else {
+        if (ApplyFirstRandomMoveRec(visited_array_index, nfa,
+                              transition.target(), depth, last_block_started))
+          return true;
         }
-        if (last_block_started != transition.letter()->index()) {
-          move->PopBlock();
-        }
-      } else
-        rec_result = FindFirstMoveRec(visited_array_index, nfa,
-                                      transition.target(), move, last_block_started);
     }
-    if (rec_result)
-      return true;*/
+    transition.letter()->Revert(calculation_state_, result);
   }
   return false;
 }
