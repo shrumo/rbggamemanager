@@ -94,8 +94,12 @@ private:
     {
       auto& item = concat.get_content()[i];
       item->accept(*this);
-      if(!clear_length_ && i != 0)
+      if(!clear_length_)
       {
+        if (i == 0) {
+          ResetResult();
+          continue;
+        }
         concat_tables.push_back(std::move(result_table));
         result_concat_clear_lengths.push_back(result_clear_length);
         result_concat_begins.push_back(static_cast<unsigned int &&>(i));
@@ -105,9 +109,10 @@ private:
         {
           result_table[j] = {j};
         }
+        ResetResult();
         continue;
       }
-      else if(result_clear_length == 0 && clear_length_ && i != 0)
+      else if(result_clear_length == 0 && clear_length_ && i!=0)
       {
         concat_tables.push_back(std::move(result_table));
         result_concat_clear_lengths.push_back(result_clear_length);
@@ -118,7 +123,6 @@ private:
         {
           result_table[j] = {j};
         }
-        continue;
       }
       result_clear_length += clear_length_;
       auto tmp_rec_result = ExtractResult();
@@ -372,6 +376,7 @@ void GameNfaCreator::dispatch(const rbg_parser::concatenation &move) {
     move.get_content()[concat_pos]->accept(*this);
     initial = nfa_result_->initial();
     concat_pos++;
+    concat_table_pos++;
   }
 
   for (; concat_pos < move.get_content().size(); concat_pos++) {
