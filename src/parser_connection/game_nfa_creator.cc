@@ -190,7 +190,57 @@ private:
   void dispatch(const rbg_parser::player_switch &) override { ResetResult();}
   void dispatch(const rbg_parser::keeper_switch&) override { ResetResult();}
   void dispatch(const rbg_parser::arithmetic_comparison &) override { ResetResult();}
-  void dispatch(const rbg_parser::move_check &) override { ResetResult(); }
+  void dispatch(const rbg_parser::move_check &move) override {
+    unsigned int tmp_clear_length = 0;
+    std::vector < std::unordered_set< vertex_t > > tmp_result = std::vector<std::unordered_set<vertex_t> >(board_.size());
+    for(ssize_t j = 0; j < static_cast<ssize_t >(tmp_result.size()); j++)
+    {
+      tmp_result[j] = {j};
+    }
+
+    move.get_content()->accept(*this);
+    if(!clear_length_)
+      return;
+    tmp_clear_length = clear_length_;
+    auto tmp_rec_result = ExtractResult();
+
+    if(!move.is_negated()) {
+        for (vertex_t v = 0; v < static_cast<ssize_t >(tmp_result.size()); v++) {
+          bool exists = false;
+          for (auto neighbour : tmp_rec_result[v]) {
+            if (neighbour != -1) {
+              exists = true;
+              tmp_result[v] = {v};
+              break;
+            }
+          }
+          if(!exists)
+          {
+            tmp_result[v] = {-1};
+          }
+        }
+    }
+    else {
+        for (vertex_t v = 0; v < static_cast<ssize_t >(tmp_result.size()); v++) {
+          bool exists = false;
+          for (auto neighbour : tmp_rec_result[v]) {
+            if (neighbour != -1) {
+              exists = true;
+              tmp_result[v] = {-1};
+              break;
+            }
+          }
+          if (!exists) {
+            tmp_result[v] = {v};
+          }
+        }
+    }
+
+    ResetResult();
+    result_ = tmp_result;
+    clear_length_ = tmp_clear_length;
+
+  }
   void dispatch(const rbg_parser::integer_arithmetic &) override { ResetResult();};
   void dispatch(const rbg_parser::variable_arithmetic &) override { ResetResult();};
   void dispatch(const rbg_parser::arithmetic_operation &) override { ResetResult();};
