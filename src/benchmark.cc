@@ -358,6 +358,10 @@ int main(int argc, const char *argv[]) {
     rbg_parser::game_items g = input_tokens(result, msg);
     pg = std::unique_ptr<rbg_parser::parsed_game>(
         new rbg_parser::parsed_game(g.parse_game(msg)));
+    if(!msg.is_empty()) {// Warnings stops
+      msg.write_as_warnings(std::cout);
+      return 1;
+    }
   } catch (rbg_parser::message &m) {
     std::cout << "Game description is bad. Here is the error: " << "\n";
     std::cout << m.as_error() << std::endl;
