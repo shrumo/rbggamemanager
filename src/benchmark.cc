@@ -188,6 +188,8 @@ void random_play_benchmark_fast(const rbg_parser::parsed_game &pg, const uint it
     //initial_state.MakeMove(moves[0]);
     if (!initial_state.ApplyFirstMove(&context)) break;
   }
+  std::vector<Move> moves;
+  moves.reserve(64);
   
   auto begin = std::chrono::system_clock::now();
   for (uint i = 0; i < iterations; i++) {
@@ -196,25 +198,18 @@ void random_play_benchmark_fast(const rbg_parser::parsed_game &pg, const uint it
     size_t keeper_state_turns = 0;
     GameState state = initial_state;
     
-    std::vector<Move> moves;
     while (true) {
-      moves.clear();
-      
       if (state.player() == state.description().keeper_player_id()) {
         keeper_state_turns++;
-        //state.FindFirstMove(&context,&moves);
-        //if (moves.size()) {state.MakeMove(moves[0]); continue;}
         if (state.ApplyFirstMove(&context)) continue;
       } else {
         state_turns++;
-        state.FindMoves(&context,&moves);
-        //if (state.ApplyFirstRandomMove(&context)) continue;
+        state.FindMoves(&context, &moves);
       }
-      //break;
-      
       if (moves.size() == 0) break;
       moves_count += moves.size();
       state.MakeMove(moves[rand() % moves.size()]);
+      moves.clear();
     }
     
     for (auto &player_score : player_scores_sum) {
@@ -375,7 +370,7 @@ int main(int argc, const char *argv[]) {
 
   if (vm.count("depth")) {
     size_t depth = vm["depth"].as<uint>();
-    fast_perft_benchmark(*pg, depth);
+    perft_benchmark(*pg, depth);
   } else {
     size_t iterations = 1;
     if (vm.count("number"))
