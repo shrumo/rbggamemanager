@@ -479,7 +479,8 @@ PerftResult SearchContext::FastPerft(std::size_t visited_array_index, const fsm:
       }
     }
     transition.letter()->Revert(calculation_state_, result);
-    if(calculation_state_->player() == calculation_state_->description().keeper_player_id() && node_count > 0)
+    //if(calculation_state_->player() == calculation_state_->description().keeper_player_id() && (node_count > 0))
+    if(calculation_state_->player() == calculation_state_->description().keeper_player_id() && (node_count > 0 || leaf_count > 0))
     {
       return {leaf_count, node_count};
     }
