@@ -25,7 +25,7 @@ void SearchContext::FindAllMovesRec(size_t visited_array_index,
       for(auto next_pos : shift_table->table()[previous_pos])
       {
         calculation_state_->SetPos(next_pos);
-        FindAllMovesRec(visited_array_index, nfa, transition.target(), move,last_block_started);
+        FindAllMovesRec(visited_array_index, nfa, transition.target(), move,-1);
       }
       calculation_state_->SetPos(previous_pos);
       continue;
@@ -52,7 +52,7 @@ void SearchContext::FindAllMovesRec(size_t visited_array_index,
           move->PopBlock();
         }
       } else {
-          FindAllMovesRec(visited_array_index, nfa, transition.target(), move,last_block_started);
+          FindAllMovesRec(visited_array_index, nfa, transition.target(), move,-1);
       }
     }
     transition.letter()->Revert(calculation_state_, result);
@@ -101,7 +101,7 @@ bool SearchContext::CheckPlay(size_t visited_array_index,
       {
         calculation_state_->SetPos(next_pos);
         if (CheckPlay(visited_array_index, nfa,
-                      transition.target(), depth,last_block_started)) {
+                      transition.target(), depth,-1)) {
           calculation_state_->SetPos(previous_pos);
           return true;
         }
@@ -122,7 +122,7 @@ bool SearchContext::CheckPlay(size_t visited_array_index,
                       transition.target(), new_depth, transition.letter()->index()))
           eval = true;
       } else if (CheckPlay(visited_array_index, nfa,
-                           transition.target(), depth, last_block_started))
+                           transition.target(), depth, -1))
         eval = true;
     }
     transition.letter()->Revert(calculation_state_, result);
@@ -238,7 +238,7 @@ bool SearchContext::FindFirstMoveRec(std::size_t visited_array_index,
       auto previous_pos = calculation_state_->pos();
       for(auto next_pos : shift_table->table()[previous_pos]) {
         calculation_state_->SetPos(next_pos);
-        if (FindFirstMoveRec(visited_array_index, nfa, transition.target(), move, last_block_started)) {
+        if (FindFirstMoveRec(visited_array_index, nfa, transition.target(), move, -1)) {
           calculation_state_->SetPos(previous_pos);
           return true;
         }
@@ -271,7 +271,7 @@ bool SearchContext::FindFirstMoveRec(std::size_t visited_array_index,
         }
       } else
         rec_result = FindFirstMoveRec(visited_array_index, nfa,
-                                      transition.target(), move, last_block_started);
+                                      transition.target(), move, -1);
     }
     transition.letter()->Revert(calculation_state_, result);
     if (rec_result)
@@ -377,7 +377,7 @@ bool SearchContext::ApplyFirstRandomMoveRec(std::size_t visited_array_index,
       std::random_shuffle(order_table.begin(), order_table.end());
       for (uint j = 0; j < order_table.size(); j++) {
         calculation_state_->SetPos(shift_table->table()[previous_pos][order_table[j]]);
-        if (ApplyFirstRandomMoveRec(visited_array_index, nfa, transition.target(), depth, last_block_started))
+        if (ApplyFirstRandomMoveRec(visited_array_index, nfa, transition.target(), depth, -1))
           return true;
       }
       calculation_state_->SetPos(previous_pos);
@@ -406,7 +406,7 @@ bool SearchContext::ApplyFirstRandomMoveRec(std::size_t visited_array_index,
           return true;
       } else {
         if (ApplyFirstRandomMoveRec(visited_array_index, nfa,
-                              transition.target(), depth, last_block_started))
+                              transition.target(), depth, -1))
           return true;
         }
     }
@@ -440,7 +440,7 @@ PerftResult SearchContext::FastPerft(std::size_t visited_array_index, const fsm:
       for(auto next_pos : shift_table->table()[previous_pos])
       {
         calculation_state_->SetPos(next_pos);
-        auto rec_result = FastPerft(visited_array_index, nfa, transition.target(), depth,last_block_started , perft_depth);
+        auto rec_result = FastPerft(visited_array_index, nfa, transition.target(), depth,-1 , perft_depth);
         node_count += rec_result.node_count;
         leaf_count += rec_result.leaf_count;
       }
@@ -468,12 +468,12 @@ PerftResult SearchContext::FastPerft(std::size_t visited_array_index, const fsm:
           }
         }
         else {
-          auto rec_result = FastPerft(visited_array_index, nfa, transition.target(), new_depth, last_block_started, perft_depth);
+          auto rec_result = FastPerft(visited_array_index, nfa, transition.target(), new_depth, transition.letter()->index(), perft_depth);
           node_count += rec_result.node_count;
           leaf_count += rec_result.leaf_count;
         }
       } else {
-        auto rec_result = FastPerft(visited_array_index, nfa, transition.target(), depth, last_block_started, perft_depth);
+        auto rec_result = FastPerft(visited_array_index, nfa, transition.target(), depth, -1, perft_depth);
         node_count += rec_result.node_count;
         leaf_count += rec_result.leaf_count;
       }

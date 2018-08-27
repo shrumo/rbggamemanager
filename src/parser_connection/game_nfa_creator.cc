@@ -8,6 +8,34 @@
 
 extern unsigned int kShiftTableClearLength;
 
+class IsModifierFn : public rbg_parser::abstract_dispatcher {
+public:
+  void dispatch(const rbg_parser::sum&) override { result_ = false; }
+  void dispatch(const rbg_parser::concatenation&) override { result_ = false; }
+  void dispatch(const rbg_parser::star_move&) override { result_ = false; }
+  void dispatch(const rbg_parser::shift&) override { result_ = false; }
+  void dispatch(const rbg_parser::ons&) override { result_ = false; }
+  void dispatch(const rbg_parser::off&) override { result_ = false; }
+  void dispatch(const rbg_parser::assignment&) override { result_ = false; }
+  void dispatch(const rbg_parser::player_switch&) override { result_ = false; }
+  void dispatch(const rbg_parser::keeper_switch&) override { result_ = false; }
+  void dispatch(const rbg_parser::move_check&) override { result_ = false; }
+  void dispatch(const rbg_parser::arithmetic_comparison&) override { result_ = false; }
+  void dispatch(const rbg_parser::integer_arithmetic&) override { result_ = false; }
+  void dispatch(const rbg_parser::variable_arithmetic&) override { result_ = false; }
+  void dispatch(const rbg_parser::arithmetic_operation&) override { result_ = false; }
+  bool result() const {return result_;}
+private:
+  bool result_;
+};
+
+bool IsModifier(const rbg_parser::game_move& m)
+{
+  IsModifierFn fn;
+  m.accept(fn);
+  return fn.result();
+}
+
 class ShiftTableCreator : public rbg_parser::abstract_dispatcher{
 public:
   explicit ShiftTableCreator(const NameResolver& resolver, const GraphBoard& board, const EdgeResolver& edge_resolver)
@@ -373,7 +401,11 @@ void GameNfaCreator::dispatch(const rbg_parser::concatenation &move) {
     concat_table_pos++;
   }
   else {
+    if(!IsModifier(*move.get_content()[concat_pos]))
+      StopBlock();
     move.get_content()[concat_pos]->accept(*this);
+    if(IsModifier(*move.get_content()[concat_pos]))
+      StartBlock();
     initial = nfa_result_->initial();
     concat_pos++;
     concat_table_pos++;
@@ -409,7 +441,16 @@ void GameNfaCreator::dispatch(const rbg_parser::concatenation &move) {
       concat_table_pos++;
     }
     else {
+      if(!IsModifier(*child))
+        StopBlock();
       child->accept(*this);
+
+      if(IsModifier(*child))
+        StartBlock();
+//      if((*nfa_result_)[nfa_result_->StateCount()-2].transitions().front().letter()->IsModifier())
+//        StartBlock();
+//      else
+//        StopBlock();
 
       while(concat_table_pos < creator.concat_begins().size() && concat_pos + 1 >= creator.concat_begins()[concat_table_pos])
       {

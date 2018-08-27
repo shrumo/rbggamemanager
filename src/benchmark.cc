@@ -288,13 +288,17 @@ void perft_benchmark(const rbg_parser::parsed_game &pg, size_t depth) {
 
 void fast_perft_benchmark(const rbg_parser::parsed_game &pg, size_t depth) {
   GameDescription gd = CreateDescription(pg);
-  auto begin = std::chrono::system_clock::now();
   SearchContext context;
+  {
+    GameState state(gd);
+    state.FindMovesDeep(&context, depth + 1);
+  }
+  auto begin = std::chrono::system_clock::now();
   GameState state(gd);
   auto result = state.FindMovesDeep(&context, depth + 1);
   auto end = std::chrono::system_clock::now();
   auto duration = std::chrono::duration<double>(end - begin).count();
-  std::cout << "Calculated perft for depth " << depth << " in "
+  std::cout << "Calculated fast perft for depth " << depth << " in "
             << std::fixed << std::showpoint
             << duration
             << "s" << std::endl;
@@ -375,6 +379,7 @@ int main(int argc, const char *argv[]) {
   if (vm.count("depth")) {
     size_t depth = vm["depth"].as<uint>();
     perft_benchmark(*pg, depth);
+    fast_perft_benchmark(*pg, depth);
   } else {
     size_t iterations = 1;
     if (vm.count("number"))
