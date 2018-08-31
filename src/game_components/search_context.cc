@@ -443,6 +443,12 @@ PerftResult SearchContext::FastPerft(std::size_t visited_array_index, const fsm:
         auto rec_result = FastPerft(visited_array_index, nfa, transition.target(), depth,-1 , perft_depth);
         node_count += rec_result.node_count;
         leaf_count += rec_result.leaf_count;
+	if(calculation_state_->player() == calculation_state_->description().keeper_player_id() && 
+			(node_count > 0 || leaf_count > 0))
+        {
+	  calculation_state_->SetPos(previous_pos);
+          return {leaf_count, node_count};
+        }
       }
       calculation_state_->SetPos(previous_pos);
       continue;
@@ -456,7 +462,7 @@ PerftResult SearchContext::FastPerft(std::size_t visited_array_index, const fsm:
           CreateVisitedLayers(visited_array_index, depth + 1);
         }
         if (transition.letter()->IsSwitch()) {
-          node_count +=  static_cast<size_t>(result.revert_player() != calculation_state_->description().keeper_player_id());
+          node_count +=  static_cast<size_t>(calculation_state_->player() != calculation_state_->description().keeper_player_id());
           size_t next_perft = calculation_state_->player() == calculation_state_->description().keeper_player_id() ? perft_depth : perft_depth - 1;
           if (next_perft > 0) {
             auto rec_result = FastPerft(visited_array_index, nfa, transition.target(), new_depth, transition.letter()->index(), next_perft);
@@ -499,6 +505,6 @@ PerftResult SearchContext::FindMovesDeep(GameState *state, size_t perft_depth, s
                   state->nfa_state(), 0, false, perft_depth);
   DumpVisited(visited_index);
   calculation_state_ = nullptr;
-  return {perft.leaf_count, perft.node_count+1};
+  return {perft.leaf_count, perft.node_count};
 }
 
