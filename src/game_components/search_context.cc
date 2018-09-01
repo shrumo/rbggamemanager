@@ -490,7 +490,6 @@ PerftResult SearchContext::FastPerft(std::size_t visited_array_index, const fsm:
   return {leaf_count, node_count};
 }
 
-
 std::pair<bool,PerftResult> SearchContext::FastPerftKeeper(std::size_t visited_array_index, const fsm::Nfa<const Action *> &nfa,
                                 fsm::state_id_t current_state, size_t depth, ssize_t last_block_started, size_t perft_depth) {
   const uint index = VisitedIndex(nfa, current_state);
@@ -582,10 +581,18 @@ PerftResult SearchContext::FindMovesDeep(GameState *state, size_t perft_depth, s
   size_t visited_index = NewVisited(
       state->description().moves_description().nfa());
   Move empty;
-  auto perft = FastPerft(visited_index, state->description().moves_description().nfa(),
-                  state->nfa_state(), 0, false, perft_depth);
-  DumpVisited(visited_index);
-  calculation_state_ = nullptr;
-  return {perft.leaf_count, perft.node_count};
+  if (calculation_state_->player() ==  calculation_state_->description().keeper_player_id()) {
+      auto perft = FastPerftKeeper(visited_index, state->description().moves_description().nfa(),
+                       state->nfa_state(), 0, false, perft_depth);
+      DumpVisited(visited_index);
+      calculation_state_ = nullptr;
+      return {perft.second.leaf_count, perft.second.node_count};
+  } else {
+      auto perft = FastPerft(visited_index, state->description().moves_description().nfa(),
+                       state->nfa_state(), 0, false, perft_depth);
+      DumpVisited(visited_index);
+      calculation_state_ = nullptr;
+      return {perft.leaf_count, perft.node_count+1};
+  }
 }
 

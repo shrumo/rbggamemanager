@@ -184,8 +184,6 @@ void random_play_benchmark_fast(const rbg_parser::parsed_game &pg, const uint it
   SearchContext context;
   GameState initial_state(gd);
   while (initial_state.player() == initial_state.description().keeper_player_id()) {
-    //auto moves = initial_state.FindFirstMove(&context);
-    //initial_state.MakeMove(moves[0]);
     if (!initial_state.ApplyFirstMove(&context)) break;
   }
   std::vector<Move> moves;
@@ -289,13 +287,12 @@ void perft_benchmark(const rbg_parser::parsed_game &pg, size_t depth) {
 void fast_perft_benchmark(const rbg_parser::parsed_game &pg, size_t depth) {
   GameDescription gd = CreateDescription(pg);
   SearchContext context;
-  {
-    GameState state(gd);
-    state.FindMovesDeep(&context, depth + 1);
+  GameState initial_state(gd);
+  while (initial_state.player() == initial_state.description().keeper_player_id()) {
+    if (!initial_state.ApplyFirstMove(&context)) break;
   }
   auto begin = std::chrono::system_clock::now();
-  GameState state(gd);
-  auto result = state.FindMovesDeep(&context, depth + 1);
+  auto result = initial_state.FindMovesDeep(&context, depth);
   auto end = std::chrono::system_clock::now();
   auto duration = std::chrono::duration<double>(end - begin).count();
   std::cout << "Calculated fast perft for depth " << depth << " in "
@@ -378,7 +375,7 @@ int main(int argc, const char *argv[]) {
 
   if (vm.count("depth")) {
     size_t depth = vm["depth"].as<uint>();
-    perft_benchmark(*pg, depth);
+    //perft_benchmark(*pg, depth);
     fast_perft_benchmark(*pg, depth);
   } else {
     size_t iterations = 1;
