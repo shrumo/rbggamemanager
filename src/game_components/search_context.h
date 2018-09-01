@@ -79,6 +79,13 @@ private:
                    fsm::state_id_t current_state, size_t depth,
                         ssize_t last_block_started=-1, size_t depth_result = 3);
 
+  std::pair<bool, PerftResult> FastPerftKeeper(std::size_t visited_array_index,
+                   const fsm::Nfa<const Action *> &nfa,
+                   fsm::state_id_t current_state, size_t depth,
+                        ssize_t last_block_started=-1, size_t depth_result = 3);
+
+
+
   void FindAllMovesRec(std::size_t visited_array_index,
                        const fsm::Nfa<const Action *> &nfa,
                        fsm::state_id_t current_state, Move *move,
