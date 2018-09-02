@@ -74,12 +74,12 @@ private:
   void
   CreateResultLayers(std::size_t results_array_index, std::size_t layer_depth);
 
-  PerftResult FastPerft(std::size_t visited_array_index,
+  void FastPerft(std::size_t visited_array_index,
                    const fsm::Nfa<const Action *> &nfa,
                    fsm::state_id_t current_state, size_t depth,
                         ssize_t last_block_started=-1, size_t depth_result = 3);
 
-  std::pair<bool, PerftResult> FastPerftKeeper(std::size_t visited_array_index,
+  bool FastPerftKeeper(std::size_t visited_array_index,
                    const fsm::Nfa<const Action *> &nfa,
                    fsm::state_id_t current_state, size_t depth,
                         ssize_t last_block_started=-1, size_t depth_result = 3);
@@ -116,6 +116,8 @@ private:
 
   std::vector<Move> *possible_moves_;
   ssize_t max_depth_;
+  size_t leaf_count_;
+  size_t node_count_;
 
   std::vector<std::vector<FastBitVector> > visited_;
 
