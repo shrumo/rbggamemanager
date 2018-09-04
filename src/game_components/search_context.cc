@@ -453,8 +453,10 @@ void SearchContext::FastPerft(std::size_t visited_array_index, const fsm::Nfa<co
         }
         if (transition.letter()->IsSwitch()) {
           if (calculation_state_->player() == calculation_state_->description().keeper_player_id()) {
-            if (!FastPerftKeeper(visited_array_index, nfa, transition.target(), new_depth, transition.letter()->index(), perft_depth))
+            if (!FastPerftKeeper(visited_array_index, nfa, transition.target(), new_depth, transition.letter()->index(), perft_depth)) {
               node_count_++;
+              if (perft_depth == 1) leaf_count_++;
+            }
           }
           else {
           node_count_++;
@@ -516,8 +518,10 @@ bool SearchContext::FastPerftKeeper(std::size_t visited_array_index, const fsm::
         if (transition.letter()->IsSwitch()) {
           found = true;
           if (calculation_state_->player() == calculation_state_->description().keeper_player_id()) {
-            if (!FastPerftKeeper(visited_array_index, nfa, transition.target(), new_depth, transition.letter()->index(), perft_depth))
+            if (!FastPerftKeeper(visited_array_index, nfa, transition.target(), new_depth, transition.letter()->index(), perft_depth)) {
               node_count_++;
+              if (perft_depth == 1) leaf_count_++;
+            }
           }
           else {
           node_count_++;
