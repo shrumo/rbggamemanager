@@ -5,21 +5,12 @@
 #ifndef RBGGAMEMANAGER_GAME_NFA_CREATOR_H
 #define RBGGAMEMANAGER_GAME_NFA_CREATOR_H
 
-#include "../../rbgParser/src/sum.hpp"
-#include "prioritized_sum.hpp"
-#include "../../rbgParser/src/concatenation.hpp"
-#include "../../rbgParser/src/shift.hpp"
-#include "../../rbgParser/src/ons.hpp"
-#include "../../rbgParser/src/offs.hpp"
-#include "../../rbgParser/src/assignments.hpp"
-#include "../../rbgParser/src/switch.hpp"
-#include "../../rbgParser/src/star_move.hpp"
-#include "../../rbgParser/src/move_check.hpp"
 #include "../actions/action.h"
 #include "../game_nfa/game_moves_description.h"
 #include "parser_wrapper.h"
+#include "parser_actions.h"
 
-// This structure alows the nfa creator to safe its current state information.
+// This structure allows the nfa creator to safe its current state information.
 struct RecoverInformation {
   std::unique_ptr<fsm::Nfa<const Action *>> nfa_result;
   bool register_modifiers;
@@ -53,34 +44,17 @@ public:
               token_id_t piece_id_threshold, const EdgeResolver &edge_resolver, const GraphBoard &board);
 
   void dispatch(const rbg_parser::sum &) override;
-
   void dispatch(const rbg_parser::prioritized_sum &) override;
-
   void dispatch(const rbg_parser::concatenation &) override;
-
   void dispatch(const rbg_parser::star_move &) override;
-
   void dispatch(const rbg_parser::shift &) override;
-
   void dispatch(const rbg_parser::ons &) override;
-
   void dispatch(const rbg_parser::off &) override;
-
   void dispatch(const rbg_parser::assignment &) override;
-
   void dispatch(const rbg_parser::player_switch &) override;
-
   void dispatch(const rbg_parser::keeper_switch &) override;
-
   void dispatch(const rbg_parser::arithmetic_comparison &comparison) override;
-
   void dispatch(const rbg_parser::move_check &check) override;
-
-  void dispatch(const rbg_parser::integer_arithmetic &) override {}
-
-  void dispatch(const rbg_parser::variable_arithmetic &) override {}
-
-  void dispatch(const rbg_parser::arithmetic_operation &) override {}
 
 private:
   void RegisterModifier(fsm::state_id_t initial_id);

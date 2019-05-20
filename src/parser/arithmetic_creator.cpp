@@ -25,6 +25,13 @@ private:
   std::unique_ptr<ArithmeticOperation> operation_;
 };
 
+std::unique_ptr<ArithmeticOperation>
+CreateOperation(const rbg_parser::arithmetic_expression &expression, const NameResolver &resolver) {
+  ArithmeticCreator creator(resolver);
+  expression.accept(creator);
+  return creator.ExtractOperation();
+}
+
 void ArithmeticCreator::dispatch(const rbg_parser::integer_arithmetic &arithmetic) {
   operation_ = std::unique_ptr<ArithmeticOperation>(new arithmetic_operations::Constant(arithmetic.get_content()));
 }
@@ -35,49 +42,24 @@ void ArithmeticCreator::dispatch(const rbg_parser::variable_arithmetic &arithmet
 }
 
 void ArithmeticCreator::dispatch(const rbg_parser::arithmetic_operation &arithmetic) {
+  std::vector<std::unique_ptr<ArithmeticOperation> > operations;
+  for (const auto &child : arithmetic.get_content()) {
+    operations.push_back(CreateOperation(*child, resolver_));
+  }
   switch(arithmetic.get_operation())
   {
-    case rbg_parser::addition: {
-      std::vector<std::unique_ptr<ArithmeticOperation> > operations;
-      for (const auto &child : arithmetic.get_content()) {
-        child->accept(*this);
-        operations.push_back(ExtractOperation());
-      }
+    case rbg_parser::addition:
       operation_ = std::unique_ptr<ArithmeticOperation>(new arithmetic_operations::Sum(std::move(operations)));
-    }
       break;
-    case rbg_parser::subtraction: {
-      std::vector<std::unique_ptr<ArithmeticOperation> > operations;
-      for (const auto &child : arithmetic.get_content()) {
-        child->accept(*this);
-        operations.push_back(ExtractOperation());
-      }
+    case rbg_parser::subtraction:
       operation_ = std::unique_ptr<ArithmeticOperation>(new arithmetic_operations::Subtraction(std::move(operations)));
-    }
       break;
-    case rbg_parser::multiplication: {
-      std::vector<std::unique_ptr<ArithmeticOperation> > operations;
-      for (const auto &child : arithmetic.get_content()) {
-        child->accept(*this);
-        operations.push_back(ExtractOperation());
-      }
+    case rbg_parser::multiplication:
       operation_ = std::unique_ptr<ArithmeticOperation>(new arithmetic_operations::Product(std::move(operations)));
-    }
       break;
-    case rbg_parser::division: {
-      std::vector<std::unique_ptr<ArithmeticOperation> > operations;
-      for (const auto &child : arithmetic.get_content()) {
-        child->accept(*this);
-        operations.push_back(ExtractOperation());
-      }
+    case rbg_parser::division:
       operation_ = std::unique_ptr<ArithmeticOperation>(new arithmetic_operations::Division(std::move(operations)));
-    }
       break;
   }
 }
 
-std::unique_ptr<ArithmeticOperation> CreateOperation(const rbg_parser::arithmetic_expression &expression, const NameResolver& resolver) {
-  ArithmeticCreator creator(resolver);
-  expression.accept(creator);
-  return creator.ExtractOperation();
-}

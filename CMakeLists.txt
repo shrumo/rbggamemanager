@@ -18,10 +18,10 @@ find_package(Threads)
 # see https://cmake.org/cmake/help/latest/module/FindBoost.html
 find_package(Boost REQUIRED COMPONENTS system program_options)
 include_directories(${Boost_INCLUDE_DIR})
-include_directories(rbgParser/src)
+include_directories(rbgParser/../)
 
 set(PLAYING_FILES ${PLAYING_FILES} src/game_nfa/automaton.h src/game_components/name_resolver.h src/actions/action.cc src/actions/action.h src/game_components/game_description.h src/game_nfa/game_moves_description.h src/game_components/game_state.cc src/game_components/game_state.h src/actions/arithmetic_operation.cc src/actions/arithmetic_operation.h src/parser/game_nfa_creator.cc src/parser/game_nfa_creator.h src/parser/parser_connection.cc src/parser/parser_connection.h src/game_components/search_context.cc src/game_components/search_context.h src/utils/fast_bit_vector.h src/utils/utilities.h src/actions/action_application.h src/actions/action_types.h src/game_components/move.h
-        src/parser/arithmetic_creator.cpp src/parser/arithmetic_creator.h src/game_components/graph_board.h src/utils/global_config.cpp src/parser/parser_wrapper.h)
+        src/parser/arithmetic_creator.cpp src/parser/arithmetic_creator.h src/game_components/graph_board.h src/utils/global_config.cpp src/parser/parser_wrapper.h src/parser/parser_utils.cpp src/parser/parser_utils.h src/parser/shift_table_creator.cpp src/parser/shift_table_creator.h src/parser/parser_actions.h)
 add_executable(benchmark ${PLAYING_FILES} src/benchmark.cc)
 target_link_libraries(benchmark rbgParser)
 target_link_libraries(benchmark ${Boost_LIBRARIES})

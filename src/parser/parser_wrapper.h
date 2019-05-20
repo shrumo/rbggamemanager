@@ -6,7 +6,7 @@
 #define RBGGAMEMANAGER_PARSER_WRAPPER_H
 
 
-#include <abstract_dispatcher.hpp>
+#include <rbgParser/src/abstract_dispatcher.hpp>
 
 class AstVisitor : public rbg_parser::abstract_dispatcher {
 public:
