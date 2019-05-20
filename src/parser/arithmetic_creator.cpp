@@ -3,8 +3,9 @@
 //
 
 #include "arithmetic_creator.h"
+#include "parser_wrapper.h"
 
-class ArithmeticCreator : public rbg_parser::abstract_dispatcher{
+class ArithmeticCreator : public AstVisitor{
 public:
   explicit ArithmeticCreator(const NameResolver& resolver)
       : resolver_(resolver)
@@ -16,18 +17,6 @@ public:
     return std::move(operation_);
   }
 private:
-  void dispatch(const rbg_parser::sum &) override {}
-  void dispatch(const rbg_parser::prioritized_sum &) override {}
-  void dispatch(const rbg_parser::concatenation &) override {}
-  void dispatch(const rbg_parser::star_move&) override {}
-  void dispatch(const rbg_parser::shift &) override {}
-  void dispatch(const rbg_parser::ons &) override {}
-  void dispatch(const rbg_parser::off &) override {}
-  void dispatch(const rbg_parser::assignment &) override {}
-  void dispatch(const rbg_parser::player_switch &) override {}
-  void dispatch(const rbg_parser::keeper_switch&) override {}
-  void dispatch(const rbg_parser::arithmetic_comparison &) override {}
-  void dispatch(const rbg_parser::move_check &) override {}
   void dispatch(const rbg_parser::integer_arithmetic &arithmetic) override;
   void dispatch(const rbg_parser::variable_arithmetic &arithmetic) override;
   void dispatch(const rbg_parser::arithmetic_operation &arithmetic) override;

@@ -5,10 +5,11 @@
 #include <algorithm>
 #include "game_nfa_creator.h"
 #include "arithmetic_creator.h"
+#include "parser_wrapper.h"
 
 extern unsigned int kShiftTableClearLength;
 
-class IsModifierFn : public rbg_parser::abstract_dispatcher {
+class IsModifierFn : public AstVisitor {
 public:
   void dispatch(const rbg_parser::sum&) override { result_ = false; }
   void dispatch(const rbg_parser::prioritized_sum&) override { result_ = false; }
@@ -16,10 +17,10 @@ public:
   void dispatch(const rbg_parser::star_move&) override { result_ = false; }
   void dispatch(const rbg_parser::shift&) override { result_ = false; }
   void dispatch(const rbg_parser::ons&) override { result_ = false; }
-  void dispatch(const rbg_parser::off&) override { result_ = false; }
-  void dispatch(const rbg_parser::assignment&) override { result_ = false; }
-  void dispatch(const rbg_parser::player_switch&) override { result_ = false; }
-  void dispatch(const rbg_parser::keeper_switch&) override { result_ = false; }
+  void dispatch(const rbg_parser::off&) override { result_ = true; }
+  void dispatch(const rbg_parser::assignment&) override { result_ = true; }
+  void dispatch(const rbg_parser::player_switch&) override { result_ = true; }
+  void dispatch(const rbg_parser::keeper_switch&) override { result_ = true; }
   void dispatch(const rbg_parser::move_check&) override { result_ = false; }
   void dispatch(const rbg_parser::arithmetic_comparison&) override { result_ = false; }
   void dispatch(const rbg_parser::integer_arithmetic&) override { result_ = false; }
@@ -37,7 +38,7 @@ bool IsModifier(const rbg_parser::game_move& m)
   return fn.result();
 }
 
-class ShiftTableCreator : public rbg_parser::abstract_dispatcher{
+class ShiftTableCreator : public AstVisitor{
 public:
   explicit ShiftTableCreator(const NameResolver& resolver, const GraphBoard& board, const EdgeResolver& edge_resolver)
       : resolver_(resolver), board_(board), edge_resolver_(edge_resolver),

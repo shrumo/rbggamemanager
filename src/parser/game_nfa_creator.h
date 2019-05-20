@@ -17,6 +17,7 @@
 #include "../../rbgParser/src/move_check.hpp"
 #include "../actions/action.h"
 #include "../game_nfa/game_moves_description.h"
+#include "parser_wrapper.h"
 
 // This structure alows the nfa creator to safe its current state information.
 struct RecoverInformation {
@@ -34,7 +35,7 @@ struct RecoverInformation {
         last_final(last_final) {}
 };
 
-class GameNfaCreator : public rbg_parser::abstract_dispatcher {
+class GameNfaCreator : public AstVisitor {
 public:
   // This function extracts current nfa. Nfa can be extracted only once after creation.
   std::unique_ptr<fsm::Nfa<const Action *>> ExtractNfa() {
@@ -57,7 +58,7 @@ public:
 
   void dispatch(const rbg_parser::concatenation &) override;
 
-  void dispatch(const rbg_parser::star_move&) override;
+  void dispatch(const rbg_parser::star_move &) override;
 
   void dispatch(const rbg_parser::shift &) override;
 
@@ -69,7 +70,7 @@ public:
 
   void dispatch(const rbg_parser::player_switch &) override;
 
-  void dispatch(const rbg_parser::keeper_switch&) override;
+  void dispatch(const rbg_parser::keeper_switch &) override;
 
   void dispatch(const rbg_parser::arithmetic_comparison &comparison) override;
 
@@ -107,7 +108,7 @@ private:
   }
 
   GameNfaCreator(const NameResolver &resolver, token_id_t piece_id_threshold, const EdgeResolver &edge_resolver,
-                 const GraphBoard& board)
+                 const GraphBoard &board)
       : resolver_(resolver),
         edge_resolver_(edge_resolver),
         graph_board_(board),
@@ -117,8 +118,7 @@ private:
         reuse_final_as_initial_(false),
         last_final_(0),
         piece_id_threshold_(piece_id_threshold),
-        move_pattern_count_(0)
-  {
+        move_pattern_count_(0) {
     blocks_states_.push_back(0);
   }
 
