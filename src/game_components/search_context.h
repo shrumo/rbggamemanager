@@ -6,8 +6,8 @@
 #define RBGGAMEMANAGER_MOVES_INFORMATION_H
 
 #include <vector>
-#include "../game_nfa/automaton.h"
-#include "../utils/fast_bit_vector.h"
+#include <game_nfa/automaton.h>
+#include <utils/fast_bit_vector.h>
 #include <unordered_map>
 #include "move.h"
 

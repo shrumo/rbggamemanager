@@ -5,10 +5,10 @@
 #ifndef RBGGAMEMANAGER_PARSER_CONNECTION_H
 #define RBGGAMEMANAGER_PARSER_CONNECTION_H
 
-#include "../../rbgParser/src/graph.hpp"
-#include "../../rbgParser/src/declarations.hpp"
-#include "../../rbgParser/src/game_move.hpp"
-#include "../../rbgParser/src/parsed_game.hpp"
+#include <rbgParser/src/graph.hpp>
+#include <rbgParser/src/declarations.hpp>
+#include <rbgParser/src/game_move.hpp>
+#include <rbgParser/src/parsed_game.hpp>
 
 class Board;
 class NameResolver;

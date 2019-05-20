@@ -9,7 +9,7 @@
 #include <string>
 #include <cstring>
 #include "networking_utils.h"
-#include "../game_components/search_context.h"
+#include <game_components/search_context.h>
 
 constexpr std::size_t kHeaderLength = 16;
 constexpr std::size_t kMaxBodyLength = 65536;

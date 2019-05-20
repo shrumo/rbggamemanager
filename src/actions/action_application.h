@@ -5,8 +5,8 @@
 #ifndef RBGGAMEMANAGER_ACTION_APPLICATION_H
 #define RBGGAMEMANAGER_ACTION_APPLICATION_H
 
-#include "../game_components/name_resolver.h"
-#include "../game_components/graph_board.h"
+#include <game_components/name_resolver.h>
+#include <game_components/graph_board.h>
 
 class Action;
 

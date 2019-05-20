@@ -3,7 +3,7 @@
 //
 
 #include "arithmetic_operation.h"
-#include "../game_components/game_state.h"
+#include <game_components/game_state.h>
 
 int arithmetic_operations::Variable::Value(GameState *b) const {
   return b->Value(variable_);

@@ -4,8 +4,8 @@
 
 #include <queue>
 #include "parser_connection.h"
-#include "../game_components/game_description.h"
-#include "../game_components/graph_board.h"
+#include <game_components/game_description.h>
+#include <game_components/graph_board.h>
 #include "game_nfa_creator.h"
 
 EdgeResolver CreateEdgeNamesResolver(const rbg_parser::graph &parsed_graph_board)

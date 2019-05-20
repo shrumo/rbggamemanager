@@ -3,7 +3,7 @@
 //
 
 #include "action.h"
-#include "../game_components/game_state.h"
+#include <game_components/game_state.h>
 
 ActionResult actions::Shift::Apply(GameState *b) const {
   vertex_t previous_pos = b->current_pos_;

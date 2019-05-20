@@ -8,7 +8,7 @@
 
 #include <boost/asio.hpp>
 #include <iostream>
-#include "../game_components/search_context.h"
+#include <game_components/search_context.h>
 #include "message.h"
 
 using boost::asio::ip::tcp;

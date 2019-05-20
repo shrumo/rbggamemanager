@@ -8,9 +8,9 @@
 
 #include <limits>
 #include "name_resolver.h"
-#include "../game_nfa/automaton.h"
-#include "../game_nfa/game_moves_description.h"
-#include "../../rbgParser/src/parsed_game.hpp"
+#include <game_nfa/automaton.h>
+#include <game_nfa/game_moves_description.h>
+#include <rbgParser/src/parsed_game.hpp>
 #include "graph_board.h"
 
 // Declarations keep track of declared token ids.

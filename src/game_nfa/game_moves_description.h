@@ -7,7 +7,7 @@
 
 #include <memory>
 #include "automaton.h"
-#include "../actions/action.h"
+#include <actions/action.h>
 
 class GameMovesDescription {
 public:

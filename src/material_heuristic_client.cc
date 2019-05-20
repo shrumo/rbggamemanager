@@ -7,7 +7,7 @@
 #include <iomanip>
 
 #include "networking/client.h"
-#include "../rbgParser/src/game_items.hpp"
+#include <rbgParser/src/game_items.hpp>
 #include "game_components/game_description.h"
 #include "parser/parser_connection.h"
 #include "game_components/game_state.h"

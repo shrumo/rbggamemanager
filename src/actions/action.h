@@ -9,12 +9,12 @@
 #include <memory>
 #include <iostream>
 
-#include "../game_components/name_resolver.h"
+#include <game_components/name_resolver.h>
 #include "action_types.h"
 #include "action_application.h"
-#include "../game_nfa/automaton.h"
+#include <game_nfa/automaton.h>
 #include "arithmetic_operation.h"
-#include "../game_components/graph_board.h"
+#include <game_components/graph_board.h>
 
 class GameState;
 

@@ -15,7 +15,7 @@
 #include <string>
 #include <vector>
 
-#include"../rbgParser/src/game_items.hpp"
+#include <rbgParser/src/game_items.hpp>
 
 #include "parser/parser_connection.h"
 

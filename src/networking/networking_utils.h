@@ -7,8 +7,8 @@
 
 #include <string>
 #include <sstream>
-#include "../game_components/search_context.h"
-#include "../game_components/name_resolver.h"
+#include <game_components/search_context.h>
+#include <game_components/name_resolver.h>
 
 class Message;
 

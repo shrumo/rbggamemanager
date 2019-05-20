@@ -12,9 +12,9 @@
 #include <string>
 #include <vector>
 
-#include "../rbgParser/src/message.hpp"
-#include "../rbgParser/src/parsed_game.hpp"
-#include "../rbgParser/src/game_items.hpp"
+#include <rbgParser/src/message.hpp>
+#include <rbgParser/src/parsed_game.hpp>
+#include <rbgParser/src/game_items.hpp>
 #include "game_components/game_description.h"
 #include "networking/server.h"
 

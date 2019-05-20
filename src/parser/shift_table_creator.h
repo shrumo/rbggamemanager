@@ -8,8 +8,8 @@
 #include <unordered_set>
 #include "parser_wrapper.h"
 #include "parser_actions.h"
-#include "../game_components/name_resolver.h"
-#include "../game_components/graph_board.h"
+#include <game_components/name_resolver.h>
+#include <game_components/graph_board.h>
 
 class ShiftTableCreator : public AstVisitor {
 public:

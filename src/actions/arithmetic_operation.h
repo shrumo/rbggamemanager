@@ -6,7 +6,7 @@
 #define RBGGAMEMANAGER_ARITHMETIC_OPERATION_H
 
 #include <bits/unique_ptr.h>
-#include "../game_components/name_resolver.h"
+#include <game_components/name_resolver.h>
 #include "action_types.h"
 
 class GameState;
