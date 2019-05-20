@@ -11,17 +11,11 @@
 #include "../../rbgParser/src/parsed_game.hpp"
 
 class Board;
-
 class NameResolver;
-
 class GameMovesDescription;
-
 class GameDescription;
-
 class Declarations;
-
 class GraphBoard;
-
 class EdgeResolver;
 
 NameResolver CreateResolver(const rbg_parser::declarations &declarations);

@@ -17,7 +17,7 @@
 
 #include"../rbgParser/src/game_items.hpp"
 
-#include "parser_connection/parser_connection.h"
+#include "parser/parser_connection.h"
 
 #include "boost/program_options.hpp"
 
@@ -204,7 +204,7 @@ void random_play_benchmark_fast(const rbg_parser::parsed_game &pg, const uint it
         state_turns++;
         state.FindMoves(&context, &moves);
       }
-      if (moves.size() == 0) break;
+      if (moves.empty()) break;
       moves_count += moves.size();
       state.MakeMove(moves[rand() % moves.size()]);
       moves.clear();

@@ -11,6 +11,7 @@ extern unsigned int kShiftTableClearLength;
 class IsModifierFn : public rbg_parser::abstract_dispatcher {
 public:
   void dispatch(const rbg_parser::sum&) override { result_ = false; }
+  void dispatch(const rbg_parser::prioritized_sum&) override { result_ = false; }
   void dispatch(const rbg_parser::concatenation&) override { result_ = false; }
   void dispatch(const rbg_parser::star_move&) override { result_ = false; }
   void dispatch(const rbg_parser::shift&) override { result_ = false; }
@@ -26,7 +27,7 @@ public:
   void dispatch(const rbg_parser::arithmetic_operation&) override { result_ = false; }
   bool result() const {return result_;}
 private:
-  bool result_;
+  bool result_ = false;
 };
 
 bool IsModifier(const rbg_parser::game_move& m)
@@ -86,6 +87,10 @@ public:
   }
 
 private:
+  void dispatch(const rbg_parser::prioritized_sum &) override {
+    throw std::logic_error{"Function not yet implemented."};
+  }
+
   void dispatch(const rbg_parser::sum &sum) override {
     unsigned int result_clear_length = 0;
     std::vector < std::unordered_set< vertex_t > > tmp_result = std::vector<std::unordered_set<vertex_t> >(board_.size());
@@ -729,4 +734,8 @@ void GameNfaCreator::dispatch(const rbg_parser::arithmetic_comparison &compariso
   nfa_result_->set_final(final_id);
 
   last_final_ = final_id;
+}
+
+void GameNfaCreator::dispatch(const rbg_parser::prioritized_sum &) {
+  throw std::logic_error{"Function not yet implemented."};
 }

@@ -6,6 +6,7 @@
 #define RBGGAMEMANAGER_GAME_NFA_CREATOR_H
 
 #include "../../rbgParser/src/sum.hpp"
+#include "prioritized_sum.hpp"
 #include "../../rbgParser/src/concatenation.hpp"
 #include "../../rbgParser/src/shift.hpp"
 #include "../../rbgParser/src/ons.hpp"
@@ -50,8 +51,9 @@ public:
   CreateMoves(const rbg_parser::game_move &move, const NameResolver &resolver,
               token_id_t piece_id_threshold, const EdgeResolver &edge_resolver, const GraphBoard &board);
 
-
   void dispatch(const rbg_parser::sum &) override;
+
+  void dispatch(const rbg_parser::prioritized_sum &) override;
 
   void dispatch(const rbg_parser::concatenation &) override;
 

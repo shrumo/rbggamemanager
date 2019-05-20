@@ -13,7 +13,7 @@
 #include "../game_components/game_description.h"
 #include "../game_components/game_state.h"
 #include "../../rbgParser/src/game_items.hpp"
-#include "../parser_connection/parser_connection.h"
+#include "../parser/parser_connection.h"
 
 using boost::asio::ip::tcp;
 
