@@ -5,46 +5,39 @@
 #include "parser_utils.h"
 #include "parser_wrapper.h"
 
-class IsModifierVisitor : public AstVisitor {
+class IsModifierVisitor : public AstVisitorR<bool> {
 public:
-  void dispatch(const rbg_parser::sum &) override { result_ = false; }
+  bool visit(const rbg_parser::sum &) override { return false; }
 
-  void dispatch(const rbg_parser::prioritized_sum &) override { result_ = false; }
+  bool visit(const rbg_parser::prioritized_sum &) override { return false; }
 
-  void dispatch(const rbg_parser::concatenation &) override { result_ = false; }
+  bool visit(const rbg_parser::concatenation &) override { return false; }
 
-  void dispatch(const rbg_parser::star_move &) override { result_ = false; }
+  bool visit(const rbg_parser::star_move &) override { return false; }
 
-  void dispatch(const rbg_parser::shift &) override { result_ = false; }
+  bool visit(const rbg_parser::shift &) override { return false; }
 
-  void dispatch(const rbg_parser::ons &) override { result_ = false; }
+  bool visit(const rbg_parser::ons &) override { return false; }
 
-  void dispatch(const rbg_parser::off &) override { result_ = true; }
+  bool visit(const rbg_parser::off &) override { return true; }
 
-  void dispatch(const rbg_parser::assignment &) override { result_ = true; }
+  bool visit(const rbg_parser::assignment &) override { return true; }
 
-  void dispatch(const rbg_parser::player_switch &) override { result_ = true; }
+  bool visit(const rbg_parser::player_switch &) override { return true; }
 
-  void dispatch(const rbg_parser::keeper_switch &) override { result_ = true; }
+  bool visit(const rbg_parser::keeper_switch &) override { return true; }
 
-  void dispatch(const rbg_parser::move_check &) override { result_ = false; }
+  bool visit(const rbg_parser::move_check &) override { return false; }
 
-  void dispatch(const rbg_parser::arithmetic_comparison &) override { result_ = false; }
+  bool visit(const rbg_parser::arithmetic_comparison &) override { return false; }
 
-  void dispatch(const rbg_parser::integer_arithmetic &) override { result_ = false; }
+  bool visit(const rbg_parser::integer_arithmetic &) override { return false; }
 
-  void dispatch(const rbg_parser::variable_arithmetic &) override { result_ = false; }
+  bool visit(const rbg_parser::variable_arithmetic &) override { return false; }
 
-  void dispatch(const rbg_parser::arithmetic_operation &) override { result_ = false; }
-
-  bool result() const { return result_; }
-
-private:
-  bool result_ = false;
+  bool visit(const rbg_parser::arithmetic_operation &) override { return false; }
 };
 
 bool IsModifier(const rbg_parser::game_move &m) {
-  IsModifierVisitor fn;
-  m.accept(fn);
-  return fn.result();
+  return Fn<IsModifierVisitor, bool>(m);
 }
