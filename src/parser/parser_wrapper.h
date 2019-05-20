@@ -42,6 +42,50 @@ public:
   void dispatch(const rbg_parser::arithmetic_operation &) override {}
 };
 
+// This allows to write simple visitors on the tree.
+// Example:
+//  // Visitor that counts the number of nodes in the ast. Call by Fn<NodeCountVisitor,int>(move).
+//  class NodeCountVisitor : public AstVisitorR<int> {
+//  public:
+//    template<typename PointerToVisitableType>
+//    int ElementsNodeCountSum(const std::vector<PointerToVisitableType> &children)
+//    {
+//      int result = 0;
+//      for(const auto& child : children) {
+//        result += Fn<NodeCountVisitor, int>(*child);
+//      }
+//      return result;
+//    }
+//    int visit(const rbg_parser::sum &move) override {
+//      return ElementsNodeCountSum(move.get_content()) + 1;
+//    }
+//    int visit(const rbg_parser::prioritized_sum &move) override {
+//      return ElementsNodeCountSum(move.get_content()) + 1;
+//    }
+//    int visit(const rbg_parser::concatenation &move) override {
+//      return ElementsNodeCountSum(move.get_content()) + 1;
+//    }
+//    int visit(const rbg_parser::star_move &move) override {
+//      return Fn<NodeCountVisitor, int>(*move.get_content()) + 1;
+//    }
+//    int visit(const rbg_parser::shift &) override { return 1; }
+//    int visit(const rbg_parser::ons &) override { return 1; }
+//    int visit(const rbg_parser::off &) override { return 1; }
+//    int visit(const rbg_parser::assignment &) override { return 1; }
+//    int visit(const rbg_parser::player_switch &) override { return 1; }
+//    int visit(const rbg_parser::keeper_switch &) override { return 1; }
+//    int visit(const rbg_parser::move_check &move) override {
+//      return Fn<NodeCountVisitor, int>(*move.get_content()) + 1;
+//    }
+//    int visit(const rbg_parser::arithmetic_comparison &move) override {
+//      return
+//          ElementsNodeCountSum<const rbg_parser::arithmetic_expression *>({move.get_left_side(), move.get_right_side()}) + 1;
+//    }
+//    int visit(const rbg_parser::integer_arithmetic &) override { return 1; }
+//    int visit(const rbg_parser::variable_arithmetic &) override { return 1; }
+//    int visit(const rbg_parser::arithmetic_operation &move) override {
+//      return ElementsNodeCountSum(move.get_content()) + 1; }
+//  };
 template<typename ResultType>
 class AstVisitorR : public rbg_parser::abstract_dispatcher {
 public:
