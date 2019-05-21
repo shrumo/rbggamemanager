@@ -24,26 +24,49 @@ include_directories(${Boost_INCLUDE_DIR})
 include_directories(src)
 include_directories(.)
 
-file(GLOB PLAYING_FILES src/actions/* src/game_components/* src/game_nfa/* src/parser/* src/utils/*)
-file(GLOB NETWORKING_FILES src/networking/*)
+set(ACTIONS_FILES src/actions/action.cc src/actions/action.h src/actions/action_application.h src/actions/action_types.h
+        src/actions/arithmetic_operation.cc src/actions/arithmetic_operation.h)
 
-add_executable(benchmark ${PLAYING_FILES} src/benchmark.cc)
+set(GAME_FILES src/game_components/game_description.h src/game_components/game_state.cc src/game_components/game_state.h
+        src/game_components/graph_board.h src/game_components/move.h src/game_components/name_resolver.h src/game_components/search_context.cc
+        src/game_components/search_context.h)
+
+set(GRAPH_FILES src/game_nfa/automaton.h src/game_nfa/game_moves_description.h src/game_nfa/graph.cpp src/game_nfa/graph.h)
+
+set(NETWORKING_FILES src/networking/client.h src/networking/message.h src/networking/networking_utils.cc src/networking/networking_utils.h
+        src/networking/server.cc src/networking/server.h)
+
+set(PARSER_FILES src/parser/arithmetic_creator.cpp src/parser/arithmetic_creator.h src/parser/game_nfa_creator.cc src/parser/game_nfa_creator.h
+        src/parser/parser_actions.h src/parser/parser_connection.cc src/parser/parser_connection.h src/parser/parser_utils.cpp
+        src/parser/parser_utils.h src/parser/parser_wrapper.h src/parser/shift_table_creator.cpp src/parser/shift_table_creator.h)
+
+set(UTILS_FILES src/utils/fast_bit_vector.h src/utils/global_config.cpp src/utils/utilities.h)
+
+set(PLAYING_FILES ${ACTIONS_FILES} ${GAME_FILES} ${GRAPH_FILES} ${UTILS_FILES})
+
+add_executable(benchmark ${PLAYING_FILES} ${PARSER_FILES} src/benchmark.cc)
 target_link_libraries(benchmark rbgParser)
 target_link_libraries(benchmark ${Boost_LIBRARIES})
 target_link_libraries(benchmark ${CMAKE_THREAD_LIBS_INIT})
 
-add_executable(host ${PLAYING_FILES} ${NETWORKING_FILES} src/run_server.cc)
+add_executable(host ${PLAYING_FILES} ${PARSER_FILES} ${NETWORKING_FILES} src/run_server.cc)
 target_link_libraries(host rbgParser)
 target_link_libraries(host ${Boost_LIBRARIES})
 target_link_libraries(host ${CMAKE_THREAD_LIBS_INIT})
 
-add_executable(random_client ${PLAYING_FILES} ${NETWORKING_FILES} src/random_client.cc)
+add_executable(random_client ${PLAYING_FILES} ${PARSER_FILES} ${NETWORKING_FILES} src/random_client.cc)
 target_link_libraries(random_client rbgParser)
 target_link_libraries(random_client ${Boost_LIBRARIES})
 target_link_libraries(random_client ${CMAKE_THREAD_LIBS_INIT})
 
-add_executable(material_client ${PLAYING_FILES} ${NETWORKING_FILES} src/material_heuristic_client.cc)
+add_executable(material_client ${PLAYING_FILES} ${PARSER_FILES} ${NETWORKING_FILES} src/material_heuristic_client.cc)
 target_link_libraries(material_client rbgParser)
 target_link_libraries(material_client ${Boost_LIBRARIES})
 target_link_libraries(material_client ${CMAKE_THREAD_LIBS_INIT})
+
+add_executable(graph_test ${PLAYING_FILES} src/tests/graph_test.cpp)
+add_test(graph graph_test)
+enable_testing()
+
+
 
