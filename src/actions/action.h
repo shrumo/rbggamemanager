@@ -64,7 +64,7 @@ namespace actions {
   // Shift changes the current position on board.
   class Shift : public Action {
   public:
-    Shift(edge_name_t edge_name) : Action(ActionType::kShiftType), edge_name_(edge_name)
+    explicit Shift(edge_name_t edge_name) : Action(ActionType::kShiftType), edge_name_(edge_name)
                                 {}
 
     ActionResult Apply(GameState *b) const override;
@@ -83,14 +83,14 @@ namespace actions {
   public:
     explicit ShiftTable(std::vector<std::vector<vertex_t> > table) : Action(ActionType::kShiftTableType), table_(std::move(table))
     {
-        for (uint i = 0; i < table_.size(); i++) {
+      for (auto &row : table_) {
           std::vector<vertex_t> new_row;
-          new_row.reserve(table_[i].size());
-          for (uint j = 0; j < table_[i].size(); j++) {
-            if (table_[i][j] != -1) new_row.push_back(table_[i][j]);
+        new_row.reserve(row.size());
+        for (long element : row) {
+          if (element != -1) new_row.push_back(element);
           }
-          table_[i] = std::move(new_row);
-          table_[i].shrink_to_fit();
+        row = std::move(new_row);
+        row.shrink_to_fit();
         }
     }
 
