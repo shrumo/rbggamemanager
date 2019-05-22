@@ -31,7 +31,7 @@ set(GAME_FILES src/game_components/game_description.h src/game_components/game_s
         src/game_components/graph_board.h src/game_components/move.h src/game_components/name_resolver.h src/game_components/search_context.cc
         src/game_components/search_context.h)
 
-set(GRAPH_FILES src/game_nfa/automaton.h src/game_nfa/game_moves_description.h src/game_nfa/graph.cpp src/game_nfa/graph.h)
+set(GRAPH_FILES src/game_nfa/automaton.h src/game_nfa/game_moves_description.h src/game_nfa/graph.h)
 
 set(NETWORKING_FILES src/networking/client.h src/networking/message.h src/networking/networking_utils.cc src/networking/networking_utils.h
         src/networking/server.cc src/networking/server.h)
@@ -64,7 +64,7 @@ target_link_libraries(material_client rbgParser)
 target_link_libraries(material_client ${Boost_LIBRARIES})
 target_link_libraries(material_client ${CMAKE_THREAD_LIBS_INIT})
 
-add_executable(graph_test ${PLAYING_FILES} src/tests/graph_test.cpp)
+add_executable(graph_test ${GRAPH_FILES} src/tests/graph_test.cpp)
 add_test(graph graph_test)
 enable_testing()
 

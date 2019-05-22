@@ -9,33 +9,100 @@
 #include <vector>
 #include <unordered_map>
 #include <unordered_set>
-#include <actions/action.h>
+#include <ostream>
+#include <algorithm>
 
 namespace graph {
   using node_t = std::size_t;
   using edge_id_t = std::size_t;
 
+  template<typename EdgeContent>
   struct Transition {
     edge_id_t id;
-    node_t node;
-    const Action *action;
+    node_t to;
+    EdgeContent content;
   };
 
+  template<typename EdgeContent>
   class Graph {
   public:
     Graph() : next_node_(0), next_transition_id_(0) {}
 
-    node_t AddNode();
+    node_t AddNode() {
+      node_t node = next_node_;
+      next_node_++;
+      nodes_.insert(node);
+      edges_[node];
+      return node;
+    }
 
-    edge_id_t AddEdge(node_t from, const Action *action, node_t to);
+    edge_id_t AddEdge(node_t from, EdgeContent content, node_t to) {
+      if (nodes_.find(from) == nodes_.end()) {
+        throw std::logic_error("Node " + std::to_string(from) + " doesn't exist.");
+      }
+      if (nodes_.find(to) == nodes_.end()) {
+        throw std::logic_error("Node " + std::to_string(to) + " doesn't exist.");
+      }
+      edge_id_t transition_id = next_transition_id_;
+      next_transition_id_++;
+      edges_[transition_id].from = from;
+      edges_[transition_id].content = std::move(content);
+      edges_[transition_id].to = to;
+      out_edges_[from].insert(transition_id);
+      in_edges_[to].insert(transition_id);
+      return transition_id;
+    }
 
-    std::vector<Transition> Transitions(node_t node) const;
+    std::vector<Transition<EdgeContent>> Transitions(node_t node) const {
+      if (nodes_.find(node) == nodes_.end()) {
+        throw std::logic_error("Node " + std::to_string(node) + " doesn't exist.");
+      }
+      std::vector<Transition<EdgeContent>> result;
+      for (edge_id_t edge_id : out_edges_.at(node)) {
+        const Edge &edge = edges_.at(edge_id);
+        result.push_back(Transition<EdgeContent>{edge_id, edge.to, edge.content});
+      }
+      return result;
+    }
 
-    std::vector<Transition> InTransitions(node_t node) const;
 
-    void DeleteEdge(edge_id_t edge_id);
+    std::vector<Transition<EdgeContent>> InTransitions(node_t node) const {
+      if (nodes_.find(node) == nodes_.end()) {
+        throw std::logic_error("Node " + std::to_string(node) + " doesn't exist.");
+      }
+      std::vector<Transition<EdgeContent>> result;
+      for (edge_id_t edge_id : in_edges_.at(node)) {
+        const Edge &edge = edges_.at(edge_id);
+        result.push_back(Transition<EdgeContent>{edge_id, edge.from, edge.content});
+      }
+      return result;
+    }
 
-    void DeleteNode(node_t node);
+    void DeleteEdge(edge_id_t edge_id) {
+      if (edges_.find(edge_id) == edges_.end()) {
+        throw std::logic_error("Node " + std::to_string(edge_id) + " doesn't exist.");
+      }
+      {
+        const Edge &edge = edges_[edge_id];
+        out_edges_[edge.from].erase(edge_id);
+        in_edges_[edge.to].erase(edge_id);
+      }
+      edges_.erase(edge_id);
+    }
+
+    void DeleteNode(node_t node) {
+      if (nodes_.find(node) == nodes_.end()) {
+        throw std::logic_error("Node " + std::to_string(node) + " doesn't exist.");
+      }
+      std::unordered_set<edge_id_t> edges_to_delete;
+      edges_to_delete.insert(out_edges_[node].begin(), out_edges_[node].end());
+      edges_to_delete.insert(in_edges_[node].begin(), in_edges_[node].end());
+      for (edge_id_t edge_id : edges_to_delete) {
+        DeleteEdge(edge_id);
+      }
+      nodes_.erase(node);
+    }
+
 
     const std::unordered_set<node_t> &nodes() const {
       return nodes_;
@@ -44,7 +111,7 @@ namespace graph {
   private:
     struct Edge {
       node_t from;
-      const Action *action;
+      EdgeContent content;
       node_t to;
     };
     std::unordered_set<node_t> nodes_;
@@ -57,6 +124,24 @@ namespace graph {
   };
 }
 
-std::ostream &operator<<(std::ostream &o, const graph::Graph &g);
+template<typename EdgeContent>
+std::ostream &operator<<(std::ostream &o, const graph::Graph<EdgeContent> &g) {
+  std::vector<graph::node_t> nodes(g.nodes().begin(), g.nodes().end());
+  std::sort(nodes.begin(), nodes.end());
+  for (graph::node_t node : nodes) {
+    o << node << " -> ";
+    auto transitions = g.Transitions(node);
+    std::sort(transitions.begin(), transitions.end(),
+              [](const graph::Transition<EdgeContent> &a, const graph::Transition<EdgeContent> &b) {
+                return a.to < b.to;
+              });
+    for (const auto &transition : transitions) {
+      o << transition.to << " (edge id: " << transition.id << ", content: " << transition.content << "), ";
+    }
+    o << "\n";
+  }
+  return o;
+}
+
 
 #endif //RBGGAMEMANAGER_GRAPH_H

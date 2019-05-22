@@ -4,42 +4,43 @@
 
 #include <game_nfa/graph.h>
 #include <algorithm>
+#include <iostream>
 #include "test.h"
 
 using namespace graph;
 
-std::vector<node_t> SortedTransitions(const Graph &g, node_t node) {
+std::vector<node_t> SortedTransitions(const Graph<int> &g, node_t node) {
   auto transitions = g.Transitions(node);
   std::vector<node_t> result;
   result.reserve(transitions.size());
   for (const auto &t : transitions) {
-    result.push_back(t.node);
+    result.push_back(t.to);
   }
   std::sort(result.begin(), result.end());
   return result;
 }
 
-std::vector<node_t> SortedInTransitions(const Graph &g, node_t node) {
+std::vector<node_t> SortedInTransitions(const Graph<int> &g, node_t node) {
   auto transitions = g.InTransitions(node);
   std::vector<node_t> result;
   result.reserve(transitions.size());
   for (const auto &t : transitions) {
-    result.push_back(t.node);
+    result.push_back(t.to);
   }
   std::sort(result.begin(), result.end());
   return result;
 }
 
 int main() {
-  Graph g;
+  Graph<int> g;
   node_t v1 = g.AddNode();
   node_t v2 = g.AddNode();
   node_t v3 = g.AddNode();
 
-  g.AddEdge(v1, nullptr, v2);
-  g.AddEdge(v2, nullptr, v3);
-  g.AddEdge(v3, nullptr, v1);
-  g.AddEdge(v1, nullptr, v3);
+  g.AddEdge(v1, 0, v2);
+  g.AddEdge(v2, 1, v3);
+  g.AddEdge(v3, 2, v1);
+  g.AddEdge(v1, 3, v3);
 
   std::cout << g << std::endl;
 
@@ -48,7 +49,7 @@ int main() {
   ASSERT(SortedTransitions(g, v3) == std::vector<node_t>({v1}))
 
   node_t v4 = g.AddNode();
-  g.AddEdge(v4, nullptr, v1);
+  g.AddEdge(v4, 4, v1);
 
   ASSERT(g.nodes().size() == 4)
   ASSERT(SortedInTransitions(g, v1) == std::vector<node_t>({v3, v4}))
