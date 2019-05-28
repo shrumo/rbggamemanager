@@ -42,8 +42,6 @@ int main() {
   g.AddEdge(v3, 2, v1);
   g.AddEdge(v1, 3, v3);
 
-  std::cout << g << std::endl;
-
   ASSERT(g.nodes().size() == 3)
   ASSERT(SortedTransitions(g, v1) == std::vector<node_t>({v2, v3}))
   ASSERT(SortedTransitions(g, v3) == std::vector<node_t>({v1}))

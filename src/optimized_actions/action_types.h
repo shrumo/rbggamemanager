@@ -9,13 +9,9 @@ enum class ActionType {
   // Switches
       kSwitchType,
 
-  kSwitchesEndMarker,
-
   // Modifiers
       kOffType,
   kAssignmentType,
-
-  kModifiersEndMarker,
 
   // Others
       kEmptyType,
@@ -34,11 +30,11 @@ enum class ActionType {
 };
 
 constexpr bool IsSwitchType(ActionType type) {
-  return type < ActionType::kSwitchesEndMarker;
+  return type == ActionType::kSwitchType;
 }
 
 constexpr bool IsModifierType(ActionType type) {
-  return type < ActionType::kModifiersEndMarker;
+  return type == ActionType::kSwitchType || type == ActionType::kOffType || type == ActionType::kAssignmentType;
 }
 
 enum class ArithmeticOperationType : char {

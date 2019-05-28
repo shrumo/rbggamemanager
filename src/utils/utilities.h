@@ -5,7 +5,7 @@
 #ifndef RBGGAMEMANAGER_UTILITIES_H
 #define RBGGAMEMANAGER_UTILITIES_H
 
-#include "../actions/action.h"
+#include <optimized_actions/optimized_action.h>
 #include "../game_components/game_description.h"
 
 std::vector<const OptimizedAction *>

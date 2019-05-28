@@ -5,7 +5,7 @@
 #ifndef RBGGAMEMANAGER_GAME_NFA_CREATOR_H
 #define RBGGAMEMANAGER_GAME_NFA_CREATOR_H
 
-#include "../actions/action.h"
+#include <optimized_actions/optimized_action.h>
 #include "../game_nfa/game_moves_description.h"
 #include "parser_wrapper.h"
 #include "parser_actions.h"
