@@ -52,19 +52,19 @@ public:
   // Lazy controller is separated from main class
   friend class LazyEvaluator;
 
-  // Modifying actions
+  // Modifying optimized_actions
 
-  friend class actions::Shift;
+  friend class optimizedactions::Shift;
 
-  friend class actions::Off;
+  friend class optimizedactions::Off;
 
-  friend class actions::PlayerSwitch;
+  friend class optimizedactions::PlayerSwitch;
 
-  friend class actions::Assignment;
+  friend class optimizedactions::Assignment;
 
-  friend class actions::ConditionCheck;
+  friend class optimizedactions::ConditionCheck;
 
-  friend class actions::NegatedConditionCheck;
+  friend class optimizedactions::NegatedConditionCheck;
 
   // Move pattern will be able to use the state_ to check the condition
   // This will speed up things. (We do not have to make a copy.)

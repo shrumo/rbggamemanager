@@ -13,8 +13,8 @@
 
 class GameState;
 
-class Action;
-namespace actions {
+class OptimizedAction;
+namespace optimizedactions {
   class ConditionCheck;
   class NegatedConditionCheck;
 }
@@ -26,8 +26,9 @@ struct PerftResult {
 
 class SearchContext {
 public:
-  friend class actions::ConditionCheck;
-  friend class actions::NegatedConditionCheck;
+  friend class optimizedactions::ConditionCheck;
+
+  friend class optimizedactions::NegatedConditionCheck;
 
   SearchContext()
       :
@@ -57,14 +58,14 @@ public:
 
   std::vector<Move> FindFirstMove(GameState *state);// TODO remove
 
-  bool CheckPattern(GameState *state, const fsm::Nfa<const Action *> &nfa);
+  bool CheckPattern(GameState *state, const fsm::Nfa<const OptimizedAction *> &nfa);
 
 private:
-  bool CheckPattern(const fsm::Nfa<const Action *> &nfa);
+  bool CheckPattern(const fsm::Nfa<const OptimizedAction *> &nfa);
 
-  std::size_t NewVisited(const fsm::Nfa<const Action *> &nfa);
+  std::size_t NewVisited(const fsm::Nfa<const OptimizedAction *> &nfa);
 
-  std::size_t NewResultsCache(const fsm::Nfa<const Action *> &nfa);
+  std::size_t NewResultsCache(const fsm::Nfa<const OptimizedAction *> &nfa);
 
   void DumpVisited(std::size_t visited_array_index);
 
@@ -75,43 +76,43 @@ private:
   CreateResultLayers(std::size_t results_array_index, std::size_t layer_depth);
 
   void FastPerft(std::size_t visited_array_index,
-                   const fsm::Nfa<const Action *> &nfa,
-                   fsm::state_id_t current_state, size_t depth,
-                        ssize_t last_block_started=-1, size_t depth_result = 3);
+                 const fsm::Nfa<const OptimizedAction *> &nfa,
+                 fsm::state_id_t current_state, size_t depth,
+                 ssize_t last_block_started = -1, size_t depth_result = 3);
 
   bool FastPerftKeeper(std::size_t visited_array_index,
-                   const fsm::Nfa<const Action *> &nfa,
-                   fsm::state_id_t current_state, size_t depth,
-                        ssize_t last_block_started=-1, size_t depth_result = 3);
+                       const fsm::Nfa<const OptimizedAction *> &nfa,
+                       fsm::state_id_t current_state, size_t depth,
+                       ssize_t last_block_started = -1, size_t depth_result = 3);
 
 
 
   void FindAllMovesRec(std::size_t visited_array_index,
-                       const fsm::Nfa<const Action *> &nfa,
+                       const fsm::Nfa<const OptimizedAction *> &nfa,
                        fsm::state_id_t current_state, Move *move,
                        ssize_t last_block_started=-1);
 
   bool FindFirstMoveRec(std::size_t visited_array_index,
-                        const fsm::Nfa<const Action *> &nfa,
+                        const fsm::Nfa<const OptimizedAction *> &nfa,
                         fsm::state_id_t current_state, Move *move,
                         ssize_t last_block_started=-1);
 
   bool ApplyFirstMoveRec(std::size_t visited_array_index,
-                         const fsm::Nfa<const Action *> &nfa,
+                         const fsm::Nfa<const OptimizedAction *> &nfa,
                          fsm::state_id_t current_state, uint depth,
                          ssize_t last_block_started=-1);
 
   bool ApplyFirstRandomMoveRec(std::size_t visited_array_index,
-                         const fsm::Nfa<const Action *> &nfa,
-                         fsm::state_id_t current_state, uint depth,
-                         ssize_t last_block_started=-1);
+                               const fsm::Nfa<const OptimizedAction *> &nfa,
+                               fsm::state_id_t current_state, uint depth,
+                               ssize_t last_block_started = -1);
 
   bool CheckPlay(std::size_t visited_array_index,
-                 const fsm::Nfa<const Action *> &nfa,
+                 const fsm::Nfa<const OptimizedAction *> &nfa,
                  fsm::state_id_t current_state, std::size_t depth,
                  ssize_t last_block_started=-1);
 
-  std::size_t VisitedIndex(const fsm::Nfa<const Action *> &nfa,
+  std::size_t VisitedIndex(const fsm::Nfa<const OptimizedAction *> &nfa,
                            fsm::state_id_t current_state) const;
 
   std::vector<Move> *possible_moves_;

@@ -25,8 +25,8 @@ void GameNfaCreator::dispatch(const rbg_parser::sum &move) {
         table[v] = std::vector<vertex_t >(result[v].begin(),result[v].end());
         std::sort(table[v].begin(),table[v].end());
       }
-      std::unique_ptr<Action> action(
-          new actions::ShiftTable(std::move(table)));
+      std::unique_ptr<OptimizedAction> action(
+          new optimizedactions::ShiftTable(std::move(table)));
       used_actions_[move_identifier] = action.get();
       actions_.push_back(std::move(action));
     }
@@ -42,7 +42,7 @@ void GameNfaCreator::dispatch(const rbg_parser::sum &move) {
   }
 
   if (used_actions_.find("epsilon") == used_actions_.end()) {
-    std::unique_ptr<Action> empty_action(new actions::Empty());
+    std::unique_ptr<OptimizedAction> empty_action(new optimizedactions::Empty());
     used_actions_["epsilon"] = empty_action.get();
     actions_.push_back(std::move(empty_action));
   }
@@ -77,8 +77,8 @@ void GameNfaCreator::dispatch(const rbg_parser::concatenation &move) {
         table[v] = std::vector<vertex_t >(result[v].begin(),result[v].end());
         std::sort(table[v].begin(),table[v].end());
       }
-      std::unique_ptr<Action> action(
-          new actions::ShiftTable(std::move(table)));
+      std::unique_ptr<OptimizedAction> action(
+          new optimizedactions::ShiftTable(std::move(table)));
       used_actions_[move_identifier] = action.get();
       actions_.push_back(std::move(action));
     }
@@ -107,8 +107,8 @@ void GameNfaCreator::dispatch(const rbg_parser::concatenation &move) {
       table[v] = std::vector<vertex_t >(result[v].begin(),result[v].end());
       std::sort(table[v].begin(),table[v].end());
     }
-    std::unique_ptr<Action> action(
-        new actions::ShiftTable(std::move(table)));
+    std::unique_ptr<OptimizedAction> action(
+        new optimizedactions::ShiftTable(std::move(table)));
     actions_.push_back(std::move(action));
 
     initial = NewInitial();
@@ -146,8 +146,8 @@ void GameNfaCreator::dispatch(const rbg_parser::concatenation &move) {
         table[v] = std::vector<vertex_t >(result[v].begin(),result[v].end());
         std::sort(table[v].begin(),table[v].end());
       }
-      std::unique_ptr<Action> action(
-          new actions::ShiftTable(std::move(table)));
+      std::unique_ptr<OptimizedAction> action(
+          new optimizedactions::ShiftTable(std::move(table)));
       ReuseFinal();
       actions_.push_back(std::move(action));
 
@@ -188,8 +188,8 @@ void GameNfaCreator::dispatch(const rbg_parser::concatenation &move) {
 void GameNfaCreator::dispatch(const rbg_parser::shift &move) {
   std::string move_identifier = move.to_rbg();
   if (used_actions_.find(move_identifier) == used_actions_.end()) {
-    std::unique_ptr<Action> action(
-        new actions::Shift(edge_resolver_.Id(move.get_content().to_string())));
+    std::unique_ptr<OptimizedAction> action(
+        new optimizedactions::Shift(edge_resolver_.Id(move.get_content().to_string())));
     used_actions_[move_identifier] = action.get();
     actions_.push_back(std::move(action));
   }
@@ -211,7 +211,7 @@ void GameNfaCreator::dispatch(const rbg_parser::ons &move) {
       token_id_t piece_id = resolver_.Id(piece_token.to_string());
       pieces[piece_id] = true;
     }
-    std::unique_ptr<Action> action(new actions::On(std::move(pieces)));
+    std::unique_ptr<OptimizedAction> action(new optimizedactions::On(std::move(pieces)));
     used_actions_[move_identifier] = action.get();
     actions_.push_back(std::move(action));
   }
@@ -230,9 +230,9 @@ void GameNfaCreator::dispatch(const rbg_parser::off &move) {
   fsm::state_id_t final_id = nfa_result_->NewState();
   RegisterModifier(initial_id);
   token_id_t piece_id = resolver_.Id(move.get_piece().to_string());
-  std::unique_ptr<Action> letter(
-      new actions::Off(piece_id, (unsigned int) blocks_states_.size() - 1));
-  Action *letter_ptr = letter.get();
+  std::unique_ptr<OptimizedAction> letter(
+      new optimizedactions::Off(piece_id, (unsigned int) blocks_states_.size() - 1));
+  OptimizedAction *letter_ptr = letter.get();
   actions_.push_back(std::move(letter));
   (*nfa_result_)[initial_id].AddTransition(final_id, letter_ptr);
   nfa_result_->set_initial(initial_id);
@@ -252,14 +252,16 @@ void GameNfaCreator::dispatch(const rbg_parser::move_check &move) {
 
     auto r = StartMovePattern();
     move.get_content()->accept(*this);
-    std::unique_ptr<Action> action;
+    std::unique_ptr<OptimizedAction> action;
     if(move.is_negated())
     {
-      action = std::unique_ptr<Action>(new actions::NegatedConditionCheck(move_pattern_count_++,ExtractNfa()));
+      action = std::unique_ptr<OptimizedAction>(
+          new optimizedactions::NegatedConditionCheck(move_pattern_count_++, ExtractNfa()));
     }
     else
     {
-      action = std::unique_ptr<Action>(new actions::ConditionCheck(move_pattern_count_++,ExtractNfa()));
+      action = std::unique_ptr<OptimizedAction>(
+          new optimizedactions::ConditionCheck(move_pattern_count_++, ExtractNfa()));
     }
     used_actions_[move_identifier] = action.get();
     actions_.push_back(std::move(action));
@@ -284,12 +286,12 @@ void GameNfaCreator::dispatch(const rbg_parser::assignment &move) {
   fsm::state_id_t final_id = nfa_result_->NewState();
   RegisterModifier(initial_id);
   token_id_t variable_id = resolver_.Id(move.get_left_side().to_string());
-  std::unique_ptr<Action> letter;
-  letter = std::unique_ptr<Action>(
-      new actions::Assignment(variable_id, CreateOperation(*move.get_right_side(),resolver_),
+  std::unique_ptr<OptimizedAction> letter;
+  letter = std::unique_ptr<OptimizedAction>(
+      new optimizedactions::Assignment(variable_id, CreateOperation(*move.get_right_side(), resolver_),
                               (unsigned int) blocks_states_.size() - 1));
 
-  Action *letter_ptr = letter.get();
+  OptimizedAction *letter_ptr = letter.get();
   actions_.push_back(std::move(letter));
   (*nfa_result_)[initial_id].AddTransition(final_id, letter_ptr);
   nfa_result_->set_initial(initial_id);
@@ -301,12 +303,12 @@ void GameNfaCreator::dispatch(const rbg_parser::player_switch &move) {
   fsm::state_id_t initial_id = NewInitial();
   fsm::state_id_t final_id = nfa_result_->NewState();
   RegisterModifier(initial_id);
-  std::unique_ptr<Action> letter;
+  std::unique_ptr<OptimizedAction> letter;
   token_id_t player_id = resolver_.Id(move.get_player().to_string());
-  letter = std::unique_ptr<Action>(new actions::PlayerSwitch(player_id,
+  letter = std::unique_ptr<OptimizedAction>(new optimizedactions::PlayerSwitch(player_id,
                                                                (unsigned int) blocks_states_.size() -
                                                                1));
-  Action *letter_ptr = letter.get();
+  OptimizedAction *letter_ptr = letter.get();
   actions_.push_back(std::move(letter));
   (*nfa_result_)[initial_id].AddTransition(final_id, letter_ptr);
   nfa_result_->set_initial(initial_id);
@@ -319,12 +321,12 @@ void GameNfaCreator::dispatch(const rbg_parser::keeper_switch &) {
   fsm::state_id_t initial_id = NewInitial();
   fsm::state_id_t final_id = nfa_result_->NewState();
   RegisterModifier(initial_id);
-  std::unique_ptr<Action> letter;
+  std::unique_ptr<OptimizedAction> letter;
   token_id_t player_id = resolver_.Id(">");
-  letter = std::unique_ptr<Action>(new actions::PlayerSwitch(player_id,
+  letter = std::unique_ptr<OptimizedAction>(new optimizedactions::PlayerSwitch(player_id,
                                                              (unsigned int) blocks_states_.size() -
                                                              1));
-  Action *letter_ptr = letter.get();
+  OptimizedAction *letter_ptr = letter.get();
   actions_.push_back(std::move(letter));
   (*nfa_result_)[initial_id].AddTransition(final_id, letter_ptr);
   nfa_result_->set_initial(initial_id);
@@ -347,8 +349,8 @@ void GameNfaCreator::dispatch(const rbg_parser::star_move &move) {
         table[v] = std::vector<vertex_t >(result[v].begin(),result[v].end());
         std::sort(table[v].begin(),table[v].end());
       }
-      std::unique_ptr<Action> action(
-          new actions::ShiftTable(std::move(table)));
+      std::unique_ptr<OptimizedAction> action(
+          new optimizedactions::ShiftTable(std::move(table)));
       used_actions_[move_identifier] = action.get();
       actions_.push_back(std::move(action));
     }
@@ -364,7 +366,7 @@ void GameNfaCreator::dispatch(const rbg_parser::star_move &move) {
   }
 
   if (used_actions_.find("epsilon") == used_actions_.end()) {
-      std::unique_ptr<Action> empty_action(new actions::Empty());
+    std::unique_ptr<OptimizedAction> empty_action(new optimizedactions::Empty());
       used_actions_["epsilon"] = empty_action.get();
       actions_.push_back(std::move(empty_action));
     }
@@ -394,48 +396,49 @@ void GameNfaCreator::dispatch(const rbg_parser::arithmetic_comparison &compariso
   if (used_actions_.find(move_identifier) == used_actions_.end()) {
     switch (comparison.get_kind_of_comparison()) {
       case rbg_parser::eq: {
-        std::unique_ptr<Action> action(
-            new actions::ArithmeticEqualComparison(CreateOperation(*comparison.get_left_side(), resolver_),
+        std::unique_ptr<OptimizedAction> action(
+            new optimizedactions::ArithmeticEqualComparison(CreateOperation(*comparison.get_left_side(), resolver_),
                                                    CreateOperation(*comparison.get_right_side(), resolver_)));
         used_actions_[move_identifier] = action.get();
         actions_.push_back(std::move(action));
         break;
       }
       case rbg_parser::neq: {
-        std::unique_ptr<Action> action(
-            new actions::ArithmeticNotEqualComparison(CreateOperation(*comparison.get_left_side(), resolver_),
+        std::unique_ptr<OptimizedAction> action(
+            new optimizedactions::ArithmeticNotEqualComparison(CreateOperation(*comparison.get_left_side(), resolver_),
                                                    CreateOperation(*comparison.get_right_side(), resolver_)));
         used_actions_[move_identifier] = action.get();
         actions_.push_back(std::move(action));
         break;
       }
       case rbg_parser::le: {
-        std::unique_ptr<Action> action(
-            new actions::ArithmeticLessComparison(CreateOperation(*comparison.get_left_side(), resolver_),
+        std::unique_ptr<OptimizedAction> action(
+            new optimizedactions::ArithmeticLessComparison(CreateOperation(*comparison.get_left_side(), resolver_),
                                                    CreateOperation(*comparison.get_right_side(), resolver_)));
         used_actions_[move_identifier] = action.get();
         actions_.push_back(std::move(action));
         break;
       }
       case rbg_parser::leq: {
-        std::unique_ptr<Action> action(
-            new actions::ArithmeticLessEqualComparison(CreateOperation(*comparison.get_left_side(), resolver_),
+        std::unique_ptr<OptimizedAction> action(
+            new optimizedactions::ArithmeticLessEqualComparison(CreateOperation(*comparison.get_left_side(), resolver_),
                                                    CreateOperation(*comparison.get_right_side(), resolver_)));
         used_actions_[move_identifier] = action.get();
         actions_.push_back(std::move(action));
         break;
       }
       case rbg_parser::ge: {
-        std::unique_ptr<Action> action(
-            new actions::ArithmeticLessComparison(CreateOperation(*comparison.get_right_side(), resolver_),
+        std::unique_ptr<OptimizedAction> action(
+            new optimizedactions::ArithmeticLessComparison(CreateOperation(*comparison.get_right_side(), resolver_),
                                                    CreateOperation(*comparison.get_left_side(), resolver_)));
         used_actions_[move_identifier] = action.get();
         actions_.push_back(std::move(action));
         break;
       }
       case rbg_parser::geq: {
-        std::unique_ptr<Action> action(
-            new actions::ArithmeticLessEqualComparison(CreateOperation(*comparison.get_right_side(), resolver_),
+        std::unique_ptr<OptimizedAction> action(
+            new optimizedactions::ArithmeticLessEqualComparison(
+                CreateOperation(*comparison.get_right_side(), resolver_),
                                                    CreateOperation(*comparison.get_left_side(), resolver_)));
         used_actions_[move_identifier] = action.get();
         actions_.push_back(std::move(action));

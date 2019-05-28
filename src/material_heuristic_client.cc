@@ -30,7 +30,7 @@ static void collect_move_usages(token_id_t previous_player, const GameState &s,
         s.description().moves_description(),
         block.id())) {
       if (action->type() == ActionType::kOffType) {
-        auto *off_action = dynamic_cast<const actions::Off *>(action);
+        auto *off_action = dynamic_cast<const optimizedactions::Off *>(action);
         token_id_t piece = off_action->piece();
         (*result)[piece][player]++;
       }

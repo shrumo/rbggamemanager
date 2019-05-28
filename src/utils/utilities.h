@@ -8,9 +8,9 @@
 #include "../actions/action.h"
 #include "../game_components/game_description.h"
 
-std::vector<const Action *>
+std::vector<const OptimizedAction *>
 get_actions_in_block(const GameMovesDescription &gd, size_t block_id) {
-  std::vector<const Action *> result;
+  std::vector<const OptimizedAction *> result;
   fsm::state_id_t current = gd.CorrespondingState(block_id);
   while (gd.nfa()[current].transitions().size() == 1 &&
          gd.nfa()[current].transitions().front().letter()->index() ==

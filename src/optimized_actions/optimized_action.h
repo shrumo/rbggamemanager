@@ -2,8 +2,8 @@
 // Created by shrum on 12.01.18.
 //
 
-#ifndef RBGGAMEMANAGER_ACTION_H
-#define RBGGAMEMANAGER_ACTION_H
+#ifndef RBGGAMEMANAGER_OPTIMIZED_ACTION_H
+#define RBGGAMEMANAGER_OPTIMIZED_ACTION_H
 
 #include <unordered_set>
 #include <memory>
@@ -21,9 +21,9 @@ class GameState;
 // Represents abstract action that can be called on a game state.
 // Actions can be applied and reverted.
 // Example:
-//   Action& a = actions::Shift(2,2);
+//   Action& a = optimized_actions::Shift(2,2);
 //   auto result = a.Apply(state);
-class Action {
+class OptimizedAction {
 public:
   virtual ActionResult Apply(GameState *b) const =0;
 
@@ -39,32 +39,32 @@ public:
   // Index is meaningful iff IsModifier() == true.
   unsigned int index() const { return index_; }
 
-  virtual ~Action() = default;
+  virtual ~OptimizedAction() = default;
 
 protected:
-  Action(ActionType type, unsigned int action_index)
+  OptimizedAction(ActionType type, unsigned int action_index)
       : type_(type), index_(action_index) {}
 
-  explicit Action(ActionType type) : type_(type), index_(0) {}
+  explicit OptimizedAction(ActionType type) : type_(type), index_(0) {}
 
 private:
   ActionType type_;
   uint index_;
 };
 
-namespace actions {
+namespace optimizedactions {
   // Empty action does not change the game state.
-  class Empty : public Action {
+  class Empty : public OptimizedAction {
   public:
-    Empty() : Action(ActionType::kEmptyType) {}
+    Empty() : OptimizedAction(ActionType::kEmptyType) {}
 
     ActionResult Apply(GameState *) const override { return true; };
   };
 
   // Shift changes the current position on board.
-  class Shift : public Action {
+  class Shift : public OptimizedAction {
   public:
-    explicit Shift(edge_name_t edge_name) : Action(ActionType::kShiftType), edge_name_(edge_name)
+    explicit Shift(edge_name_t edge_name) : OptimizedAction(ActionType::kShiftType), edge_name_(edge_name)
                                 {}
 
     ActionResult Apply(GameState *b) const override;
@@ -79,9 +79,10 @@ namespace actions {
   };
 
   // Shift changes the current position on board.
-  class ShiftTable : public Action {
+  class ShiftTable : public OptimizedAction {
   public:
-    explicit ShiftTable(std::vector<std::vector<vertex_t> > table) : Action(ActionType::kShiftTableType), table_(std::move(table))
+    explicit ShiftTable(std::vector<std::vector<vertex_t> > table) : OptimizedAction(ActionType::kShiftTableType),
+                                                                     table_(std::move(table))
     {
       for (auto &row : table_) {
           std::vector<vertex_t> new_row;
@@ -108,11 +109,11 @@ namespace actions {
   };
 
   // On checks if one of the pieces is on the current position on board.
-  class On : public Action {
+  class On : public OptimizedAction {
   public:
     // Parameter pieces should contain true for token ids of pieces names that the on accepts.
     explicit On(std::vector<bool> pieces)
-        : Action(ActionType::kOnType), pieces_(std::move(pieces)) {}
+        : OptimizedAction(ActionType::kOnType), pieces_(std::move(pieces)) {}
 
     ActionResult Apply(GameState *b) const override;
 
@@ -124,11 +125,11 @@ namespace actions {
   };
 
   // Check arithmetic comparison
-  class ArithmeticLessComparison : public Action {
+  class ArithmeticLessComparison : public OptimizedAction {
   public:
     ArithmeticLessComparison(std::unique_ptr<ArithmeticOperation> left,
                             std::unique_ptr<ArithmeticOperation> right)
-        : Action(ActionType ::kArithmeticLessComparisonType),
+        : OptimizedAction(ActionType::kArithmeticLessComparisonType),
           left_(std::move(left)),
           right_(std::move(right))
     {}
@@ -150,11 +151,11 @@ namespace actions {
   };
 
   // Check arithmetic comparison
-  class ArithmeticLessEqualComparison : public Action {
+  class ArithmeticLessEqualComparison : public OptimizedAction {
   public:
     ArithmeticLessEqualComparison(std::unique_ptr<ArithmeticOperation> left,
                              std::unique_ptr<ArithmeticOperation> right)
-        : Action(ActionType ::kArithmeticLessEqualComparisonType),
+        : OptimizedAction(ActionType::kArithmeticLessEqualComparisonType),
           left_(std::move(left)),
           right_(std::move(right))
     {}
@@ -176,11 +177,11 @@ namespace actions {
   };
 
   // Check arithmetic comparison
-  class ArithmeticEqualComparison : public Action {
+  class ArithmeticEqualComparison : public OptimizedAction {
   public:
     ArithmeticEqualComparison(std::unique_ptr<ArithmeticOperation> left,
                              std::unique_ptr<ArithmeticOperation> right)
-        : Action(ActionType ::kArithmeticEqualComparisonType),
+        : OptimizedAction(ActionType::kArithmeticEqualComparisonType),
           left_(std::move(left)),
           right_(std::move(right))
     {}
@@ -202,11 +203,11 @@ namespace actions {
   };
 
   // Check arithmetic comparison
-  class ArithmeticNotEqualComparison : public Action {
+  class ArithmeticNotEqualComparison : public OptimizedAction {
   public:
     ArithmeticNotEqualComparison(std::unique_ptr<ArithmeticOperation> left,
                               std::unique_ptr<ArithmeticOperation> right)
-        : Action(ActionType ::kArithmeticNotEqualComparisonType),
+        : OptimizedAction(ActionType::kArithmeticNotEqualComparisonType),
           left_(std::move(left)),
           right_(std::move(right))
     {}
@@ -228,49 +229,49 @@ namespace actions {
   };
 
   // Check move pattern
-  class ConditionCheck : public Action {
+  class ConditionCheck : public OptimizedAction {
   public:
     ConditionCheck(unsigned int index,
-                   std::unique_ptr<fsm::Nfa<const Action *> > move_nfa)
-        : Action(ActionType ::kConditionCheckType),
+                   std::unique_ptr<fsm::Nfa<const OptimizedAction *> > move_nfa)
+        : OptimizedAction(ActionType::kConditionCheckType),
           index_(index),
           move_nfa_(std::move(move_nfa))
     {}
 
     ActionResult Apply(GameState *b) const override;
 
-    const fsm::Nfa<const Action *> *nfa() const {
+    const fsm::Nfa<const OptimizedAction *> *nfa() const {
       return move_nfa_.get();
     }
   private:
     unsigned int index_;
-    std::unique_ptr<fsm::Nfa<const Action *> > move_nfa_;
+    std::unique_ptr<fsm::Nfa<const OptimizedAction *> > move_nfa_;
   };
 
   // Check negated move pattern
-  class NegatedConditionCheck : public Action {
+  class NegatedConditionCheck : public OptimizedAction {
   public:
     NegatedConditionCheck(unsigned int index,
-                   std::unique_ptr<fsm::Nfa<const Action *> > move_nfa)
-        : Action(ActionType ::kNegatedConditionCheckType),
+                          std::unique_ptr<fsm::Nfa<const OptimizedAction *> > move_nfa)
+        : OptimizedAction(ActionType::kNegatedConditionCheckType),
           index_(index),
           move_nfa_(std::move(move_nfa))
     {}
 
     ActionResult Apply(GameState *b) const override;
 
-    const fsm::Nfa<const Action *> *nfa() const {
+    const fsm::Nfa<const OptimizedAction *> *nfa() const {
       return move_nfa_.get();
     }
   private:
     unsigned int index_;
-    std::unique_ptr<fsm::Nfa<const Action *> > move_nfa_;
+    std::unique_ptr<fsm::Nfa<const OptimizedAction *> > move_nfa_;
   };
 
   // Off places specified piece on the current position in game state.
-  class Off : public Action {
+  class Off : public OptimizedAction {
   public:
-    explicit Off(token_id_t piece, unsigned int index = 0) : Action(
+    explicit Off(token_id_t piece, unsigned int index = 0) : OptimizedAction(
         ActionType::kOffType, index), piece_(piece) {}
 
     ActionResult Apply(GameState *b) const override;
@@ -284,9 +285,9 @@ namespace actions {
   };
 
   // PlayerSwitch changes the player to the one specified.
-  class PlayerSwitch : public Action {
+  class PlayerSwitch : public OptimizedAction {
   public:
-    explicit PlayerSwitch(token_id_t player, unsigned int index = 0) : Action(
+    explicit PlayerSwitch(token_id_t player, unsigned int index = 0) : OptimizedAction(
         ActionType::kSwitchType, index), player_(player) {}
 
     ActionResult Apply(GameState *b) const override;
@@ -300,11 +301,11 @@ namespace actions {
   };
 
   // Assignment assigns a value to the variable.
-  class Assignment : public Action {
+  class Assignment : public OptimizedAction {
   public:
     Assignment(size_t variable, std::unique_ptr<ArithmeticOperation> value,
                unsigned int index = 0)
-        : Action(ActionType::kAssignmentType, index),
+        : OptimizedAction(ActionType::kAssignmentType, index),
           variable(variable),
           value(std::move(value)) {}
 
@@ -323,10 +324,10 @@ namespace actions {
     std::unique_ptr<ArithmeticOperation> value;
   };
 
-  class PlayerCheck : public Action {
+  class PlayerCheck : public OptimizedAction {
   public:
     explicit PlayerCheck(token_id_t player)
-        : Action(ActionType::kPlayerCheck), player_(player)
+        : OptimizedAction(ActionType::kPlayerCheck), player_(player)
     {
     }
 
@@ -343,4 +344,4 @@ namespace actions {
 }
 
 
-#endif //RBGGAMEMANAGER_ACTION_H
+#endif //RBGGAMEMANAGER_OPTIMIZED_ACTION_H

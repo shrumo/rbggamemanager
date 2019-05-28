@@ -12,12 +12,12 @@
 
 // This structure allows the nfa creator to safe its current state information.
 struct RecoverInformation {
-  std::unique_ptr<fsm::Nfa<const Action *>> nfa_result;
+  std::unique_ptr<fsm::Nfa<const OptimizedAction *>> nfa_result;
   bool register_modifiers;
   bool reuse_final_as_initial;
   fsm::state_id_t last_final;
 
-  RecoverInformation(std::unique_ptr<fsm::Nfa<const Action *>> nfa_result,
+  RecoverInformation(std::unique_ptr<fsm::Nfa<const OptimizedAction *>> nfa_result,
                      bool register_modifiers,
                      bool reuse_final_as_initial, fsm::state_id_t last_final)
       : nfa_result(std::move(nfa_result)),
@@ -29,7 +29,7 @@ struct RecoverInformation {
 class GameNfaCreator : public AstVisitor {
 public:
   // This function extracts current nfa. Nfa can be extracted only once after creation.
-  std::unique_ptr<fsm::Nfa<const Action *>> ExtractNfa() {
+  std::unique_ptr<fsm::Nfa<const OptimizedAction *>> ExtractNfa() {
     return std::move(nfa_result_);
   }
 
@@ -67,8 +67,8 @@ private:
     RecoverInformation information(std::move(nfa_result_), register_modifiers_,
                                    reuse_final_as_initial_, last_final_);
     register_modifiers_ = false;
-    nfa_result_ = std::unique_ptr<fsm::Nfa<const Action *>>(
-        new fsm::Nfa<const Action *>());
+    nfa_result_ = std::unique_ptr<fsm::Nfa<const OptimizedAction *>>(
+        new fsm::Nfa<const OptimizedAction *>());
     last_final_ = 0;
     reuse_final_as_initial_ = false;
     return information;
@@ -86,7 +86,7 @@ private:
       : resolver_(resolver),
         edge_resolver_(edge_resolver),
         graph_board_(board),
-        nfa_result_(new fsm::Nfa<const Action *>()),
+        nfa_result_(new fsm::Nfa<const OptimizedAction *>()),
         block_started_(false),
         register_modifiers_(true),
         reuse_final_as_initial_(false),
@@ -111,10 +111,10 @@ private:
   const NameResolver &resolver_;
   const EdgeResolver &edge_resolver_;
   const GraphBoard &graph_board_;
-  std::unique_ptr<fsm::Nfa<const Action *>> nfa_result_;
-  std::unordered_map<std::string, const Action *> used_actions_;
+  std::unique_ptr<fsm::Nfa<const OptimizedAction *>> nfa_result_;
+  std::unordered_map<std::string, const OptimizedAction *> used_actions_;
 
-  std::vector<std::unique_ptr<Action> > actions_;
+  std::vector<std::unique_ptr<OptimizedAction> > actions_;
 
   bool block_started_;
   std::vector<fsm::state_id_t> blocks_states_;

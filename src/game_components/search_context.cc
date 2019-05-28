@@ -9,7 +9,7 @@
 // TODO(shrum): Add blocks of modifiers.
 
 void SearchContext::FindAllMovesRec(size_t visited_array_index,
-                                    const fsm::Nfa<const Action *> &nfa,
+                                    const fsm::Nfa<const OptimizedAction *> &nfa,
                                     fsm::state_id_t current_state, Move *move,
                                     ssize_t last_block_started) {
   const uint index = VisitedIndex(nfa, current_state);
@@ -20,7 +20,7 @@ void SearchContext::FindAllMovesRec(size_t visited_array_index,
   for (const auto &transition : nfa[current_state].transitions()) {
     if(transition.letter()->type() == ActionType::kShiftTableType)
     {
-      const auto shift_table = static_cast<const actions::ShiftTable*>(transition.letter());
+      const auto shift_table = static_cast<const optimizedactions::ShiftTable *>(transition.letter());
       const auto previous_pos = calculation_state_->pos();
       for(auto next_pos : shift_table->table()[previous_pos])
       {
@@ -60,12 +60,12 @@ void SearchContext::FindAllMovesRec(size_t visited_array_index,
 }
 
 size_t
-SearchContext::VisitedIndex(const fsm::Nfa<const Action *> &nfa,
+SearchContext::VisitedIndex(const fsm::Nfa<const OptimizedAction *> &nfa,
                             fsm::state_id_t current_state) const {
   return (calculation_state_->pos()) * nfa.StateCount() + current_state;
 }
 
-size_t SearchContext::NewVisited(const fsm::Nfa<const Action *> &nfa) {
+size_t SearchContext::NewVisited(const fsm::Nfa<const OptimizedAction *> &nfa) {
   if (last_visited_array_index_ < visited_.size()) {
     visited_[last_visited_array_index_].front().resize(
         std::max(visited_[last_visited_array_index_].front().size(),
@@ -83,7 +83,7 @@ size_t SearchContext::NewVisited(const fsm::Nfa<const Action *> &nfa) {
 }
 
 bool SearchContext::CheckPlay(size_t visited_array_index,
-                              const fsm::Nfa<const Action *> &nfa,
+                              const fsm::Nfa<const OptimizedAction *> &nfa,
                               fsm::state_id_t current_state, size_t depth,
                               ssize_t last_block_started) {
   if (current_state == nfa.final())
@@ -95,7 +95,7 @@ bool SearchContext::CheckPlay(size_t visited_array_index,
   for (const auto &transition : nfa[current_state].transitions()) {
     if(transition.letter()->type() == ActionType::kShiftTableType)
     {
-      const auto shift_table = static_cast<const actions::ShiftTable*>(transition.letter());
+      const auto shift_table = static_cast<const optimizedactions::ShiftTable *>(transition.letter());
       const auto previous_pos = calculation_state_->pos();
       for(auto next_pos : shift_table->table()[previous_pos])
       {
@@ -162,7 +162,7 @@ SearchContext::FindMoves(GameState *state) {
 }
 
 bool SearchContext::CheckPattern(GameState *state,
-                                 const fsm::Nfa<const Action *> &nfa) {
+                                 const fsm::Nfa<const OptimizedAction *> &nfa) {
   calculation_state_ = state;
   bool result = CheckPattern(nfa);
   calculation_state_ = nullptr;
@@ -221,7 +221,7 @@ SearchContext::FindFirstMove(GameState *state) {
 }
 
 bool SearchContext::FindFirstMoveRec(std::size_t visited_array_index,
-                                     const fsm::Nfa<const Action *> &nfa,
+                                     const fsm::Nfa<const OptimizedAction *> &nfa,
                                      fsm::state_id_t current_state, Move *move,
                                      ssize_t last_block_started) {
   const uint index = VisitedIndex(nfa, current_state);
@@ -234,7 +234,7 @@ bool SearchContext::FindFirstMoveRec(std::size_t visited_array_index,
   for (const auto &transition : nfa[current_state].transitions()) {
     if(transition.letter()->type() == ActionType::kShiftTableType)
     {
-      auto shift_table = static_cast<const actions::ShiftTable*>(transition.letter());
+      auto shift_table = static_cast<const optimizedactions::ShiftTable *>(transition.letter());
       auto previous_pos = calculation_state_->pos();
       for(auto next_pos : shift_table->table()[previous_pos]) {
         calculation_state_->SetPos(next_pos);
@@ -293,15 +293,15 @@ bool SearchContext::ApplyFirstMove(GameState *state) {
 }
 
 bool SearchContext::ApplyFirstMoveRec(std::size_t visited_array_index,
-                                     const fsm::Nfa<const Action *> &nfa,
-                                     fsm::state_id_t current_state, uint depth,
-                                     ssize_t last_block_started) {
+                                      const fsm::Nfa<const OptimizedAction *> &nfa,
+                                      fsm::state_id_t current_state, uint depth,
+                                      ssize_t last_block_started) {
   const uint index = VisitedIndex(nfa, current_state);
   visited_[visited_array_index][depth].set(index);  
   for (const auto &transition : nfa[current_state].transitions()) {
     if(transition.letter()->type() == ActionType::kShiftTableType)
     {
-      auto shift_table = static_cast<const actions::ShiftTable*>(transition.letter());
+      auto shift_table = static_cast<const optimizedactions::ShiftTable *>(transition.letter());
       auto previous_pos = calculation_state_->pos();
       for(auto next_pos : shift_table->table()[previous_pos]) {
         calculation_state_->SetPos(next_pos);
@@ -356,9 +356,9 @@ bool SearchContext::ApplyFirstRandomMove(GameState *state) {
 }
 
 bool SearchContext::ApplyFirstRandomMoveRec(std::size_t visited_array_index,
-                                     const fsm::Nfa<const Action *> &nfa,
-                                     fsm::state_id_t current_state, uint depth,
-                                     ssize_t last_block_started) {
+                                            const fsm::Nfa<const OptimizedAction *> &nfa,
+                                            fsm::state_id_t current_state, uint depth,
+                                            ssize_t last_block_started) {
   const uint index = VisitedIndex(nfa, current_state);
   visited_[visited_array_index][depth].set(index);
   boost::container::small_vector<uint,16> order_trans;
@@ -369,7 +369,7 @@ bool SearchContext::ApplyFirstRandomMoveRec(std::size_t visited_array_index,
     const auto &transition = nfa[current_state].transitions()[order_trans[i]];
     if(transition.letter()->type() == ActionType::kShiftTableType)
     {
-      auto shift_table = static_cast<const actions::ShiftTable*>(transition.letter());
+      auto shift_table = static_cast<const optimizedactions::ShiftTable *>(transition.letter());
       auto previous_pos = calculation_state_->pos();
       boost::container::small_vector<uint,16> order_table;
       order_table.resize(shift_table->table()[previous_pos].size());
@@ -415,15 +415,16 @@ bool SearchContext::ApplyFirstRandomMoveRec(std::size_t visited_array_index,
   return false;
 }
 
-bool SearchContext::CheckPattern(const fsm::Nfa<const Action *> &nfa) {
+bool SearchContext::CheckPattern(const fsm::Nfa<const OptimizedAction *> &nfa) {
   const size_t visited_index = NewVisited(nfa);
   bool result = CheckPlay(visited_index, nfa, nfa.initial(), 0);
   DumpVisited(visited_index);
   return result;
 }
 
-void SearchContext::FastPerft(std::size_t visited_array_index, const fsm::Nfa<const Action *> &nfa,
-                                fsm::state_id_t current_state, size_t depth, ssize_t last_block_started, size_t perft_depth) {
+void SearchContext::FastPerft(std::size_t visited_array_index, const fsm::Nfa<const OptimizedAction *> &nfa,
+                              fsm::state_id_t current_state, size_t depth, ssize_t last_block_started,
+                              size_t perft_depth) {
   const uint index = VisitedIndex(nfa, current_state);
   if (visited_[visited_array_index][depth][index])
     return;
@@ -433,7 +434,7 @@ void SearchContext::FastPerft(std::size_t visited_array_index, const fsm::Nfa<co
   for (const auto &transition : nfa[current_state].transitions()) {
     if(transition.letter()->type() == ActionType::kShiftTableType)
     {
-      auto shift_table = static_cast<const actions::ShiftTable*>(transition.letter());
+      auto shift_table = static_cast<const optimizedactions::ShiftTable *>(transition.letter());
       auto previous_pos = calculation_state_->pos();
       for(auto next_pos : shift_table->table()[previous_pos])
       {
@@ -480,8 +481,9 @@ void SearchContext::FastPerft(std::size_t visited_array_index, const fsm::Nfa<co
   }
 }
 
-bool SearchContext::FastPerftKeeper(std::size_t visited_array_index, const fsm::Nfa<const Action *> &nfa,
-                                fsm::state_id_t current_state, size_t depth, ssize_t last_block_started, size_t perft_depth) {
+bool SearchContext::FastPerftKeeper(std::size_t visited_array_index, const fsm::Nfa<const OptimizedAction *> &nfa,
+                                    fsm::state_id_t current_state, size_t depth, ssize_t last_block_started,
+                                    size_t perft_depth) {
   const uint index = VisitedIndex(nfa, current_state);
   if (visited_[visited_array_index][depth][index])
     return false;
@@ -491,7 +493,7 @@ bool SearchContext::FastPerftKeeper(std::size_t visited_array_index, const fsm::
   for (const auto &transition : nfa[current_state].transitions()) {
     if(transition.letter()->type() == ActionType::kShiftTableType)
     {
-      auto shift_table = static_cast<const actions::ShiftTable*>(transition.letter());
+      auto shift_table = static_cast<const optimizedactions::ShiftTable *>(transition.letter());
       auto previous_pos = calculation_state_->pos();
       for(auto next_pos : shift_table->table()[previous_pos])
       {

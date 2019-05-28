@@ -8,22 +8,22 @@
 #include <game_components/name_resolver.h>
 #include <game_components/graph_board.h>
 
-class Action;
+class OptimizedAction;
 
 // Object representing action application at some position.
 class ActionApplication {
 public:
-  ActionApplication(vertex_t applied_pos, const Action *action)
+  ActionApplication(vertex_t applied_pos, const OptimizedAction *action)
       : applied_pos_(applied_pos),
         applied_action_(action) {}
 
   vertex_t pos() const { return  applied_pos_; }
 
-  const Action *action() const { return applied_action_; }
+  const OptimizedAction *action() const { return applied_action_; }
 
 private:
   vertex_t applied_pos_;
-  const Action *applied_action_;
+  const OptimizedAction *applied_action_;
 };
 
 // Object representing the result of Action Apply function.

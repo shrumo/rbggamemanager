@@ -24,8 +24,8 @@ include_directories(${Boost_INCLUDE_DIR})
 include_directories(src)
 include_directories(.)
 
-set(ACTIONS_FILES src/actions/action.cc src/actions/action.h src/actions/action_application.h src/actions/action_types.h
-        src/actions/arithmetic_operation.cc src/actions/arithmetic_operation.h)
+set(ACTIONS_FILES src/optimized_actions/optimized_action.cc src/optimized_actions/optimized_action.h src/optimized_actions/action_application.h src/optimized_actions/action_types.h
+        src/optimized_actions/arithmetic_operation.cc src/optimized_actions/arithmetic_operation.h)
 
 set(GAME_FILES src/game_components/game_description.h src/game_components/game_state.cc src/game_components/game_state.h
         src/game_components/graph_board.h src/game_components/move.h src/game_components/name_resolver.h src/game_components/search_context.cc

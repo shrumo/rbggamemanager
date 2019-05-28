@@ -7,11 +7,11 @@
 
 #include <memory>
 #include "automaton.h"
-#include <actions/action.h>
+#include <optimized_actions/optimized_action.h>
 
 class GameMovesDescription {
 public:
-  const fsm::Nfa<const Action *> &nfa() const {
+  const fsm::Nfa<const OptimizedAction *> &nfa() const {
     return *nfa_;
   }
 
@@ -27,18 +27,18 @@ public:
 
 private:
   /* TODO(shrum): Create other way of creating GameMovesDescription. */
-  GameMovesDescription(std::unique_ptr<fsm::Nfa<const Action *>> nfa,
+  GameMovesDescription(std::unique_ptr<fsm::Nfa<const OptimizedAction *>> nfa,
                        std::vector<fsm::state_id_t> blocks_states,
-                       std::vector<std::unique_ptr<Action>> actions,
+                       std::vector<std::unique_ptr<OptimizedAction>> actions,
                        unsigned int move_pattern_count)
       : nfa_(std::move(nfa)),
         blocks_states_(std::move(blocks_states)),
         actions_(std::move(actions)),
         move_pattern_count_(move_pattern_count) {}
 
-  std::unique_ptr<fsm::Nfa<const Action *>> nfa_;
+  std::unique_ptr<fsm::Nfa<const OptimizedAction *>> nfa_;
   std::vector<fsm::state_id_t> blocks_states_;
-  std::vector<std::unique_ptr<Action> > actions_;
+  std::vector<std::unique_ptr<OptimizedAction> > actions_;
   unsigned int move_pattern_count_;
 };
 
