@@ -64,9 +64,15 @@ target_link_libraries(material_client rbgParser)
 target_link_libraries(material_client ${Boost_LIBRARIES})
 target_link_libraries(material_client ${CMAKE_THREAD_LIBS_INIT})
 
+
+enable_testing()
 add_executable(graph_test ${GRAPH_FILES} src/tests/graph_test.cpp)
 add_test(graph graph_test)
-enable_testing()
+
+add_executable(perft_test ${PLAYING_FILES} ${PARSER_FILES} src/tests/perft_test.cpp)
+target_link_libraries(perft_test rbgParser)
+add_test(perft perft_test)
+
 
 
 
