@@ -10,9 +10,10 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <ostream>
+#include <memory>
 #include <algorithm>
 
-namespace graph {
+namespace rbg {
   using node_t = std::size_t;
   using edge_id_t = std::size_t;
 
@@ -122,17 +123,24 @@ namespace graph {
     node_t next_node_;
     edge_id_t next_transition_id_;
   };
+
+  template<typename Letter>
+  struct Nfa {
+    node_t initial;
+    node_t final;
+    std::unique_ptr<Graph<Letter>> graph;
+  };
 }
 
 template<typename EdgeContent>
-std::ostream &operator<<(std::ostream &o, const graph::Graph<EdgeContent> &g) {
-  std::vector<graph::node_t> nodes(g.nodes().begin(), g.nodes().end());
+std::ostream &operator<<(std::ostream &o, const rbg::Graph<EdgeContent> &g) {
+  std::vector<rbg::node_t> nodes(g.nodes().begin(), g.nodes().end());
   std::sort(nodes.begin(), nodes.end());
-  for (graph::node_t node : nodes) {
+  for (rbg::node_t node : nodes) {
     o << node << " -> ";
     auto transitions = g.Transitions(node);
     std::sort(transitions.begin(), transitions.end(),
-              [](const graph::Transition<EdgeContent> &a, const graph::Transition<EdgeContent> &b) {
+              [](const rbg::Transition<EdgeContent> &a, const rbg::Transition<EdgeContent> &b) {
                 return a.to < b.to;
               });
     for (const auto &transition : transitions) {

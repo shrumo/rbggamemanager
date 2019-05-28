@@ -2,8 +2,8 @@
 // Created by shrum on 19/02/18.
 //
 
-#ifndef RBGGAMEMANAGER_ACTION_TYPES_H
-#define RBGGAMEMANAGER_ACTION_TYPES_H
+#ifndef RBGGAMEMANAGER_TYPES_H
+#define RBGGAMEMANAGER_TYPES_H
 
 enum class ActionType {
   // Switches
@@ -46,4 +46,4 @@ enum class ArithmeticOperationType : char {
   kDivisionType,
 };
 
-#endif //RBGGAMEMANAGER_ACTION_TYPES_H
+#endif //RBGGAMEMANAGER_TYPES_H

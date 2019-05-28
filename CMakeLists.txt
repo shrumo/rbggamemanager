@@ -6,7 +6,7 @@ if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Release)
 endif()
 
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 14)
 
 set(CMAKE_CXX_FLAGS "-Wall -Wextra -pipe")
 set(CMAKE_CXX_FLAGS_DEBUG "-g -O0")
@@ -24,8 +24,8 @@ include_directories(${Boost_INCLUDE_DIR})
 include_directories(src)
 include_directories(.)
 
-set(ACTIONS_FILES src/optimized_actions/optimized_action.cc src/optimized_actions/optimized_action.h src/optimized_actions/action_application.h src/optimized_actions/action_types.h
-        src/optimized_actions/arithmetic_operation.cc src/optimized_actions/arithmetic_operation.h)
+set(ACTIONS_FILES src/optimized_actions/optimized_action.cc src/optimized_actions/optimized_action.h src/optimized_actions/action_application.h src/actions/types.h
+        src/optimized_actions/arithmetic_operation.cc src/optimized_actions/arithmetic_operation.h src/actions/actions.h src/actions/arithmetic.h)
 
 set(GAME_FILES src/game_components/game_description.h src/game_components/game_state.cc src/game_components/game_state.h
         src/game_components/graph_board.h src/game_components/move.h src/game_components/name_resolver.h src/game_components/search_context.cc
@@ -38,7 +38,9 @@ set(NETWORKING_FILES src/networking/client.h src/networking/message.h src/networ
 
 set(PARSER_FILES src/parser/arithmetic_creator.cpp src/parser/arithmetic_creator.h src/parser/game_nfa_creator.cc src/parser/game_nfa_creator.h
         src/parser/parser_actions.h src/parser/parser_connection.cc src/parser/parser_connection.h src/parser/parser_utils.cpp
-        src/parser/parser_utils.h src/parser/parser_wrapper.h src/parser/shift_table_creator.cpp src/parser/shift_table_creator.h)
+        src/parser/parser_utils.h src/parser/parser_wrapper.h src/parser/shift_table_creator.cpp src/parser/shift_table_creator.h
+        src/parser/graph_creator.cpp src/parser/graph_creator.h src/parser/actions_creator.cpp src/parser/actions_creator.h
+        src/parser/arithmetic_operations_creator.cpp src/parser/arithmetic_operations_creator.h)
 
 set(UTILS_FILES src/utils/fast_bit_vector.h src/utils/global_config.cpp src/utils/utilities.h)
 

@@ -7,7 +7,9 @@
 
 
 #include <rbgParser/src/abstract_dispatcher.hpp>
-
+#include "parser_actions.h"
+#include <utility>
+#include <stdexcept>
 
 class AstVisitor : public rbg_parser::abstract_dispatcher {
 public:
@@ -42,7 +44,8 @@ public:
   void dispatch(const rbg_parser::arithmetic_operation &) override {}
 };
 
-// This allows to write simple visitors on the tree.
+// This allows to write simple visitors on the tree. It can be treated as a switch statement on type of the nodes in the
+// tree.
 // Example:
 //  // Visitor that counts the number of nodes in the ast. Call by Fn<NodeCountVisitor,int>(move).
 //  class NodeCountVisitor : public AstVisitorR<int> {
@@ -68,12 +71,6 @@ public:
 //    int visit(const rbg_parser::star_move &move) override {
 //      return Fn<NodeCountVisitor, int>(*move.get_content()) + 1;
 //    }
-//    int visit(const rbg_parser::shift &) override { return 1; }
-//    int visit(const rbg_parser::ons &) override { return 1; }
-//    int visit(const rbg_parser::off &) override { return 1; }
-//    int visit(const rbg_parser::assignment &) override { return 1; }
-//    int visit(const rbg_parser::player_switch &) override { return 1; }
-//    int visit(const rbg_parser::keeper_switch &) override { return 1; }
 //    int visit(const rbg_parser::move_check &move) override {
 //      return Fn<NodeCountVisitor, int>(*move.get_content()) + 1;
 //    }
@@ -81,43 +78,56 @@ public:
 //      return
 //          ElementsNodeCountSum<const rbg_parser::arithmetic_expression *>({move.get_left_side(), move.get_right_side()}) + 1;
 //    }
-//    int visit(const rbg_parser::integer_arithmetic &) override { return 1; }
-//    int visit(const rbg_parser::variable_arithmetic &) override { return 1; }
 //    int visit(const rbg_parser::arithmetic_operation &move) override {
 //      return ElementsNodeCountSum(move.get_content()) + 1; }
+//    int defaultCase() override {
+//      return 1;
+//    }
 //  };
 template<typename ResultType>
 class AstVisitorR : public rbg_parser::abstract_dispatcher {
 public:
-  virtual ResultType visit(const rbg_parser::sum &) { return ResultType(); }
+  virtual ResultType defaultCase() { return ResultType(); }
 
-  virtual ResultType visit(const rbg_parser::prioritized_sum &) { return ResultType(); }
+  virtual ResultType gameMoveCase(const rbg_parser::game_move &) { return defaultCase(); }
 
-  virtual ResultType visit(const rbg_parser::concatenation &) { return ResultType(); }
+  virtual ResultType arithmeticExpressionCase(const rbg_parser::arithmetic_expression &) { return defaultCase(); }
 
-  virtual ResultType visit(const rbg_parser::star_move &) { return ResultType(); }
+  virtual ResultType visit(const rbg_parser::sum &move) { return gameMoveCase(move); }
 
-  virtual ResultType visit(const rbg_parser::shift &) { return ResultType(); }
+  virtual ResultType visit(const rbg_parser::prioritized_sum &move) { return gameMoveCase(move); }
 
-  virtual ResultType visit(const rbg_parser::ons &) { return ResultType(); }
+  virtual ResultType visit(const rbg_parser::concatenation &move) { return gameMoveCase(move); }
 
-  virtual ResultType visit(const rbg_parser::off &) { return ResultType(); }
+  virtual ResultType visit(const rbg_parser::star_move &move) { return gameMoveCase(move); }
 
-  virtual ResultType visit(const rbg_parser::assignment &) { return ResultType(); }
+  virtual ResultType visit(const rbg_parser::shift &move) { return gameMoveCase(move); }
 
-  virtual ResultType visit(const rbg_parser::player_switch &) { return ResultType(); }
+  virtual ResultType visit(const rbg_parser::ons &move) { return gameMoveCase(move); }
 
-  virtual ResultType visit(const rbg_parser::keeper_switch &) { return ResultType(); }
+  virtual ResultType visit(const rbg_parser::off &move) { return gameMoveCase(move); }
 
-  virtual ResultType visit(const rbg_parser::move_check &) { return ResultType(); }
+  virtual ResultType visit(const rbg_parser::assignment &move) { return gameMoveCase(move); }
 
-  virtual ResultType visit(const rbg_parser::arithmetic_comparison &) { return ResultType(); }
+  virtual ResultType visit(const rbg_parser::player_switch &move) { return gameMoveCase(move); }
 
-  virtual ResultType visit(const rbg_parser::integer_arithmetic &) { return ResultType(); }
+  virtual ResultType visit(const rbg_parser::keeper_switch &move) { return gameMoveCase(move); }
 
-  virtual ResultType visit(const rbg_parser::variable_arithmetic &) { return ResultType(); }
+  virtual ResultType visit(const rbg_parser::move_check &move) { return gameMoveCase(move); }
 
-  virtual ResultType visit(const rbg_parser::arithmetic_operation &) { return ResultType(); }
+  virtual ResultType visit(const rbg_parser::arithmetic_comparison &move) { return gameMoveCase(move); }
+
+  virtual ResultType visit(const rbg_parser::integer_arithmetic &expression) {
+    return arithmeticExpressionCase(expression);
+  }
+
+  virtual ResultType visit(const rbg_parser::variable_arithmetic &expression) {
+    return arithmeticExpressionCase(expression);
+  }
+
+  virtual ResultType visit(const rbg_parser::arithmetic_operation &expression) {
+    return arithmeticExpressionCase(expression);
+  }
 
   ResultType Result() {
     if (!result_exists_)
@@ -208,7 +218,7 @@ private:
 };
 
 template<typename Visitor, typename ResultType, typename NodeType, typename ...Args>
-ResultType Fn(const NodeType &move, Args... args) {
+ResultType Fn(const NodeType &move, Args &&... args) {
   Visitor visitor(std::forward<Args>(args)...);
   move.accept(visitor);
   return std::move(visitor.Result());

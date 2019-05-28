@@ -7,7 +7,7 @@
 
 #include <bits/unique_ptr.h>
 #include <game_components/name_resolver.h>
-#include "action_types.h"
+#include "actions/types.h"
 
 class GameState;
 

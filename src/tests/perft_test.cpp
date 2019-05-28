@@ -1,3 +1,5 @@
+#include <memory>
+
 //
 // Created by shrum on 28.05.19.
 //
@@ -338,8 +340,8 @@ PerftResult perft_test(const std::string &game, size_t depth) {
   std::vector<rbg_parser::token> result = tokenize(game, msg);
   rbg_parser::game_items g = input_tokens(result, msg);
 
-  pg = std::unique_ptr<rbg_parser::parsed_game>(
-      new rbg_parser::parsed_game(g.parse_game(msg)));
+  pg = std::make_unique<rbg_parser::parsed_game>(
+      g.parse_game(msg));
   ASSERT(msg.is_empty())
   GameDescription gd = CreateDescription(*pg);
   SearchContext context;

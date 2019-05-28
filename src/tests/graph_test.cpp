@@ -7,7 +7,7 @@
 #include <iostream>
 #include "test.h"
 
-using namespace graph;
+using namespace rbg;
 
 std::vector<node_t> SortedTransitions(const Graph<int> &g, node_t node) {
   auto transitions = g.Transitions(node);

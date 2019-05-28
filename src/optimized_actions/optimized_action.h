@@ -10,7 +10,7 @@
 #include <iostream>
 
 #include <game_components/name_resolver.h>
-#include "action_types.h"
+#include "actions/types.h"
 #include "action_application.h"
 #include <game_nfa/automaton.h>
 #include "arithmetic_operation.h"
