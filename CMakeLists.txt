@@ -36,13 +36,13 @@ set(GRAPH_FILES src/game_nfa/automaton.h src/game_nfa/game_moves_description.h s
 set(NETWORKING_FILES src/networking/client.h src/networking/message.h src/networking/networking_utils.cc src/networking/networking_utils.h
         src/networking/server.cc src/networking/server.h)
 
-set(PARSER_FILES src/parser/arithmetic_creator.cpp src/parser/arithmetic_creator.h src/parser/game_nfa_creator.cc src/parser/game_nfa_creator.h
+set(PARSER_FILES src/parser/arithmetic_creator.cc src/parser/arithmetic_creator.h src/parser/game_nfa_creator.cc src/parser/game_nfa_creator.h
         src/parser/parser_actions.h src/parser/parser_connection.cc src/parser/parser_connection.h src/parser/parser_utils.cpp
-        src/parser/parser_utils.h src/parser/parser_wrapper.h src/parser/shift_table_creator.cpp src/parser/shift_table_creator.h
-        src/parser/graph_creator.cpp src/parser/graph_creator.h src/parser/actions_creator.cpp src/parser/actions_creator.h
-        src/parser/arithmetic_operations_creator.cpp src/parser/arithmetic_operations_creator.h)
+        src/parser/parser_utils.h src/parser/parser_wrapper.h src/parser/shift_table_creator.cc src/parser/shift_table_creator.h
+        src/parser/graph_creator.cc src/parser/graph_creator.h src/parser/actions_creator.cc src/parser/actions_creator.h
+        src/parser/arithmetic_operations_creator.cc src/parser/arithmetic_operations_creator.h)
 
-set(UTILS_FILES src/utils/fast_bit_vector.h src/utils/global_config.cpp src/utils/utilities.h)
+set(UTILS_FILES src/utils/fast_bit_vector.h src/utils/global_config.cc src/utils/utilities.h)
 
 set(PLAYING_FILES ${ACTIONS_FILES} ${GAME_FILES} ${GRAPH_FILES} ${UTILS_FILES})
 
@@ -68,10 +68,10 @@ target_link_libraries(material_client ${CMAKE_THREAD_LIBS_INIT})
 
 
 enable_testing()
-add_executable(graph_test ${GRAPH_FILES} src/tests/graph_test.cpp)
+add_executable(graph_test ${GRAPH_FILES} src/tests/graph_test.cc)
 add_test(graph graph_test)
 
-add_executable(perft_test ${PLAYING_FILES} ${PARSER_FILES} src/tests/perft_test.cpp)
+add_executable(perft_test ${PLAYING_FILES} ${PARSER_FILES} src/tests/perft_test.cc)
 target_link_libraries(perft_test rbgParser)
 add_test(perft perft_test)
 
