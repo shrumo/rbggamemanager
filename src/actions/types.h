@@ -46,4 +46,37 @@ enum class ArithmeticOperationType : char {
   kDivisionType,
 };
 
+std::string ActionName(ActionType type) {
+  switch (type) {
+    case ActionType::kSwitchType:
+      return "switch";
+    case ActionType::kOffType:
+      return "off";
+    case ActionType::kAssignmentType:
+      return "assignment";
+    case ActionType::kEmptyType:
+      return "empty";
+    case ActionType::kShiftType:
+      return "shift";
+    case ActionType::kShiftTableType:
+      return "shift_table";
+    case ActionType::kOnType:
+      return "on";
+    case ActionType::kConditionCheckType:
+      return "condition_check";
+    case ActionType::kNegatedConditionCheckType:
+      return "negated_condition_check";
+    case ActionType::kArithmeticLessComparisonType:
+      return "arithmetic_le";
+    case ActionType::kArithmeticLessEqualComparisonType:
+      return "arithmetic_leq";
+    case ActionType::kArithmeticEqualComparisonType:
+      return "arithmetic_eq";
+    case ActionType::kArithmeticNotEqualComparisonType:
+      return "arithmetic_neq";
+    case ActionType::kPlayerCheck:
+      return "player_check";
+  }
+}
+
 #endif //RBGGAMEMANAGER_TYPES_H

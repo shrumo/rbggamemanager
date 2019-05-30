@@ -27,6 +27,10 @@ namespace rbg {
 
     uint id() const { return id_; }
 
+    virtual std::string to_string() const {
+      return ActionName(type_) + "_" + std::to_string(id_);
+    }
+
   private:
     ActionType type_;
     uint id_;
