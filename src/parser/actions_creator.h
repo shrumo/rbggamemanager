@@ -9,6 +9,6 @@
 #include <actions/actions.h>
 #include <rbgParser/src/game_move.hpp>
 
-std::unique_ptr<rbg::Action> CreateAction(const rbg_parser::game_move &move);
+std::unique_ptr<rbg::Action> CreateAction(const rbg_parser::game_move &move, uint id);
 
 #endif //RBGGAMEMANAGER_ACTIONS_CREATOR_H

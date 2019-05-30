@@ -40,6 +40,7 @@ public:
       case rbg_parser::division:
         return std::make_unique<Division>(std::move(elements));
     }
+    throw std::logic_error("Not implemented.");
   }
 };
 
