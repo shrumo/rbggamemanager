@@ -1,8 +1,7 @@
 //
 // Created by shrum on 21.05.19.
 //
-
-#include <game_nfa/graph.h>
+#include <graph/graph.h>
 #include <algorithm>
 #include <iostream>
 #include "test.h"

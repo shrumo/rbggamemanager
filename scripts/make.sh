@@ -3,6 +3,11 @@
 # This script guides user through compiling process. It worked for me.
 
 cd "${0%/*}"
+FILE=../rbgParser/Makefile
+if ! test -f "$FILE"; then
+    echo "$FILE does not exist. You should probably call ./pull.sh."
+    exit 1
+fi
 echo "Creating CMakeLists.txt for submodule rbgParser."
 cd ../rbgParser/
 python3 ../scripts/cmakesubmodule.py > CMakeLists.txt
