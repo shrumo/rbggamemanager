@@ -14,10 +14,9 @@
 #include <stdexcept>
 #include <rbgParser/src/parsed_game.hpp>
 #include <rbgParser/src/game_items.hpp>
-#include <type_traits>
+#include <string>
 
 namespace rbg {
-
   std::unique_ptr<rbg_parser::parsed_game> ParseGame(const std::string &game_text) {
     rbg_parser::messages_container msg;
 
@@ -175,7 +174,19 @@ namespace rbg {
     bool result_exists_ = false;
     ResultType result_;
   };
+}
 
+namespace std {
+  template<>
+  struct hash<rbg_parser::token> {
+    std::size_t operator()(const rbg_parser::token &k) const {
+      using std::size_t;
+      using std::hash;
+      using std::string;
+
+      return hash<std::string>()(k.to_string());
+    }
+  };
 }
 
 #endif //RBGGAMEMANAGER_PARSER_VISITOR_H

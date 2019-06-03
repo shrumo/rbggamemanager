@@ -26,7 +26,7 @@ include_directories(.)
 
 set(GRAPH_FILES src/graph/graph.h)
 
-set(PARSER_FILES src/parser/parser_visitor.h src/parser/parser_actions.h)
+set(PARSER_FILES src/parser/parser_wrapper.h src/parser/parser_actions.h)
 
 
 enable_testing()

@@ -1,7 +1,7 @@
 //
 // Created by shrum on 03.06.19.
 //
-#include <parser/parser_visitor.h>
+#include <parser/parser_wrapper.h>
 #include "test.h"
 
 using namespace rbg;
