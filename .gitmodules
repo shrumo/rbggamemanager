@@ -1,3 +1,6 @@
 [submodule "rbgParser"]
 	path = rbgParser
 	url = https://github.com/uicus/rbgParser.git
+[submodule "pybind11"]
+	path = pybind11
+	url = https://github.com/pybind/pybind11.git

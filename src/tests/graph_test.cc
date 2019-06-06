@@ -42,6 +42,7 @@ int main() {
   g.AddEdge(v1, 3, v3);
 
   ASSERT(g.nodes().size() == 3)
+  ASSERT(g.edges().size() == 4)
   ASSERT(SortedTransitions(g, v1) == std::vector<node_t>({v2, v3}))
   ASSERT(SortedTransitions(g, v3) == std::vector<node_t>({v1}))
 
@@ -49,6 +50,7 @@ int main() {
   g.AddEdge(v4, 4, v1);
 
   ASSERT(g.nodes().size() == 4)
+  ASSERT(g.edges().size() == 5)
   ASSERT(SortedInTransitions(g, v1) == std::vector<node_t>({v3, v4}))
   ASSERT(SortedInTransitions(g, v2) == std::vector<node_t>({v1}))
 

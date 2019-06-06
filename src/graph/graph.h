@@ -25,9 +25,16 @@ namespace rbg {
     const EdgeContent &content;
   };
 
+
   template<typename EdgeContent>
   class Graph {
   public:
+    struct Edge {
+      node_t from;
+      EdgeContent content;
+      node_t to;
+    };
+
     Graph() : next_node_(0), next_transition_id_(0) {}
 
     node_t AddNode() {
@@ -130,12 +137,11 @@ namespace rbg {
       return edges_[edge].content;
     }
 
+    const std::unordered_map<edge_id_t, Edge> &edges() const {
+      return edges_;
+    }
+
   private:
-    struct Edge {
-      node_t from;
-      EdgeContent content;
-      node_t to;
-    };
     std::unordered_set<node_t> nodes_;
     std::unordered_map<edge_id_t, Edge> edges_;
     std::unordered_map<node_t, std::unordered_set<edge_id_t> > out_edges_;

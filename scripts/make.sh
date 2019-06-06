@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# This script guides user through compiling process. It worked for me.
+# This script guides user through compiling process on Linux systems.
 
 cd "${0%/*}"
 FILE=../rbgParser/Makefile
@@ -10,7 +10,7 @@ if ! test -f "$FILE"; then
 fi
 echo "Creating CMakeLists.txt for submodule rbgParser."
 cd ../rbgParser/
-python3 ../scripts/cmakesubmodule.py > CMakeLists.txt
+# python3 ../scripts/cmakesubmodule.py > CMakeLists.txt
 echo "CMakeLists.txt for submodule created."
 cd ../
 echo "Creating build directory."
