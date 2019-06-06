@@ -64,4 +64,15 @@ int main() {
   ASSERT(SortedTransitions(g, v3).empty())
   ASSERT(SortedInTransitions(g, v2).empty())
   ASSERT(SortedTransitions(g, v2) == std::vector<node_t>({v3}))
+
+  g.AddEdge(v3, 5, v4);
+  g.AddEdge(v3, 6, v3);
+  g.AddEdge(v4, 7, v3);
+  g.AddEdge(v4, 8, v2);
+  auto v = g.IdentifyNodes(v2, v3);
+  ASSERT(SortedTransitions(g, v) == std::vector<node_t>({v, v, v4}))
+
+  std::cout << "Final graph looks like this:\n";
+  std::cout << GraphDescription(g, [](const int &a) { return std::to_string(a); });
+
 }

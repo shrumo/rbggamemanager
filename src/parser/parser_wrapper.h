@@ -17,19 +17,9 @@
 #include <string>
 
 namespace rbg {
-  std::unique_ptr<rbg_parser::parsed_game> ParseGame(const std::string &game_text) {
-    rbg_parser::messages_container msg;
-
-    std::unique_ptr<rbg_parser::parsed_game> pg;
-
-    std::vector<rbg_parser::token> result = tokenize(game_text, msg);
-    rbg_parser::game_items g = input_tokens(result, msg);
-    pg = std::make_unique<rbg_parser::parsed_game>(
-        g.parse_game(msg));
-
-    return pg;
-  }
-
+  std::unique_ptr<rbg_parser::parsed_game> ParseGame(const std::string &game_text);
+  
+  
 // This is a visitor class for the abstract syntax tree that is returned by the parser.
 // This allows to write functions that operate on the tree. It can be treated as a pattern matching function.
 // The pattern is matched to the type of the game move on the input. Tha pattern is matched to the most specific type,

@@ -12,6 +12,7 @@
 #include <ostream>
 #include <memory>
 #include <algorithm>
+#include <sstream>
 
 namespace rbg {
   using node_t = std::size_t;
@@ -21,7 +22,7 @@ namespace rbg {
   struct Transition {
     edge_id_t id;
     node_t to;
-    EdgeContent content;
+    const EdgeContent &content;
   };
 
   template<typename EdgeContent>
@@ -33,7 +34,8 @@ namespace rbg {
       node_t node = next_node_;
       next_node_++;
       nodes_.insert(node);
-      edges_[node];
+      out_edges_[node];
+      in_edges_[node];
       return node;
     }
 
@@ -104,9 +106,28 @@ namespace rbg {
       nodes_.erase(node);
     }
 
+    node_t IdentifyNodes(node_t a, node_t b) {
+      for (const auto &transition : Transitions(b)) {
+        out_edges_[b].erase(transition.id);
+        out_edges_[a].insert(transition.id);
+        edges_[transition.id].from = a;
+      }
+
+      for (const auto &transition : InTransitions(b)) {
+        in_edges_[b].erase(transition.id);
+        in_edges_[a].insert(transition.id);
+        edges_[transition.id].to = a;
+      }
+      DeleteNode(b);
+      return a;
+    }
 
     const std::unordered_set<node_t> &nodes() const {
       return nodes_;
+    }
+
+    EdgeContent &edge_content(edge_id_t edge) {
+      return edges_[edge].content;
     }
 
   private:
@@ -126,29 +147,40 @@ namespace rbg {
 
   template<typename Letter>
   struct Nfa {
+    Graph<Letter> graph;
     node_t initial;
     node_t final;
-    std::unique_ptr<Graph<Letter>> graph;
   };
 }
 
-template<typename EdgeContent>
-std::ostream &operator<<(std::ostream &o, const rbg::Graph<EdgeContent> &g) {
+
+template<typename EdgeContent, typename ContentPrinter>
+std::string GraphDescription(const rbg::Graph<EdgeContent> &g, ContentPrinter printer) {
+  std::stringstream result;
   std::vector<rbg::node_t> nodes(g.nodes().begin(), g.nodes().end());
   std::sort(nodes.begin(), nodes.end());
   for (rbg::node_t node : nodes) {
-    o << node << " -> ";
+    result << node << " -> ";
     auto transitions = g.Transitions(node);
-    std::sort(transitions.begin(), transitions.end(),
-              [](const rbg::Transition<EdgeContent> &a, const rbg::Transition<EdgeContent> &b) {
-                return a.to < b.to;
-              });
-    for (const auto &transition : transitions) {
-      o << transition.to << " (edge id: " << transition.id << ", content: " << transition.content << "), ";
+    std::vector<size_t> indices;
+    indices.reserve(transitions.size());
+    for (size_t i = 0; i < transitions.size(); i++) {
+      indices.push_back(i);
     }
-    o << "\n";
+    std::sort(indices.begin(), indices.end(),
+              [&](const int &a_ind, const int &b_ind) {
+                const rbg::Transition<EdgeContent> &a = transitions[a_ind];
+                const rbg::Transition<EdgeContent> &b = transitions[b_ind];
+                return a.to < b.to || (a.to == b.to && a.id < b.id);
+              });
+    for (size_t i = 0; i < transitions.size(); i++) {
+      const auto &transition = transitions[indices[i]];
+      result << transition.to << " (edge id: " << transition.id << ", content: " << printer(transition.content)
+             << "), ";
+    }
+    result << "\n";
   }
-  return o;
+  return result.str();
 }
 
 

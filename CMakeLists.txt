@@ -26,8 +26,10 @@ include_directories(.)
 
 set(GRAPH_FILES src/graph/graph.h)
 
-set(PARSER_FILES src/parser/parser_wrapper.h src/parser/parser_actions.h)
+set(PARSER_FILES src/parser/parser_wrapper.h src/parser/parser_actions.h src/parser/parser_wrapper.cc)
 
+set(CONSTRUCTION_FILES
+        src/construction/graph_creator.cc src/construction/graph_creator.h)
 
 enable_testing()
 add_executable(graph_test ${GRAPH_FILES} src/tests/graph_test.cc)
@@ -36,6 +38,10 @@ add_test(graph graph_test)
 add_executable(parser_test ${GRAPH_FILES} ${PARSER_FILES} src/tests/parser_test.cc)
 target_link_libraries(parser_test rbgParser)
 add_test(parser parser_test)
+
+add_executable(creator_test ${GRAPH_FILES} ${PARSER_FILES} ${CONSTRUCTION_FILES} src/tests/creator_test.cc)
+target_link_libraries(creator_test rbgParser)
+add_test(creator creator_test)
 
 
 
