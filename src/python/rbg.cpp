@@ -25,10 +25,10 @@ public:
 
 Nfa<std::string> translate(const Nfa<std::unique_ptr<Move>> &nfa) {
   Nfa<std::string> result;
-  result.initial = nfa.initial;
-  result.final = nfa.final;
   std::unordered_map<node_t, node_t> node_mapping;
-  for (auto node : nfa.graph.nodes()) {
+  std::vector<node_t> sorted_nodes(nfa.graph.nodes().begin(), nfa.graph.nodes().end());
+  std::sort(sorted_nodes.begin(), sorted_nodes.end());
+  for (auto node : sorted_nodes) {
     node_t result_node = result.graph.AddNode();
     node_mapping[node] = result_node;
   }
@@ -39,6 +39,9 @@ Nfa<std::string> translate(const Nfa<std::unique_ptr<Move>> &nfa) {
                          edge.second.content ? Translator()(*edge.second.content) : "e",
                          node_mapping.at(edge.second.to));
   }
+
+  result.initial = node_mapping.at(nfa.initial);
+  result.final = node_mapping.at(nfa.final);
   return result;
 }
 
@@ -64,9 +67,9 @@ PYBIND11_MODULE(rbg, m) {
     )pbdoc");
 
   pybind11::class_<Graph<std::string>::Edge>(m, "Edge")
-      .def_readwrite("from", &Graph<std::string>::Edge::from)
-      .def_readwrite("to", &Graph<std::string>::Edge::to)
-      .def_readwrite("content", &Graph<std::string>::Edge::content)
+      .def_readwrite("a", &Graph<std::string>::Edge::from)
+      .def_readwrite("b", &Graph<std::string>::Edge::to)
+      .def_readwrite("value", &Graph<std::string>::Edge::content)
       .def("__repr__", [](const Graph<std::string>::Edge &edge) {
         return "<rbg.Edge from " + std::to_string(edge.from) + " to " + std::to_string(edge.to) + " on " +
                edge.content + ">";

@@ -11,10 +11,17 @@ nfa = rbg.create_nfa("""
 #rules = ->red ( up + down + left + right )* [$ turn = turn+1] ->blue
 """)
 
-# def collect_actions(nfa):
-# return [edge.content for edge in nfa.graph.edges().values()]
+
+def collect_actions(nfa):
+    return [edge.value for edge in nfa.graph.edges().values()]
 
 
-# assert (len(set(collect_actions(nfa))) == 7 + 1)
+assert (len(set(collect_actions(nfa))) == 7 + 1)  # There is also epsilon transition
 
-# print("The nfa was succesfully created:", nfa)
+print("The nfa was succesfully created:", nfa)
+print('Its edges look like this:')
+print(*sorted(nfa.graph.edges().values(), key=lambda x: (x.a, x.b, x.value)), sep='\n')
+
+out_of_initial = [edge for edge in nfa.graph.edges().values() if edge.a == nfa.initial]
+assert (len(out_of_initial) == 1)
+assert (out_of_initial[0].value == "->red")

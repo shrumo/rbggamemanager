@@ -37,6 +37,11 @@ set(ENV{PYTHONPATH} ${PYTHON_PATH}:${CMAKE_CURRENT_BINARY_DIR})
 pybind11_add_module(rbg src/python/rbg.cpp ${GRAPH_FILES} ${PARSER_FILES} ${CONSTRUCTION_FILES})
 target_link_libraries(rbg PRIVATE rbgParser)
 
+add_custom_target(visualize_graph ALL
+        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/src/utilities/graph_widget.py ${CMAKE_CURRENT_BINARY_DIR}/graph_widget.py
+        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/src/utilities/visualize_graph.py ${CMAKE_CURRENT_BINARY_DIR}/visualize_graph.py
+        DEPENDS rbg)
+
 # There is a bug in CMake, so that in order to run tests you have to build executables manually
 enable_testing()
 add_executable(graph_test ${GRAPH_FILES} src/tests/graph_test.cc)
