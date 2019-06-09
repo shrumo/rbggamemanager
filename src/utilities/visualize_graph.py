@@ -1,7 +1,6 @@
 #! /usr/bin/python3
 import argparse
 from collections import defaultdict
-from heapq import heappush, heappop
 from tkinter import *
 
 import rbg
@@ -71,22 +70,41 @@ def nodes_positions(nfa):
 
     heights = {nfa.initial: 0}
     taken_heights = defaultdict(lambda: set())
-    no_in = []
-    heappush(no_in, ((0, 0), nfa.initial))
-    added = 1
-    while len(no_in) > 0:
-        _, u = heappop(no_in)
-        nexts = sorted([v for v, _ in adj[u]] + erased_incoming[u], key=lambda x: -distances[x])
+
+    def dfs(u):
+        nonlocal heights, taken_heights
+        nexts = sorted([v for v, _ in adj[u]] + erased_incoming[u],
+                       key=lambda x: (-distances[x], float('inf') if x not in heights else heights[x]))
         for i, v in enumerate(nexts):
-            in_degrees[v] -= 1
             if v not in heights:
-                heights[v] = heights[u] + i
+                heights[v] = heights[u]
                 while any(heights[v] in taken_heights[i] for i in range(distances[u] + 1, distances[v] + 1)):
                     heights[v] += 1
-                taken_heights[distances[v]] |= {heights[v]}
-            if in_degrees[v] == 0:
-                heappush(no_in, ((heights[v], added), v))
-                added += 1
+                if heights[v] == heights[u]:
+                    for i in range(distances[u] + 1, distances[v] + 1):
+                        taken_heights[i] |= {heights[v]}
+                else:
+                    taken_heights[distances[v]] |= {heights[v]}
+                dfs(v)
+
+    dfs(nfa.initial)
+
+    # no_in = []
+    # heappush(no_in, ((0, 0), nfa.initial))
+    # added = 1
+    # while len(no_in) > 0:
+    #     _, u = heappop(no_in)
+    #     nexts = sorted([v for v, _ in adj[u]] + erased_incoming[u],
+    #                    key=lambda x: (float('inf') if x not in heights else heights[x], -distances[x]))
+    #     for i, v in enumerate(nexts):
+    #         in_degrees[v] -= 1
+    #         if v not in heights:
+    #             heights[v] = heights[u] + i
+    #             while any(heights[v] in taken_heights[i] for i in range(distances[u] + 1, distances[v] + 1)):
+    #                 heights[v] += 1
+    #             taken_heights[distances[v]] |= {heights[v]}
+    #             heappush(no_in, ((heights[v], -added), v))
+    #             added += 1
 
     return {v: (distances[v], heights[v]) for v in nfa.graph.nodes()}
 
@@ -129,7 +147,7 @@ def main():
 
     root = Tk()
 
-    root.title("Nfa")
+    root.title(args.game_path)
 
     root.geometry("800x600")
 
