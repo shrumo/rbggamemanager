@@ -89,23 +89,6 @@ def nodes_positions(nfa):
 
     dfs(nfa.initial)
 
-    # no_in = []
-    # heappush(no_in, ((0, 0), nfa.initial))
-    # added = 1
-    # while len(no_in) > 0:
-    #     _, u = heappop(no_in)
-    #     nexts = sorted([v for v, _ in adj[u]] + erased_incoming[u],
-    #                    key=lambda x: (float('inf') if x not in heights else heights[x], -distances[x]))
-    #     for i, v in enumerate(nexts):
-    #         in_degrees[v] -= 1
-    #         if v not in heights:
-    #             heights[v] = heights[u] + i
-    #             while any(heights[v] in taken_heights[i] for i in range(distances[u] + 1, distances[v] + 1)):
-    #                 heights[v] += 1
-    #             taken_heights[distances[v]] |= {heights[v]}
-    #             heappush(no_in, ((heights[v], -added), v))
-    #             added += 1
-
     return {v: (distances[v], heights[v]) for v in nfa.graph.nodes()}
 
 
@@ -124,7 +107,7 @@ def create_nfa_visualization(root, game_text):
     def long_jump(a, b):
         dx = abs(a[0] - b[0])
         dy = abs(a[1] - b[1])
-        return min(dx, dy) >= 2
+        return min(dx, dy) >= 2 or dy == 1 and dx > 20
 
     for edge in nfa.graph.edges().values():
         a = node_mapping[edge.a]
