@@ -40,7 +40,7 @@ public:
   }
 
   GraphCreatorResult PrioritizedSumCase(const rbg_parser::prioritized_sum &) override {
-    throw std::logic_error{"Function not yet implemented."};
+    assert(false && "Function not yet implemented.");
   }
 
   GraphCreatorResult ConcatenationCase(const rbg_parser::concatenation &concatenation) override {

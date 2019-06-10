@@ -4,7 +4,7 @@
 #include <graph/graph.h>
 #include <algorithm>
 #include <iostream>
-#include "test.h"
+#include <cassert>
 
 using namespace rbg;
 
@@ -41,40 +41,39 @@ int main() {
   g.AddEdge(v3, 2, v1);
   g.AddEdge(v1, 3, v3);
 
-  ASSERT(g.nodes().size() == 3)
-  ASSERT(g.edges().size() == 4)
-  ASSERT(SortedTransitions(g, v1) == std::vector<node_t>({v2, v3}))
-  ASSERT(SortedTransitions(g, v3) == std::vector<node_t>({v1}))
+  assert(g.nodes().size() == 3);
+  assert(g.edges().size() == 4);
+  assert(SortedTransitions(g, v1) == std::vector<node_t>({v2, v3}));
+  assert(SortedTransitions(g, v3) == std::vector<node_t>({v1}));
 
   node_t v4 = g.AddNode();
   g.AddEdge(v4, 4, v1);
 
-  ASSERT(g.nodes().size() == 4)
-  ASSERT(g.edges().size() == 5)
-  ASSERT(SortedInTransitions(g, v1) == std::vector<node_t>({v3, v4}))
-  ASSERT(SortedInTransitions(g, v2) == std::vector<node_t>({v1}))
+  assert(g.nodes().size() == 4);
+  assert(g.edges().size() == 5);
+  assert(SortedInTransitions(g, v1) == std::vector<node_t>({v3, v4}));
+  assert(SortedInTransitions(g, v2) == std::vector<node_t>({v1}));
 
-  ASSERT(g.Transitions(v3).size() == 1)
+  assert(g.Transitions(v3).size() == 1);
   edge_id_t v3v1edge = g.Transitions(v3).front().id;
   g.DeleteEdge(v3v1edge);
-  ASSERT(SortedInTransitions(g, v1) == std::vector<node_t>({v4}))
-  ASSERT(SortedTransitions(g, v3).empty())
+  assert(SortedInTransitions(g, v1) == std::vector<node_t>({v4}));
+  assert(SortedTransitions(g, v3).empty());
 
   g.DeleteNode(v1);
-  ASSERT(g.nodes().size() == 3)
-  ASSERT(SortedTransitions(g, v4).empty())
-  ASSERT(SortedTransitions(g, v3).empty())
-  ASSERT(SortedInTransitions(g, v2).empty())
-  ASSERT(SortedTransitions(g, v2) == std::vector<node_t>({v3}))
+  assert(g.nodes().size() == 3);
+  assert(SortedTransitions(g, v4).empty());
+  assert(SortedTransitions(g, v3).empty());
+  assert(SortedInTransitions(g, v2).empty());
+  assert(SortedTransitions(g, v2) == std::vector<node_t>({v3}));
 
   g.AddEdge(v3, 5, v4);
   g.AddEdge(v3, 6, v3);
   g.AddEdge(v4, 7, v3);
   g.AddEdge(v4, 8, v2);
   auto v = g.IdentifyNodes(v2, v3);
-  ASSERT(SortedTransitions(g, v) == std::vector<node_t>({v, v, v4}))
+  assert(SortedTransitions(g, v) == std::vector<node_t>({v, v, v4}));
 
-  std::cout << "Final graph looks like this:\n";
   std::cout << GraphDescription(g, [](const int &a) { return std::to_string(a); });
 
 }

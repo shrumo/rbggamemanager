@@ -6,7 +6,7 @@
 // Created by shrum on 03.06.19.
 //
 #include <parser/parser_wrapper.h>
-#include "test.h"
+#include <cassert>
 #include <construction/graph_creator.h>
 #include <queue>
 
@@ -71,7 +71,7 @@ int main() {
   auto paths = ShortestPaths(result.graph, result.initial, result.final);
 
   for (const auto &path : paths) {
-    ASSERT(SortedActionIndices(path) == vector<int>({1, 6, 7}))
+    assert(SortedActionIndices(path) == vector<int>({1, 6, 7}));
   }
 
   cout << "The graph looks like this:\n";

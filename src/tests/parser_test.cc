@@ -2,7 +2,7 @@
 // Created by shrum on 03.06.19.
 //
 #include <parser/parser_wrapper.h>
-#include "test.h"
+#include <cassert>
 
 using namespace rbg;
 
@@ -52,5 +52,5 @@ class ActionsCount : public AstFunction<int> {
 
 int main() {
   auto pg = ParseGame(kSmallGame);
-  ASSERT(ActionsCount()(*pg->get_moves()) == 9)
+  assert(ActionsCount()(*pg->get_moves()) == 9);
 }

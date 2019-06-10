@@ -15,6 +15,7 @@
 #include <rbgParser/src/parsed_game.hpp>
 #include <rbgParser/src/game_items.hpp>
 #include <string>
+#include <cassert>
 
 namespace rbg {
   std::unique_ptr<rbg_parser::parsed_game> ParseGame(const std::string &game_text);
@@ -78,9 +79,8 @@ namespace rbg {
     template<typename NodeType>
     ResultType operator()(const NodeType &move) {
       move.accept(*this);
-      if (!result_exists_)
-        throw std::logic_error(
-            "You cannot reuse the result. Extraction of the result can happen exactly once after calling visit.");
+      assert(result_exists_ &&
+             "You cannot reuse the result. Extraction of the result can happen exactly once after calling visit.");
       result_exists_ = false;
       return std::move(result_);
     }

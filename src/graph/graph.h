@@ -13,6 +13,7 @@
 #include <memory>
 #include <algorithm>
 #include <sstream>
+#include <cassert>
 
 namespace rbg {
   using node_t = std::size_t;
@@ -47,12 +48,8 @@ namespace rbg {
     }
 
     edge_id_t AddEdge(node_t from, EdgeContent content, node_t to) {
-      if (nodes_.find(from) == nodes_.end()) {
-        throw std::logic_error("Node " + std::to_string(from) + " doesn't exist.");
-      }
-      if (nodes_.find(to) == nodes_.end()) {
-        throw std::logic_error("Node " + std::to_string(to) + " doesn't exist.");
-      }
+      assert(nodes_.find(from) != nodes_.end() && "Node doesn't exist.");
+      assert(nodes_.find(to) != nodes_.end() && "Node doesn't exist.");
       edge_id_t transition_id = next_transition_id_;
       next_transition_id_++;
       edges_[transition_id].from = from;
@@ -64,9 +61,7 @@ namespace rbg {
     }
 
     std::vector<Transition<EdgeContent>> Transitions(node_t node) const {
-      if (nodes_.find(node) == nodes_.end()) {
-        throw std::logic_error("Node " + std::to_string(node) + " doesn't exist.");
-      }
+      assert(nodes_.find(node) != nodes_.end() && "Node doesn't exist.");
       std::vector<Transition<EdgeContent>> result;
       for (edge_id_t edge_id : out_edges_.at(node)) {
         const Edge &edge = edges_.at(edge_id);
@@ -77,9 +72,7 @@ namespace rbg {
 
 
     std::vector<Transition<EdgeContent>> InTransitions(node_t node) const {
-      if (nodes_.find(node) == nodes_.end()) {
-        throw std::logic_error("Node " + std::to_string(node) + " doesn't exist.");
-      }
+      assert(nodes_.find(node) != nodes_.end() && "Node doesn't exist.");
       std::vector<Transition<EdgeContent>> result;
       for (edge_id_t edge_id : in_edges_.at(node)) {
         const Edge &edge = edges_.at(edge_id);
@@ -89,9 +82,7 @@ namespace rbg {
     }
 
     void DeleteEdge(edge_id_t edge_id) {
-      if (edges_.find(edge_id) == edges_.end()) {
-        throw std::logic_error("Node " + std::to_string(edge_id) + " doesn't exist.");
-      }
+      assert(edges_.find(edge_id) != edges_.end() && "Edge doesn't exist.");
       {
         const Edge &edge = edges_[edge_id];
         out_edges_[edge.from].erase(edge_id);
@@ -101,9 +92,7 @@ namespace rbg {
     }
 
     void DeleteNode(node_t node) {
-      if (nodes_.find(node) == nodes_.end()) {
-        throw std::logic_error("Node " + std::to_string(node) + " doesn't exist.");
-      }
+      assert(nodes_.find(node) != nodes_.end() && "Node doesn't exist.");
       std::unordered_set<edge_id_t> edges_to_delete;
       edges_to_delete.insert(out_edges_[node].begin(), out_edges_[node].end());
       edges_to_delete.insert(in_edges_[node].begin(), in_edges_[node].end());
