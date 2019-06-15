@@ -25,7 +25,7 @@ include_directories(${Boost_INCLUDE_DIR})
 include_directories(src)
 include_directories(.)
 
-set(GAMESTATE_FILES src/gamestate/namesresolver.h src/gamestate/board.h)
+set(GAMESTATE_FILES src/gamestate/namesresolver.h src/gamestate/board.h src/gamestate/searchsteps/searchstep.h src/gamestate/declarations.h src/gamestate/gamestate.h src/gamestate/searchsteps/fastbitvector.h src/gamestate/searchsteps/resetabblebitarraystack.h)
 
 set(GRAPH_FILES src/graph/graph.h)
 
