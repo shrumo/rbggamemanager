@@ -55,7 +55,7 @@ int main() {
   assert(SortedInTransitions(g, v2) == std::vector<node_t>({v1}));
 
   assert(g.Transitions(v3).size() == 1);
-  edge_id_t v3v1edge = g.Transitions(v3).front().id;
+  shift_edge_id_t v3v1edge = g.Transitions(v3).front().id;
   g.DeleteEdge(v3v1edge);
   assert(SortedInTransitions(g, v1) == std::vector<node_t>({v4}));
   assert(SortedTransitions(g, v3).empty());

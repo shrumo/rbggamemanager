@@ -5,7 +5,7 @@
 #ifndef RBGGAMEMANAGER_GAMESTATE_H
 #define RBGGAMEMANAGER_GAMESTATE_H
 
-#include "board.h"
+#include "board_description.h"
 #include "declarations.h"
 
 namespace rbg {
@@ -29,7 +29,7 @@ namespace rbg {
 
   private:
     Declarations declarations_;
-    Board board_;
+    BoardDescription board_;
     vertex_id_t current_pos_;
     std::vector<variable_value_t> variables_values_;
     player_id_t current_player_;

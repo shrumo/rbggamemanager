@@ -23,11 +23,6 @@ namespace rbg {
     Run(GameState &, std::vector<ModifierApplication> &, std::vector<std::vector<ModifierApplication>> &) = 0;
   };
 
-  class EmptySearchStep : public SearchStep {
-  public:
-    void Run(GameState &, std::vector<ModifierApplication> &, std::vector<std::vector<ModifierApplication>> &) final {}
-  };
-
   class SingleSearchStep : public SearchStep {
   protected:
     void SetNextSearchStep(SearchStep *next) {
@@ -42,6 +37,24 @@ namespace rbg {
 
   private:
     SearchStep *next_ = {};
+  };
+
+
+  class MultipleSearchStep : public SearchStep {
+  public:
+    void Run(GameState &state, std::vector<ModifierApplication> &applied_modifiers,
+             std::vector<std::vector<ModifierApplication>> &moves) final {
+      for (auto step : next_steps_) {
+        step->Run(state, applied_modifiers, moves);
+      }
+    }
+
+    void AddNextSearchStep(SearchStep *next) {
+      next_steps_.push_back(next);
+    }
+
+  private:
+    std::vector<SearchStep *> next_steps_;
   };
 
 
@@ -76,12 +89,12 @@ namespace rbg {
     uint index_;
   };
 
-  class ArithmeticValue {
+  class ArithmeticOperation {
   public:
     virtual variable_value_t Value(const GameState &s) const = 0;
   };
 
-  class VariableValue : public ArithmeticValue {
+  class VariableValue : public ArithmeticOperation {
   public:
     explicit VariableValue(variable_id_t variable_id) : variable_id_(variable_id) {}
 
@@ -93,7 +106,7 @@ namespace rbg {
     variable_id_t variable_id_;
   };
 
-  class ConstantValue : public ArithmeticValue {
+  class ConstantValue : public ArithmeticOperation {
   public:
     explicit ConstantValue(variable_value_t value) : value_(value) {}
 
@@ -105,9 +118,9 @@ namespace rbg {
     variable_value_t value_;
   };
 
-  class SumValue : public ArithmeticValue {
+  class SumValue : public ArithmeticOperation {
   public:
-    explicit SumValue(std::vector<const ArithmeticValue *> summands) : summands_(std::move(summands)) {}
+    explicit SumValue(std::vector<const ArithmeticOperation *> summands) : summands_(std::move(summands)) {}
 
     variable_value_t Value(const GameState &s) const override {
       variable_value_t result = summands_[0]->Value(s);
@@ -118,12 +131,12 @@ namespace rbg {
     }
 
   private:
-    std::vector<const ArithmeticValue *> summands_;
+    std::vector<const ArithmeticOperation *> summands_;
   };
 
-  class SubtractionValue : public ArithmeticValue {
+  class SubtractionValue : public ArithmeticOperation {
   public:
-    explicit SubtractionValue(std::vector<const ArithmeticValue *> elements) : elements_(std::move(elements)) {}
+    explicit SubtractionValue(std::vector<const ArithmeticOperation *> elements) : elements_(std::move(elements)) {}
 
     variable_value_t Value(const GameState &s) const override {
       variable_value_t result = elements_[0]->Value(s);
@@ -134,12 +147,12 @@ namespace rbg {
     }
 
   private:
-    std::vector<const ArithmeticValue *> elements_;
+    std::vector<const ArithmeticOperation *> elements_;
   };
 
-  class ProductValue : public ArithmeticValue {
+  class ProductValue : public ArithmeticOperation {
   public:
-    explicit ProductValue(std::vector<const ArithmeticValue *> factors) : factors_(std::move(factors)) {}
+    explicit ProductValue(std::vector<const ArithmeticOperation *> factors) : factors_(std::move(factors)) {}
 
     variable_value_t Value(const GameState &s) const override {
       variable_value_t result = factors_[0]->Value(s);
@@ -150,12 +163,12 @@ namespace rbg {
     }
 
   private:
-    std::vector<const ArithmeticValue *> factors_;
+    std::vector<const ArithmeticOperation *> factors_;
   };
 
-  class DivisionValue : public ArithmeticValue {
+  class DivisionValue : public ArithmeticOperation {
   public:
-    explicit DivisionValue(std::vector<const ArithmeticValue *> elements) : elements_(std::move(elements)) {}
+    explicit DivisionValue(std::vector<const ArithmeticOperation *> elements) : elements_(std::move(elements)) {}
 
     variable_value_t Value(const GameState &s) const override {
       variable_value_t result = elements_[0]->Value(s);
@@ -166,12 +179,12 @@ namespace rbg {
     }
 
   private:
-    std::vector<const ArithmeticValue *> elements_;
+    std::vector<const ArithmeticOperation *> elements_;
   };
 
   class ShiftStep : public SingleSearchStep {
   public:
-    explicit ShiftStep(edge_id_t edge_id) : edge_id_(edge_id) {}
+    explicit ShiftStep(shift_edge_id_t edge_id) : edge_id_(edge_id) {}
 
     void Run(GameState &state, std::vector<ModifierApplication> &applied_modifiers,
              std::vector<std::vector<ModifierApplication>> &moves) override {
@@ -182,7 +195,7 @@ namespace rbg {
     }
 
   private:
-    edge_id_t edge_id_;
+    shift_edge_id_t edge_id_;
   };
 
   class OnStep : public SingleSearchStep {
@@ -202,8 +215,9 @@ namespace rbg {
 
   class ArithemticLessEqualComparison : public SingleSearchStep {
   public:
-    explicit ArithemticLessEqualComparison(const ArithmeticValue *left, const ArithmeticValue *right) : left_(left),
-                                                                                                        right_(right) {}
+    explicit ArithemticLessEqualComparison(const ArithmeticOperation *left, const ArithmeticOperation *right) : left_(
+        left),
+                                                                                                                right_(right) {}
 
     void Run(GameState &state, std::vector<ModifierApplication> &applied_modifiers,
              std::vector<std::vector<ModifierApplication>> &moves) override {
@@ -213,14 +227,14 @@ namespace rbg {
     }
 
   private:
-    const ArithmeticValue *left_, *right_;
+    const ArithmeticOperation *left_, *right_;
   };
 
 
   class ArithemticLessComparison : public SingleSearchStep {
   public:
-    explicit ArithemticLessComparison(const ArithmeticValue *left, const ArithmeticValue *right) : left_(left),
-                                                                                                   right_(right) {}
+    explicit ArithemticLessComparison(const ArithmeticOperation *left, const ArithmeticOperation *right) : left_(left),
+                                                                                                           right_(right) {}
 
     void Run(GameState &state, std::vector<ModifierApplication> &applied_modifiers,
              std::vector<std::vector<ModifierApplication>> &moves) override {
@@ -230,14 +244,14 @@ namespace rbg {
     }
 
   private:
-    const ArithmeticValue *left_, *right_;
+    const ArithmeticOperation *left_, *right_;
   };
 
 
   class ArithemticEqualComparison : public SingleSearchStep {
   public:
-    explicit ArithemticEqualComparison(const ArithmeticValue *left, const ArithmeticValue *right) : left_(left),
-                                                                                                    right_(right) {}
+    explicit ArithemticEqualComparison(const ArithmeticOperation *left, const ArithmeticOperation *right) : left_(left),
+                                                                                                            right_(right) {}
 
     void Run(GameState &state, std::vector<ModifierApplication> &applied_modifiers,
              std::vector<std::vector<ModifierApplication>> &moves) override {
@@ -247,7 +261,7 @@ namespace rbg {
     }
 
   private:
-    const ArithmeticValue *left_, *right_;
+    const ArithmeticOperation *left_, *right_;
   };
 
   class ConditionCheckStep : public SingleSearchStep {
@@ -324,7 +338,7 @@ namespace rbg {
 
   class AssignmentStep : public ModifyingSearchStep {
   public:
-    explicit AssignmentStep(variable_id_t variable_id, const ArithmeticValue *value, uint index)
+    explicit AssignmentStep(variable_id_t variable_id, const ArithmeticOperation *value, uint index)
         : ModifyingSearchStep(index), variable_id_(variable_id), value_(value) {}
 
     void Run(GameState &state, std::vector<ModifierApplication> &applied_modifiers,
@@ -339,7 +353,7 @@ namespace rbg {
 
   private:
     variable_id_t variable_id_;
-    const ArithmeticValue *value_;
+    const ArithmeticOperation *value_;
   };
 
 }

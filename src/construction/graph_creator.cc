@@ -68,7 +68,7 @@ public:
   GraphCreatorResult GameMoveCase(const Move &m) override {
     node_t initial = graph_.AddNode();
     node_t final = graph_.AddNode();
-    edge_id_t edge_id = graph_.AddEdge(initial, m.copy(), final);
+    shift_edge_id_t edge_id = graph_.AddEdge(initial, m.copy(), final);
     graph_.edge_content(edge_id)->give_indices_in_expression(m.index_in_expression());
     return {initial, final};
   }

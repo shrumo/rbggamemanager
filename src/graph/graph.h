@@ -16,12 +16,12 @@
 #include <cassert>
 
 namespace rbg {
-  using node_t = std::size_t;
-  using edge_id_t = std::size_t;
+  using node_t = uint;
+  using shift_edge_id_t = uint;
 
   template<typename EdgeContent>
   struct Transition {
-    edge_id_t id;
+    shift_edge_id_t id;
     node_t to;
     const EdgeContent &content;
   };
@@ -47,10 +47,10 @@ namespace rbg {
       return node;
     }
 
-    edge_id_t AddEdge(node_t from, EdgeContent content, node_t to) {
+    shift_edge_id_t AddEdge(node_t from, EdgeContent content, node_t to) {
       assert(nodes_.find(from) != nodes_.end() && "Node doesn't exist.");
       assert(nodes_.find(to) != nodes_.end() && "Node doesn't exist.");
-      edge_id_t transition_id = next_transition_id_;
+      shift_edge_id_t transition_id = next_transition_id_;
       next_transition_id_++;
       edges_[transition_id].from = from;
       edges_[transition_id].content = std::move(content);
@@ -63,7 +63,7 @@ namespace rbg {
     std::vector<Transition<EdgeContent>> Transitions(node_t node) const {
       assert(nodes_.find(node) != nodes_.end() && "Node doesn't exist.");
       std::vector<Transition<EdgeContent>> result;
-      for (edge_id_t edge_id : out_edges_.at(node)) {
+      for (shift_edge_id_t edge_id : out_edges_.at(node)) {
         const Edge &edge = edges_.at(edge_id);
         result.push_back(Transition<EdgeContent>{edge_id, edge.to, edge.content});
       }
@@ -74,14 +74,14 @@ namespace rbg {
     std::vector<Transition<EdgeContent>> InTransitions(node_t node) const {
       assert(nodes_.find(node) != nodes_.end() && "Node doesn't exist.");
       std::vector<Transition<EdgeContent>> result;
-      for (edge_id_t edge_id : in_edges_.at(node)) {
+      for (shift_edge_id_t edge_id : in_edges_.at(node)) {
         const Edge &edge = edges_.at(edge_id);
         result.push_back(Transition<EdgeContent>{edge_id, edge.from, edge.content});
       }
       return result;
     }
 
-    void DeleteEdge(edge_id_t edge_id) {
+    void DeleteEdge(shift_edge_id_t edge_id) {
       assert(edges_.find(edge_id) != edges_.end() && "Edge doesn't exist.");
       {
         const Edge &edge = edges_[edge_id];
@@ -93,10 +93,10 @@ namespace rbg {
 
     void DeleteNode(node_t node) {
       assert(nodes_.find(node) != nodes_.end() && "Node doesn't exist.");
-      std::unordered_set<edge_id_t> edges_to_delete;
+      std::unordered_set<shift_edge_id_t> edges_to_delete;
       edges_to_delete.insert(out_edges_[node].begin(), out_edges_[node].end());
       edges_to_delete.insert(in_edges_[node].begin(), in_edges_[node].end());
-      for (edge_id_t edge_id : edges_to_delete) {
+      for (shift_edge_id_t edge_id : edges_to_delete) {
         DeleteEdge(edge_id);
       }
       nodes_.erase(node);
@@ -122,22 +122,22 @@ namespace rbg {
       return nodes_;
     }
 
-    EdgeContent &edge_content(edge_id_t edge) {
+    EdgeContent &edge_content(shift_edge_id_t edge) {
       return edges_[edge].content;
     }
 
-    const std::unordered_map<edge_id_t, Edge> &edges() const {
+    const std::unordered_map<shift_edge_id_t, Edge> &edges() const {
       return edges_;
     }
 
   private:
     std::unordered_set<node_t> nodes_;
-    std::unordered_map<edge_id_t, Edge> edges_;
-    std::unordered_map<node_t, std::unordered_set<edge_id_t> > out_edges_;
-    std::unordered_map<node_t, std::unordered_set<edge_id_t> > in_edges_;
+    std::unordered_map<shift_edge_id_t, Edge> edges_;
+    std::unordered_map<node_t, std::unordered_set<shift_edge_id_t> > out_edges_;
+    std::unordered_map<node_t, std::unordered_set<shift_edge_id_t> > in_edges_;
 
     node_t next_node_;
-    edge_id_t next_transition_id_;
+    shift_edge_id_t next_transition_id_;
   };
 
   template<typename Letter>

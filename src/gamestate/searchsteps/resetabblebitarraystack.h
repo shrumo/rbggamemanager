@@ -8,6 +8,7 @@
 #include <vector>
 #include <limits>
 #include <unordered_map>
+#include <cassert>
 
 namespace rbg {
   // This is vector of booleans supporting fast reset function. Reset
@@ -54,7 +55,7 @@ namespace rbg {
 
   class ResettableBitArrayStack {
   public:
-    ResettableBitArrayStack(uint bit_array_size)
+    explicit ResettableBitArrayStack(uint bit_array_size)
         : bit_array_size_(bit_array_size), bit_arrays_{}, depth_(0) {}
 
     void Push() {
@@ -79,6 +80,10 @@ namespace rbg {
       Push();
     }
 
+    uint bit_array_size() const {
+      return bit_array_size_;
+    }
+
     ResettableBitArray &top_array() {
       return bit_arrays_[depth_ - 1];
     }
@@ -91,25 +96,29 @@ namespace rbg {
 
   class ResetableBitArrayStackChunk {
   public:
-    ResetableBitArrayStackChunk(ResettableBitArrayStack &parent, uint begin_index, uint end_index)
-        : parent_(parent), begin_index_(begin_index), end_index_(end_index) {}
+    ResetableBitArrayStackChunk(ResettableBitArrayStack &parent, uint begin_index, uint size)
+        : parent_(parent), begin_index_(begin_index), size_(size) {
+      assert(begin_index + size <= parent_.bit_array_size());
+    }
 
     bool operator[](uint index) const {
+      assert(index < size_);
       return parent_.top_array()[begin_index_ + index];
     }
 
     void set(uint index) {
+      assert(index < size_);
       parent_.top_array().set(begin_index_ + index);
     }
 
     uint size() const {
-      return end_index_ - begin_index_ + 1;
+      return size_;
     }
 
   private:
     ResettableBitArrayStack &parent_;
     uint begin_index_;
-    uint end_index_;
+    uint size_;
   };
 }
 
