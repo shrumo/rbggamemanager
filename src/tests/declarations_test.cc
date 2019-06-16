@@ -72,10 +72,10 @@ int main() {
   std::cout << result.pieces_resolver << std::endl;
 
   std::cout << "Players resolver:\n";
-  std::cout << result.pieces_resolver << std::endl;
+  std::cout << result.players_resolver << std::endl;
 
   std::cout << "Variables resolver:\n";
-  std::cout << result.pieces_resolver << std::endl;
+  std::cout << result.variables_resolver << std::endl;
 
   std::cout << "Board:\n";
   std::cout << result.board << std::endl;

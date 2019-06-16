@@ -24,7 +24,7 @@ public:
 };
 
 Nfa<std::string> translate(const Nfa<std::unique_ptr<Move>> &nfa) {
-  Nfa<std::string> result;
+  Nfa<std::string> result = Nfa<std::string>();
   std::unordered_map<node_t, node_t> node_mapping;
   std::vector<node_t> sorted_nodes(nfa.graph.nodes().begin(), nfa.graph.nodes().end());
   std::sort(sorted_nodes.begin(), sorted_nodes.end());

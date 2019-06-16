@@ -54,7 +54,7 @@ std::ostream &operator<<(std::ostream &o, const rbg::NamesResolver &res) {
   for (rbg::name_id_t i = 0; i < res.size() - 1; i++) {
     o << i << ": " << res.Name(i) << ", ";
   }
-  o << res.size() - 1 << ": " << res.Name(res.size() - 1) << "} >";
+  o << res.size() - 1 << ": " << res.Name(res.size() - 1) << "}>";
   return o;
 }
 
