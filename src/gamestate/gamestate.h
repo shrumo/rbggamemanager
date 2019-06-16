@@ -9,7 +9,6 @@
 #include "declarations.h"
 
 namespace rbg {
-  using variable_value_t = uint;
 
   class GameState {
   public:
@@ -29,7 +28,6 @@ namespace rbg {
 
   private:
     Declarations declarations_;
-    Board board_;
     vertex_id_t current_pos_;
     std::vector<variable_value_t> variables_values_;
     player_id_t current_player_;

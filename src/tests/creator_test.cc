@@ -1,10 +1,6 @@
 //
 // Created by shrum on 03.06.19.
 //
-
-//
-// Created by shrum on 03.06.19.
-//
 #include <parser/parser_wrapper.h>
 #include <cassert>
 #include <construction/graph_creator.h>

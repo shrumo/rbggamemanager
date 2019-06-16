@@ -11,6 +11,7 @@
 #include <cassert>
 
 namespace rbg {
+
   // This is vector of booleans supporting fast reset function. Reset
   // is done in constant time, independent from the size of the vector.
   // Example:

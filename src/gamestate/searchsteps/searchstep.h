@@ -189,7 +189,7 @@ namespace rbg {
     void Run(GameState &state, std::vector<ModifierApplication> &applied_modifiers,
              std::vector<std::vector<ModifierApplication>> &moves) override {
       vertex_id_t old_pos = state.current_pos_;
-      state.current_pos_ = state.board_.NextVertex(state.current_pos_, edge_id_);
+      state.current_pos_ = state.declarations_.board.NextVertex(state.current_pos_, edge_id_);
       RunNextStep(state, applied_modifiers, moves);
       state.current_pos_ = old_pos;
     }
@@ -204,7 +204,7 @@ namespace rbg {
 
     void Run(GameState &state, std::vector<ModifierApplication> &applied_modifiers,
              std::vector<std::vector<ModifierApplication>> &moves) override {
-      if (!pieces_[state.board_[state.current_pos_]])
+      if (!pieces_[state.declarations_.board[state.current_pos_]])
         return;
       RunNextStep(state, applied_modifiers, moves);
     }
@@ -306,12 +306,12 @@ namespace rbg {
 
     void Run(GameState &state, std::vector<ModifierApplication> &applied_modifiers,
              std::vector<std::vector<ModifierApplication>> &moves) override {
-      piece_id_t previous = state.board_[state.current_pos_];
-      state.board_[state.current_pos_] = piece_id_;
+      piece_id_t previous = state.declarations_.board[state.current_pos_];
+      state.declarations_.board[state.current_pos_] = piece_id_;
       applied_modifiers.push_back({state.current_pos_, index()});
       RunNextStep(state, applied_modifiers, moves);
       applied_modifiers.pop_back();
-      state.board_[state.current_pos_] = previous;
+      state.declarations_.board[state.current_pos_] = previous;
     }
 
   private:

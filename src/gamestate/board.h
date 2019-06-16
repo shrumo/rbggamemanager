@@ -89,7 +89,7 @@ std::ostream &operator<<(std::ostream &o, const rbg::Board &res) {
       }
       rbg::vertex_id_t next = res.NextVertex(i, j);
       o << (j < res.edges_names().size() ? res.edges_names().Name(j) : "<edge>") << "(" << j << ")-> "
-        << (next != res.vertices_count() ? std::to_string(next) : "<undefined>");
+        << (next != res.vertices_count() ? std::to_string(next) : "<none>");
     }
   }
   o << ">";

@@ -33,7 +33,7 @@ set(GRAPH_FILES src/graph/graph.h)
 set(PARSER_FILES src/parser/parser_wrapper.h src/parser/parser_actions.h src/parser/parser_wrapper.cc)
 
 set(CONSTRUCTION_FILES
-        src/construction/graph_creator.cc src/construction/graph_creator.h)
+        src/construction/graph_creator.cc src/construction/graph_creator.h src/construction/declarations_creator.h)
 
 set(ENV{PYTHONPATH} ${PYTHON_PATH}:${CMAKE_CURRENT_BINARY_DIR})
 
@@ -57,6 +57,10 @@ add_test(parser_test parser_test)
 add_executable(creator_test ${GRAPH_FILES} ${PARSER_FILES} ${CONSTRUCTION_FILES} src/tests/creator_test.cc)
 target_link_libraries(creator_test rbgParser)
 add_test(creator_test creator_test)
+
+add_executable(declarations_test ${PARSER_FILES} ${CONSTRUCTION_FILES} src/tests/declarations_test.cc)
+target_link_libraries(declarations_test rbgParser)
+add_test(declarations_test declarations_test)
 
 add_executable(namesresolver_test ${GAMESTATE_FILES} src/tests/namesresolver_test.cc)
 add_test(namesresolver_test namesresolver_test)
