@@ -8,22 +8,13 @@
 #include <construction/graph_creator.h>
 #include <pybind11/stl.h>
 #include <pybind11/complex.h>
+#include <construction/declarations_creator.h>
+#include <construction/moves/moves_printer.h>
+
 
 using namespace rbg;
 
-class Translator : public AstFunction<std::string> {
-public:
-  std::string GameMoveCase(const rbg_parser::game_move &move) override {
-    return move.to_rbg();
-  }
-
-  std::string DefaultCase() override {
-    throw std::logic_error("This isn't an action.");
-  }
-
-};
-
-Nfa<std::string> translate(const Nfa<std::unique_ptr<Move>> &nfa) {
+Nfa<std::string> translate(const Nfa<std::unique_ptr<Move>> &nfa, const Declarations &declarations) {
   Nfa<std::string> result = Nfa<std::string>();
   std::unordered_map<node_t, node_t> node_mapping;
   std::vector<node_t> sorted_nodes(nfa.graph.nodes().begin(), nfa.graph.nodes().end());
@@ -36,7 +27,7 @@ Nfa<std::string> translate(const Nfa<std::unique_ptr<Move>> &nfa) {
   std::vector<std::string> tmp_res;
   for (const auto &edge: nfa.graph.edges()) {
     result.graph.AddEdge(node_mapping.at(edge.second.from),
-                         edge.second.content ? Translator()(*edge.second.content) : "e",
+                         edge.second.content ? MoveDescription(*edge.second.content, declarations) : "e",
                          node_mapping.at(edge.second.to));
   }
 
@@ -47,7 +38,8 @@ Nfa<std::string> translate(const Nfa<std::unique_ptr<Move>> &nfa) {
 
 Nfa<std::string> CreateStringNfa(const std::string &game_text) {
   auto pg = ParseGame(game_text);
-  return translate(CreateGraph(*pg->get_moves()));
+  auto decl = CreateDeclarations(*pg);
+  return translate(CreateGraph(*pg->get_moves(), decl), decl);
 }
 
 namespace py = pybind11;

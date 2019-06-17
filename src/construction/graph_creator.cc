@@ -7,6 +7,7 @@
 #include <graph/graph.h>
 #include "parser/parser_wrapper.h"
 #include "parser/parser_actions.h"
+#include "construction/moves/moves_creator.h"
 
 #include <memory>
 
@@ -26,13 +27,14 @@ std::unique_ptr<Move> e() {
 // description.
 class GraphCreator : public AstFunction<GraphCreatorResult> {
 public:
-  explicit GraphCreator(Graph<std::unique_ptr<Move>> &graph) : graph_(graph) {}
+  explicit GraphCreator(Graph<std::unique_ptr<Move>> &graph, const Declarations &declarations)
+      : graph_(graph), declarations_(declarations) {}
 
   GraphCreatorResult SumCase(const rbg_parser::sum &sum) override {
     node_t initial = graph_.AddNode();
     node_t final = graph_.AddNode();
-    for (const std::unique_ptr<Move> &child : sum.get_content()) {
-      GraphCreatorResult child_result = GraphCreator(graph_)(*child);
+    for (const auto &child : sum.get_content()) {
+      GraphCreatorResult child_result = GraphCreator(graph_, declarations_)(*child);
       graph_.IdentifyNodes(initial, child_result.initial);
       graph_.IdentifyNodes(final, child_result.final);
     }
@@ -46,8 +48,8 @@ public:
   GraphCreatorResult ConcatenationCase(const rbg_parser::concatenation &concatenation) override {
     node_t initial = graph_.AddNode();
     node_t last_final = initial;
-    for (const std::unique_ptr<Move> &child : concatenation.get_content()) {
-      GraphCreatorResult child_result = GraphCreator(graph_)(*child);
+    for (const auto &child : concatenation.get_content()) {
+      GraphCreatorResult child_result = GraphCreator(graph_, declarations_)(*child);
       graph_.IdentifyNodes(last_final, child_result.initial);
       last_final = child_result.final;
     }
@@ -57,7 +59,7 @@ public:
   GraphCreatorResult StarCase(const rbg_parser::star_move &move) override {
     node_t initial = graph_.AddNode();
     node_t final = graph_.AddNode();
-    GraphCreatorResult child_result = GraphCreator(graph_)(*move.get_content());
+    GraphCreatorResult child_result = GraphCreator(graph_, declarations_)(*move.get_content());
     graph_.AddEdge(initial, e(), child_result.initial);
     graph_.AddEdge(child_result.final, e(), final);
     graph_.AddEdge(child_result.final, e(), child_result.initial);
@@ -65,20 +67,21 @@ public:
     return {initial, final};
   }
 
-  GraphCreatorResult GameMoveCase(const Move &m) override {
+  GraphCreatorResult GameMoveCase(const rbg_parser::game_move &m) override {
+    // Move representation graph edge
     node_t initial = graph_.AddNode();
     node_t final = graph_.AddNode();
-    shift_edge_id_t edge_id = graph_.AddEdge(initial, m.copy(), final);
-    graph_.edge_content(edge_id)->give_indices_in_expression(m.index_in_expression());
+    graph_.AddEdge(initial, CreateMove(m, declarations_), final);
     return {initial, final};
   }
 
 private:
   Graph<std::unique_ptr<Move> > &graph_;
+  const Declarations &declarations_;
 };
 
-Nfa<std::unique_ptr<Move>> rbg::CreateGraph(const Move &move) {
+Nfa<std::unique_ptr<Move>> rbg::CreateGraph(const rbg_parser::game_move &move, const Declarations &declarations) {
   Graph<std::unique_ptr<Move>> graph;
-  GraphCreatorResult result = GraphCreator(graph)(move);
+  GraphCreatorResult result = GraphCreator(graph, declarations)(move);
   return {std::move(graph), result.initial, result.final};
 }

@@ -148,7 +148,6 @@ namespace rbg {
   };
 }
 
-
 template<typename EdgeContent, typename ContentPrinter>
 std::string GraphDescription(const rbg::Graph<EdgeContent> &g, ContentPrinter printer) {
   std::stringstream result;
@@ -177,6 +176,13 @@ std::string GraphDescription(const rbg::Graph<EdgeContent> &g, ContentPrinter pr
   }
   return result.str();
 }
+
+//template<typename EdgeContent>
+//std::string GraphDescription(const rbg::Graph<EdgeContent> &g) {
+//  return GraphDescription(g, [](const EdgeContent& e) { return e; });
+//}
+
+
 
 
 #endif //RBGGAMEMANAGER_GRAPH_H

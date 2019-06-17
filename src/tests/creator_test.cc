@@ -5,6 +5,8 @@
 #include <cassert>
 #include <construction/graph_creator.h>
 #include <queue>
+#include <construction/moves/moves_printer.h>
+#include <construction/declarations_creator.h>
 
 using namespace rbg;
 using namespace std;
@@ -54,7 +56,7 @@ vector<int> SortedActionIndices(const vector<const Move *> &path) {
   result.reserve(path.size());
   for (const auto &move : path) {
     if (move) {
-      result.push_back(move->index_in_expression());
+      result.push_back(move->index());
     }
   }
   sort(result.begin(), result.end());
@@ -63,7 +65,8 @@ vector<int> SortedActionIndices(const vector<const Move *> &path) {
 
 int main() {
   auto pg = ParseGame(kSmallGame);
-  auto result = CreateGraph(*pg->get_moves());
+  auto decl = CreateDeclarations(*pg);
+  auto result = CreateGraph(*pg->get_moves(), decl);
   auto paths = ShortestPaths(result.graph, result.initial, result.final);
 
   for (const auto &path : paths) {
@@ -71,13 +74,14 @@ int main() {
   }
 
   cout << "The graph looks like this:\n";
-  cout << GraphDescription(result.graph, [](const unique_ptr<Move> &move) { return move ? move->to_rbg() : "eps"; })
+  cout << GraphDescription(result.graph,
+                           [&](const unique_ptr<Move> &move) { return move ? MoveDescription(*move, decl) : "eps"; })
        << "\n";
   cout << "The shortest move:\n";
   for (const auto &path : paths) {
     for (const auto &move : path) {
       if (move) {
-        cout << move->to_rbg() << " (" << move->index_in_expression() << ") ";
+        cout << MoveDescription(*move, decl) << " (" << move->index() << ") ";
       } else {
         cout << "eps" << " ";
       }

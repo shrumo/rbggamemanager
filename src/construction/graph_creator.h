@@ -8,11 +8,11 @@
 #include <graph/graph.h>
 #include <memory>
 #include <rbgParser/src/game_move.hpp>
+#include "construction/moves/moves.h"
 
 namespace rbg {
-  using Move = rbg_parser::game_move;
 
-  Nfa<std::unique_ptr<Move>> CreateGraph(const rbg_parser::game_move &move);
+  Nfa<std::unique_ptr<Move>> CreateGraph(const rbg_parser::game_move &move, const Declarations &declarations);
 }
 
 

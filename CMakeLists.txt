@@ -26,14 +26,20 @@ include_directories(src)
 include_directories(.)
 
 set(GAMESTATE_FILES src/gamestate/namesresolver.h src/gamestate/board.h src/gamestate/searchsteps/searchstep.h
-        src/gamestate/declarations.h src/gamestate/gamestate.h src/gamestate/searchsteps/resetabblebitarraystack.h)
+        src/gamestate/declarations.h src/gamestate/gamestate.h src/gamestate/searchsteps/resetabblebitarraystack.h
+        src/gamestate/searchsteps/arithmetic_operation.h src/gamestate/searchsteps/arithmetic_operation_visitor.h
+        src/gamestate/namesresolver.cc src/gamestate/board.cc)
 
 set(GRAPH_FILES src/graph/graph.h)
 
 set(PARSER_FILES src/parser/parser_wrapper.h src/parser/parser_actions.h src/parser/parser_wrapper.cc)
 
 set(CONSTRUCTION_FILES
-        src/construction/graph_creator.cc src/construction/graph_creator.h src/construction/declarations_creator.h)
+        src/construction/graph_creator.cc src/construction/graph_creator.h src/construction/declarations_creator.h
+        src/construction/moves/moves.h src/construction/moves/moves_creator.cc src/construction/moves/moves_creator.h
+        src/construction/moves/arithmetic_creator.cc src/construction/moves/arithmetic_creator.h
+        src/construction/moves/moves_visitor.h src/construction/moves/moves_printer.cc
+        src/construction/moves/moves_printer.h)
 
 set(ENV{PYTHONPATH} ${PYTHON_PATH}:${CMAKE_CURRENT_BINARY_DIR})
 
@@ -58,7 +64,7 @@ add_executable(creator_test ${GRAPH_FILES} ${PARSER_FILES} ${CONSTRUCTION_FILES}
 target_link_libraries(creator_test rbgParser)
 add_test(creator_test creator_test)
 
-add_executable(declarations_test ${PARSER_FILES} ${CONSTRUCTION_FILES} src/tests/declarations_test.cc)
+add_executable(declarations_test ${PARSER_FILES} ${CONSTRUCTION_FILES} ${GAMESTATE_FILES} src/tests/declarations_test.cc)
 target_link_libraries(declarations_test rbgParser)
 add_test(declarations_test declarations_test)
 

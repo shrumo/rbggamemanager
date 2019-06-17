@@ -7,7 +7,8 @@
 #ifndef RBGGAMEMANAGER_SEARCHSTEP_H
 #define RBGGAMEMANAGER_SEARCHSTEP_H
 
-#include "../gamestate.h"
+
+#include "arithmetic_operation.h"
 #include <vector>
 #include "resetabblebitarraystack.h"
 
@@ -87,99 +88,6 @@ namespace rbg {
 
   private:
     uint index_;
-  };
-
-  class ArithmeticOperation {
-  public:
-    virtual variable_value_t Value(const GameState &s) const = 0;
-  };
-
-  class VariableValue : public ArithmeticOperation {
-  public:
-    explicit VariableValue(variable_id_t variable_id) : variable_id_(variable_id) {}
-
-    variable_value_t Value(const GameState &s) const override {
-      return s.variables_values_[variable_id_];
-    }
-
-  private:
-    variable_id_t variable_id_;
-  };
-
-  class ConstantValue : public ArithmeticOperation {
-  public:
-    explicit ConstantValue(variable_value_t value) : value_(value) {}
-
-    variable_value_t Value(const GameState &) const override {
-      return value_;
-    }
-
-  private:
-    variable_value_t value_;
-  };
-
-  class SumValue : public ArithmeticOperation {
-  public:
-    explicit SumValue(std::vector<const ArithmeticOperation *> summands) : summands_(std::move(summands)) {}
-
-    variable_value_t Value(const GameState &s) const override {
-      variable_value_t result = summands_[0]->Value(s);
-      for (size_t i = 1; i < summands_.size(); i++) {
-        result += summands_[i]->Value(s);
-      }
-      return result;
-    }
-
-  private:
-    std::vector<const ArithmeticOperation *> summands_;
-  };
-
-  class SubtractionValue : public ArithmeticOperation {
-  public:
-    explicit SubtractionValue(std::vector<const ArithmeticOperation *> elements) : elements_(std::move(elements)) {}
-
-    variable_value_t Value(const GameState &s) const override {
-      variable_value_t result = elements_[0]->Value(s);
-      for (size_t i = 1; i < elements_.size(); i++) {
-        result -= elements_[i]->Value(s);
-      }
-      return result;
-    }
-
-  private:
-    std::vector<const ArithmeticOperation *> elements_;
-  };
-
-  class ProductValue : public ArithmeticOperation {
-  public:
-    explicit ProductValue(std::vector<const ArithmeticOperation *> factors) : factors_(std::move(factors)) {}
-
-    variable_value_t Value(const GameState &s) const override {
-      variable_value_t result = factors_[0]->Value(s);
-      for (size_t i = 1; i < factors_.size(); i++) {
-        result *= factors_[i]->Value(s);
-      }
-      return result;
-    }
-
-  private:
-    std::vector<const ArithmeticOperation *> factors_;
-  };
-
-  class DivisionValue : public ArithmeticOperation {
-  public:
-    explicit DivisionValue(std::vector<const ArithmeticOperation *> elements) : elements_(std::move(elements)) {}
-
-    variable_value_t Value(const GameState &s) const override {
-      variable_value_t result = elements_[0]->Value(s);
-      for (size_t i = 1; i < elements_.size(); i++) {
-        result /= elements_[i]->Value(s);
-      }
-      return result;
-    }
-
-  private:
-    std::vector<const ArithmeticOperation *> elements_;
   };
 
   class ShiftStep : public SingleSearchStep {

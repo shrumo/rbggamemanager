@@ -49,14 +49,6 @@ namespace rbg {
   };
 }
 
-std::ostream &operator<<(std::ostream &o, const rbg::NamesResolver &res) {
-  o << "<NamesResolver with mapping {";
-  for (rbg::name_id_t i = 0; i < res.size() - 1; i++) {
-    o << i << ": " << res.Name(i) << ", ";
-  }
-  o << res.size() - 1 << ": " << res.Name(res.size() - 1) << "}>";
-  return o;
-}
-
+std::ostream &operator<<(std::ostream &o, const rbg::NamesResolver &res);
 
 #endif //RBGGAMEMANAGER_NAMESRESOLVER_H

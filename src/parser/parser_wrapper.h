@@ -19,19 +19,16 @@
 
 namespace rbg {
   std::unique_ptr<rbg_parser::parsed_game> ParseGame(const std::string &game_text);
-  
-  
-// This is a visitor class for the abstract syntax tree that is returned by the parser.
-// This allows to write functions that operate on the tree. It can be treated as a pattern matching function.
-// The pattern is matched to the type of the game move on the input. Tha pattern is matched to the most specific type,
-// so for example if gameMoveCase is overriden and sumCase is overriden, since sumCase is overriden, then even if
-// sum is a game move, the sumCase will be chosen.
-// The function can be called using the Fn<Function> syntax.
-  template<typename ResultType>
-  class AstFunction : public rbg_parser::abstract_dispatcher {
-  public:
-    using OutType = ResultType;
 
+
+  // This is a visitor class for the abstract syntax tree that is returned by the parser.
+  // This allows to write functions that operate on the tree. It can be treated as a pattern matching function.
+  // The pattern is matched to the type of the game move on the input. Tha pattern is matched to the most specific type,
+  // so for example if gameMoveCase is overriden and sumCase is overriden, since sumCase is overriden, then even if
+  // sum is a game move, the sumCase will be chosen.
+  template<typename ResultType>
+  class AstFunction : private rbg_parser::abstract_dispatcher {
+  public:
     virtual ResultType SumCase(const rbg_parser::sum &move) { return GameMoveCase(move); }
 
     virtual ResultType PrioritizedSumCase(const rbg_parser::prioritized_sum &move) { return GameMoveCase(move); }
@@ -163,19 +160,6 @@ namespace rbg {
 
     bool result_exists_ = false;
     ResultType result_;
-  };
-}
-
-namespace std {
-  template<>
-  struct hash<rbg_parser::token> {
-    std::size_t operator()(const rbg_parser::token &k) const {
-      using std::size_t;
-      using std::hash;
-      using std::string;
-
-      return hash<std::string>()(k.to_string());
-    }
   };
 }
 
