@@ -31,6 +31,8 @@ namespace rbg {
 
   class ConditionCheck;
 
+  class VisitedCheck;
+
   enum class MoveType {
     kShiftType,
     kShiftTableType,
@@ -41,7 +43,8 @@ namespace rbg {
     kKeeperSwitchType,
     kAssignmentType,
     kPlayerCheck,
-    kConditionCheck
+    kConditionCheck,
+    kVisitedCheck,
   };
 
   class MoveVisitor {
@@ -69,27 +72,42 @@ namespace rbg {
 
   class Move {
   public:
-    explicit Move(MoveType type, uint index) : type_(type), index_(index) {}
-
+    Move(MoveType type) : type_(type) {}
+    
     MoveType type() const {
       return type_;
     }
+
+    virtual void Accept(MoveVisitor &visitor) const = 0;
+
+    virtual bool indexed() const {
+      return false;
+    }
+    
+  private:
+    MoveType type_;
+  };
+
+  class IndexedMove : public Move {
+  public:
+    explicit IndexedMove(MoveType type, uint index) : Move(type), index_(index) {}
 
     uint index() const {
       return index_;
     }
 
-    virtual void Accept(MoveVisitor &visitor) const = 0;
+    bool indexed() const override {
+      return true;
+    }
 
   private:
-    MoveType type_;
     uint index_;
   };
 
   // Shift changes the current position on board.
-  class Shift : public Move {
+  class Shift : public IndexedMove {
   public:
-    explicit Shift(shift_edge_id_t edge_id, uint index) : Move(MoveType::kShiftType, index), edge_id_(edge_id) {}
+    explicit Shift(shift_edge_id_t edge_id, uint index) : IndexedMove(MoveType::kShiftType, index), edge_id_(edge_id) {}
 
     // Returns the edge this shift travels.
     shift_edge_id_t edge_id() const { return edge_id_; }
@@ -101,10 +119,11 @@ namespace rbg {
   };
 
   // Shift changes the current position on board.
-  class ShiftTable : public Move {
+  class ShiftTable : public IndexedMove {
   public:
-    explicit ShiftTable(std::vector<std::vector<vertex_id_t> > table, uint index) : Move(MoveType::kShiftTableType,
-                                                                                         index),
+    explicit ShiftTable(std::vector<std::vector<vertex_id_t> > table, uint index) : IndexedMove(
+        MoveType::kShiftTableType,
+        index),
                                                                                     table_(std::move(table)) {
       for (auto &row : table_) {
         std::vector<vertex_id_t> new_row;
@@ -128,11 +147,11 @@ namespace rbg {
   };
 
   // On checks if one of the pieces is on the current position on board.
-  class On : public Move {
+  class On : public IndexedMove {
   public:
     // Parameter pieces should contain true for token ids of pieces names that the on accepts.
     explicit On(std::vector<bool> pieces, uint index)
-        : Move(MoveType::kOnType, index), pieces_(std::move(pieces)) {}
+        : IndexedMove(MoveType::kOnType, index), pieces_(std::move(pieces)) {}
 
     // Returns the pieces on requires on the board in order to be legal.
     const std::vector<bool> &pieces_table() const { return pieces_; }
@@ -163,11 +182,11 @@ namespace rbg {
   };
 
   // Check arithmetic comparison
-  class ArithmeticComparison : public Move {
+  class ArithmeticComparison : public IndexedMove {
   public:
     ArithmeticComparison(std::unique_ptr<ArithmeticOperation> left,
                          std::unique_ptr<ArithmeticOperation> right, ComparisonType type, uint index)
-        : Move(MoveType::kArithmeticComparisonType, index),
+        : IndexedMove(MoveType::kArithmeticComparisonType, index),
           left_(std::move(left)),
           right_(std::move(right)),
           comparison_type_(type) {}
@@ -200,9 +219,9 @@ namespace rbg {
   };
 
   // Off places specified piece on the current position in game state.
-  class Off : public Move {
+  class Off : public IndexedMove {
   public:
-    explicit Off(piece_id_t piece, unsigned int index = 0) : Move(
+    explicit Off(piece_id_t piece, unsigned int index = 0) : IndexedMove(
         MoveType::kOffType, index), piece_(piece) {}
 
     piece_id_t piece() const { return piece_; }
@@ -215,9 +234,9 @@ namespace rbg {
   };
 
   // PlayerSwitch changes the player to the one specified.
-  class PlayerSwitch : public Move {
+  class PlayerSwitch : public IndexedMove {
   public:
-    explicit PlayerSwitch(player_id_t player, unsigned int index = 0) : Move(
+    explicit PlayerSwitch(player_id_t player, unsigned int index = 0) : IndexedMove(
         MoveType::kPlayerSwitchType, index), player_(player) {}
 
     player_id_t player() const { return player_; }
@@ -230,20 +249,20 @@ namespace rbg {
   };
 
   // PlayerSwitch changes the player to the one specified.
-  class KeeperSwitch : public Move {
+  class KeeperSwitch : public IndexedMove {
   public:
-    explicit KeeperSwitch(uint index) : Move(
+    explicit KeeperSwitch(uint index) : IndexedMove(
         MoveType::kKeeperSwitchType, index) {}
 
     void Accept(MoveVisitor &visitor) const override { visitor.Visit(*this); }
   };
 
   // Assignment assigns a value to the variable.
-  class Assignment : public Move {
+  class Assignment : public IndexedMove {
   public:
     Assignment(size_t variable, std::unique_ptr<ArithmeticOperation> value,
                uint index)
-        : Move(MoveType::kAssignmentType, index),
+        : IndexedMove(MoveType::kAssignmentType, index),
           variable_(variable),
           value_(std::move(value)) {}
 
@@ -264,10 +283,10 @@ namespace rbg {
     std::unique_ptr<ArithmeticOperation> value_;
   };
 
-  class ConditionCheck : public Move {
+  class ConditionCheck : public IndexedMove {
   public:
     ConditionCheck(rbg::Nfa<std::unique_ptr<Move>> nfa, bool negated, uint index)
-        : Move(MoveType::kConditionCheck, index), nfa_(std::move(nfa)), negated_(negated) {
+        : IndexedMove(MoveType::kConditionCheck, index), nfa_(std::move(nfa)), negated_(negated) {
     }
 
     const rbg::Nfa<std::unique_ptr<Move>> &nfa() const { return nfa_; }
@@ -281,10 +300,10 @@ namespace rbg {
     bool negated_;
   };
 
-  class PlayerCheck : public Move {
+  class PlayerCheck : public IndexedMove {
   public:
     explicit PlayerCheck(player_id_t player, uint index)
-        : Move(MoveType::kPlayerCheck, index), player_(player) {
+        : IndexedMove(MoveType::kPlayerCheck, index), player_(player) {
     }
 
     void Accept(MoveVisitor &visitor) const override { visitor.Visit(*this); }

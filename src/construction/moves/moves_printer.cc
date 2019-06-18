@@ -156,8 +156,8 @@ public:
   }
 
   std::string AssignmentCase(const Assignment &move) override {
-    return declarations_.variables_resolver.Name(move.get_variable()) + "= " +
-           ArithmeticOperationPrinter(declarations_)(*move.get_value_expression());
+    return "[" + declarations_.variables_resolver.Name(move.get_variable()) + "= " +
+           ArithmeticOperationPrinter(declarations_)(*move.get_value_expression()) + "]";
   }
 
   std::string PlayerCheckCase(const PlayerCheck &move) override {

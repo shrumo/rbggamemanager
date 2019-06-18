@@ -56,7 +56,9 @@ vector<int> SortedActionIndices(const vector<const Move *> &path) {
   result.reserve(path.size());
   for (const auto &move : path) {
     if (move) {
-      result.push_back(move->index());
+      if (move->indexed()) {
+        result.push_back(dynamic_cast<const IndexedMove *>(move)->index());
+      }
     }
   }
   sort(result.begin(), result.end());
@@ -81,7 +83,11 @@ int main() {
   for (const auto &path : paths) {
     for (const auto &move : path) {
       if (move) {
-        cout << MoveDescription(*move, decl) << " (" << move->index() << ") ";
+        cout << MoveDescription(*move, decl);
+        if (move->indexed()) {
+          cout << "(" << dynamic_cast<const IndexedMove *>(move)->index() << ")";
+        }
+        cout << " ";
       } else {
         cout << "eps" << " ";
       }
