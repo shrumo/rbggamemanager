@@ -127,7 +127,7 @@ void AddVisitedChecks(Graph<unique_ptr<Move>> &graph, const Declarations &declar
     bool in_shift = false;
     auto in_transitions = graph.InTransitions(node);
     for (const auto &transition : in_transitions) {
-      if (NonInjectiveShift(declarations.board)(*transition.content)) {
+      if (NonInjectiveShift(declarations.board_description)(*transition.content)) {
         in_shift = true;
         break;
       }

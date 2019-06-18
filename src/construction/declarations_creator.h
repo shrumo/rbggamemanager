@@ -27,7 +27,7 @@ namespace rbg {
       variables_bounds[variable_id] = variable.second;
     }
 
-    Board board(game.get_board().get_size(), game.get_declarations().get_legal_edges().size());
+    Board board(game.get_board().get_size(), game.get_declarations().get_legal_edges().size(), pieces_resolver.size());
     for (const auto &edge : game.get_declarations().get_legal_edges()) {
       board.AddEdgeName(edge.to_string());
     }
@@ -36,7 +36,7 @@ namespace rbg {
       for (const auto &edge : game.get_board().get_outgoing_edges(id)) {
         board.AddEdge(id, board.edges_names().Id(edge.first.to_string()), edge.second);
       }
-      board[id] = pieces_resolver.Id(game.get_board().get_starting_piece(id).to_string());
+      board.set(id, pieces_resolver.Id(game.get_board().get_starting_piece(id).to_string()));
     }
     return {pieces_resolver, variables_resolver, players_resolver, variables_bounds, board};
   }

@@ -39,6 +39,10 @@ namespace rbg {
       return DefaultCase(division_value);
     }
 
+    virtual ResultType PieceCountCase(const PieceCountValue &piececount_value) {
+      return DefaultCase(piececount_value);
+    }
+
     virtual ResultType DefaultCase(const ArithmeticOperation &) { return ResultType(); }
 
     template<typename NodeType>
@@ -78,6 +82,11 @@ namespace rbg {
 
     void Visit(const DivisionValue &m) override {
       result_ = DivisionCase(m);
+      result_exists_ = true;
+    }
+
+    void Visit(const PieceCountValue &m) override {
+      result_ = PieceCountCase(m);
       result_exists_ = true;
     }
 

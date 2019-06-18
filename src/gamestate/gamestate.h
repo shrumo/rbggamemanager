@@ -12,6 +12,7 @@ namespace rbg {
 
   class GameState {
   public:
+
     friend class VisitedCheckSearchStep;
 
     friend class ShiftStep;
@@ -26,11 +27,14 @@ namespace rbg {
 
     friend class VariableValue;
 
+    friend class PieceCountValue;
+
   private:
-    Declarations declarations_;
+    const Declarations declarations_;
     vertex_id_t current_pos_;
     std::vector<variable_value_t> variables_values_;
     player_id_t current_player_;
+    Board board_;
   };
 }
 

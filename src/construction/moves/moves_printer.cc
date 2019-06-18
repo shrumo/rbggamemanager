@@ -101,7 +101,7 @@ public:
       : declarations_(declarations) {}
 
   std::string ShiftCase(const Shift &move) override {
-    return declarations_.board.edges_names().Name(move.edge_id());
+    return declarations_.board_description.edges_names().Name(move.edge_id());
   }
 
   std::string ShiftTableCase(const ShiftTable &move) override {

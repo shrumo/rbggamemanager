@@ -33,7 +33,7 @@ public:
   MovesCreator(const Declarations &declarations) : declarations_(declarations) {}
 
   unique_ptr<Move> ShiftCase(const rbg_parser::shift &move) override {
-    return make_unique<Shift>(declarations_.board.edges_names().Id(move.get_content().to_string()),
+    return make_unique<Shift>(declarations_.board_description.edges_names().Id(move.get_content().to_string()),
                               move.index_in_expression());
   }
 

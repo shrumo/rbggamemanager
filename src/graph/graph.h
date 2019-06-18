@@ -154,7 +154,13 @@ std::string GraphDescription(const rbg::Graph<EdgeContent> &g, ContentPrinter pr
   std::stringstream result;
   std::vector<rbg::node_t> nodes(g.nodes().begin(), g.nodes().end());
   std::sort(nodes.begin(), nodes.end());
+  bool first_sep = false;
   for (rbg::node_t node : nodes) {
+    if (!first_sep) {
+      first_sep = true;
+    } else {
+      result << ";";
+    }
     result << node << " -> ";
     auto transitions = g.Transitions(node);
     std::vector<size_t> indices;
@@ -169,11 +175,13 @@ std::string GraphDescription(const rbg::Graph<EdgeContent> &g, ContentPrinter pr
                 return a.to < b.to || (a.to == b.to && a.id < b.id);
               });
     for (size_t i = 0; i < transitions.size(); i++) {
+      if (i != 0) {
+        result << ", ";
+      }
       const auto &transition = transitions[indices[i]];
       result << transition.to << " (edge id: " << transition.id << ", content: " << printer(transition.content)
-             << "), ";
+             << ")";
     }
-    result << "\n";
   }
   return result.str();
 }

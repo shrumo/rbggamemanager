@@ -22,6 +22,8 @@ namespace rbg {
 
   class DivisionValue;
 
+  class PieceCountValue;
+
   class ArithmeticOperationVisitor {
   public:
     virtual void Visit(const VariableValue &) = 0;
@@ -35,6 +37,8 @@ namespace rbg {
     virtual void Visit(const ProductValue &) = 0;
 
     virtual void Visit(const DivisionValue &) = 0;
+
+    virtual void Visit(const PieceCountValue &) = 0;
   };
 
   class ArithmeticOperation {
@@ -179,6 +183,24 @@ namespace rbg {
 
   private:
     std::vector<std::unique_ptr<ArithmeticOperation>> elements_;
+  };
+
+  class PieceCountValue : public ArithmeticOperation {
+  public:
+    explicit PieceCountValue(piece_id_t piece) : piece_(piece) {}
+
+    variable_value_t Value(const GameState &s) const override {
+      return s.board_.piece_count(piece_);
+    }
+
+    void Accept(ArithmeticOperationVisitor &visitor) const override {
+      visitor.Visit(*this);
+    }
+
+    piece_id_t piece() const { return piece_; }
+
+  private:
+    piece_id_t piece_;
   };
 }
 

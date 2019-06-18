@@ -18,8 +18,8 @@ const char *kSmallGame = R"LIM(
 #board = rectangle(up, down, left, right,
     [e,e]
     [e,e])
-//       1       2    3      4      5        6                 7   8            9             10
-#rules = ->red ( up + down + left + right )* [$ turn = turn+1] {e} {? left {e}} {$turn < red} ->blue
+//      1       2    3      4      5        6                  7           8     9            10                  11
+#rules= ->red ( up + down + left + right )* [$ turn = turn+1] ([$red = 20] {e} + {? left {e}} {$turn < red + e})* ->blue
 )LIM";
 
 vector<vector<const Move *>> ShortestPaths(const Graph<unique_ptr<Move>> &graph, node_t initial, node_t final) {
@@ -72,7 +72,7 @@ int main() {
   auto paths = ShortestPaths(result.graph, result.initial, result.final);
 
   for (const auto &path : paths) {
-    assert(SortedActionIndices(path) == vector<int>({1, 6, 7, 8, 9, 10}));
+    assert(SortedActionIndices(path) == vector<int>({1, 6, 11}));
   }
 
   cout << "The graph looks like this:\n";

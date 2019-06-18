@@ -10,7 +10,6 @@
 #include "board.h"
 
 namespace rbg {
-  using piece_id_t = name_id_t;
   using variable_id_t = name_id_t;
   using player_id_t = name_id_t;
   using variable_value_t = uint;
@@ -20,7 +19,7 @@ namespace rbg {
     NamesResolver variables_resolver;
     NamesResolver players_resolver;
     std::vector<variable_value_t> variables_bounds;
-    Board board;
+    Board board_description;
   };
 }
 

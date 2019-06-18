@@ -43,26 +43,34 @@ int main() {
   assert(result.variables_bounds[result.variables_resolver.Id("blue")] == 50);
   assert(result.variables_bounds[result.variables_resolver.Id("turn")] == 10);
 
-  assert(result.board.vertices_count() == 4);
-  assert(result.board.edges_count() == 4);
+  assert(result.board_description.vertices_count() == 4);
+  assert(result.board_description.edges_count() == 4);
 
   std::unordered_set<std::string> square_edges;
-  for (vertex_id_t id = 0; id < result.board.vertices_count(); id++) {
-    if (result.board.NextVertex(id, result.board.edges_names().Id("right")) == result.board.vertices_count() &&
-        result.board.NextVertex(id, result.board.edges_names().Id("up")) == result.board.vertices_count()) {
-      assert(result.board[id] == result.pieces_resolver.Id("r"));
+  for (vertex_id_t id = 0; id < result.board_description.vertices_count(); id++) {
+    if (result.board_description.NextVertex(id, result.board_description.edges_names().Id("right")) ==
+        result.board_description.vertices_count() &&
+        result.board_description.NextVertex(id, result.board_description.edges_names().Id("up")) ==
+        result.board_description.vertices_count()) {
+      assert(result.board_description.at(id) == result.pieces_resolver.Id("r"));
       square_edges.insert("(right,up)");
-    } else if (result.board.NextVertex(id, result.board.edges_names().Id("left")) == result.board.vertices_count() &&
-               result.board.NextVertex(id, result.board.edges_names().Id("up")) == result.board.vertices_count()) {
-      assert(result.board[id] == result.pieces_resolver.Id("e"));
+    } else if (result.board_description.NextVertex(id, result.board_description.edges_names().Id("left")) ==
+               result.board_description.vertices_count() &&
+               result.board_description.NextVertex(id, result.board_description.edges_names().Id("up")) ==
+               result.board_description.vertices_count()) {
+      assert(result.board_description.at(id) == result.pieces_resolver.Id("e"));
       square_edges.insert("(left,up)");
-    } else if (result.board.NextVertex(id, result.board.edges_names().Id("right")) == result.board.vertices_count() &&
-               result.board.NextVertex(id, result.board.edges_names().Id("down")) == result.board.vertices_count()) {
-      assert(result.board[id] == result.pieces_resolver.Id("b"));
+    } else if (result.board_description.NextVertex(id, result.board_description.edges_names().Id("right")) ==
+               result.board_description.vertices_count() &&
+               result.board_description.NextVertex(id, result.board_description.edges_names().Id("down")) ==
+               result.board_description.vertices_count()) {
+      assert(result.board_description.at(id) == result.pieces_resolver.Id("b"));
       square_edges.insert("(right,down)");
-    } else if (result.board.NextVertex(id, result.board.edges_names().Id("left")) == result.board.vertices_count() &&
-               result.board.NextVertex(id, result.board.edges_names().Id("down")) == result.board.vertices_count()) {
-      assert(result.board[id] == result.pieces_resolver.Id("e"));
+    } else if (result.board_description.NextVertex(id, result.board_description.edges_names().Id("left")) ==
+               result.board_description.vertices_count() &&
+               result.board_description.NextVertex(id, result.board_description.edges_names().Id("down")) ==
+               result.board_description.vertices_count()) {
+      assert(result.board_description.at(id) == result.pieces_resolver.Id("e"));
       square_edges.insert("(left,down)");
     }
   }
@@ -78,5 +86,5 @@ int main() {
   std::cout << result.variables_resolver << std::endl;
 
   std::cout << "Board:\n";
-  std::cout << result.board << std::endl;
+  std::cout << result.board_description << std::endl;
 }

@@ -9,11 +9,11 @@
 using namespace rbg;
 
 int main() {
-  Board board(4, 4);
+  Board board(4, 4, 2);
 
   vertex_id_t v00 = board.AddVertexName("v00");
 
-  board[v00] = 1;
+  board.set(v00, 1);
 
   assert(board.vertices_count() == 4);
 
@@ -29,7 +29,8 @@ int main() {
   assert(board.NextVertex(v00, board.AddEdgeName("right")) == v10);
 
   assert(board.NextVertex(v10, board.edges_names().Id("left")) == v00);
-  assert(board[v00] == 1);
+  assert(board.at(v00) == 1);
+  assert(board.piece_count(1) == 1);
 
   std::cout << board << std::endl;
 }

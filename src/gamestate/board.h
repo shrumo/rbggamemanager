@@ -11,13 +11,15 @@
 namespace rbg {
   using vertex_id_t = name_id_t;
   using shift_edge_id_t = name_id_t;
+  using piece_id_t = name_id_t;
 
   class Board {
   public:
-    Board(uint vertices_count, uint edges_count) :
+    Board(uint vertices_count, uint edges_count, uint piece_count) :
         fields_(vertices_count),
         neighbours_(vertices_count, std::vector<vertex_id_t>(edges_count, vertices_count)),
-        edges_count_(edges_count) {}
+        edges_count_(edges_count),
+        pieces_counts_(piece_count) {}
 
     void AddEdge(const std::string &a, const std::string &edge, const std::string &b) {
       vertex_id_t a_vertex = AddVertexName(a);
@@ -30,12 +32,18 @@ namespace rbg {
       neighbours_[a_vertex][edge_id] = b_vertex;
     }
 
-    name_id_t &operator[](vertex_id_t vertex) {
+    piece_id_t at(vertex_id_t vertex) const {
       return fields_[vertex];
     }
 
-    name_id_t operator[](vertex_id_t vertex) const {
-      return fields_[vertex];
+    void set(vertex_id_t vertex, piece_id_t piece) {
+      pieces_counts_[at(vertex)] -= 1;
+      fields_[vertex] = piece;
+      pieces_counts_[piece] += 1;
+    }
+
+    uint piece_count(piece_id_t piece) const {
+      return pieces_counts_[piece];
     }
 
     size_t vertices_count() const {
@@ -69,9 +77,10 @@ namespace rbg {
   private:
     NamesResolver vertices_resolver_;
     NamesResolver edges_resolver_;
-    std::vector<name_id_t> fields_;
+    std::vector<piece_id_t> fields_;
     std::vector<std::vector<vertex_id_t>> neighbours_;
     uint edges_count_;
+    std::vector<uint> pieces_counts_;
   };
 }
 
