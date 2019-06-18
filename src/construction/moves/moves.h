@@ -33,6 +33,8 @@ namespace rbg {
 
   class VisitedCheck;
 
+  class Empty;
+
   enum class MoveType {
     kShiftType,
     kShiftTableType,
@@ -45,6 +47,7 @@ namespace rbg {
     kPlayerCheck,
     kConditionCheck,
     kVisitedCheck,
+    kEmpty,
   };
 
   class MoveVisitor {
@@ -68,11 +71,15 @@ namespace rbg {
     virtual void Visit(const PlayerCheck &) = 0;
 
     virtual void Visit(const ConditionCheck &) = 0;
+
+    virtual void Visit(const VisitedCheck &) = 0;
+
+    virtual void Visit(const Empty &) = 0;
   };
 
   class Move {
   public:
-    Move(MoveType type) : type_(type) {}
+    explicit Move(MoveType type) : type_(type) {}
     
     MoveType type() const {
       return type_;
@@ -83,7 +90,9 @@ namespace rbg {
     virtual bool indexed() const {
       return false;
     }
-    
+
+    virtual ~Move() = default;
+
   private:
     MoveType type_;
   };
@@ -316,6 +325,19 @@ namespace rbg {
     player_id_t player_;
   };
 
+  class VisitedCheck : public Move {
+  public:
+    VisitedCheck() : Move(MoveType::kVisitedCheck) {}
+
+    void Accept(MoveVisitor &visitor) const override { visitor.Visit(*this); }
+  };
+
+  class Empty : public Move {
+  public:
+    Empty() : Move(MoveType::kEmpty) {}
+
+    void Accept(MoveVisitor &visitor) const override { visitor.Visit(*this); }
+  };
 
 }
 

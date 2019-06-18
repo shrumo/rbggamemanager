@@ -27,7 +27,7 @@ Nfa<std::string> translate(const Nfa<std::unique_ptr<Move>> &nfa, const Declarat
   std::vector<std::string> tmp_res;
   for (const auto &edge: nfa.graph.edges()) {
     result.graph.AddEdge(node_mapping.at(edge.second.from),
-                         edge.second.content ? MoveDescription(*edge.second.content, declarations) : "e",
+                         MoveDescription(*edge.second.content, declarations),
                          node_mapping.at(edge.second.to));
   }
 

@@ -101,7 +101,7 @@ public:
       : declarations_(declarations) {}
 
   std::string ShiftCase(const Shift &move) override {
-    return "{" + declarations_.board.edges_names().Name(move.edge_id()) + "}";
+    return declarations_.board.edges_names().Name(move.edge_id());
   }
 
   std::string ShiftTableCase(const ShiftTable &move) override {
@@ -125,9 +125,9 @@ public:
 
   std::string ArithmeticComparisonCase(const ArithmeticComparison &move) override {
 
-    return ArithmeticOperationPrinter(declarations_)(*move.left()) +
+    return "{$" + ArithmeticOperationPrinter(declarations_)(*move.left()) +
            comparison_symbol(move.comparison_type()) +
-           ArithmeticOperationPrinter(declarations_)(*move.right());
+           ArithmeticOperationPrinter(declarations_)(*move.right()) + "}";
   }
 
   std::string OffCase(const Off &move) override {
@@ -166,13 +166,20 @@ public:
 
   std::string ConditionCheckCase(const ConditionCheck &move) override {
     std::stringstream result;
-    result << "<ConditionCheck";
+    result << "<ConditionCheck ";
     result << GraphDescription(move.nfa().graph,
                                [&](const std::unique_ptr<Move> &move) { return MovePrinter(declarations_)(*move); });
     result << ">";
     return result.str();
   }
 
+  std::string VisitedCheckCase(const VisitedCheck &) override {
+    return "<VisitedCheck>";
+  }
+
+  std::string EmptyCase(const Empty &) override {
+    return "e";
+  }
 private:
   const Declarations &declarations_;
 };

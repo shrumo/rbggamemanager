@@ -7,10 +7,11 @@
 #include <graph/graph.h>
 #include "parser/parser_wrapper.h"
 #include "parser/parser_actions.h"
-#include "construction/moves/moves_creator.h"
-
+#include "moves/moves_creator.h"
 #include <memory>
+#include <construction/moves/moves_visitor.h>
 
+using namespace std;
 using namespace rbg;
 
 struct GraphCreatorResult {
@@ -18,8 +19,8 @@ struct GraphCreatorResult {
   node_t final;
 };
 
-std::unique_ptr<Move> e() {
-  return nullptr;
+unique_ptr<Move> e() {
+  return make_unique<Empty>();
 }
 
 // GraphCreator is responsible for applying the Thompson construction to the parsed abstract syntax tree.
@@ -27,7 +28,7 @@ std::unique_ptr<Move> e() {
 // description.
 class GraphCreator : public AstFunction<GraphCreatorResult> {
 public:
-  explicit GraphCreator(Graph<std::unique_ptr<Move>> &graph, const Declarations &declarations)
+  explicit GraphCreator(Graph<unique_ptr<Move>> &graph, const Declarations &declarations)
       : graph_(graph), declarations_(declarations) {}
 
   GraphCreatorResult SumCase(const rbg_parser::sum &sum) override {
@@ -76,12 +77,75 @@ public:
   }
 
 private:
-  Graph<std::unique_ptr<Move> > &graph_;
+  Graph<unique_ptr<Move> > &graph_;
   const Declarations &declarations_;
 };
 
-Nfa<std::unique_ptr<Move>> rbg::CreateGraph(const rbg_parser::game_move &move, const Declarations &declarations) {
-  Graph<std::unique_ptr<Move>> graph;
-  GraphCreatorResult result = GraphCreator(graph, declarations)(move);
-  return {std::move(graph), result.initial, result.final};
+class NonInjectiveShift : public MoveFunction<bool> {
+public:
+  explicit NonInjectiveShift(const Board &board) : board_(board) {}
+
+  bool ShiftCase(const Shift &move) override {
+    vector<bool> seen(board_.vertices_count());
+    for (vertex_id_t vertex_id = 0; vertex_id < board_.vertices_count(); vertex_id++) {
+      vertex_id_t next = board_.NextVertex(vertex_id, move.edge_id());
+      if (next != board_.vertices_count()) {
+        if (seen[next]) {
+          return true;
+        }
+        seen[next] = true;
+      }
+    }
+    return false;
+  }
+
+  bool ShiftTableCase(const ShiftTable &move) override {
+    vector<bool> seen(board_.vertices_count());
+    for (vertex_id_t vertex_id = 0; vertex_id < board_.vertices_count(); vertex_id++) {
+      for (vertex_id_t next : move.table()[vertex_id]) {
+        if (next != board_.vertices_count()) {
+          if (seen[next]) {
+            return true;
+          }
+          seen[next] = true;
+        }
+      }
+    }
+    return false;
+  }
+
+  bool DefaultCase(const Move &) override {
+    return false;
+  }
+
+private:
+  const Board &board_;
+};
+
+void AddVisitedChecks(Graph<unique_ptr<Move>> &graph, const Declarations &declarations) {
+  for (node_t node : std::vector<node_t>(graph.nodes().begin(), graph.nodes().end())) {
+    bool in_shift = false;
+    auto in_transitions = graph.InTransitions(node);
+    for (const auto &transition : in_transitions) {
+      if (NonInjectiveShift(declarations.board)(*transition.content)) {
+        in_shift = true;
+        break;
+      }
+    }
+    if (in_transitions.size() > 1 || in_shift) {
+      node_t visited_check_node = graph.AddNode();
+      for (const auto &transition : in_transitions) {
+        graph.AddEdge(transition.from, std::move(graph.edge_content(transition.id)), visited_check_node);
+        graph.DeleteEdge(transition.id);
+      }
+      graph.AddEdge(visited_check_node, make_unique<VisitedCheck>(), node);
+    }
+  }
+}
+
+Nfa<unique_ptr<Move>> rbg::CreateGraph(const rbg_parser::game_move &rbg_move, const Declarations &declarations) {
+  Graph<unique_ptr<Move>> graph;
+  GraphCreatorResult result = GraphCreator(graph, declarations)(rbg_move);
+  AddVisitedChecks(graph, declarations);
+  return {move(graph), result.initial, result.final};
 }

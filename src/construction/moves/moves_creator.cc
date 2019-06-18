@@ -38,7 +38,7 @@ public:
   }
 
   unique_ptr<Move> OnCase(const rbg_parser::ons &move) override {
-    std::vector<bool> pieces_table;
+    std::vector<bool> pieces_table(declarations_.pieces_resolver.size());
     for (const auto &piece : move.get_legal_ons()) {
       pieces_table[declarations_.pieces_resolver.Id(piece.to_string())] = true;
     }

@@ -24,7 +24,7 @@ std::vector<node_t> SortedInTransitions(const Graph<int> &g, node_t node) {
   std::vector<node_t> result;
   result.reserve(transitions.size());
   for (const auto &t : transitions) {
-    result.push_back(t.to);
+    result.push_back(t.from);
   }
   std::sort(result.begin(), result.end());
   return result;

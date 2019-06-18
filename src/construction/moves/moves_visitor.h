@@ -32,6 +32,10 @@ namespace rbg {
 
     virtual ResultType ConditionCheckCase(const ConditionCheck &move) { return DefaultCase(move); }
 
+    virtual ResultType VisitedCheckCase(const VisitedCheck &move) { return DefaultCase(move); }
+
+    virtual ResultType EmptyCase(const Empty &move) { return DefaultCase(move); }
+
     virtual ResultType DefaultCase(const Move &) { return ResultType(); }
 
     template<typename NodeType>
@@ -91,6 +95,16 @@ namespace rbg {
 
     void Visit(const ConditionCheck &m) override {
       result_ = ConditionCheckCase(m);
+      result_exists_ = true;
+    };
+
+    void Visit(const VisitedCheck &m) override {
+      result_ = VisitedCheckCase(m);
+      result_exists_ = true;
+    };
+
+    void Visit(const Empty &m) override {
+      result_ = EmptyCase(m);
       result_exists_ = true;
     };
 

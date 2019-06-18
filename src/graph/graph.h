@@ -23,6 +23,7 @@ namespace rbg {
   struct Transition {
     shift_edge_id_t id;
     node_t to;
+    node_t from;
     const EdgeContent &content;
   };
 
@@ -65,7 +66,7 @@ namespace rbg {
       std::vector<Transition<EdgeContent>> result;
       for (shift_edge_id_t edge_id : out_edges_.at(node)) {
         const Edge &edge = edges_.at(edge_id);
-        result.push_back(Transition<EdgeContent>{edge_id, edge.to, edge.content});
+        result.push_back(Transition<EdgeContent>{edge_id, edge.to, node, edge.content});
       }
       return result;
     }
@@ -76,7 +77,7 @@ namespace rbg {
       std::vector<Transition<EdgeContent>> result;
       for (shift_edge_id_t edge_id : in_edges_.at(node)) {
         const Edge &edge = edges_.at(edge_id);
-        result.push_back(Transition<EdgeContent>{edge_id, edge.from, edge.content});
+        result.push_back(Transition<EdgeContent>{edge_id, node, edge.from, edge.content});
       }
       return result;
     }
@@ -176,13 +177,6 @@ std::string GraphDescription(const rbg::Graph<EdgeContent> &g, ContentPrinter pr
   }
   return result.str();
 }
-
-//template<typename EdgeContent>
-//std::string GraphDescription(const rbg::Graph<EdgeContent> &g) {
-//  return GraphDescription(g, [](const EdgeContent& e) { return e; });
-//}
-
-
 
 
 #endif //RBGGAMEMANAGER_GRAPH_H

@@ -70,6 +70,7 @@ def nodes_positions(nfa):
 
     heights = {nfa.initial: 0}
     taken_heights = defaultdict(lambda: set())
+    taken_heights[0] = {0}
 
     def dfs(u):
         nonlocal heights, taken_heights
@@ -88,6 +89,14 @@ def nodes_positions(nfa):
                 dfs(v)
 
     dfs(nfa.initial)
+
+    for v in nfa.graph.nodes():
+        if v not in distances:
+            distances[v] = -1
+            heights[v] = 0
+            while heights[v] in taken_heights[0]:
+                heights[v] += 1
+            taken_heights[0] |= {heights[v]}
 
     return {v: (distances[v], heights[v]) for v in nfa.graph.nodes()}
 

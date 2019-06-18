@@ -16,9 +16,6 @@ nfa = rbg.create_nfa("""
 def collect_actions(nfa):
     return [edge.value for edge in nfa.graph.edges().values()]
 
-
-assert (len(set(collect_actions(nfa))) == 7 + 1)  # There is also epsilon transition
-
 print('Edges of the nfa:')
 print(*sorted(nfa.graph.edges().values(), key=lambda x: (x.a, x.b, x.value)), sep='\n')
 
