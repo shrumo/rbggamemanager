@@ -200,12 +200,12 @@ namespace rbg {
           right_(std::move(right)),
           comparison_type_(type) {}
 
-    const ArithmeticOperation *left() const {
-      return left_.get();
+    const ArithmeticOperation &left() const {
+      return *left_;
     }
 
-    const ArithmeticOperation *right() const {
-      return right_.get();
+    const ArithmeticOperation &right() const {
+      return *right_;
     }
 
     std::unique_ptr<ArithmeticOperation> ExtractLeft() {
@@ -277,8 +277,8 @@ namespace rbg {
 
     variable_id_t get_variable() const { return variable_; }
 
-    const ArithmeticOperation *get_value_expression() const {
-      return value_.get();
+    const ArithmeticOperation &get_value_expression() const {
+      return *value_;
     }
 
     std::unique_ptr<ArithmeticOperation> ExtractValueExpression() {
@@ -327,9 +327,17 @@ namespace rbg {
 
   class VisitedCheck : public Move {
   public:
-    VisitedCheck() : Move(MoveType::kVisitedCheck) {}
+    explicit VisitedCheck(uint visited_array_index)
+        : Move(MoveType::kVisitedCheck), vistied_array_index_(visited_array_index) {}
 
     void Accept(MoveVisitor &visitor) const override { visitor.Visit(*this); }
+
+    uint visited_array_index() const {
+      return vistied_array_index_;
+    }
+
+  private:
+    uint vistied_array_index_;
   };
 
   class Empty : public Move {

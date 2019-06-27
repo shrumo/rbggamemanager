@@ -11,8 +11,12 @@
 #include "construction/moves/moves.h"
 
 namespace rbg {
+  struct NfaWithVisitedChecks {
+    uint visited_checks_count;
+    Nfa<std::unique_ptr<Move>> nfa;
+  };
 
-  Nfa<std::unique_ptr<Move>> CreateGraph(const rbg_parser::game_move &move, const Declarations &declarations);
+  NfaWithVisitedChecks CreateGraph(const rbg_parser::game_move &move, const Declarations &declarations);
 }
 
 

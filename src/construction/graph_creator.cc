@@ -122,7 +122,8 @@ private:
   const Board &board_;
 };
 
-void AddVisitedChecks(Graph<unique_ptr<Move>> &graph, const Declarations &declarations) {
+uint AddVisitedChecks(Graph<unique_ptr<Move>> &graph, const Declarations &declarations) {
+  uint next_index = 0;
   for (node_t node : std::vector<node_t>(graph.nodes().begin(), graph.nodes().end())) {
     bool in_shift = false;
     auto in_transitions = graph.InTransitions(node);
@@ -138,14 +139,33 @@ void AddVisitedChecks(Graph<unique_ptr<Move>> &graph, const Declarations &declar
         graph.AddEdge(transition.from, std::move(graph.edge_content(transition.id)), visited_check_node);
         graph.DeleteEdge(transition.id);
       }
-      graph.AddEdge(visited_check_node, make_unique<VisitedCheck>(), node);
+      graph.AddEdge(visited_check_node, make_unique<VisitedCheck>(next_index), node);
+      next_index++;
+    }
+  }
+  return next_index;
+}
+
+void HandleMultipleOutNodes(Graph<unique_ptr<Move>> &graph) {
+  for (node_t node : std::vector<node_t>(graph.nodes().begin(), graph.nodes().end())) {
+    auto out_transitions = graph.Transitions(node);
+    if (out_transitions.size() > 1) {
+      for (const auto &transition : out_transitions) {
+        if (transition.content->type() != MoveType::kEmpty) {
+          node_t new_node = graph.AddNode();
+          graph.AddEdge(node, e(), new_node);
+          graph.AddEdge(new_node, std::move(graph.edge_content(transition.id)), transition.to);
+          graph.DeleteEdge(transition.id);
+        }
+      }
     }
   }
 }
 
-Nfa<unique_ptr<Move>> rbg::CreateGraph(const rbg_parser::game_move &rbg_move, const Declarations &declarations) {
+NfaWithVisitedChecks rbg::CreateGraph(const rbg_parser::game_move &rbg_move, const Declarations &declarations) {
   Graph<unique_ptr<Move>> graph;
   GraphCreatorResult result = GraphCreator(graph, declarations)(rbg_move);
-  AddVisitedChecks(graph, declarations);
-  return {move(graph), result.initial, result.final};
+  uint visited_checks_count = AddVisitedChecks(graph, declarations);
+  HandleMultipleOutNodes(graph);
+  return {visited_checks_count, {move(graph), result.initial, result.final}};
 }

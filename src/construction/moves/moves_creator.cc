@@ -65,7 +65,7 @@ public:
   }
 
   unique_ptr<Move> MoveCheckCase(const rbg_parser::move_check &move) override {
-    return make_unique<ConditionCheck>(CreateGraph(*move.get_content(), declarations_), move.is_negated(),
+    return make_unique<ConditionCheck>(CreateGraph(*move.get_content(), declarations_).nfa, move.is_negated(),
                                        move.index_in_expression());
   }
 

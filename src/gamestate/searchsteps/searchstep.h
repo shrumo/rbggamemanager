@@ -24,24 +24,37 @@ namespace rbg {
   public:
     virtual void
     Run(GameState &, std::vector<ModifierApplication> &, std::vector<std::vector<ModifierApplication>> &) = 0;
+
+    virtual void AddNextSearchStep(SearchStep *next) = 0;
+
+  };
+
+  class EndStep : public SearchStep {
+  public:
+    void
+    Run(GameState &, std::vector<ModifierApplication> &, std::vector<std::vector<ModifierApplication>> &) final {}
+
+    void AddNextSearchStep(SearchStep *) {
+      assert(false && "Next step cannot be added to the ending step.");
+    }
   };
 
   class SingleSearchStep : public SearchStep {
-  protected:
-    void SetNextSearchStep(SearchStep *next) {
+  public:
+    void AddNextSearchStep(SearchStep *next) override {
+      assert(next_ == nullptr && "Single search step can have only one next step.");
       next_ = next;
     }
 
+  protected:
     void RunNextStep(GameState &state,
                      std::vector<ModifierApplication> &applied_modifiers,
                      std::vector<std::vector<ModifierApplication>> &moves) {
       next_->Run(state, applied_modifiers, moves);
     }
 
-  private:
     SearchStep *next_ = {};
   };
-
 
   class MultipleSearchStep : public SearchStep {
   public:
@@ -52,7 +65,7 @@ namespace rbg {
       }
     }
 
-    void AddNextSearchStep(SearchStep *next) {
+    void AddNextSearchStep(SearchStep *next) override {
       next_steps_.push_back(next);
     }
 
@@ -123,11 +136,12 @@ namespace rbg {
     std::vector<bool> pieces_;
   };
 
-  class ArithemticLessEqualComparison : public SingleSearchStep {
+
+  class ArithmeticLessEqualComparison : public SingleSearchStep {
   public:
-    explicit ArithemticLessEqualComparison(const ArithmeticOperation *left, const ArithmeticOperation *right) : left_(
-        left),
-                                                                                                                right_(right) {}
+    explicit ArithmeticLessEqualComparison(std::unique_ptr<ArithmeticOperation> left,
+                                           std::unique_ptr<ArithmeticOperation> right) : left_(std::move(left)),
+                                                                                         right_(std::move(right)) {}
 
     void Run(GameState &state, std::vector<ModifierApplication> &applied_modifiers,
              std::vector<std::vector<ModifierApplication>> &moves) override {
@@ -137,14 +151,15 @@ namespace rbg {
     }
 
   private:
-    const ArithmeticOperation *left_, *right_;
+    std::unique_ptr<ArithmeticOperation> left_, right_;
   };
 
 
-  class ArithemticLessComparison : public SingleSearchStep {
+  class ArithmeticLessComparison : public SingleSearchStep {
   public:
-    explicit ArithemticLessComparison(const ArithmeticOperation *left, const ArithmeticOperation *right) : left_(left),
-                                                                                                           right_(right) {}
+    explicit ArithmeticLessComparison(std::unique_ptr<ArithmeticOperation> left,
+                                      std::unique_ptr<ArithmeticOperation> right) : left_(std::move(left)),
+                                                                                    right_(std::move(right)) {}
 
     void Run(GameState &state, std::vector<ModifierApplication> &applied_modifiers,
              std::vector<std::vector<ModifierApplication>> &moves) override {
@@ -154,14 +169,15 @@ namespace rbg {
     }
 
   private:
-    const ArithmeticOperation *left_, *right_;
+    std::unique_ptr<ArithmeticOperation> left_, right_;
   };
 
 
-  class ArithemticEqualComparison : public SingleSearchStep {
+  class ArithmeticEqualComparison : public SingleSearchStep {
   public:
-    explicit ArithemticEqualComparison(const ArithmeticOperation *left, const ArithmeticOperation *right) : left_(left),
-                                                                                                            right_(right) {}
+    explicit ArithmeticEqualComparison(std::unique_ptr<ArithmeticOperation> left,
+                                       std::unique_ptr<ArithmeticOperation> right) : left_(std::move(left)),
+                                                                                     right_(std::move(right)) {}
 
     void Run(GameState &state, std::vector<ModifierApplication> &applied_modifiers,
              std::vector<std::vector<ModifierApplication>> &moves) override {
@@ -171,7 +187,25 @@ namespace rbg {
     }
 
   private:
-    const ArithmeticOperation *left_, *right_;
+    std::unique_ptr<ArithmeticOperation> left_, right_;
+  };
+
+
+  class ArithmeticNotEqualComparison : public SingleSearchStep {
+  public:
+    explicit ArithmeticNotEqualComparison(std::unique_ptr<ArithmeticOperation> left,
+                                          std::unique_ptr<ArithmeticOperation> right) : left_(std::move(left)),
+                                                                                        right_(std::move(right)) {}
+
+    void Run(GameState &state, std::vector<ModifierApplication> &applied_modifiers,
+             std::vector<std::vector<ModifierApplication>> &moves) override {
+      if (left_->Value(state) != right_->Value(state))
+        return;
+      RunNextStep(state, applied_modifiers, moves);
+    }
+
+  private:
+    std::unique_ptr<ArithmeticOperation> left_, right_;
   };
 
   class ConditionCheckStep : public SingleSearchStep {
@@ -224,6 +258,10 @@ namespace rbg {
       state.board_.set(state.current_pos_, previous);
     }
 
+    void Apply(GameState &state, vertex_id_t vertex) override {
+      assert(false && "Not yet implemented.");
+    }
+
   private:
     piece_id_t piece_id_;
   };
@@ -242,14 +280,20 @@ namespace rbg {
       state.current_player_ = previous;
     }
 
+
+    void Apply(GameState &state, vertex_id_t vertex) override {
+      assert(false && "Not yet implemented.");
+    }
+
+
   private:
     player_id_t player_id_;
   };
 
   class AssignmentStep : public ModifyingSearchStep {
   public:
-    explicit AssignmentStep(variable_id_t variable_id, const ArithmeticOperation *value, uint index)
-        : ModifyingSearchStep(index), variable_id_(variable_id), value_(value) {}
+    explicit AssignmentStep(variable_id_t variable_id, std::unique_ptr<ArithmeticOperation> value, uint index)
+        : ModifyingSearchStep(index), variable_id_(variable_id), value_(std::move(value)) {}
 
     void Run(GameState &state, std::vector<ModifierApplication> &applied_modifiers,
              std::vector<std::vector<ModifierApplication>> &moves) override {
@@ -261,9 +305,15 @@ namespace rbg {
       state.variables_values_[variable_id_] = previous;
     }
 
+
+    void Apply(GameState &state, vertex_id_t vertex) override {
+      assert(false && "Not yet implemented.");
+    }
+
+
   private:
     variable_id_t variable_id_;
-    const ArithmeticOperation *value_;
+    std::unique_ptr<ArithmeticOperation> value_;
   };
 
 }

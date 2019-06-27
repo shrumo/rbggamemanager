@@ -11,6 +11,9 @@
 namespace rbg {
   std::unique_ptr<rbg::ArithmeticOperation>
   CreateArithmeticOperation(const rbg_parser::arithmetic_expression &expression, const Declarations &declarations);
+
+  std::unique_ptr<rbg::ArithmeticOperation>
+  CreateArithmeticOperation(const ArithmeticOperation &arithmeticOperation);
 }
 
 #endif //RBGGAMEMANAGER_ARITHMETIC_CREATOR_H

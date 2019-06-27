@@ -125,9 +125,9 @@ public:
 
   std::string ArithmeticComparisonCase(const ArithmeticComparison &move) override {
 
-    return "{$" + ArithmeticOperationPrinter(declarations_)(*move.left()) +
+    return "{$" + ArithmeticOperationPrinter(declarations_)(move.left()) +
            comparison_symbol(move.comparison_type()) +
-           ArithmeticOperationPrinter(declarations_)(*move.right()) + "}";
+           ArithmeticOperationPrinter(declarations_)(move.right()) + "}";
   }
 
   std::string OffCase(const Off &move) override {
@@ -157,7 +157,7 @@ public:
 
   std::string AssignmentCase(const Assignment &move) override {
     return "[" + declarations_.variables_resolver.Name(move.get_variable()) + "= " +
-           ArithmeticOperationPrinter(declarations_)(*move.get_value_expression()) + "]";
+           ArithmeticOperationPrinter(declarations_)(move.get_value_expression()) + "]";
   }
 
   std::string PlayerCheckCase(const PlayerCheck &move) override {
@@ -173,8 +173,8 @@ public:
     return result.str();
   }
 
-  std::string VisitedCheckCase(const VisitedCheck &) override {
-    return "<VisitedCheck>";
+  std::string VisitedCheckCase(const VisitedCheck &move) override {
+    return "<VisitedCheck " + std::to_string(move.visited_array_index()) + ">";
   }
 
   std::string EmptyCase(const Empty &) override {

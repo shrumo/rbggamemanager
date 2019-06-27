@@ -39,7 +39,7 @@ set(CONSTRUCTION_FILES
         src/construction/moves/moves.h src/construction/moves/moves_creator.cc src/construction/moves/moves_creator.h
         src/construction/moves/arithmetic_creator.cc src/construction/moves/arithmetic_creator.h
         src/construction/moves/moves_visitor.h src/construction/moves/moves_printer.cc
-        src/construction/moves/moves_printer.h)
+        src/construction/moves/moves_printer.h src/construction/searchstep_creator.cpp src/construction/searchstep_creator.h)
 
 set(ENV{PYTHONPATH} ${PYTHON_PATH}:${CMAKE_CURRENT_BINARY_DIR})
 
