@@ -31,6 +31,8 @@ namespace rbg {
 
     friend class PieceCountValue;
 
+    friend class PlayerCheckStep;
+
     GameState(const Declarations &declarations, SearchstepsCollection steps)
         : declarations_(declarations), current_pos_(0),
           variables_values_(declarations.variables_resolver.size(), 0),

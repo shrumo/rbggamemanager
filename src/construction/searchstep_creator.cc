@@ -98,8 +98,8 @@ public:
     return step_index;
   }
 
-  uint PlayerCheckCase(const PlayerCheck &) override {
-    assert(false && "not yet implemented");
+  uint PlayerCheckCase(const PlayerCheck &move) override {
+    return collection_.AddSearchStep(make_unique<PlayerCheckStep>(move.player()));
   }
 
   uint ConditionCheckCase(const ConditionCheck &move) override {

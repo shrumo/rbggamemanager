@@ -188,3 +188,7 @@ void AssignmentStep::Apply(GameState &state, vertex_id_t vertex) const {
   revert_info_t revert_info;
   ApplyReversible(state, revert_info);
 }
+
+bool PlayerCheckStep::Apply(GameState &state) {
+  return state.current_player_ == player_;
+}

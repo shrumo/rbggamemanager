@@ -231,7 +231,6 @@ namespace rbg {
       return false;
     }
 
-
     bool
     RunUntilFound(GameState &state, std::vector<ModifierApplication> &applied_modifiers) override {
       bool result = false;
@@ -243,6 +242,41 @@ namespace rbg {
 
   private:
     std::vector<bool> pieces_;
+  };
+
+  class PlayerCheckStep : public SingleSearchStep {
+  public:
+    explicit PlayerCheckStep(player_id_t player) : player_(player) {}
+
+    bool Apply(GameState &state);
+
+    void Run(GameState &state, std::vector<ModifierApplication> &applied_modifiers,
+             std::vector<std::vector<ModifierApplication>> &moves) override {
+      if (Apply(state)) {
+        RunNextStep(state, applied_modifiers, moves);
+      }
+    }
+
+    bool
+    ApplyFirstFound(GameState &state) override {
+      if (Apply(state)) {
+        if (ApplyNextStepUntilFound(state))
+          return true;
+      }
+      return false;
+    }
+
+    bool
+    RunUntilFound(GameState &state, std::vector<ModifierApplication> &applied_modifiers) override {
+      bool result = false;
+      if (Apply(state)) {
+        result = RunNextStepUntilFound(state, applied_modifiers);
+      }
+      return result;
+    }
+
+  private:
+    player_id_t player_;
   };
 
 
@@ -319,8 +353,6 @@ namespace rbg {
       }
       return result;
     }
-
-
 
 
   private:
