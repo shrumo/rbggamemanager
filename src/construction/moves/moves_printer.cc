@@ -5,9 +5,10 @@
 #include "moves_printer.h"
 
 #include "moves_visitor.h"
-#include <game_state/searchsteps/arithmetic_operation_visitor.h>
+#include <game_state/search_steps/arithmetic_operation_visitor.h>
 #include "moves.h"
 #include <sstream>
+#include <construction/graph_creator.h>
 
 using namespace rbg;
 
@@ -167,7 +168,7 @@ public:
   std::string ConditionCheckCase(const ConditionCheck &move) override {
     std::stringstream result;
     result << "<ConditionCheck ";
-    result << GraphDescription(move.nfa().graph,
+    result << GraphDescription(move.nfa().nfa.graph,
                                [&](const std::unique_ptr<Move> &move) { return MovePrinter(declarations_)(*move); });
     result << ">";
     return result.str();

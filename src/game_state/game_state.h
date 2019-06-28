@@ -5,7 +5,7 @@
 #ifndef RBGGAMEMANAGER_GAME_STATE_H
 #define RBGGAMEMANAGER_GAME_STATE_H
 
-#include <construction/searchstep_creator.h>
+#include <construction/search_step_creator.h>
 #include "board.h"
 #include "declarations.h"
 
@@ -33,12 +33,11 @@ namespace rbg {
 
     friend class PlayerCheckStep;
 
-    GameState(const Declarations &declarations, SearchStepsCollection steps)
+    GameState(const Declarations &declarations, SearchStepsInformation steps)
         : declarations_(declarations), current_pos_(0),
           variables_values_(declarations.variables_resolver.size(), 0),
           current_player_(declarations.keeper_id),
           board_(declarations.board_description.initial_content()), steps_(std::move(steps)) {
-      steps_.stack().Push();
     }
 
     std::vector<std::vector<ModifierApplication>> Moves() {
@@ -66,13 +65,33 @@ namespace rbg {
       return declarations_;
     }
 
+    const BoardContent &board_content() const {
+      return board_;
+    }
+
+    vertex_id_t current_pos() const {
+      return current_pos_;
+    }
+
+    player_id_t current_player() const {
+      return current_player_;
+    }
+
+    const SearchStepsCollection &search_steps() const {
+      return steps_;
+    }
+
+    const std::vector<variable_value_t> &variables_values() const {
+      return variables_values_;
+    }
+
   private:
     const Declarations declarations_;
     vertex_id_t current_pos_;
     std::vector<variable_value_t> variables_values_;
     player_id_t current_player_;
     BoardContent board_;
-    SearchStepsCollection steps_;
+    SearchStepsInformation steps_;
   };
 }
 

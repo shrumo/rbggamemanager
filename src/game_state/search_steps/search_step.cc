@@ -44,14 +44,18 @@ bool ArithmeticNotEqualComparison::Apply(GameState &state) {
 }
 
 bool ConditionCheckStep::Apply(GameState &state) {
-  std::vector<ModifierApplication> condition_modifiers;
-  return search_->RunUntilFound(state, condition_modifiers);
+  return steps_collection_->current()->EndStepReachable(state);
 }
 
+ConditionCheckStep::ConditionCheckStep(std::unique_ptr<SearchStepsCollection> steps_collection)
+    : steps_collection_(std::move(steps_collection)) {}
+
 bool NegatedConditionCheckStep::Apply(GameState &state) {
-  std::vector<ModifierApplication> condition_modifiers;
-  return !search_->RunUntilFound(state, condition_modifiers);
+  return !steps_collection_->current()->EndStepReachable(state);
 }
+
+NegatedConditionCheckStep::NegatedConditionCheckStep(std::unique_ptr<SearchStepsCollection> steps_collection)
+    : steps_collection_(std::move(steps_collection)) {}
 
 void OffStep::ApplyReversible(GameState &state, OffStep::revert_info_t &revert_info) const {
   revert_info = state.board_.at(state.current_pos_);
@@ -83,14 +87,10 @@ bool OffStep::ApplyFirstFound(GameState &state) {
   return false;
 }
 
-bool OffStep::RunUntilFound(GameState &state, std::vector<ModifierApplication> &applied_modifiers) {
+bool OffStep::EndStepReachable(GameState &state) {
   revert_info_t revert_info;
   ApplyReversible(state, revert_info);
-  applied_modifiers.push_back({state.current_pos_, index()});
-  bool result = RunNextStepUntilFound(state, applied_modifiers);
-  if (!result) {
-    applied_modifiers.pop_back();
-  }
+  bool result = EndStepReachableFromNext(state);
   Revert(state, revert_info);
   return result;
 }
@@ -127,11 +127,10 @@ bool PlayerSwitchStep::ApplyFirstFound(GameState &state) {
   return true;
 }
 
-bool PlayerSwitchStep::RunUntilFound(GameState &state, std::vector<ModifierApplication> &applied_modifiers) {
+bool PlayerSwitchStep::EndStepReachable(GameState &state) {
   revert_info_t revert_info;
   ApplyReversible(state, revert_info);
-  applied_modifiers.push_back({state.current_pos_, index()});
-  return true;
+  return EndStepReachableFromNext(state);
 }
 
 void PlayerSwitchStep::Apply(GameState &state, vertex_id_t vertex) const {
@@ -171,14 +170,10 @@ bool AssignmentStep::ApplyFirstFound(GameState &state) {
   return false;
 }
 
-bool AssignmentStep::RunUntilFound(GameState &state, std::vector<ModifierApplication> &applied_modifiers) {
+bool AssignmentStep::EndStepReachable(GameState &state) {
   revert_info_t revert_info;
   ApplyReversible(state, revert_info);
-  applied_modifiers.push_back({state.current_pos_, index()});
-  bool result = RunNextStepUntilFound(state, applied_modifiers);
-  if (!result) {
-    applied_modifiers.pop_back();
-  }
+  bool result = EndStepReachableFromNext(state);
   Revert(state, revert_info);
   return result;
 }

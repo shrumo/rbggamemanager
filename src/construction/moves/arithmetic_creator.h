@@ -6,7 +6,7 @@
 #define RBGGAMEMANAGER_ARITHMETIC_CREATOR_H
 
 #include <parser/parser_wrapper.h>
-#include <game_state/searchsteps/arithmetic_operation.h>
+#include <game_state/search_steps/arithmetic_operation.h>
 
 namespace rbg {
   std::unique_ptr<rbg::ArithmeticOperation>

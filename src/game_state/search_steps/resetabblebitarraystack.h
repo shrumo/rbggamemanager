@@ -57,7 +57,9 @@ namespace rbg {
   class ResettableBitArrayStack {
   public:
     explicit ResettableBitArrayStack(uint bit_array_size)
-        : bit_array_size_(bit_array_size), bit_arrays_{}, depth_(0) {}
+        : bit_array_size_(bit_array_size), bit_arrays_{}, depth_(0) {
+      Push();
+    }
 
     void Push() {
       if (depth_ == bit_arrays_.size()) {

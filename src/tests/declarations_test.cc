@@ -52,25 +52,25 @@ int main() {
         result.board_description.vertices_count() &&
         result.board_description.NextVertex(id, result.board_description.edges_names().Id("up")) ==
         result.board_description.vertices_count()) {
-      assert(result.board_description.at(id) == result.pieces_resolver.Id("r"));
+      assert(result.board_description.initial_content().at(id) == result.pieces_resolver.Id("r"));
       square_edges.insert("(right,up)");
     } else if (result.board_description.NextVertex(id, result.board_description.edges_names().Id("left")) ==
                result.board_description.vertices_count() &&
                result.board_description.NextVertex(id, result.board_description.edges_names().Id("up")) ==
                result.board_description.vertices_count()) {
-      assert(result.board_description.at(id) == result.pieces_resolver.Id("e"));
+      assert(result.board_description.initial_content().at(id) == result.pieces_resolver.Id("e"));
       square_edges.insert("(left,up)");
     } else if (result.board_description.NextVertex(id, result.board_description.edges_names().Id("right")) ==
                result.board_description.vertices_count() &&
                result.board_description.NextVertex(id, result.board_description.edges_names().Id("down")) ==
                result.board_description.vertices_count()) {
-      assert(result.board_description.at(id) == result.pieces_resolver.Id("b"));
+      assert(result.board_description.initial_content().at(id) == result.pieces_resolver.Id("b"));
       square_edges.insert("(right,down)");
     } else if (result.board_description.NextVertex(id, result.board_description.edges_names().Id("left")) ==
                result.board_description.vertices_count() &&
                result.board_description.NextVertex(id, result.board_description.edges_names().Id("down")) ==
                result.board_description.vertices_count()) {
-      assert(result.board_description.at(id) == result.pieces_resolver.Id("e"));
+      assert(result.board_description.initial_content().at(id) == result.pieces_resolver.Id("e"));
       square_edges.insert("(left,down)");
     }
   }

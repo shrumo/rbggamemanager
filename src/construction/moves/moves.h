@@ -7,10 +7,12 @@
 
 
 #include <game_state/board.h>
-#include <game_state/searchsteps/search_step.h>
+#include <game_state/search_steps/search_step.h>
 #include <graph/graph.h>
 
 namespace rbg {
+  class NfaWithVisitedChecks;
+
   class Shift;
 
   class ShiftTable;
@@ -299,18 +301,18 @@ namespace rbg {
 
   class ConditionCheck : public IndexedMove {
   public:
-    ConditionCheck(rbg::Nfa<std::unique_ptr<Move>> nfa, bool negated, uint index)
+    ConditionCheck(std::unique_ptr<NfaWithVisitedChecks> nfa, bool negated, uint index)
         : IndexedMove(MoveType::kConditionCheck, index), nfa_(std::move(nfa)), negated_(negated) {
     }
 
-    const rbg::Nfa<std::unique_ptr<Move>> &nfa() const { return nfa_; }
+    const NfaWithVisitedChecks &nfa() const { return *nfa_; }
 
     bool negated() const { return negated_; }
 
     void Accept(MoveVisitor &visitor) const override { visitor.Visit(*this); }
 
   private:
-    rbg::Nfa<std::unique_ptr<Move>> nfa_;
+    std::unique_ptr<NfaWithVisitedChecks> nfa_;
     bool negated_;
   };
 

@@ -25,11 +25,11 @@ include_directories(${Boost_INCLUDE_DIR})
 include_directories(src)
 include_directories(.)
 
-set(GAMESTATE_FILES src/game_state/namesresolver.h src/game_state/board.h src/game_state/searchsteps/search_step.h
-        src/game_state/declarations.h src/game_state/game_state.h src/game_state/searchsteps/resetabblebitarraystack.h
-        src/game_state/searchsteps/arithmetic_operation.cc src/game_state/searchsteps/arithmetic_operation.h
-        src/game_state/searchsteps/arithmetic_operation_visitor.h
-        src/game_state/namesresolver.cc src/game_state/board.cc src/game_state/searchsteps/search_step.cc)
+set(GAMESTATE_FILES src/game_state/namesresolver.h src/game_state/board.h src/game_state/search_steps/search_step.h
+        src/game_state/declarations.h src/game_state/game_state.h src/game_state/search_steps/resetabblebitarraystack.h
+        src/game_state/search_steps/arithmetic_operation.cc src/game_state/search_steps/arithmetic_operation.h
+        src/game_state/search_steps/arithmetic_operation_visitor.h
+        src/game_state/namesresolver.cc src/game_state/board.cc src/game_state/search_steps/search_step.cc)
 
 set(GRAPH_FILES src/graph/graph.h)
 
@@ -40,9 +40,9 @@ set(CONSTRUCTION_FILES
         src/construction/moves/moves.h src/construction/moves/moves_creator.cc src/construction/moves/moves_creator.h
         src/construction/moves/arithmetic_creator.cc src/construction/moves/arithmetic_creator.h
         src/construction/moves/moves_visitor.h src/construction/moves/moves_printer.cc
-        src/construction/moves/moves_printer.h src/construction/searchstep_creator.cc src/construction/searchstep_creator.h
-        src/game_state/searchsteps/arithmetic_operation.cc src/game_state/searchsteps/arithmetic_operation.h
-        src/game_state/board.cc src/game_state/searchsteps/search_step.cc src/game_state/searchsteps/search_step.h src/construction/gamestate_creator.h)
+        src/construction/moves/moves_printer.h src/construction/search_step_creator.cc src/construction/search_step_creator.h
+        src/game_state/search_steps/arithmetic_operation.cc src/game_state/search_steps/arithmetic_operation.h
+        src/game_state/board.cc src/game_state/search_steps/search_step.cc src/game_state/search_steps/search_step.h src/construction/gamestate_creator.h)
 
 set(ENV{PYTHONPATH} ${PYTHON_PATH}:${CMAKE_CURRENT_BINARY_DIR})
 
@@ -66,6 +66,10 @@ add_test(parser_test parser_test)
 add_executable(creator_test ${GRAPH_FILES} ${PARSER_FILES} ${CONSTRUCTION_FILES} ${GAMESTATE_FILES} src/tests/creator_test.cc)
 target_link_libraries(creator_test rbgParser)
 add_test(creator_test creator_test)
+
+add_executable(searchsteps_test ${GRAPH_FILES} ${PARSER_FILES} ${CONSTRUCTION_FILES} ${GAMESTATE_FILES} src/tests/search_steps_test.cc)
+target_link_libraries(searchsteps_test rbgParser)
+add_test(searchsteps_test searchsteps_test)
 
 add_executable(declarations_test ${PARSER_FILES} ${CONSTRUCTION_FILES} ${GAMESTATE_FILES} src/tests/declarations_test.cc)
 target_link_libraries(declarations_test rbgParser)

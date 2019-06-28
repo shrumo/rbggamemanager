@@ -14,7 +14,7 @@ namespace rbg {
     auto game = ParseGame(game_text);
     Declarations declarations = CreateDeclarations(*game);
     NfaWithVisitedChecks nfa = CreateGraph(*game->get_moves(), declarations);
-    SearchStepsCollection steps = CreateSearchSteps(nfa, declarations);
+    SearchStepsInformation steps = CreateSearchSteps(nfa, declarations);
     return GameState(declarations, std::move(steps));
   }
 }

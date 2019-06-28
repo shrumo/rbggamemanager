@@ -3,7 +3,7 @@
 //
 
 #include <queue>
-#include "searchstep_creator.h"
+#include "search_step_creator.h"
 #include "moves/arithmetic_creator.h"
 
 using namespace rbg;
@@ -13,12 +13,10 @@ struct InitialFinalIndiciesPair {
   uint initial, final;
 };
 
-InitialFinalIndiciesPair CreateNfaSearchSteps(SearchStepsCollection &collection, const Nfa<std::unique_ptr<Move>> &nfa);
-
 class SearchStepCreator : public MoveFunction<uint> {
 public:
-  explicit SearchStepCreator(SearchStepsCollection &collection)
-      : collection_(collection) {
+  explicit SearchStepCreator(SearchStepsInformation &collection, const Declarations &declarations)
+      : collection_(collection), declarations_(declarations) {
   }
 
   uint ShiftCase(const Shift &move) override {
@@ -103,9 +101,13 @@ public:
   }
 
   uint ConditionCheckCase(const ConditionCheck &move) override {
-    InitialFinalIndiciesPair initial_final_indices = CreateNfaSearchSteps(collection_, move.nfa());
-    return collection_.AddSearchStep(make_unique<ConditionCheckStep>(collection_[initial_final_indices.initial]));
-
+    if (move.negated()) {
+      return collection_.AddSearchStep(make_unique<NegatedConditionCheckStep>(
+          make_unique<SearchStepsCollection>(CreateSearchSteps(move.nfa(), declarations_))));
+    } else {
+      return collection_.AddSearchStep(make_unique<ConditionCheckStep>(
+          make_unique<SearchStepsCollection>(CreateSearchSteps(move.nfa(), declarations_))));
+    }
   }
 
   uint VisitedCheckCase(const VisitedCheck &move) override {
@@ -120,14 +122,18 @@ public:
   }
 
 private:
-  SearchStepsCollection &collection_;
+  SearchStepsInformation &collection_;
+  const Declarations &declarations_;
 };
 
-InitialFinalIndiciesPair CreateNfaSearchSteps(SearchStepsCollection &collection, const Nfa<unique_ptr<Move>> &nfa) {
+SearchStepsInformation
+rbg::CreateSearchSteps(const NfaWithVisitedChecks &game_graph, const Declarations &declarations) {
+  SearchStepsInformation result(game_graph.visited_checks_count, declarations.board_description.vertices_count());
+  const auto &nfa = game_graph.nfa;
   unordered_map<node_t, uint> nodes_collection_indices;
   queue<node_t> to_visit;
   to_visit.push(nfa.final);
-  nodes_collection_indices[nfa.final] = collection.AddSearchStep(make_unique<EndStep>());
+  nodes_collection_indices[nfa.final] = result.AddSearchStep(make_unique<EndStep>());
   while (!to_visit.empty()) {
     uint v = to_visit.front();
     to_visit.pop();
@@ -137,21 +143,15 @@ InitialFinalIndiciesPair CreateNfaSearchSteps(SearchStepsCollection &collection,
       uint searchstep_index;
       auto iter = nodes_collection_indices.find(u);
       if (nodes_collection_indices.find(u) == nodes_collection_indices.end()) {
-        searchstep_index = SearchStepCreator(collection)(*transition.content);
+        searchstep_index = SearchStepCreator(result, declarations)(*transition.content);
         nodes_collection_indices[u] = searchstep_index;
         to_visit.push(u);
       } else {
         searchstep_index = iter->second;
       }
-      collection[searchstep_index]->AddNextSearchStep(collection[nodes_collection_indices.at(v)]);
+      result[searchstep_index]->AddNextSearchStep(result[nodes_collection_indices.at(v)]);
     }
   }
-  return {nodes_collection_indices.at(nfa.initial), nodes_collection_indices.at(nfa.final)};
-}
-
-SearchStepsCollection rbg::CreateSearchSteps(const NfaWithVisitedChecks &game_graph, const Declarations &declarations) {
-  SearchStepsCollection result(game_graph.visited_checks_count, declarations.board_description.vertices_count());
-  auto initial_final_indices = CreateNfaSearchSteps(result, game_graph.nfa);
-  result.SetInitial(initial_final_indices.initial);
+  result.SetInitial(nodes_collection_indices.at(nfa.initial));
   return result;
 }

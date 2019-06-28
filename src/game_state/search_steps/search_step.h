@@ -15,6 +15,8 @@
 
 namespace rbg {
   class GameState;
+
+  class SearchStepsCollection;
 }
 
 namespace rbg {
@@ -32,7 +34,7 @@ namespace rbg {
     ApplyFirstFound(GameState &) = 0;
 
     virtual bool
-    RunUntilFound(GameState &, std::vector<ModifierApplication> &) = 0;
+    EndStepReachable(GameState &) = 0;
 
     virtual void AddNextSearchStep(SearchStep *next) = 0;
 
@@ -59,8 +61,8 @@ namespace rbg {
     }
 
 
-    bool RunNextStepUntilFound(GameState &state, std::vector<ModifierApplication> &applied_modifiers) {
-      return next_->RunUntilFound(state, applied_modifiers);
+    bool EndStepReachableFromNext(GameState &state) {
+      return next_->EndStepReachable(state);
     }
 
     SearchStep *next_ = {};
@@ -99,9 +101,9 @@ namespace rbg {
     }
 
     bool
-    RunUntilFound(GameState &state, std::vector<ModifierApplication> &applied_modifiers) final {
+    EndStepReachable(GameState &state) final {
       for (auto step : next_steps_) {
-        if (step->RunUntilFound(state, applied_modifiers))
+        if (step->EndStepReachable(state))
           return true;
       }
       return false;
@@ -123,7 +125,7 @@ namespace rbg {
 
     bool ApplyFirstFound(GameState &) final { return false; }
 
-    bool RunUntilFound(GameState &, std::vector<ModifierApplication> &) final { return false; }
+    bool EndStepReachable(GameState &) final { return true; }
 
     void AddNextSearchStep(SearchStep *) final {
       assert(false && "Next step cannot be added to the ending step.");
@@ -152,9 +154,9 @@ namespace rbg {
     }
 
     bool
-    RunUntilFound(GameState &state, std::vector<ModifierApplication> &applied_modifiers) final {
+    EndStepReachable(GameState &state) final {
       if (Apply(state))
-        return RunNextStepUntilFound(state, applied_modifiers);
+        return EndStepReachableFromNext(state);
       return false;
     }
 
@@ -195,11 +197,11 @@ namespace rbg {
 
 
     bool
-    RunUntilFound(GameState &state, std::vector<ModifierApplication> &applied_modifiers) override {
+    EndStepReachable(GameState &state) override {
       revert_info_t revert_info;
       bool result = false;
       if (ApplyReversible(state, revert_info)) {
-        result = RunNextStepUntilFound(state, applied_modifiers);
+        result = EndStepReachableFromNext(state);
       }
       Revert(state, revert_info);
       return result;
@@ -232,10 +234,10 @@ namespace rbg {
     }
 
     bool
-    RunUntilFound(GameState &state, std::vector<ModifierApplication> &applied_modifiers) override {
+    EndStepReachable(GameState &state) override {
       bool result = false;
       if (Apply(state)) {
-        result = RunNextStepUntilFound(state, applied_modifiers);
+        result = EndStepReachableFromNext(state);
       }
       return result;
     }
@@ -267,10 +269,10 @@ namespace rbg {
     }
 
     bool
-    RunUntilFound(GameState &state, std::vector<ModifierApplication> &applied_modifiers) override {
+    EndStepReachable(GameState &state) override {
       bool result = false;
       if (Apply(state)) {
-        result = RunNextStepUntilFound(state, applied_modifiers);
+        result = EndStepReachableFromNext(state);
       }
       return result;
     }
@@ -306,10 +308,10 @@ namespace rbg {
 
 
     bool
-    RunUntilFound(GameState &state, std::vector<ModifierApplication> &applied_modifiers) override {
+    EndStepReachable(GameState &state) override {
       bool result = false;
       if (Apply(state)) {
-        result = RunNextStepUntilFound(state, applied_modifiers);
+        result = EndStepReachableFromNext(state);
       }
       return result;
     }
@@ -346,10 +348,10 @@ namespace rbg {
 
 
     bool
-    RunUntilFound(GameState &state, std::vector<ModifierApplication> &applied_modifiers) override {
+    EndStepReachable(GameState &state) override {
       bool result = false;
       if (Apply(state)) {
-        result = RunNextStepUntilFound(state, applied_modifiers);
+        result = EndStepReachableFromNext(state);
       }
       return result;
     }
@@ -386,10 +388,10 @@ namespace rbg {
 
 
     bool
-    RunUntilFound(GameState &state, std::vector<ModifierApplication> &applied_modifiers) override {
+    EndStepReachable(GameState &state) override {
       bool result = false;
       if (Apply(state)) {
-        result = RunNextStepUntilFound(state, applied_modifiers);
+        result = EndStepReachableFromNext(state);
       }
       return result;
     }
@@ -426,10 +428,10 @@ namespace rbg {
 
 
     bool
-    RunUntilFound(GameState &state, std::vector<ModifierApplication> &applied_modifiers) override {
+    EndStepReachable(GameState &state) override {
       bool result = false;
       if (Apply(state)) {
-        result = RunNextStepUntilFound(state, applied_modifiers);
+        result = EndStepReachableFromNext(state);
       }
       return result;
     }
@@ -441,7 +443,7 @@ namespace rbg {
 
   class ConditionCheckStep : public SingleSearchStep {
   public:
-    explicit ConditionCheckStep(SearchStep *search) : search_(search) {}
+    explicit ConditionCheckStep(std::unique_ptr<SearchStepsCollection> steps_collection);
 
     bool Apply(GameState &state);
 
@@ -463,21 +465,21 @@ namespace rbg {
 
 
     bool
-    RunUntilFound(GameState &state, std::vector<ModifierApplication> &applied_modifiers) override {
+    EndStepReachable(GameState &state) override {
       bool result = false;
       if (Apply(state)) {
-        result = RunNextStepUntilFound(state, applied_modifiers);
+        result = EndStepReachableFromNext(state);
       }
       return result;
     }
 
   private:
-    SearchStep *search_;
+    std::unique_ptr<SearchStepsCollection> steps_collection_;
   };
 
   class NegatedConditionCheckStep : public SingleSearchStep {
   public:
-    explicit NegatedConditionCheckStep(SearchStep *search) : search_(search) {}
+    explicit NegatedConditionCheckStep(std::unique_ptr<SearchStepsCollection> steps_collection);
 
     bool Apply(GameState &state);
 
@@ -499,16 +501,16 @@ namespace rbg {
 
 
     bool
-    RunUntilFound(GameState &state, std::vector<ModifierApplication> &applied_modifiers) override {
+    EndStepReachable(GameState &state) override {
       bool result = false;
       if (Apply(state)) {
-        result = RunNextStepUntilFound(state, applied_modifiers);
+        result = EndStepReachableFromNext(state);
       }
       return result;
     }
 
   private:
-    SearchStep *search_;
+    std::unique_ptr<SearchStepsCollection> steps_collection_;
   };
 
   class OffStep : public ModifyingSearchStep {
@@ -529,7 +531,7 @@ namespace rbg {
 
 
     bool
-    RunUntilFound(GameState &state, std::vector<ModifierApplication> &applied_modifiers) override;
+    EndStepReachable(GameState &state) override;
 
     void Apply(GameState &state, vertex_id_t vertex) const override;
 
@@ -555,7 +557,7 @@ namespace rbg {
 
 
     bool
-    RunUntilFound(GameState &state, std::vector<ModifierApplication> &applied_modifiers) override;
+    EndStepReachable(GameState &state) override;
 
     void Apply(GameState &state, vertex_id_t vertex) const override;
 
@@ -582,7 +584,7 @@ namespace rbg {
 
 
     bool
-    RunUntilFound(GameState &state, std::vector<ModifierApplication> &applied_modifiers) override;
+    EndStepReachable(GameState &state) override;
 
     void Apply(GameState &state, vertex_id_t vertex) const override;
 

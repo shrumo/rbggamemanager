@@ -2,14 +2,15 @@
 // Created by shrum on 23.06.19.
 //
 
-#ifndef RBGGAMEMANAGER_SEARCHSTEP_CREATOR_H
-#define RBGGAMEMANAGER_SEARCHSTEP_CREATOR_H
+#ifndef RBGGAMEMANAGER_SEARCH_STEP_CREATOR_H
+#define RBGGAMEMANAGER_SEARCH_STEP_CREATOR_H
 
 #include "moves/moves_visitor.h"
 #include "graph_creator.h"
 #include <unordered_map>
 
 namespace rbg {
+
   class SearchStepsCollection {
   public:
     SearchStepsCollection(uint visited_checks_count, uint board_size)
@@ -40,14 +41,6 @@ namespace rbg {
               visited_info_stack_->bit_array_size() / visited_checks_count_};
     }
 
-    void RegisterModifier(uint modifier_index, uint step_index) {
-      modifiers_[modifier_index] = dynamic_cast<ModifyingSearchStep *>((*this)[step_index]);
-    }
-
-    ModifyingSearchStep *Modifier(uint modifier_index) {
-      return modifiers_[modifier_index];
-    }
-
     ResettableBitArrayStack &stack() {
       return *visited_info_stack_;
     }
@@ -57,13 +50,29 @@ namespace rbg {
     SearchStep *current_;
     std::unique_ptr<ResettableBitArrayStack> visited_info_stack_;
     uint visited_checks_count_;
-    std::unordered_map<uint, ModifyingSearchStep *> modifiers_;
 
     friend class PlayerSwitchStep;
   };
 
-  SearchStepsCollection CreateSearchSteps(const NfaWithVisitedChecks &nfa, const Declarations &declarations);
+  class SearchStepsInformation : public SearchStepsCollection {
+  public:
+    SearchStepsInformation(uint visited_checks_count, uint board_size)
+        : SearchStepsCollection(visited_checks_count, board_size) {}
+
+    void RegisterModifier(uint modifier_index, uint step_index) {
+      modifiers_[modifier_index] = dynamic_cast<ModifyingSearchStep *>((*this)[step_index]);
+    }
+
+    ModifyingSearchStep *Modifier(uint modifier_index) {
+      return modifiers_[modifier_index];
+    }
+
+  private:
+    std::unordered_map<uint, ModifyingSearchStep *> modifiers_;
+  };
+
+  SearchStepsInformation CreateSearchSteps(const NfaWithVisitedChecks &nfa, const Declarations &declarations);
 }
 
 
-#endif //RBGGAMEMANAGER_SEARCHSTEP_CREATOR_H
+#endif //RBGGAMEMANAGER_SEARCH_STEP_CREATOR_H
