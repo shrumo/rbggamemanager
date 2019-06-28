@@ -68,6 +68,10 @@ namespace rbg {
       depth_++;
     }
 
+    void Pop() {
+      depth_--;
+    }
+
     void RevertToDepth(uint depth) {
       depth_ = depth;
     }
@@ -97,19 +101,19 @@ namespace rbg {
 
   class ResetableBitArrayStackChunk {
   public:
-    ResetableBitArrayStackChunk(ResettableBitArrayStack &parent, uint begin_index, uint size)
+    ResetableBitArrayStackChunk(ResettableBitArrayStack *parent, uint begin_index, uint size)
         : parent_(parent), begin_index_(begin_index), size_(size) {
-      assert(begin_index + size <= parent_.bit_array_size());
+      assert(begin_index + size <= parent_->bit_array_size());
     }
 
     bool operator[](uint index) const {
       assert(index < size_);
-      return parent_.top_array()[begin_index_ + index];
+      return parent_->top_array()[begin_index_ + index];
     }
 
     void set(uint index) {
       assert(index < size_);
-      parent_.top_array().set(begin_index_ + index);
+      parent_->top_array().set(begin_index_ + index);
     }
 
     uint size() const {
@@ -117,7 +121,7 @@ namespace rbg {
     }
 
   private:
-    ResettableBitArrayStack &parent_;
+    ResettableBitArrayStack *parent_;
     uint begin_index_;
     uint size_;
   };

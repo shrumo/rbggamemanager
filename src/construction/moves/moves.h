@@ -230,7 +230,7 @@ namespace rbg {
   // Off places specified piece on the current position in game state.
   class Off : public IndexedMove {
   public:
-    explicit Off(piece_id_t piece, unsigned int index = 0) : IndexedMove(
+    explicit Off(piece_id_t piece, unsigned int index) : IndexedMove(
         MoveType::kOffType, index), piece_(piece) {}
 
     piece_id_t piece() const { return piece_; }
@@ -245,7 +245,7 @@ namespace rbg {
   // PlayerSwitch changes the player to the one specified.
   class PlayerSwitch : public IndexedMove {
   public:
-    explicit PlayerSwitch(player_id_t player, unsigned int index = 0) : IndexedMove(
+    explicit PlayerSwitch(player_id_t player, unsigned int index) : IndexedMove(
         MoveType::kPlayerSwitchType, index), player_(player) {}
 
     player_id_t player() const { return player_; }
@@ -257,13 +257,18 @@ namespace rbg {
     player_id_t player_;
   };
 
-  // PlayerSwitch changes the player to the one specified.
+  // KeeperSwitch changes the player to the special keeper player
   class KeeperSwitch : public IndexedMove {
   public:
-    explicit KeeperSwitch(uint index) : IndexedMove(
-        MoveType::kKeeperSwitchType, index) {}
+    explicit KeeperSwitch(player_id_t keeper_id, uint index) : IndexedMove(
+        MoveType::kKeeperSwitchType, index), keeper_id_(keeper_id) {}
 
     void Accept(MoveVisitor &visitor) const override { visitor.Visit(*this); }
+
+    player_id_t keeper_id() const { return keeper_id_; }
+
+  private:
+    player_id_t keeper_id_;
   };
 
   // Assignment assigns a value to the variable.

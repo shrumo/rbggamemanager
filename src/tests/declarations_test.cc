@@ -30,7 +30,7 @@ int main() {
   assert(result.pieces_resolver.contains("r"));
   assert(result.pieces_resolver.contains("b"));
 
-  assert(result.players_resolver.size() == 2);
+  assert(result.players_resolver.size() == 2 + 1);
   assert(result.players_resolver.contains("red"));
   assert(result.players_resolver.contains("blue"));
 

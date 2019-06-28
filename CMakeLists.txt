@@ -27,8 +27,9 @@ include_directories(.)
 
 set(GAMESTATE_FILES src/gamestate/namesresolver.h src/gamestate/board.h src/gamestate/searchsteps/searchstep.h
         src/gamestate/declarations.h src/gamestate/gamestate.h src/gamestate/searchsteps/resetabblebitarraystack.h
-        src/gamestate/searchsteps/arithmetic_operation.h src/gamestate/searchsteps/arithmetic_operation_visitor.h
-        src/gamestate/namesresolver.cc src/gamestate/board.cc)
+        src/gamestate/searchsteps/arithmetic_operation.cc src/gamestate/searchsteps/arithmetic_operation.h
+        src/gamestate/searchsteps/arithmetic_operation_visitor.h
+        src/gamestate/namesresolver.cc src/gamestate/board.cc src/gamestate/searchsteps/searchstep.cc)
 
 set(GRAPH_FILES src/graph/graph.h)
 
@@ -39,7 +40,9 @@ set(CONSTRUCTION_FILES
         src/construction/moves/moves.h src/construction/moves/moves_creator.cc src/construction/moves/moves_creator.h
         src/construction/moves/arithmetic_creator.cc src/construction/moves/arithmetic_creator.h
         src/construction/moves/moves_visitor.h src/construction/moves/moves_printer.cc
-        src/construction/moves/moves_printer.h src/construction/searchstep_creator.cpp src/construction/searchstep_creator.h)
+        src/construction/moves/moves_printer.h src/construction/searchstep_creator.cc src/construction/searchstep_creator.h
+        src/gamestate/searchsteps/arithmetic_operation.cc src/gamestate/searchsteps/arithmetic_operation.h
+        src/gamestate/board.cc src/gamestate/searchsteps/searchstep.cc src/gamestate/searchsteps/searchstep.h src/construction/gamestate_creator.h)
 
 set(ENV{PYTHONPATH} ${PYTHON_PATH}:${CMAKE_CURRENT_BINARY_DIR})
 
@@ -60,7 +63,7 @@ add_executable(parser_test ${GRAPH_FILES} ${PARSER_FILES} src/tests/parser_test.
 target_link_libraries(parser_test rbgParser)
 add_test(parser_test parser_test)
 
-add_executable(creator_test ${GRAPH_FILES} ${PARSER_FILES} ${CONSTRUCTION_FILES} src/tests/creator_test.cc)
+add_executable(creator_test ${GRAPH_FILES} ${PARSER_FILES} ${CONSTRUCTION_FILES} ${GAMESTATE_FILES} src/tests/creator_test.cc)
 target_link_libraries(creator_test rbgParser)
 add_test(creator_test creator_test)
 
@@ -70,6 +73,10 @@ add_test(declarations_test declarations_test)
 
 add_executable(namesresolver_test ${GAMESTATE_FILES} src/tests/namesresolver_test.cc)
 add_test(namesresolver_test namesresolver_test)
+
+add_executable(gamestate_simple_test ${GRAPH_FILES} ${PARSER_FILES} ${CONSTRUCTION_FILES} ${GAMESTATE_FILES} src/tests/gamestate_simple_test.cc)
+target_link_libraries(gamestate_simple_test rbgParser)
+add_test(gamestate_simple_test gamestate_simple_test)
 
 add_executable(board_test ${GAMESTATE_FILES} src/tests/board_test.cc)
 add_test(board_test board_test)

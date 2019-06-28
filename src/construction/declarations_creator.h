@@ -38,7 +38,11 @@ namespace rbg {
       }
       board.set(id, pieces_resolver.Id(game.get_board().get_starting_piece(id).to_string()));
     }
-    return {pieces_resolver, variables_resolver, players_resolver, variables_bounds, board};
+
+    // Add keeper player id
+    player_id_t keeper_id = players_resolver.Id(">");
+
+    return {pieces_resolver, variables_resolver, players_resolver, variables_bounds, board, keeper_id};
   }
 }
 

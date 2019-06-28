@@ -26,98 +26,97 @@ public:
     return index;
   }
 
-  uint ShiftTableCase(const ShiftTable &move) override {
+  uint ShiftTableCase(const ShiftTable &) override {
     assert(false && "not yet implemented");
   }
 
   uint ArithmeticComparisonCase(const ArithmeticComparison &move) override {
-    uint index;
     auto left_result = CreateArithmeticOperation(move.left());
     auto right_result = CreateArithmeticOperation(move.right());
     switch (move.comparison_type()) {
       case ComparisonType::kEqual:
-        index = collection_.AddSearchStep(make_unique<ArithmeticEqualComparison>(
+        return collection_.AddSearchStep(make_unique<ArithmeticEqualComparison>(
             std::move(left_result), std::move(right_result)));
-        break;
       case ComparisonType::kNotEqual:
-        index = collection_.AddSearchStep(make_unique<ArithmeticNotEqualComparison>(
+        return collection_.AddSearchStep(make_unique<ArithmeticNotEqualComparison>(
             std::move(left_result),
             std::move(right_result)
         ));
-        break;
       case ComparisonType::kLess:
-        index = collection_.AddSearchStep(make_unique<ArithmeticLessComparison>(
+        return collection_.AddSearchStep(make_unique<ArithmeticLessComparison>(
             std::move(left_result),
             std::move(right_result)
         ));
-        break;
       case ComparisonType::kLessEqual:
-        index = collection_.AddSearchStep(make_unique<ArithmeticLessEqualComparison>(
+        return collection_.AddSearchStep(make_unique<ArithmeticLessEqualComparison>(
             std::move(left_result),
             std::move(right_result)
         ));
-        break;
       case ComparisonType::kGreater:
-        index = collection_.AddSearchStep(make_unique<ArithmeticLessComparison>(
+        return collection_.AddSearchStep(make_unique<ArithmeticLessComparison>(
             std::move(right_result),
             std::move(left_result)
         ));
-        break;
       case ComparisonType::kGreaterEqual:
-        index = collection_.AddSearchStep(make_unique<ArithmeticLessEqualComparison>(
+        return collection_.AddSearchStep(make_unique<ArithmeticLessEqualComparison>(
             std::move(right_result),
             std::move(left_result)
         ));
-        break;
     }
-    return index;
+    assert(false);
   }
 
   uint OffCase(const Off &move) override {
-    uint index = collection_.AddSearchStep(make_unique<OffStep>(move.piece(), move.index()));
-    return index;
+    uint step_index = collection_.AddSearchStep(make_unique<OffStep>(move.piece(), move.index()));
+    collection_.RegisterModifier(move.index(), step_index);
+    return step_index;
+
   }
 
   uint OnCase(const On &move) override {
-    uint index = collection_.AddSearchStep(make_unique<OnStep>(move.pieces_table()));
-    return index;
+    return collection_.AddSearchStep(make_unique<OnStep>(move.pieces_table()));
+
   }
 
   uint PlayerSwitchCase(const PlayerSwitch &move) override {
-    uint index = collection_.AddSearchStep(make_unique<PlayerSwitchStep>(move.player(), move.index()));
-    return index;
+    uint step_index = collection_.AddSearchStep(make_unique<PlayerSwitchStep>(move.player(), move.index()));
+    collection_.RegisterModifier(move.index(), step_index);
+    return step_index;
   }
 
   uint KeeperSwitchCase(const KeeperSwitch &move) override {
-    assert(false && "not yet implemented");
+    uint step_index = collection_.AddSearchStep(make_unique<PlayerSwitchStep>(move.keeper_id(), move.index()));
+    collection_.RegisterModifier(move.index(), step_index);
+    return step_index;
   }
 
   uint AssignmentCase(const Assignment &move) override {
-    uint index = collection_.AddSearchStep(make_unique<AssignmentStep>(move.get_variable(),
-                                                                       CreateArithmeticOperation(
+    uint step_index = collection_.AddSearchStep(make_unique<AssignmentStep>(move.get_variable(),
+                                                                            CreateArithmeticOperation(
                                                                            move.get_value_expression()), move.index()));
-    return index;
+    collection_.RegisterModifier(move.index(), step_index);
+    return step_index;
   }
 
-  uint PlayerCheckCase(const PlayerCheck &move) override {
+  uint PlayerCheckCase(const PlayerCheck &) override {
     assert(false && "not yet implemented");
   }
 
   uint ConditionCheckCase(const ConditionCheck &move) override {
     InitialFinalIndiciesPair initial_final_indices = CreateNfaSearchSteps(collection_, move.nfa());
-    uint index = collection_.AddSearchStep(make_unique<ConditionCheckStep>(collection_[initial_final_indices.initial]));
-    return index;
+    return collection_.AddSearchStep(make_unique<ConditionCheckStep>(collection_[initial_final_indices.initial]));
+
   }
 
   uint VisitedCheckCase(const VisitedCheck &move) override {
-    uint index = collection_.AddSearchStep(
+    return collection_.AddSearchStep(
         make_unique<VisitedCheckSearchStep>(collection_.GetBitArrayChunk(move.visited_array_index())));
-    return index;
+
   }
 
   uint EmptyCase(const Empty &) override {
-    uint index = collection_.AddSearchStep(make_unique<MultipleSearchStep>());
-    return index;
+    return collection_.AddSearchStep(make_unique<MultipleSearchStep>());
+
   }
 
 private:

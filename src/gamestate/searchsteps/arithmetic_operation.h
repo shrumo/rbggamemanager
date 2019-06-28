@@ -5,11 +5,14 @@
 #ifndef RBGGAMEMANAGER_ARITHMETIC_OPERATION_H
 #define RBGGAMEMANAGER_ARITHMETIC_OPERATION_H
 
-#include "../gamestate.h"
 #include <vector>
+#include <gamestate/declarations.h>
 
 namespace rbg {
+  class GameState;
+}
 
+namespace rbg {
   class VariableValue;
 
   class ConstantValue;
@@ -45,21 +48,22 @@ namespace rbg {
   public:
     virtual variable_value_t Value(const GameState &s) const = 0;
 
-    virtual void Accept(ArithmeticOperationVisitor &visitor) const = 0;
+    virtual void Accept(ArithmeticOperationVisitor &) const = 0;
+
+    virtual ~ArithmeticOperation() = default;
   };
 
   class VariableValue : public ArithmeticOperation {
   public:
     explicit VariableValue(variable_id_t variable_id) : variable_id_(variable_id) {}
 
-    variable_value_t Value(const GameState &s) const override {
-      return s.variables_values_[variable_id_];
-    }
+    variable_value_t Value(const GameState &s) const override;
 
 
     void Accept(ArithmeticOperationVisitor &visitor) const override {
       visitor.Visit(*this);
     }
+
 
     variable_id_t variable_id() const { return variable_id_; }
 
@@ -71,9 +75,7 @@ namespace rbg {
   public:
     explicit ConstantValue(variable_value_t value) : value_(value) {}
 
-    variable_value_t Value(const GameState &) const override {
-      return value_;
-    }
+    variable_value_t Value(const GameState &) const override;
 
     void Accept(ArithmeticOperationVisitor &visitor) const override {
       visitor.Visit(*this);
@@ -89,13 +91,7 @@ namespace rbg {
   public:
     explicit SumValue(std::vector<std::unique_ptr<ArithmeticOperation>> summands) : summands_(std::move(summands)) {}
 
-    variable_value_t Value(const GameState &s) const override {
-      variable_value_t result = summands_[0]->Value(s);
-      for (size_t i = 1; i < summands_.size(); i++) {
-        result += summands_[i]->Value(s);
-      }
-      return result;
-    }
+    variable_value_t Value(const GameState &s) const override;
 
     void Accept(ArithmeticOperationVisitor &visitor) const override {
       visitor.Visit(*this);
@@ -114,13 +110,7 @@ namespace rbg {
     explicit SubtractionValue(std::vector<std::unique_ptr<ArithmeticOperation>> elements) : elements_(
         std::move(elements)) {}
 
-    variable_value_t Value(const GameState &s) const override {
-      variable_value_t result = elements_[0]->Value(s);
-      for (size_t i = 1; i < elements_.size(); i++) {
-        result -= elements_[i]->Value(s);
-      }
-      return result;
-    }
+    variable_value_t Value(const GameState &s) const override;
 
     void Accept(ArithmeticOperationVisitor &visitor) const override {
       visitor.Visit(*this);
@@ -139,13 +129,7 @@ namespace rbg {
   public:
     explicit ProductValue(std::vector<std::unique_ptr<ArithmeticOperation>> factors) : factors_(std::move(factors)) {}
 
-    variable_value_t Value(const GameState &s) const override {
-      variable_value_t result = factors_[0]->Value(s);
-      for (size_t i = 1; i < factors_.size(); i++) {
-        result *= factors_[i]->Value(s);
-      }
-      return result;
-    }
+    variable_value_t Value(const GameState &s) const override;
 
     void Accept(ArithmeticOperationVisitor &visitor) const override {
       visitor.Visit(*this);
@@ -165,13 +149,7 @@ namespace rbg {
     explicit DivisionValue(std::vector<std::unique_ptr<ArithmeticOperation>> elements) : elements_(
         std::move(elements)) {}
 
-    variable_value_t Value(const GameState &s) const override {
-      variable_value_t result = elements_[0]->Value(s);
-      for (size_t i = 1; i < elements_.size(); i++) {
-        result /= elements_[i]->Value(s);
-      }
-      return result;
-    }
+    variable_value_t Value(const GameState &s) const override;
 
     void Accept(ArithmeticOperationVisitor &visitor) const override {
       visitor.Visit(*this);
@@ -189,9 +167,7 @@ namespace rbg {
   public:
     explicit PieceCountValue(piece_id_t piece) : piece_(piece) {}
 
-    variable_value_t Value(const GameState &s) const override {
-      return s.board_.piece_count(piece_);
-    }
+    variable_value_t Value(const GameState &s) const override;
 
     void Accept(ArithmeticOperationVisitor &visitor) const override {
       visitor.Visit(*this);
@@ -202,6 +178,7 @@ namespace rbg {
   private:
     piece_id_t piece_;
   };
+
 }
 
 #endif //RBGGAMEMANAGER_ARITHMETIC_OPERATION_H

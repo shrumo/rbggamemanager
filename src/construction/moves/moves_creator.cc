@@ -46,7 +46,7 @@ public:
   }
 
   unique_ptr<Move> OffCase(const rbg_parser::off &move) override {
-    return make_unique<Off>(declarations_.pieces_resolver.Id(move.get_piece().to_string()));
+    return make_unique<Off>(declarations_.pieces_resolver.Id(move.get_piece().to_string()), move.index_in_expression());
   }
 
   unique_ptr<Move> AssignmentCase(const rbg_parser::assignment &move) override {
@@ -61,7 +61,7 @@ public:
   }
 
   unique_ptr<Move> KeeperSwitchCase(const rbg_parser::keeper_switch &move) override {
-    return make_unique<KeeperSwitch>(move.index_in_expression());
+    return make_unique<KeeperSwitch>(declarations_.keeper_id, move.index_in_expression());
   }
 
   unique_ptr<Move> MoveCheckCase(const rbg_parser::move_check &move) override {
