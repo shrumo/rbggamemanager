@@ -5,7 +5,7 @@
 #include "moves_printer.h"
 
 #include "moves_visitor.h"
-#include <gamestate/searchsteps/arithmetic_operation_visitor.h>
+#include <game_state/searchsteps/arithmetic_operation_visitor.h>
 #include "moves.h"
 #include <sstream>
 

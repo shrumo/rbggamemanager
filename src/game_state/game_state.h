@@ -2,8 +2,8 @@
 // Created by shrum on 10.06.19.
 //
 
-#ifndef RBGGAMEMANAGER_GAMESTATE_H
-#define RBGGAMEMANAGER_GAMESTATE_H
+#ifndef RBGGAMEMANAGER_GAME_STATE_H
+#define RBGGAMEMANAGER_GAME_STATE_H
 
 #include <construction/searchstep_creator.h>
 #include "board.h"
@@ -33,7 +33,7 @@ namespace rbg {
 
     friend class PlayerCheckStep;
 
-    GameState(const Declarations &declarations, SearchstepsCollection steps)
+    GameState(const Declarations &declarations, SearchStepsCollection steps)
         : declarations_(declarations), current_pos_(0),
           variables_values_(declarations.variables_resolver.size(), 0),
           current_player_(declarations.keeper_id),
@@ -72,9 +72,9 @@ namespace rbg {
     std::vector<variable_value_t> variables_values_;
     player_id_t current_player_;
     BoardContent board_;
-    SearchstepsCollection steps_;
+    SearchStepsCollection steps_;
   };
 }
 
 
-#endif //RBGGAMEMANAGER_GAMESTATE_H
+#endif //RBGGAMEMANAGER_GAME_STATE_H

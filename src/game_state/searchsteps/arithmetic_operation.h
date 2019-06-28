@@ -6,7 +6,7 @@
 #define RBGGAMEMANAGER_ARITHMETIC_OPERATION_H
 
 #include <vector>
-#include <gamestate/declarations.h>
+#include <game_state/declarations.h>
 
 namespace rbg {
   class GameState;

@@ -25,7 +25,7 @@ const char *kSmallGame = R"LIM(
 )LIM";
 
 int main() {
-  auto game = CreateGamestate(kSmallGame);
+  auto game = CreateGameState(kSmallGame);
   auto first_player_moves = game.Moves();
   assert(first_player_moves.size() == 3);
   std::unordered_set<std::string> expected;

@@ -25,11 +25,11 @@ include_directories(${Boost_INCLUDE_DIR})
 include_directories(src)
 include_directories(.)
 
-set(GAMESTATE_FILES src/gamestate/namesresolver.h src/gamestate/board.h src/gamestate/searchsteps/searchstep.h
-        src/gamestate/declarations.h src/gamestate/gamestate.h src/gamestate/searchsteps/resetabblebitarraystack.h
-        src/gamestate/searchsteps/arithmetic_operation.cc src/gamestate/searchsteps/arithmetic_operation.h
-        src/gamestate/searchsteps/arithmetic_operation_visitor.h
-        src/gamestate/namesresolver.cc src/gamestate/board.cc src/gamestate/searchsteps/searchstep.cc)
+set(GAMESTATE_FILES src/game_state/namesresolver.h src/game_state/board.h src/game_state/searchsteps/search_step.h
+        src/game_state/declarations.h src/game_state/game_state.h src/game_state/searchsteps/resetabblebitarraystack.h
+        src/game_state/searchsteps/arithmetic_operation.cc src/game_state/searchsteps/arithmetic_operation.h
+        src/game_state/searchsteps/arithmetic_operation_visitor.h
+        src/game_state/namesresolver.cc src/game_state/board.cc src/game_state/searchsteps/search_step.cc)
 
 set(GRAPH_FILES src/graph/graph.h)
 
@@ -41,8 +41,8 @@ set(CONSTRUCTION_FILES
         src/construction/moves/arithmetic_creator.cc src/construction/moves/arithmetic_creator.h
         src/construction/moves/moves_visitor.h src/construction/moves/moves_printer.cc
         src/construction/moves/moves_printer.h src/construction/searchstep_creator.cc src/construction/searchstep_creator.h
-        src/gamestate/searchsteps/arithmetic_operation.cc src/gamestate/searchsteps/arithmetic_operation.h
-        src/gamestate/board.cc src/gamestate/searchsteps/searchstep.cc src/gamestate/searchsteps/searchstep.h src/construction/gamestate_creator.h)
+        src/game_state/searchsteps/arithmetic_operation.cc src/game_state/searchsteps/arithmetic_operation.h
+        src/game_state/board.cc src/game_state/searchsteps/search_step.cc src/game_state/searchsteps/search_step.h src/construction/gamestate_creator.h)
 
 set(ENV{PYTHONPATH} ${PYTHON_PATH}:${CMAKE_CURRENT_BINARY_DIR})
 

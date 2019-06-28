@@ -10,9 +10,9 @@
 #include <unordered_map>
 
 namespace rbg {
-  class SearchstepsCollection {
+  class SearchStepsCollection {
   public:
-    SearchstepsCollection(uint visited_checks_count, uint board_size)
+    SearchStepsCollection(uint visited_checks_count, uint board_size)
         : current_(nullptr),
           visited_info_stack_(std::make_unique<ResettableBitArrayStack>(visited_checks_count * board_size)),
           visited_checks_count_(visited_checks_count) {}
@@ -62,7 +62,7 @@ namespace rbg {
     friend class PlayerSwitchStep;
   };
 
-  SearchstepsCollection CreateSearchSteps(const NfaWithVisitedChecks &nfa, const Declarations &declarations);
+  SearchStepsCollection CreateSearchSteps(const NfaWithVisitedChecks &nfa, const Declarations &declarations);
 }
 
 

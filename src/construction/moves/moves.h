@@ -6,8 +6,8 @@
 #define RBGGAMEMANAGER_MOVES_H
 
 
-#include <gamestate/board.h>
-#include <gamestate/searchsteps/searchstep.h>
+#include <game_state/board.h>
+#include <game_state/searchsteps/search_step.h>
 #include <graph/graph.h>
 
 namespace rbg {

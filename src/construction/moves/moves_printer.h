@@ -6,7 +6,7 @@
 #define RBGGAMEMANAGER_MOVES_PRINTER_H
 
 #include <string>
-#include <gamestate/declarations.h>
+#include <game_state/declarations.h>
 #include "moves.h"
 
 namespace rbg {

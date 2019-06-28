@@ -2,8 +2,8 @@
 // Created by shrum on 27.06.19.
 //
 
-#include "searchstep.h"
-#include <gamestate/gamestate.h>
+#include "search_step.h"
+#include <game_state/game_state.h>
 
 using namespace rbg;
 

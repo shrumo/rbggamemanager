@@ -3,7 +3,7 @@
 //
 
 #include "arithmetic_creator.h"
-#include <gamestate/searchsteps/arithmetic_operation_visitor.h>
+#include <game_state/searchsteps/arithmetic_operation_visitor.h>
 
 using namespace rbg;
 using namespace std;

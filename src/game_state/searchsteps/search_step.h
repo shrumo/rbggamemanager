@@ -10,7 +10,7 @@
 
 #include "arithmetic_operation.h"
 #include <vector>
-#include <gamestate/declarations.h>
+#include <game_state/declarations.h>
 #include "resetabblebitarraystack.h"
 
 namespace rbg {

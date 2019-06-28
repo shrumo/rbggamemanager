@@ -13,11 +13,11 @@ struct InitialFinalIndiciesPair {
   uint initial, final;
 };
 
-InitialFinalIndiciesPair CreateNfaSearchSteps(SearchstepsCollection &collection, const Nfa<std::unique_ptr<Move>> &nfa);
+InitialFinalIndiciesPair CreateNfaSearchSteps(SearchStepsCollection &collection, const Nfa<std::unique_ptr<Move>> &nfa);
 
-class SearchstepCreator : public MoveFunction<uint> {
+class SearchStepCreator : public MoveFunction<uint> {
 public:
-  explicit SearchstepCreator(SearchstepsCollection &collection)
+  explicit SearchStepCreator(SearchStepsCollection &collection)
       : collection_(collection) {
   }
 
@@ -120,10 +120,10 @@ public:
   }
 
 private:
-  SearchstepsCollection &collection_;
+  SearchStepsCollection &collection_;
 };
 
-InitialFinalIndiciesPair CreateNfaSearchSteps(SearchstepsCollection &collection, const Nfa<unique_ptr<Move>> &nfa) {
+InitialFinalIndiciesPair CreateNfaSearchSteps(SearchStepsCollection &collection, const Nfa<unique_ptr<Move>> &nfa) {
   unordered_map<node_t, uint> nodes_collection_indices;
   queue<node_t> to_visit;
   to_visit.push(nfa.final);
@@ -137,7 +137,7 @@ InitialFinalIndiciesPair CreateNfaSearchSteps(SearchstepsCollection &collection,
       uint searchstep_index;
       auto iter = nodes_collection_indices.find(u);
       if (nodes_collection_indices.find(u) == nodes_collection_indices.end()) {
-        searchstep_index = SearchstepCreator(collection)(*transition.content);
+        searchstep_index = SearchStepCreator(collection)(*transition.content);
         nodes_collection_indices[u] = searchstep_index;
         to_visit.push(u);
       } else {
@@ -149,8 +149,8 @@ InitialFinalIndiciesPair CreateNfaSearchSteps(SearchstepsCollection &collection,
   return {nodes_collection_indices.at(nfa.initial), nodes_collection_indices.at(nfa.final)};
 }
 
-SearchstepsCollection rbg::CreateSearchSteps(const NfaWithVisitedChecks &game_graph, const Declarations &declarations) {
-  SearchstepsCollection result(game_graph.visited_checks_count, declarations.board_description.vertices_count());
+SearchStepsCollection rbg::CreateSearchSteps(const NfaWithVisitedChecks &game_graph, const Declarations &declarations) {
+  SearchStepsCollection result(game_graph.visited_checks_count, declarations.board_description.vertices_count());
   auto initial_final_indices = CreateNfaSearchSteps(result, game_graph.nfa);
   result.SetInitial(initial_final_indices.initial);
   return result;
