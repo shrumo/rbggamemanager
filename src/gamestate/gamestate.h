@@ -35,7 +35,7 @@ namespace rbg {
         : declarations_(declarations), current_pos_(0),
           variables_values_(declarations.variables_resolver.size(), 0),
           current_player_(declarations.keeper_id),
-          board_(declarations.board_description), steps_(std::move(steps)) {
+          board_(declarations.board_description.initial_content()), steps_(std::move(steps)) {
       steps_.stack().Push();
     }
 
@@ -69,7 +69,7 @@ namespace rbg {
     vertex_id_t current_pos_;
     std::vector<variable_value_t> variables_values_;
     player_id_t current_player_;
-    Board board_;
+    BoardContent board_;
     SearchstepsCollection steps_;
   };
 }

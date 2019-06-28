@@ -36,7 +36,7 @@ namespace rbg {
       for (const auto &edge : game.get_board().get_outgoing_edges(id)) {
         board.AddEdge(id, board.edges_names().Id(edge.first.to_string()), edge.second);
       }
-      board.set(id, pieces_resolver.Id(game.get_board().get_starting_piece(id).to_string()));
+      board.initial_content().set(id, pieces_resolver.Id(game.get_board().get_starting_piece(id).to_string()));
     }
 
     // Add keeper player id

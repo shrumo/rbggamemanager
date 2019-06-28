@@ -15,7 +15,7 @@ bool VisitedCheckSearchStep::Apply(GameState &state) {
 
 bool ShiftStep::ApplyReversible(GameState &state, ShiftStep::revert_info_t &revert_info) {
   revert_info = state.current_pos_;
-  state.current_pos_ = state.board_.NextVertex(state.current_pos_, edge_id_);
+  state.current_pos_ = state.declarations().board_description.NextVertex(state.current_pos_, edge_id_);
   return state.current_pos_ != state.board_.vertices_count();
 }
 
