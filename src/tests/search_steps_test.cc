@@ -68,6 +68,10 @@ void TestAssignment() {
   game.Apply(moves[0]);
   assert(game.variables_values()[game.declarations().variables_resolver.Id("turn")] == 10);
   assert(game.variables_values()[game.declarations().variables_resolver.Id("blue")] == 15);
+  auto game_no_move = CreateGameState(
+      kSmallGameDeclarations + "#rules = ->red [$turn = 10] [$blue = turn + 70] ->blue");
+  auto moves_empty = game_no_move.Moves();
+  assert(moves_empty.empty());
 }
 
 void TestExpressions() {

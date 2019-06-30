@@ -140,9 +140,10 @@ void PlayerSwitchStep::Apply(GameState &state, vertex_id_t vertex) const {
   ApplyReversible(state, revert_info);
 }
 
-void AssignmentStep::ApplyReversible(GameState &state, AssignmentStep::revert_info_t &revert_info) const {
+bool AssignmentStep::ApplyReversible(GameState &state, AssignmentStep::revert_info_t &revert_info) const {
   revert_info = state.variables_values_[variable_id_];
   state.variables_values_[variable_id_] = value_->Value(state);
+  return state.variables_values_[variable_id_] <= state.declarations().variables_bounds[variable_id_];
 }
 
 void AssignmentStep::Revert(GameState &state, const AssignmentStep::revert_info_t &revert_info) {
@@ -152,28 +153,32 @@ void AssignmentStep::Revert(GameState &state, const AssignmentStep::revert_info_
 void AssignmentStep::Run(GameState &state, std::vector<ModifierApplication> &applied_modifiers,
                          std::vector<std::vector<ModifierApplication>> &moves) {
   revert_info_t revert_info;
-  ApplyReversible(state, revert_info);
-  applied_modifiers.push_back({state.current_pos_, index()});
+  if (ApplyReversible(state, revert_info)) {
+    applied_modifiers.push_back({state.current_pos_, index()});
   state.steps_.stack().Push();
   RunNextStep(state, applied_modifiers, moves);
   state.steps_.stack().Pop();
   applied_modifiers.pop_back();
+  }
   Revert(state, revert_info);
 }
 
 bool AssignmentStep::ApplyFirstFound(GameState &state) {
   revert_info_t revert_info;
-  ApplyReversible(state, revert_info);
-  if (ApplyNextStepUntilFound(state))
-    return true;
+  if (ApplyReversible(state, revert_info)) {
+    if (ApplyNextStepUntilFound(state))
+      return true;
+  }
   Revert(state, revert_info);
   return false;
 }
 
 bool AssignmentStep::EndStepReachable(GameState &state) {
   revert_info_t revert_info;
-  ApplyReversible(state, revert_info);
-  bool result = EndStepReachableFromNext(state);
+  bool result = false;
+  if (ApplyReversible(state, revert_info)) {
+    result = EndStepReachableFromNext(state);
+  }
   Revert(state, revert_info);
   return result;
 }

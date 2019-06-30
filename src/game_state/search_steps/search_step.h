@@ -572,7 +572,7 @@ namespace rbg {
 
     using revert_info_t = variable_value_t;
 
-    void ApplyReversible(GameState &state, revert_info_t &revert_info) const;
+    bool ApplyReversible(GameState &state, revert_info_t &revert_info) const;
 
     void Revert(GameState &state, const revert_info_t &revert_info);
 
