@@ -158,6 +158,14 @@ void HandleMultipleOutNodes(Graph<unique_ptr<Move>> &graph) {
           graph.DeleteEdge(transition.id);
         }
       }
+      std::unordered_set<node_t> handled;
+      for (const auto &transition :  graph.Transitions(node)) {
+        if (handled.find(transition.to) != handled.end()) {
+          graph.DeleteEdge(transition.id);
+        } else {
+          handled.insert(transition.to);
+        }
+      }
     }
   }
 }

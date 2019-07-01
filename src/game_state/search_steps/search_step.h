@@ -15,7 +15,6 @@
 
 namespace rbg {
   class GameState;
-
   class SearchStepsCollection;
 }
 
@@ -25,13 +24,16 @@ namespace rbg {
     uint modifier_index;
   };
 
+  struct StepRevertInformation;
+
   class SearchStep {
   public:
     virtual void
     Run(GameState &, std::vector<ModifierApplication> &, std::vector<std::vector<ModifierApplication>> &) = 0;
 
     virtual bool
-    ApplyFirstFound(GameState &) = 0;
+    ApplyFirstFound(GameState &, std::vector<StepRevertInformation> &reverting_information,
+                    vertex_id_t revert_vertex) = 0;
 
     virtual bool
     EndStepReachable(GameState &) = 0;
@@ -56,8 +58,9 @@ namespace rbg {
       next_->Run(state, applied_modifiers, moves);
     }
 
-    bool ApplyNextStepUntilFound(GameState &state) {
-      return next_->ApplyFirstFound(state);
+    bool ApplyNextStepUntilFound(GameState &state, std::vector<StepRevertInformation> &reverting_information,
+                                 vertex_id_t revert_vertex) {
+      return next_->ApplyFirstFound(state, reverting_information, revert_vertex);
     }
 
 
@@ -73,14 +76,27 @@ namespace rbg {
   public:
     explicit ModifyingSearchStep(uint index) : index_(index) {}
 
-    virtual void Apply(GameState &state, vertex_id_t) const = 0;
+    virtual StepRevertInformation ApplyReversibleAtVertex(GameState &state, vertex_id_t) const = 0;
+
+    virtual void RevertFromRevertInfo(GameState &state, const StepRevertInformation &) const = 0;
 
     uint index() const {
       return index_;
     }
 
+    SearchStep *next_step() const {
+      return next_;
+    }
+
   private:
     uint index_;
+  };
+
+
+  struct StepRevertInformation {
+    const ModifyingSearchStep &modifying_step;
+    vertex_id_t vertex;
+    name_id_t revert_info;
   };
 
   class MultipleSearchStep : public SearchStep {
@@ -92,9 +108,10 @@ namespace rbg {
       }
     }
 
-    bool ApplyFirstFound(GameState &state) final {
+    bool ApplyFirstFound(GameState &state, std::vector<StepRevertInformation> &reverting_information,
+                         vertex_id_t revert_vertex) final {
       for (auto step : next_steps_) {
-        if (step->ApplyFirstFound(state))
+        if (step->ApplyFirstFound(state, reverting_information, revert_vertex))
           return true;
       }
       return false;
@@ -123,7 +140,7 @@ namespace rbg {
     void
     Run(GameState &, std::vector<ModifierApplication> &, std::vector<std::vector<ModifierApplication>> &) final {}
 
-    bool ApplyFirstFound(GameState &) final { return false; }
+    bool ApplyFirstFound(GameState &, std::vector<StepRevertInformation> &, vertex_id_t) final { return false; }
 
     bool EndStepReachable(GameState &) final { return true; }
 
@@ -138,24 +155,25 @@ namespace rbg {
         : stack_chunk_(bit_array_stack_chunk) {
     }
 
-    bool Apply(GameState &state);
+    bool Check(GameState &state);
 
     void Run(GameState &state, std::vector<ModifierApplication> &applied_modifiers,
              std::vector<std::vector<ModifierApplication>> &moves) override {
-      if (Apply(state))
+      if (Check(state))
         RunNextStep(state, applied_modifiers, moves);
     }
 
     bool
-    ApplyFirstFound(GameState &state) override {
-      if (Apply(state))
-        return ApplyNextStepUntilFound(state);
+    ApplyFirstFound(GameState &state, std::vector<StepRevertInformation> &reverting_information,
+                    vertex_id_t revert_vertex) override {
+      if (Check(state))
+        return ApplyNextStepUntilFound(state, reverting_information, revert_vertex);
       return false;
     }
 
     bool
     EndStepReachable(GameState &state) final {
-      if (Apply(state))
+      if (Check(state))
         return EndStepReachableFromNext(state);
       return false;
     }
@@ -169,26 +187,25 @@ namespace rbg {
   public:
     explicit ShiftStep(shift_edge_id_t edge_id) : edge_id_(edge_id) {}
 
-    using revert_info_t = vertex_id_t;
+    bool SetAndCheck(GameState &state, vertex_id_t &previous_vertex);
 
-    bool ApplyReversible(GameState &state, revert_info_t &revert_info);
-
-    void Revert(GameState &state, const revert_info_t &revert_info);
+    void Revert(GameState &state, vertex_id_t previous_vertex);
 
     void Run(GameState &state, std::vector<ModifierApplication> &applied_modifiers,
              std::vector<std::vector<ModifierApplication>> &moves) override {
-      revert_info_t revert_info;
-      if (ApplyReversible(state, revert_info)) {
+      vertex_id_t previous_vertex;
+      if (SetAndCheck(state, previous_vertex)) {
         RunNextStep(state, applied_modifiers, moves);
       }
-      Revert(state, revert_info);
+      Revert(state, previous_vertex);
     }
 
     bool
-    ApplyFirstFound(GameState &state) override {
-      revert_info_t revert_info;
-      if (ApplyReversible(state, revert_info)) {
-        if (ApplyNextStepUntilFound(state))
+    ApplyFirstFound(GameState &state, std::vector<StepRevertInformation> &reverting_information,
+                    vertex_id_t revert_vertex) override {
+      vertex_id_t revert_info;
+      if (SetAndCheck(state, revert_info)) {
+        if (ApplyNextStepUntilFound(state, reverting_information, revert_vertex))
           return true;
       }
       Revert(state, revert_info);
@@ -198,12 +215,12 @@ namespace rbg {
 
     bool
     EndStepReachable(GameState &state) override {
-      revert_info_t revert_info;
+      vertex_id_t previous_vertex;
       bool result = false;
-      if (ApplyReversible(state, revert_info)) {
+      if (SetAndCheck(state, previous_vertex)) {
         result = EndStepReachableFromNext(state);
       }
-      Revert(state, revert_info);
+      Revert(state, previous_vertex);
       return result;
     }
 
@@ -215,19 +232,20 @@ namespace rbg {
   public:
     explicit OnStep(std::vector<bool> pieces) : pieces_(std::move(pieces)) {}
 
-    bool Apply(GameState &state);
+    bool Check(GameState &state);
 
     void Run(GameState &state, std::vector<ModifierApplication> &applied_modifiers,
              std::vector<std::vector<ModifierApplication>> &moves) override {
-      if (Apply(state)) {
+      if (Check(state)) {
         RunNextStep(state, applied_modifiers, moves);
       }
     }
 
     bool
-    ApplyFirstFound(GameState &state) override {
-      if (Apply(state)) {
-        if (ApplyNextStepUntilFound(state))
+    ApplyFirstFound(GameState &state, std::vector<StepRevertInformation> &reverting_information,
+                    vertex_id_t revert_vertex) override {
+      if (Check(state)) {
+        if (ApplyNextStepUntilFound(state, reverting_information, revert_vertex))
           return true;
       }
       return false;
@@ -236,7 +254,7 @@ namespace rbg {
     bool
     EndStepReachable(GameState &state) override {
       bool result = false;
-      if (Apply(state)) {
+      if (Check(state)) {
         result = EndStepReachableFromNext(state);
       }
       return result;
@@ -250,19 +268,20 @@ namespace rbg {
   public:
     explicit PlayerCheckStep(player_id_t player) : player_(player) {}
 
-    bool Apply(GameState &state);
+    bool Check(GameState &state);
 
     void Run(GameState &state, std::vector<ModifierApplication> &applied_modifiers,
              std::vector<std::vector<ModifierApplication>> &moves) override {
-      if (Apply(state)) {
+      if (Check(state)) {
         RunNextStep(state, applied_modifiers, moves);
       }
     }
 
     bool
-    ApplyFirstFound(GameState &state) override {
-      if (Apply(state)) {
-        if (ApplyNextStepUntilFound(state))
+    ApplyFirstFound(GameState &state, std::vector<StepRevertInformation> &reverting_information,
+                    vertex_id_t revert_vertex) override {
+      if (Check(state)) {
+        if (ApplyNextStepUntilFound(state, reverting_information, revert_vertex))
           return true;
       }
       return false;
@@ -271,7 +290,7 @@ namespace rbg {
     bool
     EndStepReachable(GameState &state) override {
       bool result = false;
-      if (Apply(state)) {
+      if (Check(state)) {
         result = EndStepReachableFromNext(state);
       }
       return result;
@@ -288,19 +307,20 @@ namespace rbg {
                                            std::unique_ptr<ArithmeticOperation> right) : left_(std::move(left)),
                                                                                          right_(std::move(right)) {}
 
-    bool Apply(GameState &state);
+    bool Check(GameState &state);
 
     void Run(GameState &state, std::vector<ModifierApplication> &applied_modifiers,
              std::vector<std::vector<ModifierApplication>> &moves) override {
-      if (Apply(state)) {
+      if (Check(state)) {
         RunNextStep(state, applied_modifiers, moves);
       }
     }
 
     bool
-    ApplyFirstFound(GameState &state) override {
-      if (Apply(state)) {
-        if (ApplyNextStepUntilFound(state))
+    ApplyFirstFound(GameState &state, std::vector<StepRevertInformation> &reverting_information,
+                    vertex_id_t revert_vertex) override {
+      if (Check(state)) {
+        if (ApplyNextStepUntilFound(state, reverting_information, revert_vertex))
           return true;
       }
       return false;
@@ -310,7 +330,7 @@ namespace rbg {
     bool
     EndStepReachable(GameState &state) override {
       bool result = false;
-      if (Apply(state)) {
+      if (Check(state)) {
         result = EndStepReachableFromNext(state);
       }
       return result;
@@ -328,19 +348,20 @@ namespace rbg {
                                       std::unique_ptr<ArithmeticOperation> right) : left_(std::move(left)),
                                                                                     right_(std::move(right)) {}
 
-    bool Apply(GameState &state);
+    bool Check(GameState &state);
 
     void Run(GameState &state, std::vector<ModifierApplication> &applied_modifiers,
              std::vector<std::vector<ModifierApplication>> &moves) override {
-      if (Apply(state)) {
+      if (Check(state)) {
         RunNextStep(state, applied_modifiers, moves);
       }
     }
 
     bool
-    ApplyFirstFound(GameState &state) override {
-      if (Apply(state)) {
-        if (ApplyNextStepUntilFound(state))
+    ApplyFirstFound(GameState &state, std::vector<StepRevertInformation> &reverting_information,
+                    vertex_id_t revert_vertex) override {
+      if (Check(state)) {
+        if (ApplyNextStepUntilFound(state, reverting_information, revert_vertex))
           return true;
       }
       return false;
@@ -350,7 +371,7 @@ namespace rbg {
     bool
     EndStepReachable(GameState &state) override {
       bool result = false;
-      if (Apply(state)) {
+      if (Check(state)) {
         result = EndStepReachableFromNext(state);
       }
       return result;
@@ -368,19 +389,20 @@ namespace rbg {
                                        std::unique_ptr<ArithmeticOperation> right) : left_(std::move(left)),
                                                                                      right_(std::move(right)) {}
 
-    bool Apply(GameState &state);
+    bool Check(GameState &state);
 
     void Run(GameState &state, std::vector<ModifierApplication> &applied_modifiers,
              std::vector<std::vector<ModifierApplication>> &moves) override {
-      if (Apply(state)) {
+      if (Check(state)) {
         RunNextStep(state, applied_modifiers, moves);
       }
     }
 
     bool
-    ApplyFirstFound(GameState &state) override {
-      if (Apply(state)) {
-        if (ApplyNextStepUntilFound(state))
+    ApplyFirstFound(GameState &state, std::vector<StepRevertInformation> &reverting_information,
+                    vertex_id_t revert_vertex) override {
+      if (Check(state)) {
+        if (ApplyNextStepUntilFound(state, reverting_information, revert_vertex))
           return true;
       }
       return false;
@@ -390,7 +412,7 @@ namespace rbg {
     bool
     EndStepReachable(GameState &state) override {
       bool result = false;
-      if (Apply(state)) {
+      if (Check(state)) {
         result = EndStepReachableFromNext(state);
       }
       return result;
@@ -408,19 +430,20 @@ namespace rbg {
                                           std::unique_ptr<ArithmeticOperation> right) : left_(std::move(left)),
                                                                                         right_(std::move(right)) {}
 
-    bool Apply(GameState &state);
+    bool Check(GameState &state);
 
     void Run(GameState &state, std::vector<ModifierApplication> &applied_modifiers,
              std::vector<std::vector<ModifierApplication>> &moves) override {
-      if (Apply(state)) {
+      if (Check(state)) {
         RunNextStep(state, applied_modifiers, moves);
       }
     }
 
     bool
-    ApplyFirstFound(GameState &state) override {
-      if (Apply(state)) {
-        if (ApplyNextStepUntilFound(state))
+    ApplyFirstFound(GameState &state, std::vector<StepRevertInformation> &reverting_information,
+                    vertex_id_t revert_vertex) override {
+      if (Check(state)) {
+        if (ApplyNextStepUntilFound(state, reverting_information, revert_vertex))
           return true;
       }
       return false;
@@ -430,7 +453,7 @@ namespace rbg {
     bool
     EndStepReachable(GameState &state) override {
       bool result = false;
-      if (Apply(state)) {
+      if (Check(state)) {
         result = EndStepReachableFromNext(state);
       }
       return result;
@@ -445,19 +468,20 @@ namespace rbg {
   public:
     explicit ConditionCheckStep(std::unique_ptr<SearchStepsCollection> steps_collection);
 
-    bool Apply(GameState &state);
+    bool Check(GameState &state);
 
     void Run(GameState &state, std::vector<ModifierApplication> &applied_modifiers,
              std::vector<std::vector<ModifierApplication>> &moves) override {
-      if (Apply(state)) {
+      if (Check(state)) {
         RunNextStep(state, applied_modifiers, moves);
       }
     }
 
     bool
-    ApplyFirstFound(GameState &state) override {
-      if (Apply(state)) {
-        if (ApplyNextStepUntilFound(state))
+    ApplyFirstFound(GameState &state, std::vector<StepRevertInformation> &reverting_information,
+                    vertex_id_t revert_vertex) override {
+      if (Check(state)) {
+        if (ApplyNextStepUntilFound(state, reverting_information, revert_vertex))
           return true;
       }
       return false;
@@ -467,7 +491,7 @@ namespace rbg {
     bool
     EndStepReachable(GameState &state) override {
       bool result = false;
-      if (Apply(state)) {
+      if (Check(state)) {
         result = EndStepReachableFromNext(state);
       }
       return result;
@@ -481,19 +505,20 @@ namespace rbg {
   public:
     explicit NegatedConditionCheckStep(std::unique_ptr<SearchStepsCollection> steps_collection);
 
-    bool Apply(GameState &state);
+    bool Check(GameState &state);
 
     void Run(GameState &state, std::vector<ModifierApplication> &applied_modifiers,
              std::vector<std::vector<ModifierApplication>> &moves) override {
-      if (Apply(state)) {
+      if (Check(state)) {
         RunNextStep(state, applied_modifiers, moves);
       }
     }
 
     bool
-    ApplyFirstFound(GameState &state) override {
-      if (Apply(state)) {
-        if (ApplyNextStepUntilFound(state))
+    ApplyFirstFound(GameState &state, std::vector<StepRevertInformation> &reverting_information,
+                    vertex_id_t revert_vertex) override {
+      if (Check(state)) {
+        if (ApplyNextStepUntilFound(state, reverting_information, revert_vertex))
           return true;
       }
       return false;
@@ -503,7 +528,7 @@ namespace rbg {
     bool
     EndStepReachable(GameState &state) override {
       bool result = false;
-      if (Apply(state)) {
+      if (Check(state)) {
         result = EndStepReachableFromNext(state);
       }
       return result;
@@ -517,23 +542,25 @@ namespace rbg {
   public:
     explicit OffStep(piece_id_t piece_id, uint index) : ModifyingSearchStep(index), piece_id_(piece_id) {}
 
-    using revert_info_t = piece_id_t;
+    void Set(GameState &state, piece_id_t &previous_piece) const;
 
-    void ApplyReversible(GameState &state, revert_info_t &revert_info) const;
-
-    void Revert(GameState &state, const revert_info_t &revert_info);
+    void Reset(GameState &state, piece_id_t previous_piece) const;
 
     void Run(GameState &state, std::vector<ModifierApplication> &applied_modifiers,
              std::vector<std::vector<ModifierApplication>> &moves) override;
 
     bool
-    ApplyFirstFound(GameState &state) override;
+    ApplyFirstFound(GameState &state, std::vector<StepRevertInformation> &reverting_information,
+                    vertex_id_t revert_vertex) override;
 
 
     bool
     EndStepReachable(GameState &state) override;
 
-    void Apply(GameState &state, vertex_id_t vertex) const override;
+    StepRevertInformation ApplyReversibleAtVertex(GameState &state, vertex_id_t vertex) const override;
+
+    void RevertFromRevertInfo(GameState &state, const StepRevertInformation &) const override;
+
 
   private:
     piece_id_t piece_id_;
@@ -543,23 +570,24 @@ namespace rbg {
   public:
     explicit PlayerSwitchStep(player_id_t player_id, uint index) : ModifyingSearchStep(index), player_id_(player_id) {}
 
-    using revert_info_t = player_id_t;
+    void Set(GameState &state, player_id_t &previous_player) const;
 
-    void ApplyReversible(GameState &state, revert_info_t &revert_info) const;
-
-    void Revert(GameState &state, const revert_info_t &revert_info);
+    void Reset(GameState &state, player_id_t previous_player) const;
 
     void Run(GameState &state, std::vector<ModifierApplication> &applied_modifiers,
              std::vector<std::vector<ModifierApplication>> &moves) override;
 
     bool
-    ApplyFirstFound(GameState &state) override;
+    ApplyFirstFound(GameState &state, std::vector<StepRevertInformation> &reverting_information,
+                    vertex_id_t revert_vertex) override;
 
 
     bool
     EndStepReachable(GameState &state) override;
 
-    void Apply(GameState &state, vertex_id_t vertex) const override;
+    StepRevertInformation ApplyReversibleAtVertex(GameState &state, vertex_id_t vertex) const override;
+
+    void RevertFromRevertInfo(GameState &state, const StepRevertInformation &info) const override;
 
   private:
     player_id_t player_id_;
@@ -570,23 +598,24 @@ namespace rbg {
     explicit AssignmentStep(variable_id_t variable_id, std::unique_ptr<ArithmeticOperation> value, uint index)
         : ModifyingSearchStep(index), variable_id_(variable_id), value_(std::move(value)) {}
 
-    using revert_info_t = variable_value_t;
+    bool SetAndCheck(GameState &state, variable_value_t &previous_value) const;
 
-    bool ApplyReversible(GameState &state, revert_info_t &revert_info) const;
-
-    void Revert(GameState &state, const revert_info_t &revert_info);
+    void Reset(GameState &state, variable_value_t previous_value) const;
 
     void Run(GameState &state, std::vector<ModifierApplication> &applied_modifiers,
              std::vector<std::vector<ModifierApplication>> &moves) override;
 
     bool
-    ApplyFirstFound(GameState &state) override;
+    ApplyFirstFound(GameState &state, std::vector<StepRevertInformation> &reverting_information,
+                    vertex_id_t revert_vertex) override;
 
 
     bool
     EndStepReachable(GameState &state) override;
 
-    void Apply(GameState &state, vertex_id_t vertex) const override;
+    StepRevertInformation ApplyReversibleAtVertex(GameState &state, vertex_id_t vertex) const override;
+
+    void RevertFromRevertInfo(GameState &state, const StepRevertInformation &info) const override;
 
 
   private:

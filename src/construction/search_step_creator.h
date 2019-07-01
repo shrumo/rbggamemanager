@@ -35,6 +35,10 @@ namespace rbg {
       return current_;
     }
 
+    void set_current(SearchStep *step) {
+      current_ = step;
+    }
+
     ResetableBitArrayStackChunk GetBitArrayChunk(uint index) {
       return {visited_info_stack_.get(),
               index * visited_info_stack_->bit_array_size() / visited_checks_count_,

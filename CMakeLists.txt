@@ -29,7 +29,8 @@ set(GAMESTATE_FILES src/game_state/namesresolver.h src/game_state/board.h src/ga
         src/game_state/declarations.h src/game_state/game_state.h src/game_state/search_steps/resetabblebitarraystack.h
         src/game_state/search_steps/arithmetic_operation.cc src/game_state/search_steps/arithmetic_operation.h
         src/game_state/search_steps/arithmetic_operation_visitor.h
-        src/game_state/namesresolver.cc src/game_state/board.cc src/game_state/search_steps/search_step.cc)
+        src/game_state/namesresolver.cc src/game_state/board.cc src/game_state/search_steps/search_step.cc
+        src/game_state/calculate_perft.h src/game_state/game_state_printer.h)
 
 set(GRAPH_FILES src/graph/graph.h)
 
@@ -53,6 +54,10 @@ add_custom_target(visualize_graph ALL
         COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/src/utilities/graph_widget.py ${CMAKE_CURRENT_BINARY_DIR}/graph_widget.py
         COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/src/utilities/visualize_graph.py ${CMAKE_CURRENT_BINARY_DIR}/visualize_graph.py
         DEPENDS rbg)
+
+add_executable(benchmark ${GRAPH_FILES} ${PARSER_FILES} ${CONSTRUCTION_FILES} ${GAMESTATE_FILES} src/benchmark.cc)
+target_link_libraries(benchmark rbgParser)
+
 
 # There is a bug in CMake, so that in order to run tests you have to build executables manually
 enable_testing()
@@ -81,6 +86,10 @@ add_test(namesresolver_test namesresolver_test)
 add_executable(gamestate_simple_test ${GRAPH_FILES} ${PARSER_FILES} ${CONSTRUCTION_FILES} ${GAMESTATE_FILES} src/tests/gamestate_simple_test.cc)
 target_link_libraries(gamestate_simple_test rbgParser)
 add_test(gamestate_simple_test gamestate_simple_test)
+
+add_executable(chess_test ${GRAPH_FILES} ${PARSER_FILES} ${CONSTRUCTION_FILES} ${GAMESTATE_FILES} src/tests/chess_test.cc)
+target_link_libraries(chess_test rbgParser)
+add_test(chess_test chess_test)
 
 add_executable(board_test ${GAMESTATE_FILES} src/tests/board_test.cc)
 add_test(board_test board_test)
