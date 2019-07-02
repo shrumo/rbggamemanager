@@ -11,6 +11,8 @@
 
 namespace rbg {
 
+  using GameMove = std::vector<ModifierApplication>;
+
   struct MoveRevertInformation {
     SearchStep *previous_search_step;
     std::vector<StepRevertInformation> player_steps_revert_information;

@@ -16,7 +16,6 @@ namespace rbg {
   };
 
   PerftResult Perft(GameState &state, size_t depth) {
-    static int i = 0;
     if (depth == 0) {
       return {1, 1};
     }

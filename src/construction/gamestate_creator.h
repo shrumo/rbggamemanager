@@ -10,13 +10,7 @@
 #include <parser/parser_wrapper.h>
 
 namespace rbg {
-  GameState CreateGameState(const std::string &game_text) {
-    auto game = ParseGame(game_text);
-    Declarations declarations = CreateDeclarations(*game);
-    NfaWithVisitedChecks nfa = CreateGraph(*game->get_moves(), declarations);
-    SearchStepsInformation steps = CreateSearchSteps(nfa, declarations);
-    return GameState(declarations, std::move(steps));
-  }
+  GameState CreateGameState(const std::string &game_text);
 }
 
 #endif //RBGGAMEMANAGER_GAMESTATE_CREATOR_H

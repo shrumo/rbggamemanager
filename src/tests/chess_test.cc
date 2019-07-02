@@ -6,7 +6,6 @@
 #include <game_state/calculate_perft.h>
 #include <iostream>
 #include <game_state/game_state_printer.h>
-#include <chrono>
 
 using namespace rbg;
 using namespace std;
@@ -189,7 +188,6 @@ const char *kChessGame = R"LIM(
 
 int main() {
   auto game = CreateGameState(kChessGame);
-  auto begin = std::chrono::system_clock::now();
   auto result = Perft(game, 3);
   assert(result.leaves_count == 8902);
   assert(result.nodes_count == 9323);

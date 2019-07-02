@@ -22,6 +22,10 @@ namespace rbg {
   struct ModifierApplication {
     vertex_id_t vertex;
     uint modifier_index;
+
+    bool operator==(const ModifierApplication &b) const {
+      return vertex == b.vertex && modifier_index == b.modifier_index;
+    }
   };
 
   struct StepRevertInformation;
@@ -98,6 +102,7 @@ namespace rbg {
     vertex_id_t vertex;
     name_id_t revert_info;
   };
+
 
   class MultipleSearchStep : public SearchStep {
   public:

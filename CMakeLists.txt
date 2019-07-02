@@ -17,9 +17,7 @@ add_subdirectory(pybind11)
 
 find_package(Threads)
 
-# See https://cmake.org/cmake/help/latest/module/FindBoost.html
-find_package(Boost REQUIRED COMPONENTS system)
-include_directories(${Boost_INCLUDE_DIR})
+include_directories(asio/asio/include)
 
 # Include the directories so that finding headers is easier
 include_directories(src)
@@ -30,7 +28,7 @@ set(GAMESTATE_FILES src/game_state/namesresolver.h src/game_state/board.h src/ga
         src/game_state/search_steps/arithmetic_operation.cc src/game_state/search_steps/arithmetic_operation.h
         src/game_state/search_steps/arithmetic_operation_visitor.h
         src/game_state/namesresolver.cc src/game_state/board.cc src/game_state/search_steps/search_step.cc
-        src/game_state/calculate_perft.h src/game_state/game_state_printer.h)
+        src/game_state/calculate_perft.h src/game_state/game_state_printer.h src/game_state/game_state_printer.cc)
 
 set(GRAPH_FILES src/graph/graph.h)
 
@@ -43,7 +41,9 @@ set(CONSTRUCTION_FILES
         src/construction/moves/moves_visitor.h src/construction/moves/moves_printer.cc
         src/construction/moves/moves_printer.h src/construction/search_step_creator.cc src/construction/search_step_creator.h
         src/game_state/search_steps/arithmetic_operation.cc src/game_state/search_steps/arithmetic_operation.h
-        src/game_state/board.cc src/game_state/search_steps/search_step.cc src/game_state/search_steps/search_step.h src/construction/gamestate_creator.h)
+        src/game_state/board.cc src/game_state/search_steps/search_step.cc src/game_state/search_steps/search_step.h src/construction/gamestate_creator.h src/construction/declarations_creator.cc src/construction/gamestate_creator.cc)
+
+set(NETWORKING_FILES src/networking/server.h src/networking/server.cc src/networking/message.h src/networking/coder.h src/networking/synchronous_client.h src/networking/coder.cc)
 
 set(ENV{PYTHONPATH} ${PYTHON_PATH}:${CMAKE_CURRENT_BINARY_DIR})
 
@@ -55,9 +55,17 @@ add_custom_target(visualize_graph ALL
         COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/src/utilities/visualize_graph.py ${CMAKE_CURRENT_BINARY_DIR}/visualize_graph.py
         DEPENDS rbg)
 
-add_executable(benchmark ${GRAPH_FILES} ${PARSER_FILES} ${CONSTRUCTION_FILES} ${GAMESTATE_FILES} src/benchmark.cc)
+add_executable(benchmark ${GRAPH_FILES} ${PARSER_FILES}
+        ${CONSTRUCTION_FILES} ${GAMESTATE_FILES} src/benchmark.cc)
 target_link_libraries(benchmark rbgParser)
 
+add_executable(start_server ${GRAPH_FILES} ${PARSER_FILES} ${CONSTRUCTION_FILES} ${GAMESTATE_FILES} ${NETWORKING_FILES} src/start_server.cc)
+target_link_libraries(start_server rbgParser)
+target_link_libraries(start_server pthread)
+
+add_executable(start_random_client ${GRAPH_FILES} ${PARSER_FILES} ${CONSTRUCTION_FILES} ${GAMESTATE_FILES} ${NETWORKING_FILES} src/start_random_client.cc)
+target_link_libraries(start_random_client rbgParser)
+target_link_libraries(start_random_client pthread)
 
 # There is a bug in CMake, so that in order to run tests you have to build executables manually
 enable_testing()
@@ -93,6 +101,9 @@ add_test(chess_test chess_test)
 
 add_executable(board_test ${GAMESTATE_FILES} src/tests/board_test.cc)
 add_test(board_test board_test)
+
+add_executable(network_message_test src/networking/message.h src/tests/network_message_test.cc)
+add_test(network_message_test network_message_test)
 
 add_custom_target(python_test ALL COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/src/tests/python_test.py ${CMAKE_CURRENT_BINARY_DIR}/python_test.py
         DEPENDS rbg)
