@@ -2,7 +2,7 @@
 
 # This script guides user through testing process on Linux systems.
 
-cd "${0%/*}"
+cd "${0%/*}" # This changes your current directory to the one where the file is placed
 ./make.sh
 cd ../build/
 if [[ $# -eq 0 ]]

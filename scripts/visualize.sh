@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# This script guides user through testing process on Linux systems.
+# This script guides user through visualizaing process on Linux systems.
 
-./make.sh
-python3 ../build/visualize_graph.py $1
+${0%/*}/./make.sh
+python3 ${0%/*}/../build/visualize_graph.py $1

@@ -2,7 +2,7 @@
 
 # This script guides user through compiling process on Linux systems.
 
-cd "${0%/*}"
+cd "${0%/*}" # This changes your current directory to the one where the file is placed
 FILE=../rbgParser/Makefile
 if ! test -f "$FILE"; then
     echo "$FILE does not exist. You should probably call ./pull.sh."
