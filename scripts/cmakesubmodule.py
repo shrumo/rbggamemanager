@@ -36,7 +36,7 @@ set(CMAKE_CXX_FLAGS_DEBUG "${{CMAKE_CXX_FLAGS_DEBUG}} {}")
 set(CMAKE_CXX_STANDARD 11)
 
 set(SOURCE_FILES {})
-add_library(rbgParser ${{SOURCE_FILES}})
+add_library(rbgParser SHARED ${{SOURCE_FILES}})
 '''
 
 print(text.format(cxxflags,cxxdebugflags,'\n'.join(files)))
