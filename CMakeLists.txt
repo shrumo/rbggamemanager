@@ -9,7 +9,7 @@ endif()
 set(CMAKE_CXX_STANDARD 14)
 
 set(CMAKE_CXX_FLAGS "-Wall -Wextra -pipe")
-set(CMAKE_CXX_FLAGS_DEBUG "-g -Ofast")
+set(CMAKE_CXX_FLAGS_DEBUG "-g -O0")
 set(CMAKE_CXX_FLAGS_RELEASE "-Ofast -march=native")
 
 add_subdirectory(rbgParser)
