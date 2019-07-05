@@ -11,8 +11,6 @@
 #include <graph/graph.h>
 
 namespace rbg {
-  class NfaWithVisitedChecks;
-
   class Shift;
 
   class ShiftTable;
@@ -51,6 +49,8 @@ namespace rbg {
     kVisitedCheck,
     kEmpty,
   };
+
+  bool is_modifier_type(MoveType type);
 
   class MoveVisitor {
   public:
@@ -301,18 +301,20 @@ namespace rbg {
 
   class ConditionCheck : public IndexedMove {
   public:
-    ConditionCheck(std::unique_ptr<NfaWithVisitedChecks> nfa, bool negated, uint index)
+    ConditionCheck(std::unique_ptr<Nfa<std::unique_ptr<Move>>> nfa, bool negated, uint index)
         : IndexedMove(MoveType::kConditionCheck, index), nfa_(std::move(nfa)), negated_(negated) {
     }
 
-    const NfaWithVisitedChecks &nfa() const { return *nfa_; }
+    const Nfa<std::unique_ptr<Move>> &nfa() const { return *nfa_; }
+
+    Nfa<std::unique_ptr<Move>> &nfa() { return *nfa_; }
 
     bool negated() const { return negated_; }
 
     void Accept(MoveVisitor &visitor) const override { visitor.Visit(*this); }
 
   private:
-    std::unique_ptr<NfaWithVisitedChecks> nfa_;
+    std::unique_ptr<Nfa<std::unique_ptr<Move>>> nfa_;
     bool negated_;
   };
 

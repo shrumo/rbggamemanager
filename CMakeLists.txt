@@ -9,7 +9,7 @@ endif()
 set(CMAKE_CXX_STANDARD 14)
 
 set(CMAKE_CXX_FLAGS "-Wall -Wextra -pipe")
-set(CMAKE_CXX_FLAGS_DEBUG "-g -O0")
+set(CMAKE_CXX_FLAGS_DEBUG "-g -Ofast")
 set(CMAKE_CXX_FLAGS_RELEASE "-Ofast -march=native")
 
 add_subdirectory(rbgParser)
@@ -36,7 +36,8 @@ set(PARSER_FILES src/parser/parser_wrapper.h src/parser/parser_actions.h src/par
 
 set(CONSTRUCTION_FILES
         src/construction/graph_creator.cc src/construction/graph_creator.h src/construction/declarations_creator.h
-        src/construction/moves/moves.h src/construction/moves/moves_creator.cc src/construction/moves/moves_creator.h
+        src/construction/moves/moves.h src/construction/moves/moves.cc
+        src/construction/moves/moves_creator.cc src/construction/moves/moves_creator.h
         src/construction/moves/arithmetic_creator.cc src/construction/moves/arithmetic_creator.h
         src/construction/moves/moves_visitor.h src/construction/moves/moves_printer.cc
         src/construction/moves/moves_printer.h src/construction/search_step_creator.cc src/construction/search_step_creator.h

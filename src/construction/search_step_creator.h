@@ -14,8 +14,7 @@ namespace rbg {
   class SearchStepsCollection {
   public:
     SearchStepsCollection(uint visited_checks_count, uint board_size)
-        : current_(nullptr),
-          visited_info_stack_(std::make_unique<ResettableBitArrayStack>(visited_checks_count * board_size)),
+        : visited_info_stack_(std::make_unique<ResettableBitArrayStack>(visited_checks_count * board_size)),
           visited_checks_count_(visited_checks_count) {}
 
     uint AddSearchStep(std::unique_ptr<SearchStep> step) {
@@ -23,20 +22,8 @@ namespace rbg {
       return searchsteps_.size() - 1;
     }
 
-    void SetInitial(uint index) {
-      current_ = searchsteps_[index].get();
-    }
-
     SearchStep *operator[](uint index) {
       return searchsteps_[index].get();
-    }
-
-    SearchStep *current() {
-      return current_;
-    }
-
-    void set_current(SearchStep *step) {
-      current_ = step;
     }
 
     ResetableBitArrayStackChunk GetBitArrayChunk(uint index) {
@@ -49,20 +36,6 @@ namespace rbg {
       return *visited_info_stack_;
     }
 
-  private:
-    std::vector<std::unique_ptr<SearchStep>> searchsteps_;
-    SearchStep *current_;
-    std::unique_ptr<ResettableBitArrayStack> visited_info_stack_;
-    uint visited_checks_count_;
-
-    friend class PlayerSwitchStep;
-  };
-
-  class SearchStepsInformation : public SearchStepsCollection {
-  public:
-    SearchStepsInformation(uint visited_checks_count, uint board_size)
-        : SearchStepsCollection(visited_checks_count, board_size) {}
-
     void RegisterModifier(uint modifier_index, uint step_index) {
       modifiers_[modifier_index] = dynamic_cast<ModifyingSearchStep *>((*this)[step_index]);
     }
@@ -72,7 +45,40 @@ namespace rbg {
     }
 
   private:
+    std::vector<std::unique_ptr<SearchStep>> searchsteps_;
+    std::unique_ptr<ResettableBitArrayStack> visited_info_stack_;
+    uint visited_checks_count_;
+
     std::unordered_map<uint, ModifyingSearchStep *> modifiers_;
+
+    friend class PlayerSwitchStep;
+  };
+
+  class SearchStepsPoint {
+  public:
+    explicit SearchStepsPoint(SearchStepsCollection &parent_collection, SearchStep *current = nullptr) :
+        parent_(parent_collection), current_(current) {}
+
+    void SetInitial(uint index) {
+      current_ = parent_[index];
+    }
+
+    SearchStep *current() {
+      return current_;
+    }
+
+    void set_current(SearchStep *step) {
+      current_ = step;
+    }
+
+  private:
+    SearchStepsCollection &parent_;
+    SearchStep *current_;
+  };
+
+  struct SearchStepsInformation {
+    SearchStepsCollection collection;
+    SearchStepsPoint current_position;
   };
 
   SearchStepsInformation CreateSearchSteps(const NfaWithVisitedChecks &nfa, const Declarations &declarations);

@@ -168,7 +168,7 @@ public:
   std::string ConditionCheckCase(const ConditionCheck &move) override {
     std::stringstream result;
     result << "<ConditionCheck ";
-    result << GraphDescription(move.nfa().nfa.graph,
+    result << GraphDescription(move.nfa().graph,
                                [&](const std::unique_ptr<Move> &move) { return MovePrinter(declarations_)(*move); });
     result << ">";
     return result.str();

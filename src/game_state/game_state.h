@@ -52,21 +52,22 @@ namespace rbg {
     std::vector<std::vector<ModifierApplication>> Moves() {
       std::vector<std::vector<ModifierApplication>> result;
       std::vector<ModifierApplication> modifiers;
-      steps_.current()->Run(*this, modifiers, result);
-      steps_.stack().reset();
+      steps_.current_position.current()->Run(*this, modifiers, result);
+      steps_.collection.stack().reset();
       return result;
     }
 
     MoveRevertInformation Apply(const std::vector<ModifierApplication> &move) {
-      SearchStep *previous_search_step = steps_.current();
+      SearchStep *previous_search_step = steps_.current_position.current();
       std::vector<StepRevertInformation> revert_infos;
       revert_infos.reserve(move.size());
       for (const auto &mod_application : move) {
         revert_infos.push_back(
-            steps_.Modifier(mod_application.modifier_index)->ApplyReversibleAtVertex(*this, mod_application.vertex));
+            steps_.collection.Modifier(mod_application.modifier_index)->ApplyReversibleAtVertex(*this,
+                                                                                                mod_application.vertex));
       }
-      steps_.set_current(revert_infos.back().modifying_step.next_step());
-      steps_.stack().reset();
+      steps_.current_position.set_current(revert_infos.back().modifying_step.next_step());
+      steps_.collection.stack().reset();
       MakeKeeperClosure(revert_infos);
       return {previous_search_step, revert_infos};
     }
@@ -77,7 +78,7 @@ namespace rbg {
             revert_info.player_steps_revert_information.size() - i - 1];
         step.modifying_step.RevertFromRevertInfo(*this, step);
       }
-      steps_.set_current(revert_info.previous_search_step);
+      steps_.current_position.set_current(revert_info.previous_search_step);
     }
 
     const Declarations &declarations() const {
@@ -96,7 +97,7 @@ namespace rbg {
       return current_player_;
     }
 
-    const SearchStepsCollection &search_steps() const {
+    const SearchStepsInformation &search_steps() const {
       return steps_;
     }
 
@@ -108,9 +109,9 @@ namespace rbg {
     void MakeKeeperClosure(std::vector<StepRevertInformation> &steps_revert_information) {
       bool exists = true;
       while (exists && current_player_ == declarations_.keeper_id) {
-        exists = steps_.current()->ApplyFirstFound(*this, steps_revert_information, current_pos_);
-        steps_.set_current(steps_revert_information.back().modifying_step.next_step());
-        steps_.stack().reset();
+        exists = steps_.current_position.current()->ApplyFirstFound(*this, steps_revert_information, current_pos_);
+        steps_.current_position.set_current(steps_revert_information.back().modifying_step.next_step());
+        steps_.collection.stack().reset();
       }
     }
 

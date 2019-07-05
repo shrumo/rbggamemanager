@@ -10,6 +10,7 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <ostream>
+#include <iostream>
 #include <memory>
 #include <algorithm>
 #include <sstream>
@@ -101,6 +102,8 @@ namespace rbg {
         DeleteEdge(edge_id);
       }
       nodes_.erase(node);
+      out_edges_.erase(node);
+      in_edges_.erase(node);
     }
 
     node_t IdentifyNodes(node_t a, node_t b) {
@@ -131,6 +134,15 @@ namespace rbg {
       return edges_;
     }
 
+    void ChangeTransitionTo(shift_edge_id_t edge_id, node_t target) {
+      assert(edges_.find(edge_id) != edges_.end() && "Edge doesn't exist.");
+      assert(nodes_.find(target) != nodes_.end() && "Node doesn't exist.");
+      auto &edge = edges_[edge_id];
+      in_edges_[edge.to].erase(edge_id);
+      edge.to = target;
+      in_edges_[target].insert(edge_id);
+    }
+
   private:
     std::unordered_set<node_t> nodes_;
     std::unordered_map<shift_edge_id_t, Edge> edges_;
@@ -159,7 +171,7 @@ std::string GraphDescription(const rbg::Graph<EdgeContent> &g, ContentPrinter pr
     if (!first_sep) {
       first_sep = true;
     } else {
-      result << ";";
+      result << "\n";
     }
     result << node << " -> ";
     auto transitions = g.Transitions(node);

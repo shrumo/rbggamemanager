@@ -16,6 +16,8 @@
 namespace rbg {
   class GameState;
   class SearchStepsCollection;
+
+  class SearchStepsPoint;
 }
 
 namespace rbg {
@@ -471,7 +473,7 @@ namespace rbg {
 
   class ConditionCheckStep : public SingleSearchStep {
   public:
-    explicit ConditionCheckStep(std::unique_ptr<SearchStepsCollection> steps_collection);
+    explicit ConditionCheckStep(std::unique_ptr<SearchStepsPoint> steps_point);
 
     bool Check(GameState &state);
 
@@ -503,12 +505,12 @@ namespace rbg {
     }
 
   private:
-    std::unique_ptr<SearchStepsCollection> steps_collection_;
+    std::unique_ptr<SearchStepsPoint> steps_point_;
   };
 
   class NegatedConditionCheckStep : public SingleSearchStep {
   public:
-    explicit NegatedConditionCheckStep(std::unique_ptr<SearchStepsCollection> steps_collection);
+    explicit NegatedConditionCheckStep(std::unique_ptr<SearchStepsPoint> steps_point);
 
     bool Check(GameState &state);
 
@@ -540,7 +542,7 @@ namespace rbg {
     }
 
   private:
-    std::unique_ptr<SearchStepsCollection> steps_collection_;
+    std::unique_ptr<SearchStepsPoint> steps_point_;
   };
 
   class OffStep : public ModifyingSearchStep {

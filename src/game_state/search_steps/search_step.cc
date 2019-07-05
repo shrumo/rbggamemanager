@@ -44,20 +44,20 @@ bool ArithmeticNotEqualComparison::Check(GameState &state) {
 }
 
 bool ConditionCheckStep::Check(GameState &state) {
-  steps_collection_->stack().reset();
-  return steps_collection_->current()->EndStepReachable(state);
+//  steps_point_->stack().reset();
+  return steps_point_->current()->EndStepReachable(state);
 }
 
-ConditionCheckStep::ConditionCheckStep(std::unique_ptr<SearchStepsCollection> steps_collection)
-    : steps_collection_(std::move(steps_collection)) {}
+ConditionCheckStep::ConditionCheckStep(std::unique_ptr<SearchStepsPoint> steps_point)
+    : steps_point_(std::move(steps_point)) {}
 
 bool NegatedConditionCheckStep::Check(GameState &state) {
-  steps_collection_->stack().reset();
-  return !steps_collection_->current()->EndStepReachable(state);
+//  steps_point_->stack().reset();
+  return !steps_point_->current()->EndStepReachable(state);
 }
 
-NegatedConditionCheckStep::NegatedConditionCheckStep(std::unique_ptr<SearchStepsCollection> steps_collection)
-    : steps_collection_(std::move(steps_collection)) {}
+NegatedConditionCheckStep::NegatedConditionCheckStep(std::unique_ptr<SearchStepsPoint> steps_point)
+    : steps_point_(std::move(steps_point)) {}
 
 void OffStep::Set(GameState &state, piece_id_t &previous_piece) const {
   previous_piece = state.board_.at(state.current_pos_);
@@ -73,9 +73,9 @@ void OffStep::Run(GameState &state, std::vector<ModifierApplication> &applied_mo
   piece_id_t revert_info;
   Set(state, revert_info);
   applied_modifiers.push_back({state.current_pos_, index()});
-  state.steps_.stack().Push();
+  state.steps_.collection.stack().Push();
   RunNextStep(state, applied_modifiers, moves);
-  state.steps_.stack().Pop();
+  state.steps_.collection.stack().Pop();
   applied_modifiers.pop_back();
   Reset(state, revert_info);
 }
@@ -175,9 +175,9 @@ void AssignmentStep::Run(GameState &state, std::vector<ModifierApplication> &app
   variable_value_t previous_value;
   if (SetAndCheck(state, previous_value)) {
     applied_modifiers.push_back({state.current_pos_, index()});
-  state.steps_.stack().Push();
+    state.steps_.collection.stack().Push();
   RunNextStep(state, applied_modifiers, moves);
-  state.steps_.stack().Pop();
+    state.steps_.collection.stack().Pop();
   applied_modifiers.pop_back();
   }
   Reset(state, previous_value);
