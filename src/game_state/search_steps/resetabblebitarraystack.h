@@ -26,7 +26,7 @@ namespace rbg {
     }
 
     bool operator[](const uint index) const {
-      return data_[index] >= threshold_;
+      return data_[index] == threshold_;
     }
 
     void set(const uint index) {
@@ -37,8 +37,8 @@ namespace rbg {
       if (threshold_ == std::numeric_limits<unsigned int>::max()) {
         std::fill(data_.begin(), data_.end(), 0);
         threshold_ = 1;
-      }
-      threshold_++;
+      } else
+        threshold_++;
     }
 
     void resize(uint new_size) {
