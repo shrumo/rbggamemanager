@@ -19,8 +19,9 @@ CreateStepsInCollection(const Nfa<std::unique_ptr<Move>> &game_graph, SearchStep
 
 class SearchStepCreator : public MoveFunction<uint> {
 public:
-  explicit SearchStepCreator(SearchStepsCollection &collection, const Declarations &declarations)
-      : collection_(collection), declarations_(declarations) {
+  explicit SearchStepCreator(SearchStepsCollection &collection, const Declarations &declarations,
+                             bool register_modifiers = true)
+      : collection_(collection), declarations_(declarations), register_modifiers_(register_modifiers) {
   }
 
   uint ShiftCase(const Shift &move) override {
@@ -65,12 +66,13 @@ public:
             std::move(left_result)
         ));
     }
-    assert(false);
   }
 
   uint OffCase(const Off &move) override {
     uint step_index = collection_.AddSearchStep(make_unique<OffStep>(move.piece(), move.index()));
-    collection_.RegisterModifier(move.index(), step_index);
+    if (register_modifiers_) {
+      collection_.RegisterModifier(move.index(), step_index);
+    }
     return step_index;
 
   }
@@ -82,13 +84,17 @@ public:
 
   uint PlayerSwitchCase(const PlayerSwitch &move) override {
     uint step_index = collection_.AddSearchStep(make_unique<PlayerSwitchStep>(move.player(), move.index()));
-    collection_.RegisterModifier(move.index(), step_index);
+    if (register_modifiers_) {
+      collection_.RegisterModifier(move.index(), step_index);
+    }
     return step_index;
   }
 
   uint KeeperSwitchCase(const KeeperSwitch &move) override {
     uint step_index = collection_.AddSearchStep(make_unique<PlayerSwitchStep>(move.keeper_id(), move.index()));
-    collection_.RegisterModifier(move.index(), step_index);
+    if (register_modifiers_) {
+      collection_.RegisterModifier(move.index(), step_index);
+    }
     return step_index;
   }
 
@@ -96,7 +102,9 @@ public:
     uint step_index = collection_.AddSearchStep(make_unique<AssignmentStep>(move.get_variable(),
                                                                             CreateArithmeticOperation(
                                                                            move.get_value_expression()), move.index()));
-    collection_.RegisterModifier(move.index(), step_index);
+    if (register_modifiers_) {
+      collection_.RegisterModifier(move.index(), step_index);
+    }
     return step_index;
   }
 
@@ -128,6 +136,7 @@ public:
 private:
   SearchStepsCollection &collection_;
   const Declarations &declarations_;
+  bool register_modifiers_;
 };
 
 SearchStepsPoint
@@ -136,24 +145,40 @@ CreateStepsInCollection(const Nfa<std::unique_ptr<Move>> &game_graph, SearchStep
   const auto &nfa = game_graph;
   unordered_map<node_t, uint> nodes_collection_indices;
   queue<node_t> to_visit;
-  to_visit.push(nfa.final);
+  unordered_set<node_t> initialized;
+  to_visit.push(nfa.initial);
+  initialized.insert(nfa.initial);
+  while (!to_visit.empty()) {
+    uint v = to_visit.front();
+    to_visit.pop();
+    auto transitions = nfa.graph.Transitions(v);
+    for (const auto &transition : transitions) {
+      uint u = transition.to;
+      if (initialized.find(u) == initialized.end()) {
+        initialized.insert(u);
+        to_visit.push(u);
+      }
+      if (nodes_collection_indices.find(v) == nodes_collection_indices.end()) {
+        nodes_collection_indices[v] = SearchStepCreator(collection, declarations)(*transition.content);
+      }
+    }
+  }
   nodes_collection_indices[nfa.final] = collection.AddSearchStep(make_unique<EndStep>());
+
+  to_visit = {};
+  to_visit.push(nfa.final);
+  unordered_set<node_t> visited;
   while (!to_visit.empty()) {
     uint v = to_visit.front();
     to_visit.pop();
     auto transitions = nfa.graph.InTransitions(v);
     for (const auto &transition : transitions) {
       uint u = transition.from;
-      uint searchstep_index;
-      auto iter = nodes_collection_indices.find(u);
-      if (nodes_collection_indices.find(u) == nodes_collection_indices.end()) {
-        searchstep_index = SearchStepCreator(collection, declarations)(*transition.content);
-        nodes_collection_indices[u] = searchstep_index;
+      if (visited.find(u) == visited.end()) {
         to_visit.push(u);
-      } else {
-        searchstep_index = iter->second;
+        visited.insert(u);
       }
-      collection[searchstep_index]->AddNextSearchStep(collection[nodes_collection_indices.at(v)]);
+      collection[nodes_collection_indices.at(u)]->AddNextSearchStep(collection[nodes_collection_indices.at(v)]);
     }
   }
   return SearchStepsPoint{collection, collection[nodes_collection_indices.at(nfa.initial)]};
