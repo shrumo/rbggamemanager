@@ -192,7 +192,7 @@ namespace rbg {
 
   class ShiftStep : public SingleSearchStep {
   public:
-    explicit ShiftStep(shift_edge_id_t edge_id) : edge_id_(edge_id) {}
+    explicit ShiftStep(shift_edge_id edge_id) : edge_id_(edge_id) {}
 
     bool SetAndCheck(GameState &state, vertex_id_t &previous_vertex);
 
@@ -232,7 +232,7 @@ namespace rbg {
     }
 
   private:
-    shift_edge_id_t edge_id_;
+    shift_edge_id edge_id_;
   };
 
   class OnStep : public SingleSearchStep {

@@ -142,7 +142,7 @@ GraphTimesBoard rbg::CreateGraphTimesBoard(const Nfa<unique_ptr<Move>> &nfa, con
     for (const auto &transition : nfa.graph.Transitions(top.node)) {
       vector<vertex_id_t> reachable_vertices;
       if (transition.content->type() == MoveType::kShiftType) {
-        shift_edge_id_t edge_id = dynamic_cast<Shift *>(transition.content.get())->edge_id();
+        transition_id edge_id = dynamic_cast<Shift *>(transition.content.get())->edge_id();
         vertex_id_t next = declarations.board_description.NextVertex(top.vertex, edge_id);
         if (next != declarations.board_description.vertices_count()) {
           reachable_vertices.push_back(next);

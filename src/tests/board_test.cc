@@ -22,7 +22,7 @@ int main() {
 
   vertex_id_t v10 = board.AddVertexName("v10");
 
-  shift_edge_id_t left_edge_id = board.AddEdgeName("left");
+  shift_edge_id left_edge_id = board.AddEdgeName("left");
 
   board.AddEdge(v10, left_edge_id, v00);
 

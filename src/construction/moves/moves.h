@@ -118,15 +118,15 @@ namespace rbg {
   // Shift changes the current position on board.
   class Shift : public IndexedMove {
   public:
-    explicit Shift(shift_edge_id_t edge_id, uint index) : IndexedMove(MoveType::kShiftType, index), edge_id_(edge_id) {}
+    explicit Shift(transition_id edge_id, uint index) : IndexedMove(MoveType::kShiftType, index), edge_id_(edge_id) {}
 
     // Returns the edge this shift travels.
-    shift_edge_id_t edge_id() const { return edge_id_; }
+    transition_id edge_id() const { return edge_id_; }
 
     void Accept(MoveVisitor &visitor) const override { visitor.Visit(*this); }
 
   private:
-    shift_edge_id_t edge_id_;
+    transition_id edge_id_;
   };
 
   // Shift changes the current position on board.

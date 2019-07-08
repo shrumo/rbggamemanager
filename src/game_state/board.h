@@ -10,7 +10,7 @@
 
 namespace rbg {
   using vertex_id_t = name_id_t;
-  using shift_edge_id_t = name_id_t;
+  using shift_edge_id = name_id_t;
   using piece_id_t = name_id_t;
 
   class BoardContent {
@@ -53,11 +53,11 @@ namespace rbg {
     void AddEdge(const std::string &a, const std::string &edge, const std::string &b) {
       vertex_id_t a_vertex = AddVertexName(a);
       vertex_id_t b_vertex = AddVertexName(b);
-      shift_edge_id_t edge_id = AddEdgeName(edge);
+      shift_edge_id edge_id = AddEdgeName(edge);
       AddEdge(a_vertex, edge_id, b_vertex);
     }
 
-    void AddEdge(vertex_id_t a_vertex, shift_edge_id_t edge_id, vertex_id_t b_vertex) {
+    void AddEdge(vertex_id_t a_vertex, shift_edge_id edge_id, vertex_id_t b_vertex) {
       neighbours_[a_vertex][edge_id] = b_vertex;
     }
 
@@ -77,7 +77,7 @@ namespace rbg {
       return edges_resolver_.Id(e);
     }
 
-    vertex_id_t NextVertex(vertex_id_t current, shift_edge_id_t edge) const {
+    vertex_id_t NextVertex(vertex_id_t current, shift_edge_id edge) const {
       return neighbours_[current][edge];
     }
 

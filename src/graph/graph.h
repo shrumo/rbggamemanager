@@ -18,16 +18,15 @@
 
 namespace rbg {
   using node_t = uint;
-  using shift_edge_id_t = uint;
+  using transition_id = uint;
 
   template<typename EdgeContent>
   struct Transition {
-    shift_edge_id_t id;
+    transition_id id;
     node_t to;
     node_t from;
     const EdgeContent &content;
   };
-
 
   template<typename EdgeContent>
   class Graph {
@@ -49,10 +48,10 @@ namespace rbg {
       return node;
     }
 
-    shift_edge_id_t AddEdge(node_t from, EdgeContent content, node_t to) {
+    transition_id AddEdge(node_t from, EdgeContent content, node_t to) {
       assert(nodes_.find(from) != nodes_.end() && "Node doesn't exist.");
       assert(nodes_.find(to) != nodes_.end() && "Node doesn't exist.");
-      shift_edge_id_t transition_id = next_transition_id_;
+      transition_id transition_id = next_transition_id_;
       next_transition_id_++;
       edges_[transition_id].from = from;
       edges_[transition_id].content = std::move(content);
@@ -65,7 +64,7 @@ namespace rbg {
     std::vector<Transition<EdgeContent>> Transitions(node_t node) const {
       assert(nodes_.find(node) != nodes_.end() && "Node doesn't exist.");
       std::vector<Transition<EdgeContent>> result;
-      for (shift_edge_id_t edge_id : out_edges_.at(node)) {
+      for (transition_id edge_id : out_edges_.at(node)) {
         const Edge &edge = edges_.at(edge_id);
         result.push_back(Transition<EdgeContent>{edge_id, edge.to, node, edge.content});
       }
@@ -76,14 +75,14 @@ namespace rbg {
     std::vector<Transition<EdgeContent>> InTransitions(node_t node) const {
       assert(nodes_.find(node) != nodes_.end() && "Node doesn't exist.");
       std::vector<Transition<EdgeContent>> result;
-      for (shift_edge_id_t edge_id : in_edges_.at(node)) {
+      for (transition_id edge_id : in_edges_.at(node)) {
         const Edge &edge = edges_.at(edge_id);
         result.push_back(Transition<EdgeContent>{edge_id, node, edge.from, edge.content});
       }
       return result;
     }
 
-    void DeleteEdge(shift_edge_id_t edge_id) {
+    void DeleteEdge(transition_id edge_id) {
       assert(edges_.find(edge_id) != edges_.end() && "Edge doesn't exist.");
       {
         const Edge &edge = edges_[edge_id];
@@ -95,10 +94,10 @@ namespace rbg {
 
     void DeleteNode(node_t node) {
       assert(nodes_.find(node) != nodes_.end() && "Node doesn't exist.");
-      std::unordered_set<shift_edge_id_t> edges_to_delete;
+      std::unordered_set<transition_id> edges_to_delete;
       edges_to_delete.insert(out_edges_[node].begin(), out_edges_[node].end());
       edges_to_delete.insert(in_edges_[node].begin(), in_edges_[node].end());
-      for (shift_edge_id_t edge_id : edges_to_delete) {
+      for (transition_id edge_id : edges_to_delete) {
         DeleteEdge(edge_id);
       }
       nodes_.erase(node);
@@ -126,15 +125,15 @@ namespace rbg {
       return nodes_;
     }
 
-    EdgeContent &edge_content(shift_edge_id_t edge) {
+    EdgeContent &edge_content(transition_id edge) {
       return edges_[edge].content;
     }
 
-    const std::unordered_map<shift_edge_id_t, Edge> &edges() const {
+    const std::unordered_map<transition_id, Edge> &edges() const {
       return edges_;
     }
 
-    void ChangeTransitionTo(shift_edge_id_t edge_id, node_t target) {
+    void ChangeTransitionTo(transition_id edge_id, node_t target) {
       assert(edges_.find(edge_id) != edges_.end() && "Edge doesn't exist.");
       assert(nodes_.find(target) != nodes_.end() && "Node doesn't exist.");
       auto &edge = edges_[edge_id];
@@ -145,12 +144,12 @@ namespace rbg {
 
   private:
     std::unordered_set<node_t> nodes_;
-    std::unordered_map<shift_edge_id_t, Edge> edges_;
-    std::unordered_map<node_t, std::unordered_set<shift_edge_id_t> > out_edges_;
-    std::unordered_map<node_t, std::unordered_set<shift_edge_id_t> > in_edges_;
+    std::unordered_map<transition_id, Edge> edges_;
+    std::unordered_map<node_t, std::unordered_set<transition_id> > out_edges_;
+    std::unordered_map<node_t, std::unordered_set<transition_id> > in_edges_;
 
     node_t next_node_;
-    shift_edge_id_t next_transition_id_;
+    transition_id next_transition_id_;
   };
 
   template<typename Letter>
