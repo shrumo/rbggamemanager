@@ -238,7 +238,6 @@ void HandleMultipleOutNodes(Graph<unique_ptr<Move>> &graph) {
       auto& transition = graph.GetEdge(transition_id);
       if (transition.content()->type() == MoveType::kConditionCheck) {
         HandleMultipleOutNodes(dynamic_cast<ConditionCheck *>(transition.modifiable_content().get())->nfa().graph);
-        std::cout << "DONE" << std::endl;
       }
     }
   }
