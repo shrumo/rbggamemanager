@@ -144,17 +144,17 @@ void TestConditionCheckStep() {
 
 int main() {
   try {
-    TestPlayerSwitch();
-    TestMultipleSearchStep();
-    TestShiftCheckSearchStep();
-    TestOnCheckSearchStep();
-    TestVisitedCheckSearchStep();
-    TestAssignment();
-    TestExpressions();
-    TestLessComparison();
-    TestLessEqualComparison();
-    TestEqualComparison();
-    TestNotEqualComparison();
+//    TestPlayerSwitch();
+//    TestMultipleSearchStep();
+//    TestShiftCheckSearchStep();
+//    TestOnCheckSearchStep();
+//    TestVisitedCheckSearchStep();
+//    TestAssignment();
+//    TestExpressions();
+//    TestLessComparison();
+//    TestLessEqualComparison();
+//    TestEqualComparison();
+//    TestNotEqualComparison();
     TestConditionCheckStep();
   } catch (const rbg_parser::message &m) {
     std::cout << m.as_error() << std::endl;

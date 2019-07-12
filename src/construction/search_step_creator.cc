@@ -151,29 +151,30 @@ CreateStepsInCollection(const Nfa<std::unique_ptr<Move>> &game_graph, SearchStep
   while (!to_visit.empty()) {
     uint v = to_visit.front();
     to_visit.pop();
-    auto transitions = nfa.graph.Transitions(v);
+    auto transitions = nfa.graph.EdgesFrom(v);
     for (const auto &transition : transitions) {
-      uint u = transition.to;
+      uint u = transition.to();
       if (initialized.find(u) == initialized.end()) {
         initialized.insert(u);
         to_visit.push(u);
       }
       if (nodes_collection_indices.find(v) == nodes_collection_indices.end()) {
-        nodes_collection_indices[v] = SearchStepCreator(collection, declarations)(*transition.content);
+        nodes_collection_indices[v] = SearchStepCreator(collection, declarations)(*transition.content());
       }
     }
   }
   nodes_collection_indices[nfa.final] = collection.AddSearchStep(make_unique<EndStep>());
 
-  to_visit = {};
+  to_visit = queue<node_t>();
   to_visit.push(nfa.final);
   unordered_set<node_t> visited;
+  visited.insert(nfa.final);
   while (!to_visit.empty()) {
     uint v = to_visit.front();
     to_visit.pop();
-    auto transitions = nfa.graph.InTransitions(v);
+    auto transitions = nfa.graph.EdgesTo(v);
     for (const auto &transition : transitions) {
-      uint u = transition.from;
+      uint u = transition.from();
       if (visited.find(u) == visited.end()) {
         to_visit.push(u);
         visited.insert(u);
@@ -185,7 +186,7 @@ CreateStepsInCollection(const Nfa<std::unique_ptr<Move>> &game_graph, SearchStep
 }
 
 SearchStepsInformation
-rbg::CreateSearchSteps(const NfaWithVisitedChecks &game_graph, const Declarations &declarations) {
+rbg::CreateSearchSteps(const VisitedChecksNfa &game_graph, const Declarations &declarations) {
   SearchStepsCollection collection(game_graph.visited_checks_count, declarations.board_description.vertices_count());
   auto point = CreateStepsInCollection(game_graph.nfa, collection, declarations);
   return SearchStepsInformation{std::move(collection), point};

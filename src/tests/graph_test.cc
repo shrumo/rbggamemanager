@@ -8,23 +8,19 @@
 
 using namespace rbg;
 
-std::vector<node_t> SortedTransitions(const Graph<int> &g, node_t node) {
-  auto transitions = g.Transitions(node);
+std::vector<node_t> SortedOutNeighbours(const Graph<int> &g, node_t node) {
   std::vector<node_t> result;
-  result.reserve(transitions.size());
-  for (const auto &t : transitions) {
-    result.push_back(t.to);
+  for(const auto& edge : g.EdgesFrom(node)) {
+    result.push_back(edge.to());
   }
   std::sort(result.begin(), result.end());
   return result;
 }
 
-std::vector<node_t> SortedInTransitions(const Graph<int> &g, node_t node) {
-  auto transitions = g.InTransitions(node);
+std::vector<node_t> SortedInNeighbours(const Graph<int> &g, node_t node) {
   std::vector<node_t> result;
-  result.reserve(transitions.size());
-  for (const auto &t : transitions) {
-    result.push_back(t.from);
+  for(const auto& edge : g.EdgesTo(node)) {
+    result.push_back(edge.from());
   }
   std::sort(result.begin(), result.end());
   return result;
@@ -32,47 +28,48 @@ std::vector<node_t> SortedInTransitions(const Graph<int> &g, node_t node) {
 
 int main() {
   Graph<int> g;
-  node_t v1 = g.AddNode();
-  node_t v2 = g.AddNode();
-  node_t v3 = g.AddNode();
+  node_t v1 = g.NewNode();
+  node_t v2 = g.NewNode();
+  node_t v3 = g.NewNode();
 
   g.AddEdge(v1, 0, v2);
   g.AddEdge(v2, 1, v3);
   g.AddEdge(v3, 2, v1);
   g.AddEdge(v1, 3, v3);
 
-  assert(g.nodes().size() == 3);
-  assert(g.edges().size() == 4);
-  assert(SortedTransitions(g, v1) == std::vector<node_t>({v2, v3}));
-  assert(SortedTransitions(g, v3) == std::vector<node_t>({v1}));
+  assert(g.nodes_map().size() == 3);
+  assert(g.edges_map().size() == 4);
+  assert(SortedOutNeighbours(g, v1) == std::vector<node_t>({v2, v3}));
+  assert(SortedOutNeighbours(g, v3) == std::vector<node_t>({v1}));
 
-  node_t v4 = g.AddNode();
+  node_t v4 = g.NewNode();
   g.AddEdge(v4, 4, v1);
 
-  assert(g.nodes().size() == 4);
-  assert(g.edges().size() == 5);
-  assert(SortedInTransitions(g, v1) == std::vector<node_t>({v3, v4}));
-  assert(SortedInTransitions(g, v2) == std::vector<node_t>({v1}));
+  assert(g.nodes_map().size() == 4);
+  assert(g.edges_map().size() == 5);
+  std::cout << GraphDescription(g, [](const int &a) { return std::to_string(a); }) << std::endl;
+  assert(SortedInNeighbours(g, v1) == std::vector<node_t>({v3, v4}));
+  assert(SortedInNeighbours(g, v2) == std::vector<node_t>({v1}));
 
-  assert(g.Transitions(v3).size() == 1);
-  transition_id v3v1edge = g.Transitions(v3).front().id;
-  g.DeleteEdge(v3v1edge);
-  assert(SortedInTransitions(g, v1) == std::vector<node_t>({v4}));
-  assert(SortedTransitions(g, v3).empty());
+  assert(g.edges_ids_from(v3).size() == 1);
+  edge_id_t v3v1edge = g.edges_ids_from(v3).front();
+  g.EraseEdge(v3v1edge);
+  assert(SortedInNeighbours(g, v1) == std::vector<node_t>({v4}));
+  assert(SortedOutNeighbours(g, v3).empty());
 
-  g.DeleteNode(v1);
-  assert(g.nodes().size() == 3);
-  assert(SortedTransitions(g, v4).empty());
-  assert(SortedTransitions(g, v3).empty());
-  assert(SortedInTransitions(g, v2).empty());
-  assert(SortedTransitions(g, v2) == std::vector<node_t>({v3}));
+  g.EraseNode(v1);
+  assert(g.nodes_map().size() == 3);
+  assert(SortedOutNeighbours(g, v4).empty());
+  assert(SortedOutNeighbours(g, v3).empty());
+  assert(SortedInNeighbours(g, v2).empty());
+  assert(SortedOutNeighbours(g, v2) == std::vector<node_t>({v3}));
 
   g.AddEdge(v3, 5, v4);
   g.AddEdge(v3, 6, v3);
   g.AddEdge(v4, 7, v3);
   g.AddEdge(v4, 8, v2);
-  auto v = g.IdentifyNodes(v2, v3);
-  assert(SortedTransitions(g, v) == std::vector<node_t>({v, v, v4}));
+  g.MergeWithNode(v2, v3);
+  assert(SortedOutNeighbours(g, v2) == std::vector<node_t>({v2, v2, v4}));
 
   std::cout << GraphDescription(g, [](const int &a) { return std::to_string(a); });
 

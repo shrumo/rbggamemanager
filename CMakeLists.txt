@@ -30,7 +30,7 @@ set(GAMESTATE_FILES src/game_state/namesresolver.h src/game_state/board.h src/ga
         src/game_state/namesresolver.cc src/game_state/board.cc src/game_state/search_steps/search_step.cc
         src/game_state/calculate_perft.h src/game_state/game_state_printer.h src/game_state/game_state_printer.cc)
 
-set(GRAPH_FILES src/graph/graph.h)
+set(GRAPH_FILES src/graph/graph.h src/stl_extension/range.h src/stl_extension/pair.h src/stl_extension/iterator_transform.h)
 
 set(PARSER_FILES src/parser/parser_wrapper.h src/parser/parser_actions.h src/parser/parser_wrapper.cc)
 

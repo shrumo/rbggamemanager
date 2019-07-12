@@ -33,34 +33,34 @@ public:
       : graph_(graph), declarations_(declarations) {}
 
   GraphCreatorResult SumCase(const rbg_parser::sum &sum) override {
-    node_t initial = graph_.AddNode();
-    node_t final = graph_.AddNode();
+    node_t initial = graph_.NewNode();
+    node_t final = graph_.NewNode();
     for (const auto &child : sum.get_content()) {
       GraphCreatorResult child_result = GraphCreator(graph_, declarations_)(*child);
-      graph_.IdentifyNodes(initial, child_result.initial);
-      graph_.IdentifyNodes(final, child_result.final);
+      graph_.MergeWithNode(initial, child_result.initial);
+      graph_.MergeWithNode(final, child_result.final);
     }
     return {initial, final};
   }
 
   GraphCreatorResult PrioritizedSumCase(const rbg_parser::prioritized_sum &) override {
-    assert(false && "Function not yet implemented.");
+    assert(false);
   }
 
   GraphCreatorResult ConcatenationCase(const rbg_parser::concatenation &concatenation) override {
-    node_t initial = graph_.AddNode();
+    node_t initial = graph_.NewNode();
     node_t last_final = initial;
     for (const auto &child : concatenation.get_content()) {
       GraphCreatorResult child_result = GraphCreator(graph_, declarations_)(*child);
-      graph_.IdentifyNodes(last_final, child_result.initial);
+      graph_.MergeWithNode(last_final, child_result.initial);
       last_final = child_result.final;
     }
     return {initial, last_final};
   }
 
   GraphCreatorResult StarCase(const rbg_parser::star_move &move) override {
-    node_t initial = graph_.AddNode();
-    node_t final = graph_.AddNode();
+    node_t initial = graph_.NewNode();
+    node_t final = graph_.NewNode();
     GraphCreatorResult child_result = GraphCreator(graph_, declarations_)(*move.get_content());
     graph_.AddEdge(initial, e(), child_result.initial);
     graph_.AddEdge(child_result.final, e(), final);
@@ -71,8 +71,8 @@ public:
 
   GraphCreatorResult GameMoveCase(const rbg_parser::game_move &m) override {
     // Move representation graph edge
-    node_t initial = graph_.AddNode();
-    node_t final = graph_.AddNode();
+    node_t initial = graph_.NewNode();
+    node_t final = graph_.NewNode();
     graph_.AddEdge(initial, CreateMove(m, declarations_), final);
     return {initial, final};
   }
@@ -82,87 +82,47 @@ private:
   const Declarations &declarations_;
 };
 
-class NonInjectiveShift : public MoveFunction<bool> {
-public:
-  explicit NonInjectiveShift(const Board &board) : board_(board) {}
-
-  bool ShiftCase(const Shift &move) override {
-    vector<bool> seen(board_.vertices_count());
-    for (vertex_id_t vertex_id = 0; vertex_id < board_.vertices_count(); vertex_id++) {
-      vertex_id_t next = board_.NextVertex(vertex_id, move.edge_id());
-      if (next != board_.vertices_count()) {
-        if (seen[next]) {
-          return true;
-        }
-        seen[next] = true;
-      }
-    }
-    return false;
-  }
-
-  bool ShiftTableCase(const ShiftTable &move) override {
-    vector<bool> seen(board_.vertices_count());
-    for (vertex_id_t vertex_id = 0; vertex_id < board_.vertices_count(); vertex_id++) {
-      for (vertex_id_t next : move.table()[vertex_id]) {
-        if (next != board_.vertices_count()) {
-          if (seen[next]) {
-            return true;
-          }
-          seen[next] = true;
-        }
-      }
-    }
-    return false;
-  }
-
-  bool DefaultCase(const Move &) override {
-    return false;
-  }
-
-private:
-  const Board &board_;
-};
-
-
-Nfa<unique_ptr<Move>> rbg::CreateNfa(const rbg_parser::game_move &rbg_move, const Declarations &declarations) {
+Nfa<unique_ptr<Move>> rbg::ThompsonsConstruction(const rbg_parser::game_move &rbg_move, const Declarations &declarations) {
   Graph<unique_ptr<Move>> graph;
   GraphCreatorResult result = GraphCreator(graph, declarations)(rbg_move);
-  return {std::move(graph), result.initial, result.final};
+  return Nfa<unique_ptr<Move>>{std::move(graph), result.initial, result.final};
 }
 
-
-GraphTimesBoard rbg::CreateGraphTimesBoard(const Nfa<unique_ptr<Move>> &nfa, const Declarations &declarations) {
-  GraphTimesBoard result(nfa);
-  queue<NodeVertexPair> to_visit;
-  to_visit.push({nfa.initial, 0});
-  result.node_mapping[{nfa.initial, 0}] = result.graph_with_board.AddNode();
+// Change this to take board instead.
+GraphBoardMultiplication rbg::CreateNfaBoardMultiplication(const Nfa<std::unique_ptr<Move>> &nfa,
+                                                           const Declarations &declarations) {
+  GraphBoardMultiplication result(nfa);
+  queue<VertexNode> to_visit;
+  to_visit.push({0,nfa.initial});
+  result.node_mapping[{0,nfa.initial}] = result.graph_with_board.NewNode();
   while (!to_visit.empty()) {
-    NodeVertexPair top = to_visit.front();
+    auto top = to_visit.front();
     to_visit.pop();
-    for (const auto &transition : nfa.graph.Transitions(top.node)) {
+    for (edge_id_t transition_id : nfa.graph.edges_ids_from(top.node)) {
+      const auto& transition = nfa.graph.GetEdge(transition_id);
       vector<vertex_id_t> reachable_vertices;
-      if (transition.content->type() == MoveType::kShiftType) {
-        transition_id edge_id = dynamic_cast<Shift *>(transition.content.get())->edge_id();
+      if (transition.content()->type() == MoveType::kShiftType) {
+        edge_id_t edge_id = dynamic_cast<Shift *>(transition.content().get())->edge_id();
         vertex_id_t next = declarations.board_description.NextVertex(top.vertex, edge_id);
         if (next != declarations.board_description.vertices_count()) {
           reachable_vertices.push_back(next);
         }
-      } else if (transition.content->type() == MoveType::kShiftTableType) {
-        const auto &table = dynamic_cast<ShiftTable *>(transition.content.get())->table();
+      } else if (transition.content()->type() == MoveType::kShiftTableType) {
+        const auto &table = dynamic_cast<ShiftTable *>(transition.content().get())->table();
         reachable_vertices.insert(reachable_vertices.end(), table[top.vertex].begin(), table[top.vertex].end());
       } else {
         reachable_vertices.push_back(top.vertex);
       }
       for (vertex_id_t vertex : reachable_vertices) {
-        NodeVertexPair next_node_vertex_pair = {transition.to, vertex};
+        VertexNode next_node_vertex_pair{vertex, transition.to()};
         if (result.node_mapping.find(next_node_vertex_pair) == result.node_mapping.end()) {
-          result.node_mapping[next_node_vertex_pair] = result.graph_with_board.AddNode();
+          result.node_mapping[next_node_vertex_pair] = result.graph_with_board.NewNode();
           to_visit.push(next_node_vertex_pair);
           result.reverse_node_mapping[result.node_mapping[next_node_vertex_pair]] = next_node_vertex_pair;
         }
         node_t current_node = result.node_mapping[top];
         node_t next_node = result.node_mapping[next_node_vertex_pair];
-        result.graph_with_board.AddEdge(current_node, transition.content.get(), next_node);
+        result.graph_with_board.AddEdge(current_node, transition.content().get(), next_node);
       }
     }
   }
@@ -171,13 +131,14 @@ GraphTimesBoard rbg::CreateGraphTimesBoard(const Nfa<unique_ptr<Move>> &nfa, con
 
 
 uint AddVisitedChecks(Nfa<unique_ptr<Move>> &nfa, const Declarations &declarations, uint visited_checks_index = 0) {
-  auto graph_times_board = CreateGraphTimesBoard(nfa, declarations);
+  auto graph_times_board = CreateNfaBoardMultiplication(nfa, declarations);
   queue<node_t> to_start_searches_from;
   unordered_map<node_t, node_t> last_visited_by_search_from;
-  for (node_t node : graph_times_board.graph_with_board.nodes()) {
-    last_visited_by_search_from[node] = declarations.board_description.vertices_count();
+  for (const auto& pair : graph_times_board.graph_with_board.nodes_map()) {
+    node_t node = pair.first;
+    last_visited_by_search_from[node] = declarations.board_description.vertices_count(); // tu jest tez blad
   }
-  unordered_map<node_t, bool> should_add_check(nfa.graph.nodes().size());
+  unordered_map<node_t, bool> should_add_check(nfa.graph.nodes_map().size());
   to_start_searches_from.push(graph_times_board.node_mapping[{nfa.initial, 0}]);
   while (!to_start_searches_from.empty()) {
     node_t search_from = to_start_searches_from.front();
@@ -188,19 +149,20 @@ uint AddVisitedChecks(Nfa<unique_ptr<Move>> &nfa, const Declarations &declaratio
     while (!to_visit.empty()) {
       node_t current = to_visit.front();
       to_visit.pop();
-      for (const auto &transition : graph_times_board.graph_with_board.Transitions(current)) {
-        if (last_visited_by_search_from[transition.to] == declarations.board_description.vertices_count()) {
-          if (is_modifier_type(transition.content->type())) {
-            to_start_searches_from.push(transition.to);
-            last_visited_by_search_from[transition.to] = transition.to;
+      for (edge_id_t transition_id : graph_times_board.graph_with_board.edges_ids_from(current)) {
+        const auto& transition = graph_times_board.graph_with_board.GetEdge(transition_id);
+        if (last_visited_by_search_from[transition.to()] == declarations.board_description.vertices_count()) {
+          if (is_modifier_type(transition.content()->type())) {
+            to_start_searches_from.push(transition.to());
+            last_visited_by_search_from[transition.to()] = transition.to();
           } else {
-            to_visit.push(transition.to);
+            to_visit.push(transition.to());
           }
         }
-        if (last_visited_by_search_from[transition.to] == search_from) {
-          should_add_check[graph_times_board.reverse_node_mapping[transition.to].node] = true;
+        if (last_visited_by_search_from[transition.to()] == search_from) {
+          should_add_check[graph_times_board.reverse_node_mapping[transition.to()].node] = true;
         }
-        last_visited_by_search_from[transition.to] = search_from;
+        last_visited_by_search_from[transition.to()] = search_from;
       }
     }
   }
@@ -212,25 +174,28 @@ uint AddVisitedChecks(Nfa<unique_ptr<Move>> &nfa, const Declarations &declaratio
   while (!to_visit.empty()) {
     node_t u = to_visit.front();
     to_visit.pop();
-    for (const auto &transition : nfa.graph.Transitions(u)) {
-      if (transition.content->type() == MoveType::kConditionCheck) {
-        visited_checks_index = AddVisitedChecks(dynamic_cast<ConditionCheck *>(transition.content.get())->nfa(),
+    for (edge_id_t transition_id : nfa.graph.edges_ids_from(u)) {
+      auto& transition = nfa.graph.GetEdge(transition_id);
+      node_t v = transition.to();
+      if (transition.content()->type() == MoveType::kConditionCheck) {
+        visited_checks_index = AddVisitedChecks(dynamic_cast<ConditionCheck *>(transition.modifiable_content().get())->nfa(),
                                                 declarations, visited_checks_index);
       }
-      if (visited.find(transition.to) == visited.end()) {
-        if (should_add_check[transition.to]) {
-          node_t visited_check = nfa.graph.AddNode();
-          for (const auto &intransition : nfa.graph.InTransitions(transition.to)) {
-            nfa.graph.ChangeTransitionTo(intransition.id, visited_check);
+      if (visited.find(transition.to()) == visited.end()) {
+        if (should_add_check[transition.to()]) {
+          node_t visited_check = nfa.graph.NewNode();
+          unordered_set<edge_id_t> transitions_to = nfa.graph.edges_ids_to(transition.to());
+          for (edge_id_t in_transition_id : transitions_to) {
+            nfa.graph.ChangeEdgeTarget(in_transition_id, visited_check);
           }
-          nfa.graph.AddEdge(visited_check, make_unique<VisitedCheck>(visited_checks_index), transition.to);
+          nfa.graph.AddEdge(visited_check, make_unique<VisitedCheck>(visited_checks_index), v);
           visited_checks_index++;
-          to_visit.push(transition.to);
-          visited.insert(transition.to);
+          to_visit.push(v);
+          visited.insert(v);
           visited.insert(visited_check);
         } else {
-          to_visit.push(transition.to);
-          visited.insert(transition.to);
+          to_visit.push(v);
+          visited.insert(v);
         }
       }
     }
@@ -239,40 +204,49 @@ uint AddVisitedChecks(Nfa<unique_ptr<Move>> &nfa, const Declarations &declaratio
 }
 
 void HandleMultipleOutNodes(Graph<unique_ptr<Move>> &graph) {
-  for (node_t node : std::vector<node_t>(graph.nodes().begin(), graph.nodes().end())) {
-    auto out_transitions = graph.Transitions(node);
+  for (node_t node: std::vector<node_t>(graph.nodes().begin(), graph.nodes().end())) {
+    // node_t node = pair.first;
+    auto out_transitions = graph.edges_ids_from(node);
     if (out_transitions.size() > 1) {
-      for (const auto &transition : out_transitions) {
-        if (transition.content->type() != MoveType::kEmpty) {
-          node_t new_node = graph.AddNode();
+      for (edge_id_t transition_id : out_transitions) {
+        auto& transition = graph.GetEdge(transition_id);
+        if (transition.content()->type() != MoveType::kEmpty) {
+          node_t new_node = graph.NewNode();
           graph.AddEdge(node, e(), new_node);
-          graph.AddEdge(new_node, std::move(graph.edge_content(transition.id)), transition.to);
-          graph.DeleteEdge(transition.id);
+          graph.ChangeEdgeSource(transition_id, new_node);
         }
       }
       std::unordered_set<node_t> handled;
-      for (const auto &transition :  graph.Transitions(node)) {
-        if (handled.find(transition.to) != handled.end()) {
-          graph.DeleteEdge(transition.id);
+      std::vector<edge_id_t> to_erase;
+      for (edge_id_t transition_id :  graph.edges_ids_from(node)) {
+        const auto& transition = graph.GetEdge(transition_id);
+        if (handled.find(transition.to()) != handled.end()) {
+          to_erase.push_back(transition_id);
         } else {
-          handled.insert(transition.to);
+          handled.insert(transition_id);
         }
+      }
+      for(edge_id_t transition_id : to_erase) {
+        graph.EraseEdge(transition_id);
       }
     }
   }
-  for (node_t node : std::vector<node_t>(graph.nodes().begin(), graph.nodes().end())) {
-    auto out_transitions = graph.Transitions(node);
-    for (const auto &transition : out_transitions) {
-      if (graph.edge_content(transition.id)->type() == MoveType::kConditionCheck) {
-        HandleMultipleOutNodes(dynamic_cast<ConditionCheck *>(graph.edge_content(transition.id).get())->nfa().graph);
+  for (const auto& pair : graph.nodes_map()) {
+    node_t node = pair.first;
+    auto out_transitions = graph.edges_ids_from(node);
+    for (edge_id_t transition_id : out_transitions) {
+      auto& transition = graph.GetEdge(transition_id);
+      if (transition.content()->type() == MoveType::kConditionCheck) {
+        HandleMultipleOutNodes(dynamic_cast<ConditionCheck *>(transition.modifiable_content().get())->nfa().graph);
+        std::cout << "DONE" << std::endl;
       }
     }
   }
 }
 
-NfaWithVisitedChecks rbg::CreateFinalNfa(const rbg_parser::game_move &rbg_move, const Declarations &declarations) {
-  auto nfa = CreateNfa(rbg_move, declarations);
+VisitedChecksNfa rbg::CreateVisitedChecksNfa(const rbg_parser::game_move &rbg_move, const Declarations &declarations) {
+  auto nfa = ThompsonsConstruction(rbg_move, declarations);
   uint visited_checks_count = AddVisitedChecks(nfa, declarations);
   HandleMultipleOutNodes(nfa.graph);
-  return {visited_checks_count, move(nfa)};
+  return VisitedChecksNfa{visited_checks_count, move(nfa)};
 }

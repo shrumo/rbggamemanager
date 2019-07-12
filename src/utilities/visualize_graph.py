@@ -12,7 +12,7 @@ from graph_widget import *
 def create_dag(nfa):
     adj = {v: set() for v in nfa.graph.nodes()}
     for edge in nfa.graph.edges().values():
-        adj[edge.a] |= {(edge.b, edge.value)}
+        adj[edge.a()] |= {(edge.b(), edge.value())}
 
     erased = {v: [] for v in adj.keys()}
     entered = set()
@@ -119,12 +119,12 @@ def create_nfa_visualization(root, game_text):
         return min(dx, dy) >= 2 or dy == 1 and dx > 20
 
     for edge in nfa.graph.edges().values():
-        a = node_mapping[edge.a]
-        b = node_mapping[edge.b]
-        edge_label = edge.value
+        a = node_mapping[edge.a()]
+        b = node_mapping[edge.b()]
+        edge_label = edge.value()
         if len(edge_label) > 40:
             edge_label = '...'
-        if long_jump(positions[edge.a], positions[edge.b]):
+        if long_jump(positions[edge.a()], positions[edge.b()]):
             graph.add_edge(a, b, edge_label, dash=(2, 8))
         else:
             graph.add_edge(a, b, edge_label)

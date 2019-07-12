@@ -66,7 +66,7 @@ public:
 
   unique_ptr<Move> MoveCheckCase(const rbg_parser::move_check &move) override {
     return make_unique<ConditionCheck>(
-        std::make_unique<Nfa<unique_ptr<Move>>>(CreateNfa(*move.get_content(), declarations_)), move.is_negated(),
+        std::make_unique<Nfa<unique_ptr<Move>>>(ThompsonsConstruction(*move.get_content(), declarations_)), move.is_negated(),
         move.index_in_expression());
   }
 

@@ -33,15 +33,15 @@ vector<vector<const Move *>> ShortestPaths(const Graph<unique_ptr<Move>> &graph,
     if (u == final) {
       break;
     }
-    for (const auto &transition : graph.Transitions(u)) {
-      node_t v = transition.to;
+    for (const auto &transition : graph.EdgesFrom(u)) {
+      node_t v = transition.to();
       if (shortest.find(v) == shortest.end() || shortest.at(v).front().size() == shortest.at(u).front().size() + 1) {
         if (shortest.find(v) == shortest.end()) {
           q.push(v);
         }
         vector<vector<const Move *>> parent_paths = shortest[u];
         for (auto parent_path : parent_paths) {
-          parent_path.push_back(transition.content.get());
+          parent_path.push_back(transition.content().get());
           shortest[v].push_back(parent_path);
         }
       }
@@ -68,7 +68,7 @@ vector<int> SortedActionIndices(const vector<const Move *> &path) {
 int main() {
   auto pg = ParseGame(kSmallGame);
   auto decl = CreateDeclarations(*pg);
-  auto result = CreateFinalNfa(*pg->get_moves(), decl).nfa;
+  auto result = CreateVisitedChecksNfa(*pg->get_moves(), decl).nfa;
   auto paths = ShortestPaths(result.graph, result.initial, result.final);
 
   for (const auto &path : paths) {

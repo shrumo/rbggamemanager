@@ -81,7 +81,7 @@ namespace rbg {
     SearchStepsPoint current_position;
   };
 
-  SearchStepsInformation CreateSearchSteps(const NfaWithVisitedChecks &nfa, const Declarations &declarations);
+  SearchStepsInformation CreateSearchSteps(const VisitedChecksNfa &nfa, const Declarations &declarations);
 }
 
 
