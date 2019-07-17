@@ -188,7 +188,8 @@ const char *kChessGame = R"LIM(
 
 int main() {
   auto game = CreateGameState(kChessGame);
-  auto result = Perft(game, 3);
+  auto result = Perft(game, 4);
+  std::cout << result.leaves_count << std::endl;
   assert(result.leaves_count == 8902);
   assert(result.nodes_count == 9323);
   game.Apply(game.Moves()[0]);

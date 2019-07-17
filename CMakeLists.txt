@@ -6,9 +6,9 @@ if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Release)
 endif()
 
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 
-set(CMAKE_CXX_FLAGS "-Wall -Wextra -pipe")
+set(CMAKE_CXX_FLAGS "-Wall -Wextra -pipe -Ofast")
 set(CMAKE_CXX_FLAGS_DEBUG "-g -O0")
 set(CMAKE_CXX_FLAGS_RELEASE "-Ofast -march=native")
 
@@ -24,11 +24,11 @@ include_directories(src)
 include_directories(.)
 
 set(GAMESTATE_FILES src/game_state/namesresolver.h src/game_state/board.h src/game_state/search_steps/search_step.h
-        src/game_state/declarations.h src/game_state/game_state.h src/game_state/search_steps/resetabblebitarraystack.h
+        src/game_state/declarations.h src/game_state/game_state.h src/stl_extension/resetabblebitarraystack.h
         src/game_state/search_steps/arithmetic_operation.cc src/game_state/search_steps/arithmetic_operation.h
         src/game_state/search_steps/arithmetic_operation_visitor.h
         src/game_state/namesresolver.cc src/game_state/board.cc src/game_state/search_steps/search_step.cc
-        src/game_state/calculate_perft.h src/game_state/game_state_printer.h src/game_state/game_state_printer.cc)
+        src/game_state/calculate_perft.h src/game_state/game_state_printer.h src/game_state/game_state_printer.cc src/game_state/search_steps/actions.cpp src/game_state/search_steps/actions.h src/stl_extension/vector.h src/game_state/search_steps/public_actions.h src/game_state/search_steps/public_actions.cpp)
 
 set(GRAPH_FILES src/graph/graph.h src/stl_extension/range.h src/stl_extension/pair.h src/stl_extension/iterator_transform.h)
 

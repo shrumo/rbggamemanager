@@ -178,7 +178,7 @@ uint AddVisitedChecks(Nfa<unique_ptr<Move>> &nfa, const Declarations &declaratio
       auto& transition = nfa.graph.GetEdge(transition_id);
       node_t v = transition.to();
       if (transition.content()->type() == MoveType::kConditionCheck) {
-        visited_checks_index = AddVisitedChecks(dynamic_cast<ConditionCheck *>(transition.modifiable_content().get())->nfa(),
+        visited_checks_index = AddVisitedChecks(dynamic_cast<Condition *>(transition.modifiable_content().get())->nfa(),
                                                 declarations, visited_checks_index);
       }
       if (visited.find(transition.to()) == visited.end()) {
@@ -188,7 +188,7 @@ uint AddVisitedChecks(Nfa<unique_ptr<Move>> &nfa, const Declarations &declaratio
           for (edge_id_t in_transition_id : transitions_to) {
             nfa.graph.ChangeEdgeTarget(in_transition_id, visited_check);
           }
-          nfa.graph.AddEdge(visited_check, make_unique<VisitedCheck>(visited_checks_index), v);
+          nfa.graph.AddEdge(visited_check, make_unique<VisitedQuery>(visited_checks_index), v);
           visited_checks_index++;
           to_visit.push(v);
           visited.insert(v);
@@ -237,7 +237,7 @@ void HandleMultipleOutNodes(Graph<unique_ptr<Move>> &graph) {
     for (edge_id_t transition_id : out_transitions) {
       auto& transition = graph.GetEdge(transition_id);
       if (transition.content()->type() == MoveType::kConditionCheck) {
-        HandleMultipleOutNodes(dynamic_cast<ConditionCheck *>(transition.modifiable_content().get())->nfa().graph);
+        HandleMultipleOutNodes(dynamic_cast<Condition *>(transition.modifiable_content().get())->nfa().graph);
       }
     }
   }

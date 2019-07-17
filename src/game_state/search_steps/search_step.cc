@@ -43,21 +43,21 @@ bool ArithmeticNotEqualComparison::Check(GameState &state) {
   return left_->Value(state) != right_->Value(state);
 }
 
-bool ConditionCheckStep::Check(GameState &state) {
-//  steps_point_->stack().reset();
-  return steps_point_->current()->EndStepReachable(state);
-}
+//bool ConditionCheckStep::Check(GameState &state) {
+////  steps_point_->stack().reset();
+//  return steps_point_->current()->RunAndFindEnd(state);
+//}
 
-ConditionCheckStep::ConditionCheckStep(std::unique_ptr<SearchStepsPoint> steps_point)
-    : steps_point_(std::move(steps_point)) {}
-
-bool NegatedConditionCheckStep::Check(GameState &state) {
-//  steps_point_->stack().reset();
-  return !steps_point_->current()->EndStepReachable(state);
-}
-
-NegatedConditionCheckStep::NegatedConditionCheckStep(std::unique_ptr<SearchStepsPoint> steps_point)
-    : steps_point_(std::move(steps_point)) {}
+//ConditionCheckStep::ConditionCheckStep(std::unique_ptr<SearchStepsPoint> steps_point)
+//    : steps_point_(std::move(steps_point)) {}
+//
+////bool NegatedConditionCheckStep::Check(GameState &state) {
+//////  steps_point_->stack().reset();
+////  return !steps_point_->current()->EndStepReachable(state);
+////}
+//
+//NegatedConditionCheckStep::NegatedConditionCheckStep(std::unique_ptr<SearchStepsPoint> steps_point)
+//    : steps_point_(std::move(steps_point)) {}
 
 void OffStep::Set(GameState &state, piece_id_t &previous_piece) const {
   previous_piece = state.board_.at(state.current_pos_);

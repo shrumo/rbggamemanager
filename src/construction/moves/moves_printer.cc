@@ -165,7 +165,7 @@ public:
     return "{" + declarations_.players_resolver.Name(move.player()) + "}";
   }
 
-  std::string ConditionCheckCase(const ConditionCheck &move) override {
+  std::string ConditionCase(const Condition &move) override {
     std::stringstream result;
     result << "<ConditionCheck ";
     result << GraphDescription(move.nfa().graph,
@@ -174,8 +174,8 @@ public:
     return result.str();
   }
 
-  std::string VisitedCheckCase(const VisitedCheck &move) override {
-    return "<VisitedCheck " + std::to_string(move.visited_array_index()) + ">";
+  std::string VisitedQueryCase(const VisitedQuery &move) override {
+    return "<VisitedQuery " + std::to_string(move.visited_array_index()) + ">";
   }
 
   std::string EmptyCase(const Empty &) override {

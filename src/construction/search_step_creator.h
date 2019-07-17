@@ -8,6 +8,7 @@
 #include "moves/moves_visitor.h"
 #include "graph_creator.h"
 #include <unordered_map>
+#include <game_state/search_steps/search_step.h>
 
 namespace rbg {
 
@@ -17,12 +18,12 @@ namespace rbg {
         : visited_info_stack_(std::make_unique<ResettableBitArrayStack>(visited_checks_count * board_size)),
           visited_checks_count_(visited_checks_count) {}
 
-    uint AddSearchStep(std::unique_ptr<SearchStep> step) {
+    uint AddSearchStep(std::unique_ptr<AbstractBlock> step) {
       searchsteps_.emplace_back(std::move(step));
       return searchsteps_.size() - 1;
     }
 
-    SearchStep *operator[](uint index) {
+    AbstractBlock *operator[](uint index) {
       return searchsteps_[index].get();
     }
 
@@ -36,44 +37,57 @@ namespace rbg {
       return *visited_info_stack_;
     }
 
-    void RegisterModifier(uint modifier_index, uint step_index) {
-      modifiers_[modifier_index] = dynamic_cast<ModifyingSearchStep *>((*this)[step_index]);
+    void RegisterModifier(uint modifier_index, const ModifyingApplication* application) {
+      modifiers_[modifier_index] = application;
     }
 
-    ModifyingSearchStep *Modifier(uint modifier_index) {
-      return modifiers_[modifier_index];
+    void RegisterSwitch(uint modifier_index, AbstractBlock* block) {
+      switches_[modifier_index] = block;
+    }
+
+    const ModifyingApplication *Modifier(uint modifier_index) {
+      return modifiers_.at(modifier_index);
+    }
+
+    AbstractBlock *Switch(uint modifier_index) {
+      return switches_.at(modifier_index);
     }
 
   private:
-    std::vector<std::unique_ptr<SearchStep>> searchsteps_;
+    std::vector<std::unique_ptr<AbstractBlock>> searchsteps_;
     std::unique_ptr<ResettableBitArrayStack> visited_info_stack_;
     uint visited_checks_count_;
 
-    std::unordered_map<uint, ModifyingSearchStep *> modifiers_;
+    std::unordered_map<uint, const ModifyingApplication*> modifiers_;
+    std::unordered_map<uint, AbstractBlock*> switches_;
 
-    friend class PlayerSwitchStep;
+    friend class NewVisitedCheckLayerApplication;
+    friend class PlayerSwitchApplication;
   };
 
   class SearchStepsPoint {
   public:
-    explicit SearchStepsPoint(SearchStepsCollection &parent_collection, SearchStep *current = nullptr) :
-        parent_(parent_collection), current_(current) {}
+    explicit SearchStepsPoint(SearchStepsCollection &parent_collection, AbstractBlock *current = nullptr) :
+        parent_(&parent_collection), current_(current) {}
 
     void SetInitial(uint index) {
-      current_ = parent_[index];
+      current_ = (*parent_)[index];
     }
 
-    SearchStep *current() {
+    AbstractBlock *current() {
       return current_;
     }
 
-    void set_current(SearchStep *step) {
+    void set_current(AbstractBlock *step) {
       current_ = step;
     }
 
+    void SetParent(SearchStepsCollection *parent) {
+      parent_ = parent;
+    }
   private:
-    SearchStepsCollection &parent_;
-    SearchStep *current_;
+    SearchStepsCollection *parent_;
+    AbstractBlock *current_;
   };
 
   struct SearchStepsInformation {

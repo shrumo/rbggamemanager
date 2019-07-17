@@ -7,7 +7,7 @@
 
 
 #include <game_state/board.h>
-#include <game_state/search_steps/search_step.h>
+#include <game_state/search_steps/arithmetic_operation.h>
 #include <graph/graph.h>
 
 namespace rbg {
@@ -29,9 +29,9 @@ namespace rbg {
 
   class PlayerCheck;
 
-  class ConditionCheck;
+  class Condition;
 
-  class VisitedCheck;
+  class VisitedQuery;
 
   class Empty;
 
@@ -72,9 +72,9 @@ namespace rbg {
 
     virtual void Visit(const PlayerCheck &) = 0;
 
-    virtual void Visit(const ConditionCheck &) = 0;
+    virtual void Visit(const Condition &) = 0;
 
-    virtual void Visit(const VisitedCheck &) = 0;
+    virtual void Visit(const VisitedQuery &) = 0;
 
     virtual void Visit(const Empty &) = 0;
   };
@@ -299,9 +299,9 @@ namespace rbg {
     std::unique_ptr<ArithmeticOperation> value_;
   };
 
-  class ConditionCheck : public IndexedMove {
+  class Condition : public IndexedMove {
   public:
-    ConditionCheck(std::unique_ptr<Nfa<std::unique_ptr<Move>>> nfa, bool negated, uint index)
+    Condition(std::unique_ptr<Nfa<std::unique_ptr<Move>>> nfa, bool negated, uint index)
         : IndexedMove(MoveType::kConditionCheck, index), nfa_(std::move(nfa)), negated_(negated) {
     }
 
@@ -334,9 +334,9 @@ namespace rbg {
     player_id_t player_;
   };
 
-  class VisitedCheck : public Move {
+  class VisitedQuery : public Move {
   public:
-    explicit VisitedCheck(uint visited_array_index)
+    explicit VisitedQuery(uint visited_array_index)
         : Move(MoveType::kVisitedCheck), vistied_array_index_(visited_array_index) {}
 
     void Accept(MoveVisitor &visitor) const override { visitor.Visit(*this); }

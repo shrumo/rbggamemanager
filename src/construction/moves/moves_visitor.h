@@ -30,9 +30,9 @@ namespace rbg {
 
     virtual ResultType PlayerCheckCase(const PlayerCheck &move) { return DefaultCase(move); }
 
-    virtual ResultType ConditionCheckCase(const ConditionCheck &move) { return DefaultCase(move); }
+    virtual ResultType ConditionCase(const Condition &move) { return DefaultCase(move); }
 
-    virtual ResultType VisitedCheckCase(const VisitedCheck &move) { return DefaultCase(move); }
+    virtual ResultType VisitedQueryCase(const VisitedQuery &move) { return DefaultCase(move); }
 
     virtual ResultType EmptyCase(const Empty &move) { return DefaultCase(move); }
 
@@ -93,13 +93,13 @@ namespace rbg {
       result_exists_ = true;
     };
 
-    void Visit(const ConditionCheck &m) override {
-      result_ = ConditionCheckCase(m);
+    void Visit(const Condition &m) override {
+      result_ = ConditionCase(m);
       result_exists_ = true;
     };
 
-    void Visit(const VisitedCheck &m) override {
-      result_ = VisitedCheckCase(m);
+    void Visit(const VisitedQuery &m) override {
+      result_ = VisitedQueryCase(m);
       result_exists_ = true;
     };
 
