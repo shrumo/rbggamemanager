@@ -67,11 +67,11 @@ namespace rbg {
 
   class SearchStepsPoint {
   public:
-    explicit SearchStepsPoint(SearchStepsCollection &parent_collection, AbstractBlock *current = nullptr) :
-        parent_(&parent_collection), current_(current) {}
+    explicit SearchStepsPoint(SearchStepsCollection &parent_collection, AbstractBlock *initial = nullptr) :
+        parent_(&parent_collection), current_(initial), initial_(initial) {}
 
     void SetInitial(uint index) {
-      current_ = (*parent_)[index];
+      initial_ = (*parent_)[index];
     }
 
     AbstractBlock *current() {
@@ -85,9 +85,14 @@ namespace rbg {
     void SetParent(SearchStepsCollection *parent) {
       parent_ = parent;
     }
+
+    void reset() {
+      current_ = initial_;
+    }
   private:
     SearchStepsCollection *parent_;
     AbstractBlock *current_;
+    AbstractBlock *initial_;
   };
 
   struct SearchStepsInformation {

@@ -53,7 +53,7 @@ namespace rbg {
       return kHeaderLength + body_length_;
     }
 
-  private:
+  public:
     void EncodeHeader() {
       char header[kHeaderLength + 1] = "";
       std::sprintf(header, ("%" + std::to_string(kHeaderLength) + "lu").c_str(), body_length_);

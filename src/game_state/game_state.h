@@ -138,6 +138,22 @@ namespace rbg {
       return variables_values_;
     }
 
+    void Reset() {
+      current_pos_ = 0;
+      variables_values_ = std::vector<variable_value_t >(declarations_.variables_resolver.size(), 0);
+          current_player_ = declarations_.keeper_id;
+          board_ = declarations_.board_description.initial_content();
+          steps_.current_position.reset();
+          steps_.collection.stack().reset();
+          moves_calculated = false;
+      applied_modifiers_.clear();
+      applied_modifiers_.reserve(10);
+      moves_.clear();
+      moves_.reserve(10);
+      std::vector<ActionRevertInfo> initial_keeper_step_revert_information;
+      MakeKeeperClosure(initial_keeper_step_revert_information);
+    }
+
   private:
     void MakeKeeperClosure(std::vector<ActionRevertInfo> &steps_revert_information) {
       bool exists = true;
@@ -150,10 +166,6 @@ namespace rbg {
         steps_.current_position.set_current(steps_.collection.Switch(applied_modifiers_.back().modifier_index));
       }
       }
-//      if(exists) {
-//        steps_.current_position.set_current(steps_.collection.Switch(applied_modifiers_.back().modifier_index));
-//      }
-//      moves_.clear();
       applied_modifiers_.clear();
     }
 

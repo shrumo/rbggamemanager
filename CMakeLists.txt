@@ -103,9 +103,6 @@ add_test(chess_test chess_test)
 add_executable(board_test ${GAMESTATE_FILES} src/tests/board_test.cc)
 add_test(board_test board_test)
 
-add_executable(network_message_test src/networking/message.h src/tests/network_message_test.cc)
-add_test(network_message_test network_message_test)
-
 add_custom_target(python_test ALL COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/src/tests/python_test.py ${CMAKE_CURRENT_BINARY_DIR}/python_test.py
         DEPENDS rbg)
 add_test(python_test ${PYTHON_EXECUTABLE} python_test.py)

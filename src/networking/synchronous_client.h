@@ -27,11 +27,7 @@ namespace rbg {
     }
 
     void Write(const rbg::GameMove &move) {
-      Message message = Message(EncodeMove(move));
-      asio::error_code ignored_error;
-      asio::write(socket_, asio::buffer(message.data_ptr(),
-                                        message.length()),
-                  ignored_error);
+      WriteStringToSocket(EncodeMove(move));
     }
 
     const std::string &description() const {
@@ -43,40 +39,35 @@ namespace rbg {
     }
 
     GameMove Read() {
-      Message message;
-      asio::error_code ignored_error;
-      asio::read(socket_,
-                 asio::buffer(message.data_ptr(), kHeaderLength),
-                 ignored_error);
-      message.DecodeHeader();
-      asio::read(socket_, asio::buffer(message.body_ptr(),
-                                       message.body_length()),
-                 ignored_error);
-      return DecodeMove(message.body_ptr());
+      auto str = ReadStringFromSocket();
+      return DecodeMove(str.c_str());
     }
 
   private:
+    std::string ReadStringFromSocket() {
+      asio::streambuf b;
+      asio::read_until(socket_, b,'\0');
+      std::string res;
+          std::istream is(&b);
+        std::getline(is, res, '\0');
+      return res;
+    }
+
+    void WriteStringToSocket(const std::string& data) {
+       asio::write(socket_, asio::buffer(data.c_str(),
+                                        data.length()+1));
+    }
+
     void Initialize() {
       Message message;
       asio::error_code ignored_error;
-      asio::read(socket_,
-                 asio::buffer(message.data_ptr(), kHeaderLength),
-                 ignored_error);
-      message.DecodeHeader();
-      asio::read(socket_, asio::buffer(message.body_ptr(),
-                                       message.body_length()),
-                 ignored_error);
-      game_description_ = std::string(message.body_ptr(),
-                                      message.body_ptr() + message.body_length());
-      asio::read(socket_,
-                 asio::buffer(message.data_ptr(), kHeaderLength),
-                 ignored_error);
-      message.DecodeHeader();
-      asio::read(socket_, asio::buffer(message.body_ptr(),
-                                       message.body_length()),
-                 ignored_error);
-      assigned_player_ = std::atoi(std::string(message.body_ptr(),
-                                               message.body_ptr() + message.body_length()).c_str());
+
+      auto str = ReadStringFromSocket();
+      game_description_ = str.c_str();
+
+
+      str = ReadStringFromSocket();
+      assigned_player_ = std::atoi(str.c_str());
     }
 
     asio::io_service io_service_;

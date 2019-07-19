@@ -38,29 +38,27 @@ namespace rbg {
 
     void Start();
 
-    void Send(const Message &message) {
+    void Send(const std::string &message) {
       bool write_in_progress = !write_moves_.empty();
       write_moves_.push_back(message);
       if (!write_in_progress) {
         Write();
       }
     }
-
   private:
     tcp::socket socket_;
 
-    Message read_move_;
-    std::deque<Message> write_moves_;
+    asio::streambuf read_move_;
+    std::deque<std::string> write_moves_;
 
     ServerGameInstance *instance_;
 
     ClientConnection(tcp::socket socket, ServerGameInstance *instance) :
-        socket_(std::move(socket)), read_move_(Message()),
+        socket_(std::move(socket)),
         instance_(instance) {}
 
-    void ReadHeader();
 
-    void ReadBody();
+    void Read();
 
     void Write();
   };
@@ -100,8 +98,8 @@ namespace rbg {
       std::cout << "Starting the game." << std::endl;
       for (const auto &pair : clients_) {
         const auto &client = pair.first;
-        client->Send(Message(game_text_));
-        client->Send(Message(std::to_string(pair.second)));
+        client->Send(game_text_);
+        client->Send(std::to_string(pair.second));
       }
       auto moves = state_.Moves();
       available_moves_ = std::unordered_set<GameMove>(moves.begin(), moves.end());
@@ -127,7 +125,7 @@ namespace rbg {
 
     void Leave(const ClientConnection::pointer &client);
 
-    void DeliverToEveryoneBut(const Message &msg, const ClientConnection::pointer &omit) {
+    void DeliverToEveryoneBut(const std::string &msg, const ClientConnection::pointer &omit) {
       for (const auto &pair : clients_) {
         if (pair.first && pair.first != omit)
           pair.first->Send(msg);
@@ -135,17 +133,18 @@ namespace rbg {
     }
 
     bool
-    HandleMove(const ClientConnection::pointer &client, const Message &message) {
+    HandleMove(const ClientConnection::pointer &client, const std::string &message) {
       player_id_t client_player_id = clients_[client];
       std::cout << "Got a move from client " << client
                 << " which is player "
                 << state_.declarations().players_resolver.Name(client_player_id)
                 << std::endl;
+      std::cout << message << std::endl;
       if (client_player_id != state_.current_player()) {
         std::cout << "Wrong player." << std::endl;
         return false;
       }
-      auto move = DecodeMove(message.body_ptr());
+      auto move = DecodeMove(message);
       if (available_moves_.find(move) == available_moves_.end()) {
         std::cout << "Wrong move." << std::endl;
         return false;
