@@ -42,41 +42,44 @@ public:
         return collection_.AddSearchStep(make_unique<Block<EqualComparisonTest, BranchSingle>>(EqualComparisonTest(
             std::move(left_result), std::move(right_result)), BranchSingle{}));
       case ComparisonType::kNotEqual:
-        return collection_.AddSearchStep(make_unique<Block<NotEqualComparisonTest, BranchSingle>>(NotEqualComparisonTest(
-            std::move(left_result),
-            std::move(right_result)
-        ), BranchSingle{}));
+        return collection_.AddSearchStep(
+            make_unique<Block<NotEqualComparisonTest, BranchSingle>>(NotEqualComparisonTest(
+                std::move(left_result),
+                std::move(right_result)
+            ), BranchSingle{}));
       case ComparisonType::kLess:
         return collection_.AddSearchStep(make_unique<Block<LessComparisonTest, BranchSingle>>(LessComparisonTest(
             std::move(left_result),
             std::move(right_result)
         ), BranchSingle{}));
       case ComparisonType::kLessEqual:
-        return collection_.AddSearchStep(make_unique<Block<LessEqualComparisonTest, BranchSingle>>(LessEqualComparisonTest(
-            std::move(left_result),
-            std::move(right_result))
-        , BranchSingle{}));
+        return collection_.AddSearchStep(
+            make_unique<Block<LessEqualComparisonTest, BranchSingle>>(LessEqualComparisonTest(
+                std::move(left_result),
+                std::move(right_result)), BranchSingle{}));
       case ComparisonType::kGreater:
         return collection_.AddSearchStep(make_unique<Block<LessComparisonTest, BranchSingle>>(LessComparisonTest(
             std::move(right_result),
             std::move(left_result)
         ), BranchSingle{}));
       case ComparisonType::kGreaterEqual:
-        return collection_.AddSearchStep(make_unique<Block<LessEqualComparisonTest, BranchSingle>>(LessEqualComparisonTest(
-            std::move(right_result),
-            std::move(left_result)
-        ), BranchSingle{}));
+        return collection_.AddSearchStep(
+            make_unique<Block<LessEqualComparisonTest, BranchSingle>>(LessEqualComparisonTest(
+                std::move(right_result),
+                std::move(left_result)
+            ), BranchSingle{}));
     }
+    assert(false && "Not possible.");
+    return 0;
   }
 
   uint OffCase(const Off &move) override {
     uint step_index = collection_.AddSearchStep(make_unique<Block<OffApplication, BranchSingle>>(OffApplication(move.piece(), move.index()),BranchSingle{}));
     if (register_modifiers_) {
       collection_.RegisterModifier(move.index(),
-                                   dynamic_cast<Block<OffApplication, BranchSingle> *>(collection_[step_index])->content().action());
+                                   dynamic_cast<Block<OffApplication, BranchSingle> *>(collection_[step_index])->GetAction<0>());
     }
     return step_index;
-
   }
 
   uint OnCase(const On &move) override {
@@ -88,11 +91,12 @@ public:
     uint step_index = collection_.AddSearchStep(make_unique<Block<PlayerSwitchApplication, BranchSingle>>(PlayerSwitchApplication(move.player(), move.index()), BranchSingle{}));
     if (register_modifiers_) {
       collection_.RegisterModifier(move.index(),
-                                   dynamic_cast<Block<PlayerSwitchApplication, BranchSingle> *>(collection_[step_index])->content().action());
+                                   dynamic_cast<Block<PlayerSwitchApplication, BranchSingle> *>(collection_[step_index])->GetAction<0>());
 
     }
 
-    uint switch_index = collection_.AddSearchStep(make_unique<BlockPointer<BranchSingle>>(BlockPointer<BranchSingle>(dynamic_cast<Block<PlayerSwitchApplication, BranchSingle> *>(collection_[step_index])->GetSubBlockPointer<1>())));
+    uint switch_index = collection_.AddSearchStep(make_unique<BlockPointer<BranchSingle>>(BlockPointer<BranchSingle>(
+        dynamic_cast<Block<PlayerSwitchApplication, BranchSingle> *>(collection_[step_index])->GetSubAbstractBlock<1>())));
       collection_.RegisterSwitch(move.index(),collection_[switch_index]);
     return step_index;
   }
@@ -102,12 +106,11 @@ public:
     if (register_modifiers_) {
 
       collection_.RegisterModifier(move.index(),
-                                   dynamic_cast<Block<PlayerSwitchApplication, BranchSingle> *>(collection_[step_index])->content().action());
-//       uint switch_index = collection_.AddSearchStep(make_unique<BlockPointer<PlayerSwitchApplication,  BranchSingle>>(dynamic_cast<Block<PlayerSwitchApplication, BranchSingle> *>(collection_[step_index])->GetSubBlockPointer<0>()));
-//      collection_.RegisterSwitch(move.index(),collection_[switch_index]);
+                                   dynamic_cast<Block<PlayerSwitchApplication, BranchSingle> *>(collection_[step_index])->GetAction<0>());
     }
 
-    uint switch_index = collection_.AddSearchStep(make_unique<BlockPointer<BranchSingle>>(BlockPointer<BranchSingle>(dynamic_cast<Block<PlayerSwitchApplication, BranchSingle> *>(collection_[step_index])->GetSubBlockPointer<1>())));
+    uint switch_index = collection_.AddSearchStep(make_unique<BlockPointer<BranchSingle>>(BlockPointer<BranchSingle>(
+        dynamic_cast<Block<PlayerSwitchApplication, BranchSingle> *>(collection_[step_index])->GetSubAbstractBlock<1>())));
       collection_.RegisterSwitch(move.index(),collection_[switch_index]);
     return step_index;
   }
@@ -119,7 +122,7 @@ public:
     if (register_modifiers_) {
       auto tmp = dynamic_cast<Block<AssignmentAction, VariableBoundsTest, BranchSingle> *>(collection_[step_index]);
       collection_.RegisterModifier(move.index(),
-                                   tmp->content().action());
+                                   tmp->GetAction<0>());
     }
     return step_index;
   }

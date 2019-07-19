@@ -27,7 +27,7 @@ set(GAMESTATE_FILES src/game_state/namesresolver.h src/game_state/board.h src/ga
         src/game_state/declarations.h src/game_state/game_state.h src/stl_extension/resetabblebitarraystack.h
         src/game_state/search_steps/arithmetic_operation.cc src/game_state/search_steps/arithmetic_operation.h
         src/game_state/search_steps/arithmetic_operation_visitor.h
-        src/game_state/namesresolver.cc src/game_state/board.cc src/game_state/search_steps/search_step.cc
+        src/game_state/namesresolver.cc src/game_state/board.cc
         src/game_state/calculate_perft.h src/game_state/game_state_printer.h src/game_state/game_state_printer.cc src/game_state/search_steps/actions.cpp src/game_state/search_steps/actions.h src/stl_extension/vector.h src/game_state/search_steps/public_actions.h src/game_state/search_steps/public_actions.cpp)
 
 set(GRAPH_FILES src/graph/graph.h src/stl_extension/range.h src/stl_extension/pair.h src/stl_extension/iterator_transform.h)
@@ -42,7 +42,7 @@ set(CONSTRUCTION_FILES
         src/construction/moves/moves_visitor.h src/construction/moves/moves_printer.cc
         src/construction/moves/moves_printer.h src/construction/search_step_creator.cc src/construction/search_step_creator.h
         src/game_state/search_steps/arithmetic_operation.cc src/game_state/search_steps/arithmetic_operation.h
-        src/game_state/board.cc src/game_state/search_steps/search_step.cc src/game_state/search_steps/search_step.h src/construction/gamestate_creator.h src/construction/declarations_creator.cc src/construction/gamestate_creator.cc)
+        src/game_state/board.cc src/game_state/search_steps/search_step.h src/construction/gamestate_creator.h src/construction/declarations_creator.cc src/construction/gamestate_creator.cc)
 
 set(NETWORKING_FILES src/networking/server.h src/networking/server.cc src/networking/message.h src/networking/coder.h src/networking/synchronous_client.h src/networking/coder.cc)
 

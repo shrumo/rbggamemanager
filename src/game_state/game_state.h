@@ -77,7 +77,7 @@ namespace rbg {
       MakeKeeperClosure(initial_keeper_step_revert_information);
     }
 
-    const std::vector<std::vector<ModifierApplication>>& Moves() {
+    std::vector<std::vector<ModifierApplication>> Moves() {
       if(!moves_calculated) {
         steps_.current_position.current()->Run(this);
         steps_.collection.stack().reset();
@@ -98,7 +98,6 @@ namespace rbg {
         revert_infos.push_back(ActionRevertInfo{modifier, previous_vertex, modifier->Apply(this)});
       }
       steps_.current_position.set_current(steps_.collection.Switch(move.back().modifier_index));
-//      steps_.current_position.set_current(revert_infos.back().modifying_step.next_step());
       steps_.collection.stack().reset();
       MakeKeeperClosure(revert_infos);
       moves_calculated=false;
