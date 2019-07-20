@@ -20,13 +20,9 @@ int main(int argc, char *argv[]) {
   std::stringstream buffer;
   buffer << filestream.rdbuf();
 
-  std::string game_text = buffer.str();
-
-  game_text = ParseGame(game_text)->to_rbg();
-
   try {
     asio::io_service io_service;
-    Server server(game_text, io_service,
+    Server server(buffer.str(), io_service,
                   static_cast<unsigned short>(std::atoi(argv[argc - 1])));
 
     io_service.run();
