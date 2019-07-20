@@ -8,7 +8,6 @@
 #include <asio.hpp>
 #include <iostream>
 #include <game_state/game_state.h>
-#include "message.h"
 #include "coder.h"
 
 namespace rbg {
@@ -59,7 +58,6 @@ namespace rbg {
     }
 
     void Initialize() {
-      Message message;
       asio::error_code ignored_error;
 
       auto str = ReadStringFromSocket();

@@ -10,7 +10,6 @@
 
 #include <deque>
 
-#include "message.h"
 #include "coder.h"
 #include <rbgParser/src/game_items.hpp>
 

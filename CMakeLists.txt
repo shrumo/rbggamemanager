@@ -44,7 +44,7 @@ set(CONSTRUCTION_FILES
         src/game_state/search_steps/arithmetic_operation.cc src/game_state/search_steps/arithmetic_operation.h
         src/game_state/board.cc src/game_state/search_steps/search_step.h src/construction/gamestate_creator.h src/construction/declarations_creator.cc src/construction/gamestate_creator.cc)
 
-set(NETWORKING_FILES src/networking/server.h src/networking/server.cc src/networking/message.h src/networking/coder.h src/networking/synchronous_client.h src/networking/coder.cc)
+set(NETWORKING_FILES src/networking/server.h src/networking/server.cc src/networking/coder.h src/networking/synchronous_client.h src/networking/coder.cc)
 
 set(ENV{PYTHONPATH} ${PYTHON_PATH}:${CMAKE_CURRENT_BINARY_DIR})
 
