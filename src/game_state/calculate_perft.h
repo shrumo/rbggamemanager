@@ -22,7 +22,7 @@ namespace rbg {
     auto moves = state.Moves();
     PerftResult result = {0, 0};
     result.nodes_count += 1;
-    for (const auto &move : moves) {
+    for (const auto &move : std::vector<GameMove>(moves.begin(), moves.end())) {
       auto revert_info = state.Apply(move);
       auto rec_result = Perft(state, depth - 1);
       result.leaves_count += rec_result.leaves_count;

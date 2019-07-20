@@ -77,10 +77,10 @@ namespace rbg {
       MakeKeeperClosure(initial_keeper_step_revert_information);
     }
 
-    std::vector<std::vector<ModifierApplication>> Moves() {
+    const std::vector<std::vector<ModifierApplication>>& Moves() {
       if(!moves_calculated) {
         steps_.current_position.current()->Run(this);
-        steps_.collection.stack().reset();
+        moves_calculated = true;
         return moves_;
       }
       return moves_;
@@ -163,10 +163,11 @@ namespace rbg {
         exists = steps_.current_position.current()->RunAndApplyFirst(this, &steps_revert_information, current_pos_);
         steps_.collection.stack().reset();
         if(exists) {
-        steps_.current_position.set_current(steps_.collection.Switch(applied_modifiers_.back().modifier_index));
+          steps_.current_position.set_current(steps_.collection.Switch(applied_modifiers_.back().modifier_index));
+          steps_.collection.stack().reset();
+          applied_modifiers_.clear();
+        }
       }
-      }
-      applied_modifiers_.clear();
     }
 
 
