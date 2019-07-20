@@ -95,9 +95,7 @@ public:
 
     }
 
-    uint switch_index = collection_.AddSearchStep(make_unique<BlockPointer<BranchSingle>>(BlockPointer<BranchSingle>(
-        dynamic_cast<Block<PlayerSwitchApplication, BranchSingle> *>(collection_[step_index])->GetSubAbstractBlock<1>())));
-      collection_.RegisterSwitch(move.index(),collection_[switch_index]);
+      collection_.RegisterSwitch(move.index(), dynamic_cast<Block<PlayerSwitchApplication, BranchSingle>*>(collection_[step_index])->GetSubAbstractBlock<1>());
     return step_index;
   }
 
@@ -109,9 +107,8 @@ public:
                                    dynamic_cast<Block<PlayerSwitchApplication, BranchSingle> *>(collection_[step_index])->GetAction<0>());
     }
 
-    uint switch_index = collection_.AddSearchStep(make_unique<BlockPointer<BranchSingle>>(BlockPointer<BranchSingle>(
-        dynamic_cast<Block<PlayerSwitchApplication, BranchSingle> *>(collection_[step_index])->GetSubAbstractBlock<1>())));
-      collection_.RegisterSwitch(move.index(),collection_[switch_index]);
+
+    collection_.RegisterSwitch(move.index(), dynamic_cast<Block<PlayerSwitchApplication, BranchSingle>*>(collection_[step_index])->GetSubAbstractBlock<1>());
     return step_index;
   }
 

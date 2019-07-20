@@ -86,6 +86,14 @@ namespace rbg {
      bool RunNextAndFindEnd(GameState *state)__attribute__((always_inline)) {
       return next_->RunAndFindEnd(state);
     }
+
+    AbstractBlock* next() {
+      return next_;
+    }
+
+    const AbstractBlock* next() const {
+      return next_;
+    }
   private:
     AbstractBlock *next_;
   };
@@ -171,6 +179,14 @@ namespace rbg {
     }
 
     __attribute__((always_inline)) void AddNextBlock(AbstractBlock *step) { branch_.AddNext(step); }
+
+    BranchType* branch() {
+      return &branch_;
+    }
+
+    const BranchType* branch() const {
+      return &branch_;
+    }
 
   private:
     BranchType branch_;
@@ -340,6 +356,7 @@ namespace rbg {
   template<typename First, typename ...Rest>
   struct BlockContentGet<0, BlockContent<First, Rest ...>> {
     using FirstElementType = First;
+    using SubBlockType = BlockContent<First, Rest...>;
     static auto GetSubContent(BlockContent<First, Rest...> *block_content) {
       return block_content;
     }
@@ -348,15 +365,16 @@ namespace rbg {
   template<std::size_t I, typename First, typename ...Rest>
   struct BlockContentGet<I, BlockContent<First, Rest...>>{
     using FirstElementType = typename BlockContentGet<I - 1, BlockContent<Rest ...>>::FirstElementType ;
+    using SubBlockType  = typename BlockContentGet<I - 1, BlockContent<Rest ...>>::SubBlockType ;
     static auto GetSubContent(BlockContent<First, Rest...> *block_content) {
       return BlockContentGet<I - 1, BlockContent<Rest ...>>::GetSubContent(block_content->next_elements());
     }
   };
 
-  template<typename ...BlockElements>
+  template<typename BlockContent>
   class BlockPointer : public AbstractBlock {
       public:
-    explicit BlockPointer(BlockContent<BlockElements...>* elements) : elements_(elements) {}
+    explicit BlockPointer(BlockContent* elements) : elements_(elements) {}
 
     void Run(GameState *state) override {
       elements_->Run(state);
@@ -372,15 +390,15 @@ namespace rbg {
       return elements_->RunAndFindEnd(state);
     }
 
-    void AddNextBlock(AbstractBlock *step) override {
-      elements_->AddNextBlock(step);
+    void AddNextBlock(AbstractBlock *) override {
+      assert(false);
     }
 
-    const BlockContent<BlockElements...>& content() const {
+    const BlockContent& content() const {
       return *elements_;
     }
   private:
-    BlockContent<BlockElements...> *elements_;
+    BlockContent *elements_;
   };
 
   template<typename ...BlockElements>
@@ -410,10 +428,8 @@ namespace rbg {
     auto GetSubAbstractBlock()
     {
       auto sub_block_pointer = BlockContentGet<I, BlockContent<BlockElements...>>::GetSubContent(&elements_);
-      if(IsBranchType<typename BlockContentGet<I, BlockContent<BlockElements...>>::FirstElementType>::value) {
-        return sub_block_pointer;
-      }
-      return sub_block_pointer;
+      sub_pointers_.push_back(std::make_unique<BlockPointer<typename BlockContentGet<I, BlockContent<BlockElements...>>::SubBlockType>>(sub_block_pointer));
+      return sub_pointers_.back().get();
     }
 
     template<size_t I>
@@ -427,6 +443,7 @@ namespace rbg {
     }
   private:
     BlockContent<BlockElements...> elements_;
+    std::vector<std::unique_ptr<AbstractBlock>> sub_pointers_;
   };
 }
 
