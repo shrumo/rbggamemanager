@@ -26,7 +26,7 @@ public:
   }
 
   uint ShiftCase(const Shift &move) override {
-    uint index = collection_.AddSearchStep(make_unique<Block<ShiftAction, OutOfBoundsTest, BranchSingle>>(ShiftAction(move.edge_id()), OutOfBoundsTest{}, BranchSingle{}));
+    uint index = collection_.AddSearchStep(CreateBlockUniquePtr(ShiftAction(move.edge_id()), OutOfBoundsTest{}, BranchSingle{}));
     return index;
   }
 
@@ -39,32 +39,32 @@ public:
     auto right_result = CreateArithmeticOperation(move.right());
     switch (move.comparison_type()) {
       case ComparisonType::kEqual:
-        return collection_.AddSearchStep(make_unique<Block<EqualComparisonTest, BranchSingle>>(EqualComparisonTest(
+        return collection_.AddSearchStep(CreateBlockUniquePtr(EqualComparisonTest(
             std::move(left_result), std::move(right_result)), BranchSingle{}));
       case ComparisonType::kNotEqual:
         return collection_.AddSearchStep(
-            make_unique<Block<NotEqualComparisonTest, BranchSingle>>(NotEqualComparisonTest(
+            CreateBlockUniquePtr(NotEqualComparisonTest(
                 std::move(left_result),
                 std::move(right_result)
             ), BranchSingle{}));
       case ComparisonType::kLess:
-        return collection_.AddSearchStep(make_unique<Block<LessComparisonTest, BranchSingle>>(LessComparisonTest(
+        return collection_.AddSearchStep(CreateBlockUniquePtr(LessComparisonTest(
             std::move(left_result),
             std::move(right_result)
         ), BranchSingle{}));
       case ComparisonType::kLessEqual:
         return collection_.AddSearchStep(
-            make_unique<Block<LessEqualComparisonTest, BranchSingle>>(LessEqualComparisonTest(
+            CreateBlockUniquePtr(LessEqualComparisonTest(
                 std::move(left_result),
                 std::move(right_result)), BranchSingle{}));
       case ComparisonType::kGreater:
-        return collection_.AddSearchStep(make_unique<Block<LessComparisonTest, BranchSingle>>(LessComparisonTest(
+        return collection_.AddSearchStep(CreateBlockUniquePtr(LessComparisonTest(
             std::move(right_result),
             std::move(left_result)
         ), BranchSingle{}));
       case ComparisonType::kGreaterEqual:
         return collection_.AddSearchStep(
-            make_unique<Block<LessEqualComparisonTest, BranchSingle>>(LessEqualComparisonTest(
+            CreateBlockUniquePtr(LessEqualComparisonTest(
                 std::move(right_result),
                 std::move(left_result)
             ), BranchSingle{}));
@@ -74,7 +74,7 @@ public:
   }
 
   uint OffCase(const Off &move) override {
-    uint step_index = collection_.AddSearchStep(make_unique<Block<OffApplication, BranchSingle>>(OffApplication(move.piece(), move.index()),BranchSingle{}));
+    uint step_index = collection_.AddSearchStep(CreateBlockUniquePtr(OffApplication(move.piece(), move.index()),BranchSingle{}));
     if (register_modifiers_) {
       collection_.RegisterModifier(move.index(),
                                    dynamic_cast<Block<OffApplication, BranchSingle> *>(collection_[step_index])->GetAction<0>());
@@ -83,12 +83,12 @@ public:
   }
 
   uint OnCase(const On &move) override {
-    return collection_.AddSearchStep(make_unique<Block<OnTest, BranchSingle>>(OnTest(move.pieces_table()), BranchSingle{}));
+    return collection_.AddSearchStep(CreateBlockUniquePtr(OnTest(move.pieces_table()), BranchSingle{}));
 
   }
 
   uint PlayerSwitchCase(const PlayerSwitch &move) override {
-    uint step_index = collection_.AddSearchStep(make_unique<Block<PlayerSwitchApplication, BranchSingle>>(PlayerSwitchApplication(move.player(), move.index()), BranchSingle{}));
+    uint step_index = collection_.AddSearchStep(CreateBlockUniquePtr(PlayerSwitchApplication(move.player(), move.index()), BranchSingle{}));
     if (register_modifiers_) {
       collection_.RegisterModifier(move.index(),
                                    dynamic_cast<Block<PlayerSwitchApplication, BranchSingle> *>(collection_[step_index])->GetAction<0>());
@@ -100,7 +100,7 @@ public:
   }
 
   uint KeeperSwitchCase(const KeeperSwitch &move) override {
-     uint step_index = collection_.AddSearchStep(make_unique<Block<PlayerSwitchApplication, BranchSingle>>(PlayerSwitchApplication(move.keeper_id(), move.index()), BranchSingle{}));
+     uint step_index = collection_.AddSearchStep(CreateBlockUniquePtr(PlayerSwitchApplication(move.keeper_id(), move.index()), BranchSingle{}));
     if (register_modifiers_) {
 
       collection_.RegisterModifier(move.index(),
@@ -113,7 +113,7 @@ public:
   }
 
   uint AssignmentCase(const Assignment &move) override {
-    uint step_index = collection_.AddSearchStep(make_unique<Block<AssignmentAction, VariableBoundsTest, BranchSingle>>(AssignmentAction(move.get_variable(),
+    uint step_index = collection_.AddSearchStep(CreateBlockUniquePtr(AssignmentAction(move.get_variable(),
                                                                             CreateArithmeticOperation(
                                                                            move.get_value_expression()), move.index()), VariableBoundsTest(move.get_variable()), BranchSingle{}));
     if (register_modifiers_) {
@@ -125,27 +125,27 @@ public:
   }
 
   uint PlayerCheckCase(const PlayerCheck &move) override {
-    return collection_.AddSearchStep(make_unique<Block<PlayerTest, BranchSingle>>(PlayerTest(move.player()),BranchSingle{}));
+    return collection_.AddSearchStep(CreateBlockUniquePtr(PlayerTest(move.player()),BranchSingle{}));
   }
 
   uint ConditionCase(const Condition &move) override {
     if (move.negated()) {
-      return collection_.AddSearchStep(make_unique<Block<NegatedConditionCheckTest, BranchSingle>>(NegatedConditionCheckTest(
+      return collection_.AddSearchStep(CreateBlockUniquePtr(NegatedConditionCheckTest(
           make_unique<SearchStepsPoint>(CreateStepsInCollection(move.nfa(), collection_, declarations_))),BranchSingle{}));
     } else {
-      return collection_.AddSearchStep(make_unique<Block<ConditionCheckTest, BranchSingle>>( ConditionCheckTest(
+      return collection_.AddSearchStep(CreateBlockUniquePtr( ConditionCheckTest(
           make_unique<SearchStepsPoint>(CreateStepsInCollection(move.nfa(), collection_, declarations_))),BranchSingle{}));
     }
   }
 
   uint VisitedQueryCase(const VisitedQuery &move) override {
     return collection_.AddSearchStep(
-        make_unique<Block<VisitedCheckTest, BranchSingle>>(VisitedCheckTest(collection_.GetBitArrayChunk(move.visited_array_index())),BranchSingle{}));
+        CreateBlockUniquePtr(VisitedCheckTest(collection_.GetBitArrayChunk(move.visited_array_index())),BranchSingle{}));
 
   }
 
   uint EmptyCase(const Empty &) override {
-    return collection_.AddSearchStep(make_unique<Block<BranchMultiple>>(BranchMultiple{}));
+    return collection_.AddSearchStep(CreateBlockUniquePtr(BranchMultiple{}));
 
   }
 
@@ -179,7 +179,7 @@ CreateStepsInCollection(const Nfa<std::unique_ptr<Move>> &game_graph, SearchStep
       }
     }
   }
-  nodes_collection_indices[nfa.final] = collection.AddSearchStep(make_unique<Block<BranchEmpty>>(BranchEmpty()));
+  nodes_collection_indices[nfa.final] = collection.AddSearchStep(CreateBlockUniquePtr(BranchEmpty()));
 
   to_visit = queue<node_t>();
   to_visit.push(nfa.final);

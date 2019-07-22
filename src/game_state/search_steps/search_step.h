@@ -445,6 +445,11 @@ namespace rbg {
     BlockContent<BlockElements...> elements_;
     std::vector<std::unique_ptr<AbstractBlock>> sub_pointers_;
   };
+
+  template<typename ...BlockElements>
+  std::unique_ptr<Block<BlockElements...>> CreateBlockUniquePtr(BlockElements... elements) {
+    return std::make_unique<Block<BlockElements...>>(std::move(elements)...);
+  }
 }
 
 #endif //RBGGAMEMANAGER_SEARCHSTEP_H
