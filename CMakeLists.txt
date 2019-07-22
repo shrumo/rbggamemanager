@@ -58,7 +58,13 @@ add_custom_target(visualize_graph ALL
 
 add_executable(benchmark ${GRAPH_FILES} ${PARSER_FILES}
         ${CONSTRUCTION_FILES} ${GAMESTATE_FILES} src/benchmark.cc)
+
 target_link_libraries(benchmark rbgParser)
+
+add_executable(explain ${GRAPH_FILES} ${PARSER_FILES}
+        ${CONSTRUCTION_FILES} ${GAMESTATE_FILES} src/explain.cc)
+
+target_link_libraries(explain rbgParser)
 
 add_executable(start_server ${GRAPH_FILES} ${PARSER_FILES} ${CONSTRUCTION_FILES} ${GAMESTATE_FILES} ${NETWORKING_FILES} src/start_server.cc)
 target_link_libraries(start_server rbgParser)
