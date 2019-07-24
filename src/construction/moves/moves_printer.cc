@@ -9,6 +9,8 @@
 #include "moves.h"
 #include <sstream>
 #include <construction/graph_creator.h>
+#include <parser/parser_wrapper.h>
+#include <construction/declarations_creator.h>
 
 using namespace rbg;
 
@@ -187,4 +189,20 @@ private:
 
 std::string rbg::MoveDescription(const Move &move, const Declarations &declarations) {
   return MovePrinter(declarations)(move);
+}
+
+std::unordered_map<uint, std::string> rbg::ActionsDescriptionsMap(const std::string &game_text) {
+  std::unordered_map<uint, std::string> result;
+  auto game = ParseGame(ParseGame(game_text)->to_rbg());
+  Declarations declarations = CreateDeclarations(*game);
+  VisitedChecksNfa nfa = CreateVisitedChecksNfa(*game->get_moves(), declarations);
+  for(node_t node: nfa.nfa.graph.nodes()) {
+    for(const auto& edge : nfa.nfa.graph.EdgesFrom(node)) {
+      if(edge.content()->indexed()) {
+        const auto& indexed_edge = dynamic_cast<const IndexedMove&>(*edge.content());
+        result[indexed_edge.index()] = MoveDescription(*edge.content(), declarations);
+      }
+    }
+  }
+  return result;
 }

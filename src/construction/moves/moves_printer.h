@@ -11,6 +11,7 @@
 
 namespace rbg {
   std::string MoveDescription(const Move &move, const Declarations &declarations);
+  std::unordered_map<uint,std::string> ActionsDescriptionsMap(const std::string& game_text);
 }
 
 

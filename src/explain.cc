@@ -15,22 +15,6 @@
 using namespace rbg;
 using namespace std;
 
-std::unordered_map<uint,string> ActionsDescriptionsMap(const string& game_text) {
-  std::unordered_map<uint, string> result;
-  auto game = ParseGame(ParseGame(game_text)->to_rbg());
-  Declarations declarations = CreateDeclarations(*game);
-  VisitedChecksNfa nfa = CreateVisitedChecksNfa(*game->get_moves(), declarations);
-  for(node_t node: nfa.nfa.graph.nodes()) {
-    for(const auto& edge : nfa.nfa.graph.EdgesFrom(node)) {
-      if(edge.content()->indexed()) {
-        const auto& indexed_edge = dynamic_cast<const IndexedMove&>(*edge.content());
-        result[indexed_edge.index()] = MoveDescription(*edge.content(), declarations);
-      }
-    }
-  }
-  return result;
-}
-
 int main(int argc, const char *argv[]) {
   assert((argc == 2 || argc == 3) && "You need to pass the path to the game file and seed for random optionally.");
 

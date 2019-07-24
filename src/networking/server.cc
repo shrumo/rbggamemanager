@@ -53,11 +53,19 @@ void rbg::ClientConnection::Start() {
 }
 
 void rbg::ServerGameInstance::Leave(const ClientConnection::pointer &client) {
-  std::cout << client << " left_ the game." << std::endl;
+  std::lock_guard<std::mutex> lock(mutex_);
   state_.Reset();
-  player_id_t player_token = clients_[client];
-  clients_.erase(client);
-  players_[player_token] = nullptr;
+
+  std::vector<ClientConnection::pointer> clients_to_kick;
+  for(const auto& client : clients_) {
+    clients_to_kick.push_back(client.first);
+  }
+  for(const auto& client : clients_to_kick) {
+    std::cout << client << " left the game." << std::endl;
+    player_id_t player_token = clients_[client];
+    clients_.erase(client);
+    players_[player_token] = nullptr;
+  }
 
   if (controlling_server_)
     controlling_server_->DoAccept();

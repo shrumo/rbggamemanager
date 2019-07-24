@@ -65,7 +65,7 @@ namespace rbg {
     friend class ModifyingApplication;
 
     GameState(const Declarations &declarations, SearchStepsInformation steps)
-        : declarations_(declarations), current_pos_(0),
+        : declarations_(declarations), current_pos_(1),
           variables_values_(declarations.variables_resolver.size(), 0),
           current_player_(declarations.keeper_id),
           board_(declarations.board_description.initial_content()), steps_(std::move(steps)),
@@ -139,7 +139,7 @@ namespace rbg {
     }
 
     void Reset() {
-      current_pos_ = 0;
+      current_pos_ = 1;
       variables_values_ = std::vector<variable_value_t >(declarations_.variables_resolver.size(), 0);
           current_player_ = declarations_.keeper_id;
           board_ = declarations_.board_description.initial_content();

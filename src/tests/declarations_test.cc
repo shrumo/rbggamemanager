@@ -43,11 +43,11 @@ int main() {
   assert(result.variables_bounds[result.variables_resolver.Id("blue")] == 50);
   assert(result.variables_bounds[result.variables_resolver.Id("turn")] == 10);
 
-  assert(result.board_description.vertices_count() == 4);
+  assert(result.board_description.vertices_count() == 5);
   assert(result.board_description.edges_count() == 4);
 
   std::unordered_set<std::string> square_edges;
-  for (vertex_id_t id = 0; id < result.board_description.vertices_count(); id++) {
+  for (vertex_id_t id = 1; id < result.board_description.vertices_count(); id++) {
     if (result.board_description.NextVertex(id, result.board_description.edges_names().Id("right")) ==
         result.board_description.vertices_count() &&
         result.board_description.NextVertex(id, result.board_description.edges_names().Id("up")) ==

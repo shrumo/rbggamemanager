@@ -7,7 +7,7 @@
 std::string rbg::RectangularBoardDescription(const BoardContent &board_content, const Declarations &declarations) {
   size_t width = 0;
   size_t height = 0;
-  for (vertex_id_t v = 0; v < static_cast<ssize_t >(declarations.board_description.vertices_count()); v++) {
+  for (vertex_id_t v = 1; v < static_cast<ssize_t >(declarations.board_description.vertices_count()); v++) {
     std::string vertex_name = declarations.board_description.vertices_names().Name(v);
     std::stringstream stream(vertex_name);
     char placeholders[3] = {'\0', '\0', '\0'};
@@ -21,7 +21,7 @@ std::string rbg::RectangularBoardDescription(const BoardContent &board_content, 
     height = std::max(y + 1, height);
   }
   std::vector<piece_id_t> field(width * height);
-  for (vertex_id_t v = 0; v < static_cast<ssize_t >(declarations.board_description.vertices_count()); v++) {
+  for (vertex_id_t v = 1; v < static_cast<ssize_t >(declarations.board_description.vertices_count()); v++) {
     std::string vertex_name = declarations.board_description.vertices_names().Name(v);
     std::stringstream stream(vertex_name);
     char placeholder;

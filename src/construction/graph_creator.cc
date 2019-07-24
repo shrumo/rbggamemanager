@@ -93,8 +93,8 @@ GraphBoardMultiplication rbg::CreateNfaBoardMultiplication(const Nfa<std::unique
                                                            const Declarations &declarations) {
   GraphBoardMultiplication result(nfa);
   queue<VertexNode> to_visit;
-  to_visit.push({0,nfa.initial});
-  result.node_mapping[{0,nfa.initial}] = result.graph_with_board.NewNode();
+  to_visit.push({1,nfa.initial});
+  result.node_mapping[{1,nfa.initial}] = result.graph_with_board.NewNode();
   while (!to_visit.empty()) {
     auto top = to_visit.front();
     to_visit.pop();

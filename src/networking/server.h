@@ -77,23 +77,34 @@ namespace rbg {
     }
 
     void Join(const ClientConnection::pointer &client) {
+      std::lock_guard<std::mutex> lock(mutex_);
       std::cout << client << " joins the game." << std::endl;
-      for (player_id_t player_token = 0; player_token < state_.declarations().players_resolver.size(); player_token++) {
+      for (player_id_t player_token = 1; player_token < state_.declarations().players_resolver.size(); player_token++) {
         if (players_[player_token] == nullptr) {
           clients_[client] = player_token;
           players_[player_token] = client;
           std::cout << client << " is player "
                     << state_.declarations().players_resolver.Name(player_token)
                     << "." << std::endl;
-          if (Full())
-            Start();
           return;
         }
       }
       std::cout << client << " has no player assigned." << std::endl;
     }
 
+
+
+    bool Full() const {
+      std::lock_guard<std::mutex> lock(mutex_);
+      return clients_.size() ==
+             state_.declarations().players_resolver.size() - 1;
+    }
+
+    void Leave(const ClientConnection::pointer &client);
+
+
     void Start() {
+      std::lock_guard<std::mutex> lock(mutex_);
       std::cout << "Starting the game." << std::endl;
       for (const auto &pair : clients_) {
         const auto &client = pair.first;
@@ -108,31 +119,9 @@ namespace rbg {
       }
     }
 
-    void Stop() {
-      std::cout << "Game ended." << std::endl;
-      for (const auto &pair : clients_) {
-        std::cout << "\t" << pair.second << " (" << state_.declarations().players_resolver.Name(pair.second) << ")"
-                  << "(" << pair.first << ")" << " : "
-                  << state_.variables_values()[pair.second] << std::endl;
-      }
-    }
-
-    bool Full() const {
-      return clients_.size() ==
-             state_.declarations().players_resolver.size() - 1;
-    }
-
-    void Leave(const ClientConnection::pointer &client);
-
-    void DeliverToEveryoneBut(const std::string &msg, const ClientConnection::pointer &omit) {
-      for (const auto &pair : clients_) {
-        if (pair.first && pair.first != omit)
-          pair.first->Send(msg);
-      }
-    }
-
     bool
     HandleMove(const ClientConnection::pointer &client, const std::string &message) {
+      std::lock_guard<std::mutex> lock(mutex_);
       player_id_t client_player_id = clients_[client];
       std::cout << "Got a move from client " << client
                 << " which is player "
@@ -160,6 +149,25 @@ namespace rbg {
     }
 
   private:
+    void DeliverToEveryoneBut(const std::string &msg, const ClientConnection::pointer &omit) {
+      for (const auto &pair : clients_) {
+        if (pair.first && pair.first != omit)
+          pair.first->Send(msg);
+      }
+    }
+
+
+    void Stop() {
+      std::cout << "Game ended." << std::endl;
+      for (const auto &pair : clients_) {
+        std::string player_name =  state_.declarations().players_resolver.Name(pair.second);
+        std::cout << "\t" << pair.second << " (" << player_name << ")"
+                  << "(" << pair.first << ")" << " : "
+                  << state_.variables_values()[state_.declarations().variables_resolver.Id(player_name)] << std::endl;
+      }
+    }
+
+    mutable std::mutex mutex_;
     std::unordered_map<ClientConnection::pointer, player_id_t> clients_;
     std::vector<ClientConnection::pointer> players_;
     GameState state_;
@@ -187,6 +195,8 @@ namespace rbg {
                                }
                                if (!game_instance_.Full())
                                  DoAccept();
+                               else
+                                 game_instance_.Start();
                              });
     }
 

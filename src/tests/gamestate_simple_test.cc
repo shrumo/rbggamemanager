@@ -17,8 +17,8 @@ const char *kSmallGame = R"LIM(
     [e,e])
 
 //   Board indices:
-//   0 1
-//   2 3
+//   1 2
+//   3 4
 
 //       1      2       3       4  5       6       7        8      9     10  11  12    13  14  15
 #rules = ->red (right + (down)* up down + (right + down)* + down + right {r} [e] down) {e} [r] ->>
@@ -31,24 +31,24 @@ int main() {
   std::unordered_set<std::string> expected;
   for (const auto &move : first_player_moves) {
     assert(move.size() > 1);
-    if (move[0].vertex == 2) {
+    if (move[0].vertex == 3) {
       assert(move.size() == 2);
       assert(move[0].modifier_index == 14);
-      assert(move[1].vertex == 2);
+      assert(move[1].vertex == 3);
       assert(move[1].modifier_index == 15);
       expected.insert("down [r]");
-    } else if (move[0].vertex == 1) {
+    } else if (move[0].vertex == 2) {
       assert(move.size() == 3);
       assert(move[0].modifier_index == 11);
-      assert(move[1].vertex == 3);
+      assert(move[1].vertex == 4);
       assert(move[1].modifier_index == 14);
-      assert(move[2].vertex == 3);
+      assert(move[2].vertex == 4);
       assert(move[2].modifier_index == 15);
       expected.insert("right [e] down [r]");
-    } else if (move[0].vertex == 3) {
+    } else if (move[0].vertex == 4) {
       assert(move.size() == 2);
       assert(move[0].modifier_index == 14);
-      assert(move[1].vertex == 3);
+      assert(move[1].vertex == 4);
       assert(move[1].modifier_index == 15);
       expected.insert("right down [r]");
     }
