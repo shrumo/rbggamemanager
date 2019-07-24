@@ -60,11 +60,12 @@ namespace rbg {
      public:
     static constexpr BranchTypeTrait type = BranchTypeTrait :: NONE;
     void AddNext(AbstractBlock *step) { assert(!step && "You cannot set next step to an empty branch."); }
-    void RunNext(GameState*) {} __attribute__((always_inline))
+     void RunNext(GameState*) {}
      bool RunNextAndApplyFirst(GameState*,
         std::vector<ActionRevertInfo>*,
-        vertex_id_t) __attribute__((always_inline))  __attribute__((always_inline)){ return false; }
-     bool RunNextAndFindEnd(GameState*) __attribute__((always_inline)){ return true; }
+        vertex_id_t) { return false; }
+
+         bool RunNextAndFindEnd(GameState*) { return true; }
   };
 
   class BranchSingle {
@@ -72,26 +73,26 @@ namespace rbg {
     BranchSingle() = default;
 
     static constexpr BranchTypeTrait type = BranchTypeTrait :: SINGLE;
-    void AddNext(AbstractBlock *step) { assert(next_ == nullptr && "Single branch can have only one next block."); next_ = step; }
-     void RunNext(GameState *state) __attribute__((always_inline)){
+     void AddNext(AbstractBlock *step) { assert(next_ == nullptr && "Single branch can have only one next block."); next_ = step; }
+     void RunNext(GameState *state) {
       next_->Run(state);
     }
 
      bool RunNextAndApplyFirst(GameState *state,
         std::vector<ActionRevertInfo> *revert_infos,
-        vertex_id_t revert_vertex) __attribute__((always_inline)){
+        vertex_id_t revert_vertex) {
       return next_->RunAndApplyFirst(state, revert_infos, revert_vertex);
     }
 
-     bool RunNextAndFindEnd(GameState *state)__attribute__((always_inline)) {
+     bool RunNextAndFindEnd(GameState *state)  {
       return next_->RunAndFindEnd(state);
     }
 
-    AbstractBlock* next() {
+     AbstractBlock* next() {
       return next_;
     }
 
-    const AbstractBlock* next() const {
+     const AbstractBlock* next() const {
       return next_;
     }
   private:
@@ -104,14 +105,16 @@ namespace rbg {
 
     static constexpr BranchTypeTrait type = BranchTypeTrait :: MULTIPLE;
     void AddNext(AbstractBlock *step) { next_steps_.push_back(step); }
-     void RunNext(GameState *state) __attribute__((always_inline)){
+
+     void RunNext(GameState *state) {
       for(AbstractBlock* next_step : next_steps_) {
       next_step->Run(state);
       }
     }
+
      bool RunNextAndApplyFirst(GameState *state,
         std::vector<ActionRevertInfo> *revert_infos,
-        vertex_id_t revert_vertex) __attribute__((always_inline)){
+        vertex_id_t revert_vertex) {
       for(AbstractBlock* next_step : next_steps_) {
       if(next_step->RunAndApplyFirst(state, revert_infos, revert_vertex)) {
       return true;
@@ -119,7 +122,7 @@ namespace rbg {
     }
    return false;
     }
-     bool RunNextAndFindEnd(GameState *state) __attribute__((always_inline))
+     bool RunNextAndFindEnd(GameState *state)
     {
        for(AbstractBlock* next_step : next_steps_) {
          if(next_step->RunAndFindEnd(state))
@@ -164,21 +167,21 @@ namespace rbg {
       static_assert(IsBranchType<BranchType>::value && "The last element of the block should be a branch type.");
     }
 
-     __attribute__((always_inline)) void Run(GameState* state) {
+       void Run(GameState* state) {
       branch_.RunNext(state);
     }
 
-     __attribute__((always_inline)) bool RunAndApplyFirst(GameState *state,
+       bool RunAndApplyFirst(GameState *state,
         std::vector<ActionRevertInfo> *revert_infos,
         vertex_id_t revert_vertex) {
       return branch_.RunNextAndApplyFirst(state, revert_infos, revert_vertex);
     }
 
-    __attribute__((always_inline)) bool RunAndFindEnd(GameState* state) {
+      bool RunAndFindEnd(GameState* state) {
       return branch_.RunNextAndFindEnd(state);
     }
 
-    __attribute__((always_inline)) void AddNextBlock(AbstractBlock *step) { branch_.AddNext(step); }
+      void AddNextBlock(AbstractBlock *step) { branch_.AddNext(step); }
 
     BranchType* branch() {
       return &branch_;
@@ -201,14 +204,14 @@ namespace rbg {
 
     // If the action is of type CHECK, those methods are defined.
     template<typename ActionTypeCopy = ActionType>
-     __attribute__((always_inline)) typename std::enable_if<ActionTypeCopy::type == ActionTypeTrait :: CHECK,
+       typename std::enable_if<ActionTypeCopy::type == ActionTypeTrait :: CHECK,
     void>::type Run(GameState* state) {
       if(action_.Check(state))
         next_elements_.Run(state);
     }
 
     template<typename ActionTypeCopy = ActionType>
-    __attribute__((always_inline)) typename std::enable_if<ActionTypeCopy::type == ActionTypeTrait :: CHECK,
+      typename std::enable_if<ActionTypeCopy::type == ActionTypeTrait :: CHECK,
     bool>::type RunAndApplyFirst(GameState *state,
         std::vector<ActionRevertInfo> *revert_infos,
         vertex_id_t revert_vertex) {
@@ -218,7 +221,7 @@ namespace rbg {
     }
 
     template<typename ActionTypeCopy = ActionType>
-    __attribute__((always_inline)) typename std::enable_if<ActionTypeCopy::type == ActionTypeTrait :: CHECK,
+      typename std::enable_if<ActionTypeCopy::type == ActionTypeTrait :: CHECK,
     bool>::type RunAndFindEnd(GameState* state) {
       if(action_.Check(state))
         return next_elements_.RunAndFindEnd(state);
@@ -227,7 +230,7 @@ namespace rbg {
 
     // If the action is of type APPLICATION, those methods are defined.
      template<typename ActionTypeCopy = ActionType>
-     __attribute__((always_inline))typename std::enable_if<ActionTypeCopy::type == ActionTypeTrait :: APPLICATION,
+      typename std::enable_if<ActionTypeCopy::type == ActionTypeTrait :: APPLICATION,
     bool>::type RunAndApplyFirst(GameState *state,
         std::vector<ActionRevertInfo> *revert_infos,
         vertex_id_t revert_vertex) {
@@ -240,7 +243,7 @@ namespace rbg {
     }
 
     template<typename ActionTypeCopy = ActionType>
-     __attribute__((always_inline))typename std::enable_if<ActionTypeCopy::type == ActionTypeTrait :: APPLICATION,
+      typename std::enable_if<ActionTypeCopy::type == ActionTypeTrait :: APPLICATION,
     void>::type Run(GameState* state) {
       typename ActionType::revert_info_t action_revert_info = action_.Apply(state);
       next_elements_.Run(state);
@@ -248,7 +251,7 @@ namespace rbg {
     }
 
     template<typename ActionTypeCopy = ActionType>
-     __attribute__((always_inline))typename std::enable_if<ActionTypeCopy::type == ActionTypeTrait :: APPLICATION,
+      typename std::enable_if<ActionTypeCopy::type == ActionTypeTrait :: APPLICATION,
     bool>::type RunAndFindEnd(GameState* state) {
       typename ActionType::revert_info_t action_revert_info = action_.Apply(state);
     if(next_elements_.RunAndFindEnd(state)) {
@@ -262,7 +265,7 @@ namespace rbg {
 
     // If the action is of type MODIFIER, those methods are defined.
     template<typename ActionTypeCopy = ActionType>
-     __attribute__((always_inline))typename std::enable_if<ActionTypeCopy::type == ActionTypeTrait :: MODIFIER,
+      typename std::enable_if<ActionTypeCopy::type == ActionTypeTrait :: MODIFIER,
     void>::type Run(GameState* state) {
       action_.PushVisitedStackAndAddToApplied(state);
       typename ActionType::revert_info_t action_revert_info = action_.Apply(state);
@@ -272,7 +275,7 @@ namespace rbg {
     }
 
     template<typename ActionTypeCopy = ActionType>
-     __attribute__((always_inline))typename std::enable_if<ActionTypeCopy::type == ActionTypeTrait :: MODIFIER,
+      typename std::enable_if<ActionTypeCopy::type == ActionTypeTrait :: MODIFIER,
     bool>::type RunAndApplyFirst(GameState *state,
         std::vector<ActionRevertInfo> *revert_infos,
         vertex_id_t revert_vertex) {
@@ -289,7 +292,7 @@ namespace rbg {
 
     // If the action is of type MODIFIER, those methods are defined.
     template<typename ActionTypeCopy = ActionType>
-     __attribute__((always_inline))typename std::enable_if<ActionTypeCopy::type == ActionTypeTrait :: SWITCH,
+      typename std::enable_if<ActionTypeCopy::type == ActionTypeTrait :: SWITCH,
     void>::type Run(GameState* state) {
       action_.PushVisitedStackAndAddToApplied(state);
       typename ActionType::revert_info_t action_revert_info = action_.Apply(state);
@@ -299,7 +302,7 @@ namespace rbg {
     }
 
     template<typename ActionTypeCopy = ActionType>
-     __attribute__((always_inline))typename std::enable_if<ActionTypeCopy::type == ActionTypeTrait :: SWITCH,
+      typename std::enable_if<ActionTypeCopy::type == ActionTypeTrait :: SWITCH,
     bool>::type RunAndApplyFirst(GameState *state,
         std::vector<ActionRevertInfo> *revert_infos,
         vertex_id_t) {
@@ -311,7 +314,7 @@ namespace rbg {
 
     // If the action is of type MODIFIER or of type SWITCH, those methods are defined.
     template<typename ActionTypeCopy = ActionType>
-     __attribute__((always_inline))typename std::enable_if< ActionTypeCopy::type == ActionTypeTrait :: MODIFIER ||
+      typename std::enable_if< ActionTypeCopy::type == ActionTypeTrait :: MODIFIER ||
     ActionTypeCopy::type == ActionTypeTrait :: SWITCH,
     bool>::type RunAndFindEnd(GameState* state) {
       action_.PushVisitedStackAndAddToApplied(state);

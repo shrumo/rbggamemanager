@@ -30,7 +30,7 @@ set(GAMESTATE_FILES src/game_state/namesresolver.h src/game_state/board.h src/ga
         src/game_state/namesresolver.cc src/game_state/board.cc
         src/game_state/calculate_perft.h src/game_state/game_state_printer.h src/game_state/game_state_printer.cc src/game_state/search_steps/actions.cpp src/game_state/search_steps/actions.h src/stl_extension/vector.h src/game_state/search_steps/public_actions.h src/game_state/search_steps/public_actions.cpp)
 
-set(GRAPH_FILES src/graph/graph.h src/stl_extension/range.h src/stl_extension/pair.h src/stl_extension/iterator_transform.h)
+set(GRAPH_FILES src/graph/graph.h src/stl_extension/range.h src/stl_extension/utility.h src/stl_extension/iterator_transform.h)
 
 set(PARSER_FILES src/parser/parser_wrapper.h src/parser/parser_actions.h src/parser/parser_wrapper.cc)
 
@@ -52,8 +52,8 @@ pybind11_add_module(rbg src/python/rbg.cc ${GRAPH_FILES} ${PARSER_FILES} ${CONST
 target_link_libraries(rbg PRIVATE rbgParser)
 
 add_custom_target(visualize_graph ALL
-        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/src/utilities/graph_widget.py ${CMAKE_CURRENT_BINARY_DIR}/graph_widget.py
-        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/src/utilities/visualize_graph.py ${CMAKE_CURRENT_BINARY_DIR}/visualize_graph.py
+        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/src/widgets/graph_widget.py ${CMAKE_CURRENT_BINARY_DIR}/graph_widget.py
+        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/src/widgets/visualize_graph.py ${CMAKE_CURRENT_BINARY_DIR}/visualize_graph.py
         DEPENDS rbg)
 
 add_executable(benchmark ${GRAPH_FILES} ${PARSER_FILES}

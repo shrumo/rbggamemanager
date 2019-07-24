@@ -2,10 +2,18 @@
 // Created by shrum on 11/07/19.
 //
 
-#ifndef RBGGAMEMANAGER_PAIR_H
-#define RBGGAMEMANAGER_PAIR_H
+#ifndef RBGGAMEMANAGER_UTILITY_H
+#define RBGGAMEMANAGER_UTILITY_H
 
 #include <utility>
+
+#ifndef always_inline
+#ifdef __GNUC__
+#define always_inline __attribute__((always_inline))
+#else
+#define always_inline inline
+#endif
+#endif
 
 namespace std_ext {
   template<typename A, typename B>
@@ -31,4 +39,4 @@ namespace std_ext {
   };
 }
 
-#endif //RBGGAMEMANAGER_PAIR_H
+#endif //RBGGAMEMANAGER_UTILITY_H

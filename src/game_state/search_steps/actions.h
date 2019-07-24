@@ -14,55 +14,63 @@
 
 namespace rbg {
   class GameState;
+
   class SearchStepsCollection;
+
   class SearchStepsPoint;
 }
 
 namespace rbg {
 
 
-  class VisitedCheckTest  {
+  class VisitedCheckTest {
   public:
-    static constexpr ActionTypeTrait type = ActionTypeTrait :: CHECK;
+    static constexpr ActionTypeTrait type = ActionTypeTrait::CHECK;
+
     explicit VisitedCheckTest(ResetableBitArrayStackChunk bit_array_stack_chunk)
         : stack_chunk_(bit_array_stack_chunk) {
     }
 
-    bool Check(GameState *state) __attribute__((always_inline)) {
-  bool result = stack_chunk_[state->current_pos_];
-  stack_chunk_.set(state->current_pos_);
-  return !result;
-}
+    always_inline   bool Check(GameState *state) {
+      bool result = stack_chunk_[state->current_pos_];
+      stack_chunk_.set(state->current_pos_);
+      return !result;
+    }
+
   private:
     ResetableBitArrayStackChunk stack_chunk_;
   };
 
   class ShiftAction {
   public:
-    static constexpr ActionTypeTrait type = ActionTypeTrait :: APPLICATION;
-    using revert_info_t = vertex_id_t ;
-    explicit ShiftAction(shift_edge_id edge_id) : edge_id_(edge_id) {}
-    revert_info_t Apply(GameState *state) const __attribute__((always_inline)){
+    static constexpr ActionTypeTrait type = ActionTypeTrait::APPLICATION;
+    using revert_info_t = vertex_id_t;
 
-  vertex_id_t previous_vertex = state->current_pos_;
-  state->current_pos_ = state->declarations().board_description.NextVertex(state->current_pos_, edge_id_);
-  return previous_vertex;
+    explicit ShiftAction(shift_edge_id edge_id) : edge_id_(edge_id) {}
+
+    always_inline     revert_info_t Apply(GameState *state) const {
+
+      vertex_id_t previous_vertex = state->current_pos_;
+      state->current_pos_ = state->declarations().board_description.NextVertex(state->current_pos_, edge_id_);
+      return previous_vertex;
 
     }
-    void Revert(GameState *state, revert_info_t previous_vertex) const __attribute__((always_inline)){
+
+    always_inline     void Revert(GameState *state, revert_info_t previous_vertex) const {
 
       state->current_pos_ = previous_vertex;
     }
+
   private:
     shift_edge_id edge_id_;
   };
 
 
-
   class OutOfBoundsTest {
   public:
-    static constexpr ActionTypeTrait type = ActionTypeTrait :: CHECK;
-    bool Check(GameState *state) const __attribute__((always_inline)){
+    static constexpr ActionTypeTrait type = ActionTypeTrait::CHECK;
+
+    always_inline     bool Check(GameState *state) const {
 
       return state->current_pos() < state->declarations().board_description.vertices_count();
     }
@@ -71,12 +79,15 @@ namespace rbg {
 
   class OnTest {
   public:
-    static constexpr ActionTypeTrait type = ActionTypeTrait :: CHECK;
+    static constexpr ActionTypeTrait type = ActionTypeTrait::CHECK;
+
     explicit OnTest(std::vector<bool> pieces) : pieces_(std::move(pieces)) {}
-    bool Check(GameState *state) const __attribute__((always_inline)){
+
+    always_inline     bool Check(GameState *state) const {
 
       return pieces_[state->board_.at(state->current_pos_)];
     }
+
   private:
     std::vector<bool> pieces_;
   };
@@ -84,10 +95,11 @@ namespace rbg {
 
   class PlayerTest {
   public:
-    static constexpr ActionTypeTrait type = ActionTypeTrait :: CHECK;
+    static constexpr ActionTypeTrait type = ActionTypeTrait::CHECK;
+
     explicit PlayerTest(player_id_t player) : player_(player) {}
 
-    bool Check(GameState *state) const __attribute__((always_inline)){
+    always_inline     bool Check(GameState *state) const {
 
       return state->current_player_ == player_;
     }
@@ -100,15 +112,17 @@ namespace rbg {
   class LessEqualComparisonTest {
   public:
 
-    static constexpr ActionTypeTrait type = ActionTypeTrait :: CHECK;
-    explicit LessEqualComparisonTest(std::unique_ptr<ArithmeticOperation> left,
-                                           std::unique_ptr<ArithmeticOperation> right) : left_(std::move(left)),
-                                                                                         right_(std::move(right)) {}
+    static constexpr ActionTypeTrait type = ActionTypeTrait::CHECK;
 
-    bool Check(GameState *state) const __attribute__((always_inline)){
+    explicit LessEqualComparisonTest(std::unique_ptr<ArithmeticOperation> left,
+                                     std::unique_ptr<ArithmeticOperation> right) : left_(std::move(left)),
+                                                                                   right_(std::move(right)) {}
+
+    always_inline     bool Check(GameState *state) const {
 
       return left_->Value(*state) <= right_->Value(*state);
     }
+
   private:
     std::unique_ptr<ArithmeticOperation> left_, right_;
   };
@@ -117,15 +131,17 @@ namespace rbg {
   class LessComparisonTest {
   public:
 
-    static constexpr ActionTypeTrait type = ActionTypeTrait :: CHECK;
-    explicit LessComparisonTest(std::unique_ptr<ArithmeticOperation> left,
-                                      std::unique_ptr<ArithmeticOperation> right) : left_(std::move(left)),
-                                                                                    right_(std::move(right)) {}
+    static constexpr ActionTypeTrait type = ActionTypeTrait::CHECK;
 
-    bool Check(GameState *state) const __attribute__((always_inline)){
+    explicit LessComparisonTest(std::unique_ptr<ArithmeticOperation> left,
+                                std::unique_ptr<ArithmeticOperation> right) : left_(std::move(left)),
+                                                                              right_(std::move(right)) {}
+
+    always_inline     bool Check(GameState *state) const {
 
       return left_->Value(*state) < right_->Value(*state);
     }
+
   private:
     std::unique_ptr<ArithmeticOperation> left_, right_;
   };
@@ -134,12 +150,13 @@ namespace rbg {
   class EqualComparisonTest {
   public:
 
-    static constexpr ActionTypeTrait type = ActionTypeTrait :: CHECK;
-    explicit EqualComparisonTest(std::unique_ptr<ArithmeticOperation> left,
-                                       std::unique_ptr<ArithmeticOperation> right) : left_(std::move(left)),
-                                                                                     right_(std::move(right)) {}
+    static constexpr ActionTypeTrait type = ActionTypeTrait::CHECK;
 
-    bool Check(GameState *state) const __attribute__((always_inline)){
+    explicit EqualComparisonTest(std::unique_ptr<ArithmeticOperation> left,
+                                 std::unique_ptr<ArithmeticOperation> right) : left_(std::move(left)),
+                                                                               right_(std::move(right)) {}
+
+    always_inline     bool Check(GameState *state) const {
 
       return left_->Value(*state) == right_->Value(*state);
     }
@@ -152,16 +169,16 @@ namespace rbg {
   class NotEqualComparisonTest {
   public:
 
-    static constexpr ActionTypeTrait type = ActionTypeTrait :: CHECK;
-    explicit NotEqualComparisonTest(std::unique_ptr<ArithmeticOperation> left,
-                                          std::unique_ptr<ArithmeticOperation> right) : left_(std::move(left)),
-                                                                                        right_(std::move(right)) {}
+    static constexpr ActionTypeTrait type = ActionTypeTrait::CHECK;
 
-    bool Check(GameState *state) const __attribute__((always_inline)){
+    explicit NotEqualComparisonTest(std::unique_ptr<ArithmeticOperation> left,
+                                    std::unique_ptr<ArithmeticOperation> right) : left_(std::move(left)),
+                                                                                  right_(std::move(right)) {}
+
+    always_inline     bool Check(GameState *state) const {
 
       return left_->Value(*state) != right_->Value(*state);
     }
-
 
 
   private:
@@ -172,11 +189,12 @@ namespace rbg {
   class ConditionCheckTest {
   public:
 
-    static constexpr ActionTypeTrait type = ActionTypeTrait :: CHECK;
-    explicit ConditionCheckTest(std::unique_ptr<SearchStepsPoint> steps_point)
-      : steps_point_(std::move(steps_point)) {};
+    static constexpr ActionTypeTrait type = ActionTypeTrait::CHECK;
 
-    bool Check(GameState *state) const __attribute__((always_inline)){
+    explicit ConditionCheckTest(std::unique_ptr<SearchStepsPoint> steps_point)
+        : steps_point_(std::move(steps_point)) {};
+
+    always_inline     bool Check(GameState *state) const {
 
       return steps_point_->current()->RunAndFindEnd(state);
     }
@@ -190,11 +208,12 @@ namespace rbg {
   class NegatedConditionCheckTest {
   public:
 
-    static constexpr ActionTypeTrait type = ActionTypeTrait :: CHECK;
-    explicit NegatedConditionCheckTest(std::unique_ptr<SearchStepsPoint> steps_point)
-      : steps_point_(std::move(steps_point)) {};
+    static constexpr ActionTypeTrait type = ActionTypeTrait::CHECK;
 
-    bool Check(GameState *state) const __attribute__((always_inline)){
+    explicit NegatedConditionCheckTest(std::unique_ptr<SearchStepsPoint> steps_point)
+        : steps_point_(std::move(steps_point)) {};
+
+    always_inline     bool Check(GameState *state) const {
 
       return !steps_point_->current()->RunAndFindEnd(state);
     }
@@ -205,19 +224,19 @@ namespace rbg {
   };
 
 
-
-  class OffApplication : public ModifyingApplication{
+  class OffApplication : public ModifyingApplication {
   public:
-     static constexpr ActionTypeTrait type = ActionTypeTrait :: MODIFIER;
+    static constexpr ActionTypeTrait type = ActionTypeTrait::MODIFIER;
     using revert_info_t = piece_id_t;
 
     explicit OffApplication(revert_info_t piece_id, uint index) : ModifyingApplication(index), piece_id_(piece_id) {}
 
     revert_info_t Apply(GameState *state) const override {
       piece_id_t previous_piece = state->board_.at(state->current_pos_);
-  state->board_.set(state->current_pos_, piece_id_);
-  return previous_piece;
+      state->board_.set(state->current_pos_, piece_id_);
+      return previous_piece;
     }
+
     void Revert(GameState *state, revert_info_t previous_piece) const override {
 
       state->board_.set(state->current_pos_, previous_piece);
@@ -230,15 +249,18 @@ namespace rbg {
 
   class PlayerSwitchApplication : public ModifyingApplication {
   public:
-    static constexpr ActionTypeTrait type = ActionTypeTrait :: SWITCH;
+    static constexpr ActionTypeTrait type = ActionTypeTrait::SWITCH;
     using revert_info_t = player_id_t;
 
-    explicit PlayerSwitchApplication(player_id_t player_id, uint index) : ModifyingApplication(index), player_id_(player_id) {}
+    explicit PlayerSwitchApplication(player_id_t player_id, uint index) : ModifyingApplication(index),
+                                                                          player_id_(player_id) {}
+
     revert_info_t Apply(GameState *state) const override {
       player_id_t previous_player = state->current_player_;
-  state->current_player_ = player_id_;
-  return previous_player;
+      state->current_player_ = player_id_;
+      return previous_player;
     }
+
     void Revert(GameState *state, revert_info_t previous_player) const override {
 
       state->current_player_ = previous_player;
@@ -251,7 +273,7 @@ namespace rbg {
 
   class AssignmentAction : public ModifyingApplication {
   public:
-    static constexpr ActionTypeTrait type = ActionTypeTrait :: MODIFIER;
+    static constexpr ActionTypeTrait type = ActionTypeTrait::MODIFIER;
     using revert_info_t = variable_value_t;
 
     explicit AssignmentAction(variable_id_t variable_id, std::unique_ptr<ArithmeticOperation> value, uint index)
@@ -259,9 +281,10 @@ namespace rbg {
 
     revert_info_t Apply(GameState *state) const override {
       variable_value_t previous_value = state->variables_values_[variable_id_];
-  state->variables_values_[variable_id_] = value_->Value(*state);
-  return previous_value;
+      state->variables_values_[variable_id_] = value_->Value(*state);
+      return previous_value;
     }
+
     void Revert(GameState *state, revert_info_t previous_value) const override {
 
       state->variables_values_[variable_id_] = previous_value;
@@ -274,19 +297,37 @@ namespace rbg {
 
   class VariableBoundsTest {
   public:
-    static constexpr ActionTypeTrait type = ActionTypeTrait :: CHECK;
+    static constexpr ActionTypeTrait type = ActionTypeTrait::CHECK;
+
     explicit VariableBoundsTest(variable_id_t variable_id) : variable_id_(variable_id) {}
-    bool Check(GameState *state) const __attribute__((always_inline)){
+
+    always_inline     bool Check(GameState *state) const {
 
       return state->variables_values()[variable_id_] <= state->declarations().variables_bounds[variable_id_];
     }
+
   private:
     variable_id_t variable_id_;
   };
 
+  template<typename NormalApplication>
+  class WeirdMultipleApplication : public NormalApplication {
+    static constexpr ActionTypeTrait type = ActionTypeTrait::MULTIPLE_APPLICATION;
+
+    explicit WeirdMultipleApplication(NormalApplication normal_application) : normal_application_(normal_application) {}
+
+    template<typename Function>
+    void Run(GameState *state, Function next) {
+      normal_application_.Apply(state);
+      next();
+      normal_application_.Revert(state);
+    }
+
+  private:
+    NormalApplication normal_application_;
+
+  };
 }
-
-
 
 
 #endif //RBGGAMEMANAGER_ACTIONS_H

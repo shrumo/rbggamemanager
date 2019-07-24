@@ -14,7 +14,8 @@ namespace rbg{
     CHECK,
     APPLICATION,
     MODIFIER,
-    SWITCH
+    SWITCH,
+    MULTIPLE_APPLICATION
   };
   class ModifyingApplication {
   public:

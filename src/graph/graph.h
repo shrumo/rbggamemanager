@@ -17,7 +17,7 @@
 #include <sstream>
 #include <cassert>
 #include <stl_extension/range.h>
-#include <stl_extension/pair.h>
+#include <stl_extension/utility.h>
 #include <stl_extension/iterator_transform.h>
 
 namespace rbg {
