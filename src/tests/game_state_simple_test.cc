@@ -2,7 +2,7 @@
 // Created by shrum on 28.06.19.
 //
 
-#include <construction/gamestate_creator.h>
+#include <game_state/construction/gamestate_creator.h>
 #include <iostream>
 
 using namespace rbg;

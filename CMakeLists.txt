@@ -23,37 +23,39 @@ include_directories(asio/asio/include)
 include_directories(src)
 include_directories(.)
 
-set(GAMESTATE_FILES src/game_state/namesresolver.h src/game_state/board.h src/game_state/search_steps/search_step.h
-        src/game_state/declarations.h src/game_state/game_state.h src/stl_extension/resetabblebitarraystack.h
-        src/game_state/search_steps/arithmetic_operation.cc src/game_state/search_steps/arithmetic_operation.h
-        src/game_state/search_steps/arithmetic_operation_visitor.h
-        src/game_state/namesresolver.cc src/game_state/board.cc
-        src/game_state/calculate_perft.h src/game_state/game_state_printer.h src/game_state/game_state_printer.cc src/game_state/search_steps/actions.cpp src/game_state/search_steps/actions.h src/stl_extension/vector.h src/game_state/search_steps/public_actions.h src/game_state/search_steps/public_actions.cpp)
-
-set(GRAPH_FILES src/graph/graph.h src/stl_extension/range.h src/stl_extension/utility.h src/stl_extension/iterator_transform.h)
+set(GRAPH_FILES src/stl_extension/graph.h src/stl_extension/range.h src/stl_extension/utility.h src/stl_extension/iterator_transform.h)
 
 set(PARSER_FILES src/parser/parser_wrapper.h src/parser/parser_actions.h src/parser/parser_wrapper.cc)
 
-set(CONSTRUCTION_FILES
-        src/construction/graph_creator.cc src/construction/graph_creator.h src/construction/declarations_creator.h
-        src/construction/moves/moves.h src/construction/moves/moves.cc
-        src/construction/moves/moves_creator.cc src/construction/moves/moves_creator.h
-        src/construction/moves/arithmetic_creator.cc src/construction/moves/arithmetic_creator.h
-        src/construction/moves/moves_visitor.h src/construction/moves/moves_printer.cc
-        src/construction/moves/moves_printer.h src/construction/search_step_creator.cc src/construction/search_step_creator.h
+set(GAMESTATE_FILES ${PARSER_FILES} ${GRAPH_FILES} src/game_state/names_resolver.h src/game_state/board.h src/game_state/search_steps/block.h
+        src/game_state/declarations.h src/game_state/game_state.h src/stl_extension/resetabble_bitarray_stack.h
         src/game_state/search_steps/arithmetic_operation.cc src/game_state/search_steps/arithmetic_operation.h
-        src/game_state/board.cc src/game_state/search_steps/search_step.h src/construction/gamestate_creator.h src/construction/declarations_creator.cc src/construction/gamestate_creator.cc)
+        src/game_state/search_steps/arithmetic_operation_visitor.h
+        src/game_state/names_resolver.cc src/game_state/board.cc
+        src/game_state/calculate_perft.h src/game_state/game_state_printer.h src/game_state/game_state_printer.cc
+        src/game_state/search_steps/actions.cpp src/game_state/search_steps/actions.h src/stl_extension/vector.h
+        src/game_state/search_steps/modifying_application.h src/game_state/search_steps/modifying_application.cpp
+        src/game_state/construction/graph_creator.cc src/game_state/construction/graph_creator.h src/game_state/construction/declarations_creator.h
+        src/game_state/construction/moves/moves.h src/game_state/construction/moves/moves.cc
+        src/game_state/construction/moves/moves_creator.cc src/game_state/construction/moves/moves_creator.h
+        src/game_state/construction/moves/arithmetic_creator.cc src/game_state/construction/moves/arithmetic_creator.h
+        src/game_state/construction/moves/moves_visitor.h src/game_state/construction/moves/moves_printer.cc
+        src/game_state/construction/moves/moves_printer.h src/game_state/construction/search_step_creator.cc src/game_state/construction/search_step_creator.h
+        src/game_state/search_steps/arithmetic_operation.cc src/game_state/search_steps/arithmetic_operation.h
+        src/game_state/board.cc src/game_state/search_steps/block.h src/game_state/construction/gamestate_creator.h
+        src/game_state/construction/declarations_creator.cc src/game_state/construction/gamestate_creator.cc
+        )
 
-set(NETWORKING_FILES src/networking/server.h src/networking/server.cc src/networking/coder.h src/networking/synchronous_client.h src/networking/coder.cc)
+set(NETWORKING_FILES ${GAMESTATE_FILES} src/networking/server.h src/networking/server.cc src/networking/coder.h src/networking/synchronous_client.h src/networking/coder.cc)
 
 set(ENV{PYTHONPATH} ${PYTHON_PATH}:${CMAKE_CURRENT_BINARY_DIR})
 
-pybind11_add_module(rbg src/python/rbg.cc ${GRAPH_FILES} ${PARSER_FILES} ${CONSTRUCTION_FILES})
+pybind11_add_module(rbg src/python_bindings/rbg.cc ${GAMESTATE_FILES})
 target_link_libraries(rbg PRIVATE rbgParser)
 
 add_custom_target(visualize_graph ALL
-        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/src/widgets/graph_widget.py ${CMAKE_CURRENT_BINARY_DIR}/graph_widget.py
-        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/src/widgets/visualize_graph.py ${CMAKE_CURRENT_BINARY_DIR}/visualize_graph.py
+        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/src/python_widgets/graph_widget.py ${CMAKE_CURRENT_BINARY_DIR}/graph_widget.py
+        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/src/python_widgets/visualize_graph.py ${CMAKE_CURRENT_BINARY_DIR}/visualize_graph.py
         DEPENDS rbg)
 
 add_executable(benchmark ${GRAPH_FILES} ${PARSER_FILES}
@@ -66,11 +68,11 @@ add_executable(explain ${GRAPH_FILES} ${PARSER_FILES}
 
 target_link_libraries(explain rbgParser)
 
-add_executable(start_server ${GRAPH_FILES} ${PARSER_FILES} ${CONSTRUCTION_FILES} ${GAMESTATE_FILES} ${NETWORKING_FILES} src/start_server.cc)
+add_executable(start_server ${NETWORKING_FILES} src/start_server.cc)
 target_link_libraries(start_server rbgParser)
 target_link_libraries(start_server pthread)
 
-add_executable(start_random_client ${GRAPH_FILES} ${PARSER_FILES} ${CONSTRUCTION_FILES} ${GAMESTATE_FILES} ${NETWORKING_FILES} src/start_random_client.cc)
+add_executable(start_random_client ${NETWORKING_FILES} src/start_random_client.cc)
 target_link_libraries(start_random_client rbgParser)
 target_link_libraries(start_random_client pthread)
 
@@ -83,30 +85,30 @@ add_executable(parser_test ${GRAPH_FILES} ${PARSER_FILES} src/tests/parser_test.
 target_link_libraries(parser_test rbgParser)
 add_test(parser_test parser_test)
 
-add_executable(creator_test ${GRAPH_FILES} ${PARSER_FILES} ${CONSTRUCTION_FILES} ${GAMESTATE_FILES} src/tests/creator_test.cc)
+add_executable(creator_test ${GAMESTATE_FILES} src/tests/creator_test.cc)
 target_link_libraries(creator_test rbgParser)
 add_test(creator_test creator_test)
 
-add_executable(searchsteps_test ${GRAPH_FILES} ${PARSER_FILES} ${CONSTRUCTION_FILES} ${GAMESTATE_FILES} src/tests/search_steps_test.cc)
+add_executable(searchsteps_test  ${GAMESTATE_FILES} src/tests/search_steps_test.cc)
 target_link_libraries(searchsteps_test rbgParser)
 add_test(searchsteps_test searchsteps_test)
 
-add_executable(declarations_test ${PARSER_FILES} ${CONSTRUCTION_FILES} ${GAMESTATE_FILES} src/tests/declarations_test.cc)
+add_executable(declarations_test  ${GAMESTATE_FILES} src/tests/declarations_test.cc)
 target_link_libraries(declarations_test rbgParser)
 add_test(declarations_test declarations_test)
 
-add_executable(namesresolver_test ${GAMESTATE_FILES} src/tests/namesresolver_test.cc)
+add_executable(namesresolver_test src/game_state/names_resolver.h src/game_state/names_resolver.cc src/tests/namesresolver_test.cc)
 add_test(namesresolver_test namesresolver_test)
 
-add_executable(gamestate_simple_test ${GRAPH_FILES} ${PARSER_FILES} ${CONSTRUCTION_FILES} ${GAMESTATE_FILES} src/tests/gamestate_simple_test.cc)
+add_executable(gamestate_simple_test  ${GAMESTATE_FILES} src/tests/game_state_simple_test.cc)
 target_link_libraries(gamestate_simple_test rbgParser)
 add_test(gamestate_simple_test gamestate_simple_test)
 
-add_executable(chess_test ${GRAPH_FILES} ${PARSER_FILES} ${CONSTRUCTION_FILES} ${GAMESTATE_FILES} src/tests/chess_test.cc)
+add_executable(chess_test ${GAMESTATE_FILES} src/tests/chess_test.cc)
 target_link_libraries(chess_test rbgParser)
 add_test(chess_test chess_test)
 
-add_executable(board_test ${GAMESTATE_FILES} src/tests/board_test.cc)
+add_executable(board_test src/game_state/board.h src/game_state/board.cc src/tests/board_test.cc)
 add_test(board_test board_test)
 
 add_custom_target(python_test ALL COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/src/tests/python_test.py ${CMAKE_CURRENT_BINARY_DIR}/python_test.py

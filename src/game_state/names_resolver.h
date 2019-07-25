@@ -2,8 +2,8 @@
 // Created by shrum on 09.06.19.
 //
 
-#ifndef RBGGAMEMANAGER_NAMESRESOLVER_H
-#define RBGGAMEMANAGER_NAMESRESOLVER_H
+#ifndef RBGGAMEMANAGER_NAMES_RESOLVER_H
+#define RBGGAMEMANAGER_NAMES_RESOLVER_H
 
 #include <string>
 #include <vector>
@@ -51,4 +51,4 @@ namespace rbg {
 
 std::ostream &operator<<(std::ostream &o, const rbg::NamesResolver &res);
 
-#endif //RBGGAMEMANAGER_NAMESRESOLVER_H
+#endif //RBGGAMEMANAGER_NAMES_RESOLVER_H

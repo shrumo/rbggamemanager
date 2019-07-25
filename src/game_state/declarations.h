@@ -6,7 +6,7 @@
 #define RBGGAMEMANAGER_DECLARATIONS_H
 
 #include <rbgParser/src/parsed_game.hpp>
-#include "namesresolver.h"
+#include "names_resolver.h"
 #include "board.h"
 
 namespace rbg {

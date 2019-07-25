@@ -5,7 +5,7 @@
 #ifndef RBGGAMEMANAGER_GAME_STATE_H
 #define RBGGAMEMANAGER_GAME_STATE_H
 
-#include <construction/search_step_creator.h>
+#include <game_state/construction/search_step_creator.h>
 #include "board.h"
 #include "declarations.h"
 

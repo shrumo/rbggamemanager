@@ -2,7 +2,7 @@
 // Created by shrum on 30.06.19.
 //
 
-#include <construction/gamestate_creator.h>
+#include <game_state/construction/gamestate_creator.h>
 #include <game_state/calculate_perft.h>
 #include <iostream>
 #include <game_state/game_state_printer.h>

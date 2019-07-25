@@ -2,7 +2,7 @@
 // Created by shrum on 18/07/19.
 //
 
-#include "public_actions.h"
+#include "modifying_application.h"
 #include <game_state/game_state.h>
 
 using namespace rbg;

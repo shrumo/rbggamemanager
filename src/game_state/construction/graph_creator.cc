@@ -4,12 +4,12 @@
 
 #include "graph_creator.h"
 
-#include <graph/graph.h>
+#include <stl_extension/graph.h>
 #include "parser/parser_wrapper.h"
 #include "parser/parser_actions.h"
-#include "moves/moves_creator.h"
+#include "game_state/construction/moves/moves_creator.h"
 #include <memory>
-#include <construction/moves/moves_visitor.h>
+#include <game_state/construction/moves/moves_visitor.h>
 #include <queue>
 
 using namespace std;

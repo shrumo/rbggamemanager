@@ -1,7 +1,7 @@
 //
 // Created by shrum on 21.05.19.
 //
-#include <graph/graph.h>
+#include <stl_extension/graph.h>
 #include <algorithm>
 #include <iostream>
 #include <cassert>

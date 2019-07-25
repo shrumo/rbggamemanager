@@ -2,10 +2,10 @@
 // Created by shrum on 18/07/19.
 //
 
-#ifndef RBGGAMEMANAGER_PUBLIC_ACTIONS_H
-#define RBGGAMEMANAGER_PUBLIC_ACTIONS_H
+#ifndef RBGGAMEMANAGER_MODIFYING_APPLICATION_H
+#define RBGGAMEMANAGER_MODIFYING_APPLICATION_H
 
-#include <game_state/namesresolver.h>
+#include <game_state/names_resolver.h>
 #include <game_state/board.h>
 
 namespace rbg{
@@ -38,4 +38,4 @@ namespace rbg{
   };
 }
 
-#endif //RBGGAMEMANAGER_PUBLIC_ACTIONS_H
+#endif //RBGGAMEMANAGER_MODIFYING_APPLICATION_H

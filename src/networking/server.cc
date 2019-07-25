@@ -19,7 +19,7 @@ void rbg::ClientConnection::Write() {
                           Write();
                         }
                       } else {
-                        instance_->Leave(shared_from_this());
+                        instance_->KickAll();
                       }
                     });
 }
@@ -34,7 +34,7 @@ void rbg::ClientConnection::Read() {
                       std::istream is(&read_move_);
                      std::getline(is, res, '\0');
                      if(res.empty()) {
-                       instance_->Leave(shared_from_this());
+                       instance_->KickAll();
                        return;
                      }
                      bool valid = instance_->HandleMove(
@@ -42,7 +42,7 @@ void rbg::ClientConnection::Read() {
                      if (valid && !ec) {
                        Read();
                      } else {
-                       instance_->Leave(shared_from_this());
+                       instance_->KickAll();
                      }
                    });
 }
@@ -52,7 +52,7 @@ void rbg::ClientConnection::Start() {
   Read();
 }
 
-void rbg::ServerGameInstance::Leave(const ClientConnection::pointer &client) {
+void rbg::ServerGameInstance::KickAll() {
   std::lock_guard<std::mutex> lock(mutex_);
   state_.Reset();
 

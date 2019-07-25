@@ -7,9 +7,9 @@
 #include <chrono>
 #include <random>
 
-#include <construction/gamestate_creator.h>
+#include <game_state/construction/gamestate_creator.h>
 #include <game_state/calculate_perft.h>
-#include <construction/moves/moves_printer.h>
+#include <game_state/construction/moves/moves_printer.h>
 
 
 using namespace rbg;

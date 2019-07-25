@@ -8,8 +8,8 @@
 
 #include <networking/synchronous_client.h>
 #include <rbgParser/src/game_items.hpp>
-#include <construction/gamestate_creator.h>
-#include <construction/moves/moves_printer.h>
+#include <game_state/construction/gamestate_creator.h>
+#include <game_state/construction/moves/moves_printer.h>
 
 using namespace rbg;
 

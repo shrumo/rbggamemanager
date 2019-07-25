@@ -5,7 +5,7 @@
 #ifndef RBGGAMEMANAGER_BOARD_H
 #define RBGGAMEMANAGER_BOARD_H
 
-#include "namesresolver.h"
+#include "names_resolver.h"
 #include <ostream>
 
 namespace rbg {

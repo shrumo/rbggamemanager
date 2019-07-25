@@ -5,7 +5,7 @@
 #include <queue>
 #include <game_state/search_steps/actions.h>
 #include "search_step_creator.h"
-#include "moves/arithmetic_creator.h"
+#include "game_state/construction/moves/arithmetic_creator.h"
 
 using namespace rbg;
 using namespace std;

@@ -8,9 +8,9 @@
 #include <game_state/search_steps/arithmetic_operation_visitor.h>
 #include "moves.h"
 #include <sstream>
-#include <construction/graph_creator.h>
+#include <game_state/construction/graph_creator.h>
 #include <parser/parser_wrapper.h>
-#include <construction/declarations_creator.h>
+#include <game_state/construction/declarations_creator.h>
 
 using namespace rbg;
 

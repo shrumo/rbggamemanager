@@ -8,8 +8,8 @@
 #include "arithmetic_operation.h"
 #include <vector>
 #include <game_state/declarations.h>
-#include "stl_extension/resetabblebitarraystack.h"
-#include "public_actions.h"
+#include "stl_extension/resetabble_bitarray_stack.h"
+#include "modifying_application.h"
 #include <game_state/game_state.h>
 
 namespace rbg {

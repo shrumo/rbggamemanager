@@ -2,7 +2,7 @@
 // Created by shrum on 10.06.19.
 //
 
-#include <game_state/namesresolver.h>
+#include <game_state/names_resolver.h>
 #include <cassert>
 #include <iostream>
 

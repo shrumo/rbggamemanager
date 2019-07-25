@@ -14,8 +14,8 @@
 #include <type_traits>
 #include <game_state/declarations.h>
 #include <stl_extension/vector.h>
-#include "stl_extension/resetabblebitarraystack.h"
-#include "public_actions.h"
+#include "stl_extension/resetabble_bitarray_stack.h"
+#include "modifying_application.h"
 
 namespace rbg {
   class GameState;
@@ -202,7 +202,7 @@ namespace rbg {
     : action_(std::move(action)), next_elements_(std::forward<BlockElements>(actions)...)
     {}
 
-    // If the action is of type CHECK, those methods are defined.
+    /* ------------------------ If the action is of type CHECK, those methods are defined. -------------------------- */
     template<typename ActionTypeCopy = ActionType>
        typename std::enable_if<ActionTypeCopy::type == ActionTypeTrait :: CHECK,
     void>::type Run(GameState* state) {
@@ -228,7 +228,7 @@ namespace rbg {
       return false;
     }
 
-    // If the action is of type APPLICATION, those methods are defined.
+    /* ------------------------ If the action is of type APPLICATION, those methods are defined. -------------------- */
      template<typename ActionTypeCopy = ActionType>
       typename std::enable_if<ActionTypeCopy::type == ActionTypeTrait :: APPLICATION,
     bool>::type RunAndApplyFirst(GameState *state,
@@ -263,7 +263,7 @@ namespace rbg {
     }
     }
 
-    // If the action is of type MODIFIER, those methods are defined.
+    /* ------------------------ If the action is of type MODIFIER, those methods are defined. ----------------------- */
     template<typename ActionTypeCopy = ActionType>
       typename std::enable_if<ActionTypeCopy::type == ActionTypeTrait :: MODIFIER,
     void>::type Run(GameState* state) {
@@ -290,7 +290,7 @@ namespace rbg {
       return false;
     }
 
-    // If the action is of type MODIFIER, those methods are defined.
+    /* ------------------------ If the action is of type MODIFIER, those methods are defined. ----------------------- */
     template<typename ActionTypeCopy = ActionType>
       typename std::enable_if<ActionTypeCopy::type == ActionTypeTrait :: SWITCH,
     void>::type Run(GameState* state) {
@@ -312,7 +312,7 @@ namespace rbg {
       return true;
     }
 
-    // If the action is of type MODIFIER or of type SWITCH, those methods are defined.
+    /* ------------------------ If the action is of type MODIFIER or of type SWITCH, those methods are defined. ----- */
     template<typename ActionTypeCopy = ActionType>
       typename std::enable_if< ActionTypeCopy::type == ActionTypeTrait :: MODIFIER ||
     ActionTypeCopy::type == ActionTypeTrait :: SWITCH,
@@ -330,6 +330,7 @@ namespace rbg {
     }
     }
 
+    /* ------------------------ Those functions are defined always in a BlockContent -------------------------------- */
     void AddNextBlock(AbstractBlock * step) {
       next_elements_.AddNextBlock(step);
     }

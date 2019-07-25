@@ -5,10 +5,10 @@
 #ifndef RBGGAMEMANAGER_SEARCH_STEP_CREATOR_H
 #define RBGGAMEMANAGER_SEARCH_STEP_CREATOR_H
 
-#include "moves/moves_visitor.h"
+#include "game_state/construction/moves/moves_visitor.h"
 #include "graph_creator.h"
 #include <unordered_map>
-#include <game_state/search_steps/search_step.h>
+#include <game_state/search_steps/block.h>
 
 namespace rbg {
 

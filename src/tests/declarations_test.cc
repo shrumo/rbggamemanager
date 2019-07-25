@@ -5,7 +5,7 @@
 #include <parser/parser_wrapper.h>
 #include <cassert>
 #include <queue>
-#include <construction/declarations_creator.h>
+#include <game_state/construction/declarations_creator.h>
 #include <unordered_set>
 
 using namespace rbg;

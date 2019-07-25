@@ -2,7 +2,7 @@
 // Created by shrum on 17.06.19.
 //
 
-#include "namesresolver.h"
+#include "names_resolver.h"
 
 std::ostream &operator<<(std::ostream &o, const rbg::NamesResolver &res) {
   o << "<NamesResolver with mapping {";

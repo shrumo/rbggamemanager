@@ -13,7 +13,7 @@
 #include "coder.h"
 #include <rbgParser/src/game_items.hpp>
 
-#include <construction/gamestate_creator.h>
+#include <game_state/construction/gamestate_creator.h>
 #include <game_state/game_state.h>
 #include <game_state/game_state_printer.h>
 
@@ -100,7 +100,7 @@ namespace rbg {
              state_.declarations().players_resolver.size() - 1;
     }
 
-    void Leave(const ClientConnection::pointer &client);
+    void KickAll();
 
 
     void Start() {

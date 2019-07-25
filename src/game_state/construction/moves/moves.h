@@ -8,7 +8,7 @@
 
 #include <game_state/board.h>
 #include <game_state/search_steps/arithmetic_operation.h>
-#include <graph/graph.h>
+#include <stl_extension/graph.h>
 
 namespace rbg {
   class Shift;

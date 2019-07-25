@@ -3,8 +3,8 @@
 //
 
 #include "moves_creator.h"
-#include "construction/moves/arithmetic_creator.h"
-#include "construction/graph_creator.h"
+#include "arithmetic_creator.h"
+#include "game_state/construction/graph_creator.h"
 #include <parser/parser_wrapper.h>
 
 using namespace rbg;
