@@ -2,7 +2,7 @@
 // Created by shrum on 28.06.19.
 //
 
-#include <game_state/construction/gamestate_creator.h>
+#include <game_state/construction/game_state_creator.h>
 #include <iostream>
 
 using namespace rbg;
@@ -63,7 +63,7 @@ int main() {
       } else {
         first_printed = true;
       }
-      cout << e.vertex << " (" << game.declarations().board_description.vertices_names().Name(e.vertex) << ")"
+      cout << e.vertex << " (" << game.declarations().initial_board.vertices_names().Name(e.vertex) << ")"
            << " "
            << e.modifier_index;
     }

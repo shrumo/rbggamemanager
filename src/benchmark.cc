@@ -8,8 +8,8 @@
 #include <fstream>
 #include <chrono>
 
-#include <game_state/construction/gamestate_creator.h>
-#include <game_state/calculate_perft.h>
+#include <game_state/construction/game_state_creator.h>
+#include <utility/calculate_perft.h>
 
 using namespace rbg;
 using namespace std;

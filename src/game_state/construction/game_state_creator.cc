@@ -2,7 +2,7 @@
 // Created by shrum on 02.07.19.
 //
 
-#include "gamestate_creator.h"
+#include "game_state_creator.h"
 
 rbg::GameState rbg::CreateGameState(const std::string &game_text) {
   auto game = ParseGame(ParseGame(game_text)->to_rbg());

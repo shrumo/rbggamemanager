@@ -5,7 +5,7 @@
 #ifndef RBGGAMEMANAGER_MOVES_CREATOR_H
 #define RBGGAMEMANAGER_MOVES_CREATOR_H
 
-#include "moves.h"
+#include "game_description/moves/moves.h"
 
 namespace rbg {
   std::unique_ptr<Move> CreateMove(const rbg_parser::game_move &move, const Declarations &declarations);

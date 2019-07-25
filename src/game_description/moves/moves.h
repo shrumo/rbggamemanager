@@ -6,9 +6,9 @@
 #define RBGGAMEMANAGER_MOVES_H
 
 
-#include <game_state/board.h>
+#include <game_description/board.h>
 #include <game_state/search_steps/arithmetic_operation.h>
-#include <stl_extension/graph.h>
+#include <utility/graph.h>
 
 namespace rbg {
   class Shift;

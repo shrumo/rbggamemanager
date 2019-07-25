@@ -3,10 +3,10 @@
 //
 #include <parser/parser_wrapper.h>
 #include <cassert>
-#include <game_state/construction/graph_creator.h>
+#include <game_description/construction/graph_creator.h>
 #include <queue>
-#include <game_state/construction/moves/moves_printer.h>
-#include <game_state/construction/declarations_creator.h>
+#include <utility/printer.h>
+#include <game_description/construction/declarations_creator.h>
 
 using namespace rbg;
 using namespace std;

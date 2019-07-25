@@ -3,13 +3,13 @@
 //
 
 #include <pybind11/pybind11.h>
-#include <stl_extension/graph.h>
+#include <utility/graph.h>
 #include <parser/parser_wrapper.h>
-#include <game_state/construction/graph_creator.h>
+#include "game_description/construction/graph_creator.h"
 #include <pybind11/stl.h>
 #include <pybind11/complex.h>
-#include <game_state/construction/declarations_creator.h>
-#include <game_state/construction/moves/moves_printer.h>
+#include "game_description/construction/declarations_creator.h"
+#include <utility/printer.h>
 
 
 using namespace rbg;

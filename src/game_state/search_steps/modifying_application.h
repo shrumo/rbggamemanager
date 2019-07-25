@@ -5,8 +5,8 @@
 #ifndef RBGGAMEMANAGER_MODIFYING_APPLICATION_H
 #define RBGGAMEMANAGER_MODIFYING_APPLICATION_H
 
-#include <game_state/names_resolver.h>
-#include <game_state/board.h>
+#include <game_description/names_resolver.h>
+#include <game_description/board.h>
 
 namespace rbg{
   class GameState;

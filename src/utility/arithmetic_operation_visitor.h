@@ -5,7 +5,7 @@
 #ifndef RBGGAMEMANAGER_ARITHMETIC_OPERATION_VISITOR_H
 #define RBGGAMEMANAGER_ARITHMETIC_OPERATION_VISITOR_H
 
-#include "arithmetic_operation.h"
+#include "game_state/search_steps/arithmetic_operation.h"
 
 namespace rbg {
   template<typename ResultType>

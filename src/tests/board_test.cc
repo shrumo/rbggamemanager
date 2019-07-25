@@ -2,7 +2,7 @@
 // Created by shrum on 10.06.19.
 //
 
-#include <game_state/board.h>
+#include <game_description/board.h>
 #include <cassert>
 #include <iostream>
 

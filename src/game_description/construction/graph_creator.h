@@ -5,11 +5,11 @@
 #ifndef RBGGAMEMANAGER_GRAPH_CREATOR_H
 #define RBGGAMEMANAGER_GRAPH_CREATOR_H
 
-#include <stl_extension/graph.h>
+#include <utility/graph.h>
 #include <memory>
 #include <utility>
 #include <rbgParser/src/game_move.hpp>
-#include "game_state/construction/moves/moves.h"
+#include "game_description/moves/moves.h"
 
 namespace rbg {
   struct VertexNode {

@@ -7,9 +7,9 @@
 #include <chrono>
 #include <random>
 
-#include <game_state/construction/gamestate_creator.h>
-#include <game_state/calculate_perft.h>
-#include <game_state/construction/moves/moves_printer.h>
+#include <game_state/construction/game_state_creator.h>
+#include <utility/calculate_perft.h>
+#include <utility/printer.h>
 
 
 using namespace rbg;
@@ -44,7 +44,7 @@ int main(int argc, const char *argv[]) {
     auto move = moves[random_index(rng)];
     cout << "Chosen move:" << std::endl;
     for(const auto& mod : move) {
-      cout << "\t" << game.declarations().board_description.vertices_names().Name(mod.vertex) << " (" << mod.vertex << ") "
+      cout << "\t" << game.declarations().initial_board.vertices_names().Name(mod.vertex) << " (" << mod.vertex << ") "
            << actions_translator[mod.modifier_index] << " (" << mod.modifier_index << ")" << std::endl;
     }
     game.Apply(moves[random_index(rng)]);

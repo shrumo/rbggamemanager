@@ -5,8 +5,8 @@
 #include <parser/parser_wrapper.h>
 #include <cassert>
 #include <queue>
-#include <game_state/construction/declarations_creator.h>
 #include <unordered_set>
+#include <game_description/construction/declarations_creator.h>
 
 using namespace rbg;
 using namespace std;
@@ -43,34 +43,34 @@ int main() {
   assert(result.variables_bounds[result.variables_resolver.Id("blue")] == 50);
   assert(result.variables_bounds[result.variables_resolver.Id("turn")] == 10);
 
-  assert(result.board_description.vertices_count() == 5);
-  assert(result.board_description.edges_count() == 4);
+  assert(result.initial_board.vertices_count() == 5);
+  assert(result.initial_board.edges_count() == 4);
 
   std::unordered_set<std::string> square_edges;
-  for (vertex_id_t id = 1; id < result.board_description.vertices_count(); id++) {
-    if (result.board_description.NextVertex(id, result.board_description.edges_names().Id("right")) ==
-        result.board_description.vertices_count() &&
-        result.board_description.NextVertex(id, result.board_description.edges_names().Id("up")) ==
-        result.board_description.vertices_count()) {
-      assert(result.board_description.initial_content().at(id) == result.pieces_resolver.Id("r"));
+  for (vertex_id_t id = 1; id < result.initial_board.vertices_count(); id++) {
+    if (result.initial_board.NextVertex(id, result.initial_board.edges_names().Id("right")) ==
+        result.initial_board.vertices_count() &&
+        result.initial_board.NextVertex(id, result.initial_board.edges_names().Id("up")) ==
+        result.initial_board.vertices_count()) {
+      assert(result.initial_board.initial_content().at(id) == result.pieces_resolver.Id("r"));
       square_edges.insert("(right,up)");
-    } else if (result.board_description.NextVertex(id, result.board_description.edges_names().Id("left")) ==
-               result.board_description.vertices_count() &&
-               result.board_description.NextVertex(id, result.board_description.edges_names().Id("up")) ==
-               result.board_description.vertices_count()) {
-      assert(result.board_description.initial_content().at(id) == result.pieces_resolver.Id("e"));
+    } else if (result.initial_board.NextVertex(id, result.initial_board.edges_names().Id("left")) ==
+               result.initial_board.vertices_count() &&
+               result.initial_board.NextVertex(id, result.initial_board.edges_names().Id("up")) ==
+               result.initial_board.vertices_count()) {
+      assert(result.initial_board.initial_content().at(id) == result.pieces_resolver.Id("e"));
       square_edges.insert("(left,up)");
-    } else if (result.board_description.NextVertex(id, result.board_description.edges_names().Id("right")) ==
-               result.board_description.vertices_count() &&
-               result.board_description.NextVertex(id, result.board_description.edges_names().Id("down")) ==
-               result.board_description.vertices_count()) {
-      assert(result.board_description.initial_content().at(id) == result.pieces_resolver.Id("b"));
+    } else if (result.initial_board.NextVertex(id, result.initial_board.edges_names().Id("right")) ==
+               result.initial_board.vertices_count() &&
+               result.initial_board.NextVertex(id, result.initial_board.edges_names().Id("down")) ==
+               result.initial_board.vertices_count()) {
+      assert(result.initial_board.initial_content().at(id) == result.pieces_resolver.Id("b"));
       square_edges.insert("(right,down)");
-    } else if (result.board_description.NextVertex(id, result.board_description.edges_names().Id("left")) ==
-               result.board_description.vertices_count() &&
-               result.board_description.NextVertex(id, result.board_description.edges_names().Id("down")) ==
-               result.board_description.vertices_count()) {
-      assert(result.board_description.initial_content().at(id) == result.pieces_resolver.Id("e"));
+    } else if (result.initial_board.NextVertex(id, result.initial_board.edges_names().Id("left")) ==
+               result.initial_board.vertices_count() &&
+               result.initial_board.NextVertex(id, result.initial_board.edges_names().Id("down")) ==
+               result.initial_board.vertices_count()) {
+      assert(result.initial_board.initial_content().at(id) == result.pieces_resolver.Id("e"));
       square_edges.insert("(left,down)");
     }
   }
@@ -86,5 +86,5 @@ int main() {
   std::cout << result.variables_resolver << std::endl;
 
   std::cout << "Board:\n";
-  std::cout << result.board_description << std::endl;
+  std::cout << result.initial_board << std::endl;
 }

@@ -2,10 +2,10 @@
 // Created by shrum on 30.06.19.
 //
 
-#include <game_state/construction/gamestate_creator.h>
-#include <game_state/calculate_perft.h>
+#include <game_state/construction/game_state_creator.h>
+#include <utility/calculate_perft.h>
 #include <iostream>
-#include <game_state/game_state_printer.h>
+#include <utility/printer.h>
 
 using namespace rbg;
 using namespace std;

@@ -4,7 +4,7 @@
 
 #include "moves_creator.h"
 #include "arithmetic_creator.h"
-#include "game_state/construction/graph_creator.h"
+#include "game_description/construction/graph_creator.h"
 #include <parser/parser_wrapper.h>
 
 using namespace rbg;
@@ -33,7 +33,7 @@ public:
   explicit MovesCreator(const Declarations &declarations) : declarations_(declarations) {}
 
   unique_ptr<Move> ShiftCase(const rbg_parser::shift &move) override {
-    return make_unique<Shift>(declarations_.board_description.edges_names().Id(move.get_content().to_string()),
+    return make_unique<Shift>(declarations_.initial_board.edges_names().Id(move.get_content().to_string()),
                               move.index_in_expression());
   }
 

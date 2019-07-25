@@ -5,8 +5,7 @@
 #ifndef RBGGAMEMANAGER_CALCULATE_PERFT_H
 #define RBGGAMEMANAGER_CALCULATE_PERFT_H
 
-#include "game_state.h"
-#include "game_state_printer.h"
+#include "game_state/game_state.h"
 
 namespace rbg {
 

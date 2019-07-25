@@ -13,9 +13,9 @@
 #include "coder.h"
 #include <rbgParser/src/game_items.hpp>
 
-#include <game_state/construction/gamestate_creator.h>
+#include <game_state/construction/game_state_creator.h>
 #include <game_state/game_state.h>
-#include <game_state/game_state_printer.h>
+#include <utility/printer.h>
 
 namespace rbg {
   using asio::ip::tcp;

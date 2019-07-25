@@ -23,27 +23,27 @@ include_directories(asio/asio/include)
 include_directories(src)
 include_directories(.)
 
-set(GRAPH_FILES src/stl_extension/graph.h src/stl_extension/range.h src/stl_extension/utility.h src/stl_extension/iterator_transform.h)
+set(GRAPH_FILES src/utility/graph.h src/stl_extension/range.h src/stl_extension/utility.h src/stl_extension/iterator_transform.h)
 
 set(PARSER_FILES src/parser/parser_wrapper.h src/parser/parser_actions.h src/parser/parser_wrapper.cc)
 
-set(GAMESTATE_FILES ${PARSER_FILES} ${GRAPH_FILES} src/game_state/names_resolver.h src/game_state/board.h src/game_state/search_steps/block.h
-        src/game_state/declarations.h src/game_state/game_state.h src/stl_extension/resetabble_bitarray_stack.h
+set(GAMESTATE_FILES ${PARSER_FILES} ${GRAPH_FILES} src/game_description/names_resolver.h src/game_description/board.h src/game_state/search_steps/block.h
+        src/game_description/declarations.h src/game_state/game_state.h src/utility/resetabble_bitarray_stack.h
         src/game_state/search_steps/arithmetic_operation.cc src/game_state/search_steps/arithmetic_operation.h
-        src/game_state/search_steps/arithmetic_operation_visitor.h
-        src/game_state/names_resolver.cc src/game_state/board.cc
-        src/game_state/calculate_perft.h src/game_state/game_state_printer.h src/game_state/game_state_printer.cc
-        src/game_state/search_steps/actions.cpp src/game_state/search_steps/actions.h src/stl_extension/vector.h
+        src/utility/arithmetic_operation_visitor.h
+        src/game_description/names_resolver.cc src/game_description/board.cc
+        src/utility/calculate_perft.h
+        src/game_state/search_steps/actions.h src/stl_extension/vector.h
         src/game_state/search_steps/modifying_application.h src/game_state/search_steps/modifying_application.cpp
-        src/game_state/construction/graph_creator.cc src/game_state/construction/graph_creator.h src/game_state/construction/declarations_creator.h
-        src/game_state/construction/moves/moves.h src/game_state/construction/moves/moves.cc
-        src/game_state/construction/moves/moves_creator.cc src/game_state/construction/moves/moves_creator.h
-        src/game_state/construction/moves/arithmetic_creator.cc src/game_state/construction/moves/arithmetic_creator.h
-        src/game_state/construction/moves/moves_visitor.h src/game_state/construction/moves/moves_printer.cc
-        src/game_state/construction/moves/moves_printer.h src/game_state/construction/search_step_creator.cc src/game_state/construction/search_step_creator.h
+        src/game_description/construction/graph_creator.cc src/game_description/construction/graph_creator.h src/game_description/construction/declarations_creator.h
+        src/game_description/moves/moves.h src/game_description/moves/moves.cc
+        src/game_description/construction/moves_creator.cc src/game_description/construction/moves_creator.h
+        src/game_description/construction/arithmetic_creator.cc src/game_description/construction/arithmetic_creator.h
+        src/utility/moves_visitor.h src/utility/printer.cc
+        src/utility/printer.h src/game_state/construction/blocks_creator.cc src/game_state/construction/blocks_creator.h
         src/game_state/search_steps/arithmetic_operation.cc src/game_state/search_steps/arithmetic_operation.h
-        src/game_state/board.cc src/game_state/search_steps/block.h src/game_state/construction/gamestate_creator.h
-        src/game_state/construction/declarations_creator.cc src/game_state/construction/gamestate_creator.cc
+        src/game_description/board.cc src/game_state/search_steps/block.h src/game_state/construction/game_state_creator.h
+        src/game_description/construction/declarations_creator.cc src/game_state/construction/game_state_creator.cc
         )
 
 set(NETWORKING_FILES ${GAMESTATE_FILES} src/networking/server.h src/networking/server.cc src/networking/coder.h src/networking/synchronous_client.h src/networking/coder.cc)
@@ -97,7 +97,7 @@ add_executable(declarations_test  ${GAMESTATE_FILES} src/tests/declarations_test
 target_link_libraries(declarations_test rbgParser)
 add_test(declarations_test declarations_test)
 
-add_executable(namesresolver_test src/game_state/names_resolver.h src/game_state/names_resolver.cc src/tests/namesresolver_test.cc)
+add_executable(namesresolver_test src/game_description/names_resolver.h src/game_description/names_resolver.cc src/tests/namesresolver_test.cc)
 add_test(namesresolver_test namesresolver_test)
 
 add_executable(gamestate_simple_test  ${GAMESTATE_FILES} src/tests/game_state_simple_test.cc)
@@ -108,7 +108,7 @@ add_executable(chess_test ${GAMESTATE_FILES} src/tests/chess_test.cc)
 target_link_libraries(chess_test rbgParser)
 add_test(chess_test chess_test)
 
-add_executable(board_test src/game_state/board.h src/game_state/board.cc src/tests/board_test.cc)
+add_executable(board_test src/game_description/board.h src/game_description/board.cc src/tests/board_test.cc)
 add_test(board_test board_test)
 
 add_custom_target(python_test ALL COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/src/tests/python_test.py ${CMAKE_CURRENT_BINARY_DIR}/python_test.py

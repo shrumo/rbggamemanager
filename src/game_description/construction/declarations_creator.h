@@ -5,7 +5,7 @@
 #ifndef RBGGAMEMANAGER_DECLARATIONS_CREATOR_H
 #define RBGGAMEMANAGER_DECLARATIONS_CREATOR_H
 
-#include <game_state/declarations.h>
+#include <game_description/declarations.h>
 
 namespace rbg {
   Declarations CreateDeclarations(const rbg_parser::parsed_game &game);

@@ -19,7 +19,7 @@ namespace rbg {
     NamesResolver variables_resolver;
     NamesResolver players_resolver;
     std::vector<variable_value_t> variables_bounds;
-    Board board_description;
+    Board initial_board;
     player_id_t keeper_id;
   };
 }

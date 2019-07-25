@@ -7,15 +7,15 @@
 
 #include "arithmetic_operation.h"
 #include <vector>
-#include <game_state/declarations.h>
-#include "stl_extension/resetabble_bitarray_stack.h"
+#include <game_description/declarations.h>
+#include "utility/resetabble_bitarray_stack.h"
 #include "modifying_application.h"
 #include <game_state/game_state.h>
 
 namespace rbg {
   class GameState;
 
-  class SearchStepsCollection;
+  class BlocksCollection;
 
   class SearchStepsPoint;
 }
@@ -51,7 +51,7 @@ namespace rbg {
     always_inline     revert_info_t Apply(GameState *state) const {
 
       vertex_id_t previous_vertex = state->current_pos_;
-      state->current_pos_ = state->declarations().board_description.NextVertex(state->current_pos_, edge_id_);
+      state->current_pos_ = state->declarations().initial_board.NextVertex(state->current_pos_, edge_id_);
       return previous_vertex;
 
     }
@@ -72,7 +72,7 @@ namespace rbg {
 
     always_inline     bool Check(GameState *state) const {
 
-      return state->current_pos() < state->declarations().board_description.vertices_count();
+      return state->current_pos() < state->declarations().initial_board.vertices_count();
     }
   };
 
@@ -191,17 +191,17 @@ namespace rbg {
 
     static constexpr ActionTypeTrait type = ActionTypeTrait::CHECK;
 
-    explicit ConditionCheckTest(std::unique_ptr<SearchStepsPoint> steps_point)
+    explicit ConditionCheckTest(Block* steps_point)
         : steps_point_(std::move(steps_point)) {};
 
     always_inline     bool Check(GameState *state) const {
 
-      return steps_point_->current()->RunAndFindEnd(state);
+      return steps_point_->RunAndFindEnd(state);
     }
 
 
   private:
-    std::unique_ptr<SearchStepsPoint> steps_point_;
+    Block* steps_point_;
   };
 
 
@@ -210,17 +210,17 @@ namespace rbg {
 
     static constexpr ActionTypeTrait type = ActionTypeTrait::CHECK;
 
-    explicit NegatedConditionCheckTest(std::unique_ptr<SearchStepsPoint> steps_point)
+    explicit NegatedConditionCheckTest(Block* steps_point)
         : steps_point_(std::move(steps_point)) {};
 
     always_inline     bool Check(GameState *state) const {
 
-      return !steps_point_->current()->RunAndFindEnd(state);
+      return !steps_point_->RunAndFindEnd(state);
     }
 
 
   private:
-    std::unique_ptr<SearchStepsPoint> steps_point_;
+    Block* steps_point_;
   };
 
 

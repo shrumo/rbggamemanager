@@ -5,7 +5,7 @@
 #ifndef RBGGAMEMANAGER_MOVES_VISITOR_H
 #define RBGGAMEMANAGER_MOVES_VISITOR_H
 
-#include "moves.h"
+#include "game_description/moves/moves.h"
 
 namespace rbg {
 

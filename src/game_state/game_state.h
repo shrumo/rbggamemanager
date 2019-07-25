@@ -5,16 +5,16 @@
 #ifndef RBGGAMEMANAGER_GAME_STATE_H
 #define RBGGAMEMANAGER_GAME_STATE_H
 
-#include <game_state/construction/search_step_creator.h>
-#include "board.h"
-#include "declarations.h"
+#include <game_state/construction/blocks_creator.h>
+#include "game_description/board.h"
+#include "game_description/declarations.h"
 
 namespace rbg {
 
   using GameMove = std::vector<ModifierApplication>;
 
   struct MoveRevertInformation {
-    AbstractBlock *previous_search_step;
+    Block *previous_search_step;
     std::vector<ActionRevertInfo> player_steps_revert_information;
   };
 
@@ -68,7 +68,7 @@ namespace rbg {
         : declarations_(declarations), current_pos_(1),
           variables_values_(declarations.variables_resolver.size(), 0),
           current_player_(declarations.keeper_id),
-          board_(declarations.board_description.initial_content()), steps_(std::move(steps)),
+          board_(declarations.initial_board.initial_content()), steps_(std::move(steps)),
           moves_calculated(false) {
       steps_.current_position.SetParent(&steps_.collection);
       applied_modifiers_.reserve(10);
@@ -88,7 +88,7 @@ namespace rbg {
 
     MoveRevertInformation Apply(const std::vector<ModifierApplication> &move) {
       moves_.clear();
-      AbstractBlock *previous_search_step = steps_.current_position.current();
+      Block *previous_search_step = steps_.current_position.current();
       std::vector<ActionRevertInfo> revert_infos;
       revert_infos.reserve(move.size());
       for (const auto &mod_application : move) {
@@ -142,7 +142,7 @@ namespace rbg {
       current_pos_ = 1;
       variables_values_ = std::vector<variable_value_t >(declarations_.variables_resolver.size(), 0);
           current_player_ = declarations_.keeper_id;
-          board_ = declarations_.board_description.initial_content();
+          board_ = declarations_.initial_board.initial_content();
           steps_.current_position.reset();
           steps_.collection.stack().reset();
           moves_calculated = false;

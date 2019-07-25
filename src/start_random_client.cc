@@ -8,8 +8,8 @@
 
 #include <networking/synchronous_client.h>
 #include <rbgParser/src/game_items.hpp>
-#include <game_state/construction/gamestate_creator.h>
-#include <game_state/construction/moves/moves_printer.h>
+#include <game_state/construction/game_state_creator.h>
+#include <utility/printer.h>
 
 using namespace rbg;
 
@@ -39,7 +39,7 @@ int main(int argc, char *argv[]) {
       state.Apply(move);
       std::cout << "Sending move:" << std::endl;
       for(const auto& mod : move) {
-        std::cout << "\t" << state.declarations().board_description.vertices_names().Name(mod.vertex) << " (" << mod.vertex << ") "
+        std::cout << "\t" << state.declarations().initial_board.vertices_names().Name(mod.vertex) << " (" << mod.vertex << ") "
            << actions_translator[mod.modifier_index] << " (" << mod.modifier_index << ")" << std::endl;
       }
       client.Write(move);
