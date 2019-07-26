@@ -7,7 +7,7 @@
 
 
 #include <game_description/board.h>
-#include <game_state/search_steps/arithmetic_operation.h>
+#include <game_description/moves/arithmetic_operation.h>
 #include <utility/graph.h>
 
 namespace rbg {
@@ -337,16 +337,16 @@ namespace rbg {
   class VisitedQuery : public Move {
   public:
     explicit VisitedQuery(uint visited_array_index)
-        : Move(MoveType::kVisitedCheck), vistied_array_index_(visited_array_index) {}
+        : Move(MoveType::kVisitedCheck), visited_array_index_(visited_array_index) {}
 
     void Accept(MoveVisitor &visitor) const override { visitor.Visit(*this); }
 
     uint visited_array_index() const {
-      return vistied_array_index_;
+      return visited_array_index_;
     }
 
   private:
-    uint vistied_array_index_;
+    uint visited_array_index_;
   };
 
   class Empty : public Move {

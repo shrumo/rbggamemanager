@@ -3,7 +3,7 @@
 //
 
 #include <queue>
-#include <game_state/search_steps/actions.h>
+#include <game_state/blocks/actions.h>
 #include "blocks_creator.h"
 #include "game_description/construction/arithmetic_creator.h"
 
@@ -15,143 +15,178 @@ CreateStepsInCollection(const Nfa<std::unique_ptr<Move>> &game_graph, BlocksColl
                         const Declarations &declarations);
 
 template<typename Branch>
-class SearchStepCreator : public MoveFunction<uint> {
+struct BlocksCreatorResult {
+  uint block_collection_index;
+  Branch *branch_pointer;
+};
+
+template<typename Branch>
+class SearchStepCreator : public MoveFunction<BlocksCreatorResult<Branch>> {
 public:
   explicit SearchStepCreator(BlocksCollection &collection, const Declarations &declarations,
                              bool register_modifiers = true)
       : collection_(collection), declarations_(declarations), register_modifiers_(register_modifiers) {
   }
 
-  uint ShiftCase(const Shift &move) override {
-    uint index = collection_.AddBlock(
-        CreateBlockUniquePtr(ShiftAction(move.edge_id()), OutOfBoundsTest{}, Branch{}));
-    return index;
+  BlocksCreatorResult<Branch> ShiftCase(const Shift &move) override {
+    auto block = CreateBlockUniquePtr(ShiftAction(move.edge_id()), OutOfBoundsTest{}, Branch{});
+    auto branch = block->content().branch();
+    uint index = collection_.AddBlock(std::move(block));
+    return BlocksCreatorResult<Branch>{index, branch};
   }
 
-  uint ShiftTableCase(const ShiftTable &) override {
+  BlocksCreatorResult<Branch> ShiftTableCase(const ShiftTable &) override {
     assert(false && "not yet implemented");
   }
 
-  uint ArithmeticComparisonCase(const ArithmeticComparison &move) override {
+  BlocksCreatorResult<Branch> ArithmeticComparisonCase(const ArithmeticComparison &move) override {
     auto left_result = CreateArithmeticOperation(move.left());
     auto right_result = CreateArithmeticOperation(move.right());
     switch (move.comparison_type()) {
-      case ComparisonType::kEqual:
-        return collection_.AddBlock(CreateBlockUniquePtr(EqualComparisonTest(
-            std::move(left_result), std::move(right_result)), Branch{}));
-      case ComparisonType::kNotEqual:
-        return collection_.AddBlock(
-            CreateBlockUniquePtr(NotEqualComparisonTest(
+      case ComparisonType::kEqual: {
+        auto block = CreateBlockUniquePtr(EqualComparisonTest(
+            std::move(left_result), std::move(right_result)), Branch{});
+        auto branch = block->content().branch();
+        uint index = collection_.AddBlock(std::move(block));
+        return {index, branch};
+      }
+      case ComparisonType::kNotEqual: {
+        auto block = CreateBlockUniquePtr(NotEqualComparisonTest(
                 std::move(left_result),
                 std::move(right_result)
-            ), Branch{}));
-      case ComparisonType::kLess:
-        return collection_.AddBlock(CreateBlockUniquePtr(LessComparisonTest(
-            std::move(left_result),
-            std::move(right_result)
-        ), Branch{}));
-      case ComparisonType::kLessEqual:
-        return collection_.AddBlock(
-            CreateBlockUniquePtr(LessEqualComparisonTest(
+            ), Branch{});
+        auto branch = block->content().branch();
+        uint index = collection_.AddBlock(std::move(block));
+        return {index, branch};
+      }
+      case ComparisonType::kLess: {
+         auto block = CreateBlockUniquePtr(LessComparisonTest(
                 std::move(left_result),
-                std::move(right_result)), Branch{}));
-      case ComparisonType::kGreater:
-        return collection_.AddBlock(CreateBlockUniquePtr(LessComparisonTest(
-            std::move(right_result),
-            std::move(left_result)
-        ), Branch{}));
-      case ComparisonType::kGreaterEqual:
-        return collection_.AddBlock(
-            CreateBlockUniquePtr(LessEqualComparisonTest(
+                std::move(right_result)
+            ), Branch{});
+        auto branch = block->content().branch();
+        uint index = collection_.AddBlock(std::move(block));
+        return {index, branch};
+      }
+      case ComparisonType::kLessEqual: {
+         auto block = CreateBlockUniquePtr(LessEqualComparisonTest(
+                std::move(left_result),
+                std::move(right_result)
+            ), Branch{});
+        auto branch = block->content().branch();
+        uint index = collection_.AddBlock(std::move(block));
+        return {index, branch};
+      }
+
+      case ComparisonType::kGreater: {
+         auto block = CreateBlockUniquePtr(LessComparisonTest(
                 std::move(right_result),
                 std::move(left_result)
-            ), Branch{}));
+            ), Branch{});
+        auto branch = block->content().branch();
+        uint index = collection_.AddBlock(std::move(block));
+        return {index, branch};
+      }
+      case ComparisonType::kGreaterEqual: {
+         auto block = CreateBlockUniquePtr(LessEqualComparisonTest(
+                std::move(right_result),
+                std::move(left_result)
+            ), Branch{});
+        auto branch = block->content().branch();
+        uint index = collection_.AddBlock(std::move(block));
+        return {index, branch};
+      }
     }
     assert(false && "Not possible.");
-    return 0;
   }
 
-  uint OffCase(const Off &move) override {
-    uint step_index = collection_.AddBlock(
-        CreateBlockUniquePtr(OffApplication(move.piece(), move.index()), Branch{}));
+  BlocksCreatorResult<Branch> OffCase(const Off &move) override {
+     auto block = CreateBlockUniquePtr(OffApplication(move.piece(), move.index()), Branch{});
+     auto branch = block->content().branch();
+
     if (register_modifiers_) {
-      collection_.RegisterModifier(move.index(),
-                                   static_cast<ActionsBlock<OffApplication, Branch> *>(collection_.GetBlockPointer(step_index))->template GetAction<0>());
+      collection_.RegisterModifier(move.index(),block->template GetAction<0>());
     }
-    return step_index;
+    uint step_index = collection_.AddBlock(std::move(block));
+    return {step_index, branch};
   }
 
-  uint OnCase(const On &move) override {
-    return collection_.AddBlock(CreateBlockUniquePtr(OnTest(move.pieces_table()), Branch{}));
-
+  BlocksCreatorResult<Branch> OnCase(const On &move) override {
+    auto block = CreateBlockUniquePtr(OnTest(move.pieces_table()), Branch{});
+    auto branch = block->content().branch();
+    uint step_index = collection_.AddBlock(std::move(block));
+    return {step_index, branch};
   }
 
-  uint PlayerSwitchCase(const PlayerSwitch &move) override {
-    uint step_index = collection_.AddBlock(
-        CreateBlockUniquePtr(PlayerSwitchApplication(move.player(), move.index()), Branch{}));
+  BlocksCreatorResult<Branch> PlayerSwitchCase(const PlayerSwitch &move) override {
+    auto block = CreateBlockUniquePtr(PlayerSwitchApplication(move.player(), move.index()), Branch{});
+    auto branch = block->content().branch();
     if (register_modifiers_) {
-      collection_.RegisterModifier(move.index(),
-                                   dynamic_cast<ActionsBlock<PlayerSwitchApplication, Branch> *>(collection_.GetBlockPointer(step_index))->template GetAction<0>());
+      collection_.RegisterModifier(move.index(),block->template GetAction<0>());
 
     }
-
-      collection_.RegisterSwitch(move.index(), dynamic_cast<ActionsBlock<PlayerSwitchApplication, Branch>*>(collection_.GetBlockPointer(step_index))->template GetSubAbstractBlock<1>());
-    return step_index;
+      collection_.RegisterSwitch(move.index(), block->template GetSubAbstractBlock<1>());
+    uint step_index = collection_.AddBlock(std::move(block));
+    return {step_index, branch};
   }
 
-  uint KeeperSwitchCase(const KeeperSwitch &move) override {
-     uint step_index = collection_.AddBlock(
-         CreateBlockUniquePtr(PlayerSwitchApplication(move.keeper_id(), move.index()), Branch{}));
+  BlocksCreatorResult<Branch> KeeperSwitchCase(const KeeperSwitch &move) override {
+     auto block = CreateBlockUniquePtr(PlayerSwitchApplication(move.keeper_id(), move.index()), Branch{});
+    auto branch = block->content().branch();
     if (register_modifiers_) {
+      collection_.RegisterModifier(move.index(),block->template GetAction<0>());
 
-      collection_.RegisterModifier(move.index(),
-                                   dynamic_cast<ActionsBlock<PlayerSwitchApplication, Branch> *>(collection_.GetBlockPointer(step_index))->template GetAction<0>());
     }
-
-
-    collection_.RegisterSwitch(move.index(), dynamic_cast<ActionsBlock<PlayerSwitchApplication, Branch>*>(collection_.GetBlockPointer(step_index))->template GetSubAbstractBlock<1>());
-    return step_index;
+      collection_.RegisterSwitch(move.index(), block->template GetSubAbstractBlock<1>());
+    uint step_index = collection_.AddBlock(std::move(block));
+    return {step_index, branch};
   }
 
-  uint AssignmentCase(const Assignment &move) override {
-    uint step_index = collection_.AddBlock(CreateBlockUniquePtr(AssignmentAction(move.get_variable(),
+  BlocksCreatorResult<Branch> AssignmentCase(const Assignment &move) override {
+    auto block = CreateBlockUniquePtr(AssignmentAction(move.get_variable(),
                                                                                  CreateArithmeticOperation(
                                                                                      move.get_value_expression()),
                                                                                  move.index()),
                                                                 VariableBoundsTest(move.get_variable()),
-                                                                Branch{}));
+                                                                Branch{});
+    auto branch = block->content().branch();
     if (register_modifiers_) {
-      auto tmp = dynamic_cast<ActionsBlock<AssignmentAction, VariableBoundsTest, Branch> *>(collection_.GetBlockPointer(step_index));
-      collection_.RegisterModifier(move.index(),
-                                   tmp->template GetAction<0>());
+      collection_.RegisterModifier(move.index(), block->template GetAction<0>());
     }
-    return step_index;
+    uint step_index = collection_.AddBlock(std::move(block));
+    return {step_index, branch};
   }
 
-  uint PlayerCheckCase(const PlayerCheck &move) override {
-    return collection_.AddBlock(CreateBlockUniquePtr(PlayerTest(move.player()), Branch{}));
+  BlocksCreatorResult<Branch> PlayerCheckCase(const PlayerCheck &move) override {
+    auto block = CreateBlockUniquePtr(PlayerTest(move.player()), Branch{});
+    auto branch = block->content().branch();
+    uint step_index = collection_.AddBlock(std::move(block));
+    return {step_index, branch};
   }
 
-  uint ConditionCase(const Condition &move) override {
+  BlocksCreatorResult<Branch> ConditionCase(const Condition &move) override {
     if (move.negated()) {
-      return collection_.AddBlock(CreateBlockUniquePtr(NegatedConditionCheckTest(
-          CreateStepsInCollection(move.nfa(), collection_, declarations_).current()), Branch{}));
+      auto block = CreateBlockUniquePtr(NegatedConditionCheckTest(
+          CreateStepsInCollection(move.nfa(), collection_, declarations_).current()), Branch{});
+      auto branch = block->content().branch();
+      uint step_index = collection_.AddBlock(std::move(block));
+      return {step_index, branch};
     } else {
-      return collection_.AddBlock(CreateBlockUniquePtr(ConditionCheckTest(
-          CreateStepsInCollection(move.nfa(), collection_, declarations_).current()), Branch{}));
+      auto block = CreateBlockUniquePtr(ConditionCheckTest(
+          CreateStepsInCollection(move.nfa(), collection_, declarations_).current()), Branch{});
+      auto branch = block->content().branch();
+      uint step_index = collection_.AddBlock(std::move(block));
+      return {step_index, branch};
     }
   }
 
-  uint VisitedQueryCase(const VisitedQuery &move) override {
-    return collection_.AddBlock(
-        CreateBlockUniquePtr(VisitedCheckTest(collection_.GetBitArrayChunk(move.visited_array_index())),
-                             Branch{}));
+  BlocksCreatorResult<Branch> VisitedQueryCase(const VisitedQuery &move) override {
 
-  }
-
-  uint EmptyCase(const Empty &) override {
-    return collection_.AddBlock(CreateBlockUniquePtr(Branch{}));
-
+    auto block = CreateBlockUniquePtr(VisitedCheckTest(collection_.GetBitArrayChunk(move.visited_array_index())),
+                             Branch{});
+    auto branch = block->content().branch();
+    uint step_index = collection_.AddBlock(std::move(block));
+    return {step_index, branch};
   }
 
 private:
@@ -160,29 +195,43 @@ private:
   bool register_modifiers_;
 };
 
+BlocksCreatorResult<BranchMultiple> CreateMultipleBranch(BlocksCollection *collection) {
+  auto block = CreateBlockUniquePtr(BranchMultiple{});
+    auto branch = block->content().branch();
+    uint step_index = collection->AddBlock(std::move(block));
+    return {step_index, branch};
+}
 
 
-void CreateStepsInCollectionDfs(const Graph<std::unique_ptr<Move>> &game_graph, BlocksCollection &collection,
-                        const Declarations &declarations, node_t current,
-                        unordered_set<node_t> *visited,
-                        unordered_map<node_t, uint> *nodes_blocks) {
-  visited->insert(current);
+
+void CreateStepsInCollectionRecursive(const Graph<std::unique_ptr<Move>> &game_graph, BlocksCollection &collection,
+                                      const Declarations &declarations, node_t current,
+                                      unordered_map<node_t, uint> *nodes_blocks) {
   if(game_graph.EdgesFrom(current).size() == 0) {
     (*nodes_blocks)[current] = collection.AddBlock(CreateBlockUniquePtr(BranchEmpty()));
   }
-  for(const auto& edge : game_graph.EdgesFrom(current)) {
+  else if(game_graph.EdgesFrom(current).size() == 1) {
+    const auto& edge = *game_graph.EdgesFrom(current).begin();
     uint next = edge.to();
-    if(nodes_blocks->find(current) == nodes_blocks->end()) {
-      if(game_graph.EdgesFrom(current).size() == 1) {
-        (*nodes_blocks)[current] = SearchStepCreator<BranchSingle>(collection, declarations)(*edge.content());
-      } else {
-        (*nodes_blocks)[current] = SearchStepCreator<BranchMultiple>(collection, declarations)(*edge.content());
-      }
+    auto result = SearchStepCreator<BranchSingle>(collection, declarations)(*edge.content());
+    (*nodes_blocks)[current]  = result.block_collection_index;
+    if(nodes_blocks->find(next) == nodes_blocks->end() ) {
+      CreateStepsInCollectionRecursive(game_graph, collection, declarations, next, nodes_blocks);
     }
-    if(visited->find(next) == visited->end() ) {
-      CreateStepsInCollectionDfs(game_graph, collection, declarations, next, visited, nodes_blocks);
+    result.branch_pointer->AddNext(collection.GetBlockPointer(nodes_blocks->at(next)));
+  }
+  else {
+    auto result = CreateMultipleBranch(&collection);
+    (*nodes_blocks)[current]  = result.block_collection_index;
+
+    for(const auto& edge : game_graph.EdgesFrom(current)) {
+      assert(edge.content()->type() == MoveType::kEmpty && "The multiple branch now only support only epsilon transitions.");
+       uint next = edge.to();
+       if(nodes_blocks->find(next) == nodes_blocks->end() ) {
+         CreateStepsInCollectionRecursive(game_graph, collection, declarations, next, nodes_blocks);
+       }
+       result.branch_pointer->AddNext(collection.GetBlockPointer(nodes_blocks->at(next)));
     }
-    collection.GetBlockPointer(nodes_blocks->at(current))->AddNextBlock(collection.GetBlockPointer(nodes_blocks->at(next)));
   }
 }
 
@@ -190,9 +239,8 @@ SearchStepsPoint
 CreateStepsInCollection(const Nfa<std::unique_ptr<Move>> &game_graph, BlocksCollection &collection,
                         const Declarations &declarations) {
   const auto &nfa = game_graph;
-  std::unordered_set<node_t> visited;
   std::unordered_map<node_t, uint> nodes_blocks;
-  CreateStepsInCollectionDfs(nfa.graph, collection, declarations,nfa.initial, &visited, &nodes_blocks);
+  CreateStepsInCollectionRecursive(nfa.graph, collection, declarations, nfa.initial, &nodes_blocks);
   return SearchStepsPoint{collection, collection.GetBlockPointer(nodes_blocks.at(nfa.initial))};
 }
 

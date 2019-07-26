@@ -205,7 +205,6 @@ uint AddVisitedChecks(Nfa<unique_ptr<Move>> &nfa, const Declarations &declaratio
 
 void HandleMultipleOutNodes(Graph<unique_ptr<Move>> &graph) {
   for (node_t node: std::vector<node_t>(graph.nodes().begin(), graph.nodes().end())) {
-    // node_t node = pair.first;
     auto out_transitions = graph.edges_ids_from(node);
     if (out_transitions.size() > 1) {
       for (edge_id_t transition_id : out_transitions) {

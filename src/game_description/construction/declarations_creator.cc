@@ -18,7 +18,7 @@ rbg::Declarations rbg::CreateDeclarations(const rbg_parser::parsed_game &game) {
   auto players_tokens = std::vector<std::pair<rbg_parser::token, uint>>(
       game.get_declarations().get_legal_players().begin(), game.get_declarations().get_legal_players().end());
 
-  // Add keeper player id, this also makes sure that first player has index 1
+  // Add keeper player id, this also makes sure that first player has index 1.
   player_id_t keeper_id = players_resolver.Id(">");
 
   std::sort(players_tokens.begin(), players_tokens.end(),
@@ -40,6 +40,7 @@ rbg::Declarations rbg::CreateDeclarations(const rbg_parser::parsed_game &game) {
     board.AddEdgeName(edge.to_string());
   }
 
+  // This makes sure the vertices are indexed starting from 1.
   board.AddVertexName("<out>");
 
   for (uint id = 0; id < game.get_board().get_size(); id++) {

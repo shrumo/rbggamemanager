@@ -8,7 +8,7 @@
 #include "utility/moves_visitor.h"
 #include "game_description/construction/graph_creator.h"
 #include <unordered_map>
-#include <game_state/search_steps/block.h>
+#include <game_state/blocks/block.h>
 
 namespace rbg {
 

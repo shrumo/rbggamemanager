@@ -11,11 +11,10 @@
 namespace rbg{
   class GameState;
   enum class ActionTypeTrait {
-    CHECK,
-    APPLICATION,
-    MODIFIER,
-    SWITCH,
-    MULTIPLE_APPLICATION
+    kCheck,
+    kApplication,
+    kModifier,
+    kSwitch,
   };
   class ModifyingApplication {
   public:

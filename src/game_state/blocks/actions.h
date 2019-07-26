@@ -5,7 +5,7 @@
 #ifndef RBGGAMEMANAGER_ACTIONS_H
 #define RBGGAMEMANAGER_ACTIONS_H
 
-#include "arithmetic_operation.h"
+#include "game_description/moves/arithmetic_operation.h"
 #include <vector>
 #include <game_description/declarations.h>
 #include "utility/resetabble_bitarray_stack.h"
@@ -25,7 +25,7 @@ namespace rbg {
 
   class VisitedCheckTest {
   public:
-    static constexpr ActionTypeTrait type = ActionTypeTrait::CHECK;
+    static constexpr ActionTypeTrait kind = ActionTypeTrait::kCheck;
 
     explicit VisitedCheckTest(ResetableBitArrayStackChunk bit_array_stack_chunk)
         : stack_chunk_(bit_array_stack_chunk) {
@@ -43,7 +43,7 @@ namespace rbg {
 
   class ShiftAction {
   public:
-    static constexpr ActionTypeTrait type = ActionTypeTrait::APPLICATION;
+    static constexpr ActionTypeTrait kind = ActionTypeTrait::kApplication;
     using revert_info_t = vertex_id_t;
 
     explicit ShiftAction(shift_edge_id edge_id) : edge_id_(edge_id) {}
@@ -68,7 +68,7 @@ namespace rbg {
 
   class OutOfBoundsTest {
   public:
-    static constexpr ActionTypeTrait type = ActionTypeTrait::CHECK;
+    static constexpr ActionTypeTrait kind = ActionTypeTrait::kCheck;
 
     always_inline     bool Check(GameState *state) const {
 
@@ -79,7 +79,7 @@ namespace rbg {
 
   class OnTest {
   public:
-    static constexpr ActionTypeTrait type = ActionTypeTrait::CHECK;
+    static constexpr ActionTypeTrait kind = ActionTypeTrait::kCheck;
 
     explicit OnTest(std::vector<bool> pieces) : pieces_(std::move(pieces)) {}
 
@@ -95,7 +95,7 @@ namespace rbg {
 
   class PlayerTest {
   public:
-    static constexpr ActionTypeTrait type = ActionTypeTrait::CHECK;
+    static constexpr ActionTypeTrait kind = ActionTypeTrait::kCheck;
 
     explicit PlayerTest(player_id_t player) : player_(player) {}
 
@@ -112,7 +112,7 @@ namespace rbg {
   class LessEqualComparisonTest {
   public:
 
-    static constexpr ActionTypeTrait type = ActionTypeTrait::CHECK;
+    static constexpr ActionTypeTrait kind = ActionTypeTrait::kCheck;
 
     explicit LessEqualComparisonTest(std::unique_ptr<ArithmeticOperation> left,
                                      std::unique_ptr<ArithmeticOperation> right) : left_(std::move(left)),
@@ -131,7 +131,7 @@ namespace rbg {
   class LessComparisonTest {
   public:
 
-    static constexpr ActionTypeTrait type = ActionTypeTrait::CHECK;
+    static constexpr ActionTypeTrait kind = ActionTypeTrait::kCheck;
 
     explicit LessComparisonTest(std::unique_ptr<ArithmeticOperation> left,
                                 std::unique_ptr<ArithmeticOperation> right) : left_(std::move(left)),
@@ -150,7 +150,7 @@ namespace rbg {
   class EqualComparisonTest {
   public:
 
-    static constexpr ActionTypeTrait type = ActionTypeTrait::CHECK;
+    static constexpr ActionTypeTrait kind = ActionTypeTrait::kCheck;
 
     explicit EqualComparisonTest(std::unique_ptr<ArithmeticOperation> left,
                                  std::unique_ptr<ArithmeticOperation> right) : left_(std::move(left)),
@@ -169,7 +169,7 @@ namespace rbg {
   class NotEqualComparisonTest {
   public:
 
-    static constexpr ActionTypeTrait type = ActionTypeTrait::CHECK;
+    static constexpr ActionTypeTrait kind = ActionTypeTrait::kCheck;
 
     explicit NotEqualComparisonTest(std::unique_ptr<ArithmeticOperation> left,
                                     std::unique_ptr<ArithmeticOperation> right) : left_(std::move(left)),
@@ -189,7 +189,7 @@ namespace rbg {
   class ConditionCheckTest {
   public:
 
-    static constexpr ActionTypeTrait type = ActionTypeTrait::CHECK;
+    static constexpr ActionTypeTrait kind = ActionTypeTrait::kCheck;
 
     explicit ConditionCheckTest(Block* steps_point)
         : steps_point_(std::move(steps_point)) {};
@@ -208,7 +208,7 @@ namespace rbg {
   class NegatedConditionCheckTest {
   public:
 
-    static constexpr ActionTypeTrait type = ActionTypeTrait::CHECK;
+    static constexpr ActionTypeTrait kind = ActionTypeTrait::kCheck;
 
     explicit NegatedConditionCheckTest(Block* steps_point)
         : steps_point_(std::move(steps_point)) {};
@@ -226,7 +226,7 @@ namespace rbg {
 
   class OffApplication : public ModifyingApplication {
   public:
-    static constexpr ActionTypeTrait type = ActionTypeTrait::MODIFIER;
+    static constexpr ActionTypeTrait kind = ActionTypeTrait::kModifier;
     using revert_info_t = piece_id_t;
 
     explicit OffApplication(revert_info_t piece_id, uint index) : ModifyingApplication(index), piece_id_(piece_id) {}
@@ -249,7 +249,7 @@ namespace rbg {
 
   class PlayerSwitchApplication : public ModifyingApplication {
   public:
-    static constexpr ActionTypeTrait type = ActionTypeTrait::SWITCH;
+    static constexpr ActionTypeTrait kind = ActionTypeTrait::kSwitch;
     using revert_info_t = player_id_t;
 
     explicit PlayerSwitchApplication(player_id_t player_id, uint index) : ModifyingApplication(index),
@@ -273,7 +273,7 @@ namespace rbg {
 
   class AssignmentAction : public ModifyingApplication {
   public:
-    static constexpr ActionTypeTrait type = ActionTypeTrait::MODIFIER;
+    static constexpr ActionTypeTrait kind = ActionTypeTrait::kModifier;
     using revert_info_t = variable_value_t;
 
     explicit AssignmentAction(variable_id_t variable_id, std::unique_ptr<ArithmeticOperation> value, uint index)
@@ -297,7 +297,7 @@ namespace rbg {
 
   class VariableBoundsTest {
   public:
-    static constexpr ActionTypeTrait type = ActionTypeTrait::CHECK;
+    static constexpr ActionTypeTrait kind = ActionTypeTrait::kCheck;
 
     explicit VariableBoundsTest(variable_id_t variable_id) : variable_id_(variable_id) {}
 
@@ -308,24 +308,6 @@ namespace rbg {
 
   private:
     variable_id_t variable_id_;
-  };
-
-  template<typename NormalApplication>
-  class WeirdMultipleApplication : public NormalApplication {
-    static constexpr ActionTypeTrait type = ActionTypeTrait::MULTIPLE_APPLICATION;
-
-    explicit WeirdMultipleApplication(NormalApplication normal_application) : normal_application_(normal_application) {}
-
-    template<typename Function>
-    void Run(GameState *state, Function next) {
-      normal_application_.Apply(state);
-      next();
-      normal_application_.Revert(state);
-    }
-
-  private:
-    NormalApplication normal_application_;
-
   };
 }
 

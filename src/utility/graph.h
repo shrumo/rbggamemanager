@@ -155,20 +155,6 @@ namespace rbg {
       return GetNode(node_id).out_edges_ids();
     }
 
-    decltype(auto) EdgesFrom(node_t node_id) {
-      auto extract_edge = [this](const edge_id_t& edge_id) -> Edge<EdgeContent>& { return GetEdge(edge_id); };
-      return std_ext::range<
-          std_ext::transform_iterator<
-              typename std::list<edge_id_t>::const_iterator,
-              decltype(extract_edge)>>
-              (std_ext::transform_iterator<
-                  typename std::list<edge_id_t>::const_iterator,decltype(extract_edge)
-                  >(edges_ids_from(node_id).begin(), extract_edge),
-              std_ext::transform_iterator<
-                  typename std::list<edge_id_t>::const_iterator,decltype(extract_edge)
-                  >(edges_ids_from(node_id).end(), extract_edge), edges_ids_from(node_id).size());
-    }
-
     decltype(auto) EdgesFrom(node_t node_id) const {
       auto extract_edge = [this](const edge_id_t& edge_id) -> const Edge<EdgeContent>& { return GetEdge(edge_id); };
       return std_ext::range<

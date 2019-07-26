@@ -27,22 +27,22 @@ set(GRAPH_FILES src/utility/graph.h src/stl_extension/range.h src/stl_extension/
 
 set(PARSER_FILES src/parser/parser_wrapper.h src/parser/parser_actions.h src/parser/parser_wrapper.cc)
 
-set(GAMESTATE_FILES ${PARSER_FILES} ${GRAPH_FILES} src/game_description/names_resolver.h src/game_description/board.h src/game_state/search_steps/block.h
+set(GAMESTATE_FILES ${PARSER_FILES} ${GRAPH_FILES} src/game_description/names_resolver.h src/game_description/board.h src/game_state/blocks/block.h
         src/game_description/declarations.h src/game_state/game_state.h src/utility/resetabble_bitarray_stack.h
-        src/game_state/search_steps/arithmetic_operation.cc src/game_state/search_steps/arithmetic_operation.h
+        src/game_description/moves/arithmetic_operation.cc src/game_description/moves/arithmetic_operation.h
         src/utility/arithmetic_operation_visitor.h
         src/game_description/names_resolver.cc src/game_description/board.cc
         src/utility/calculate_perft.h
-        src/game_state/search_steps/actions.h src/stl_extension/vector.h
-        src/game_state/search_steps/modifying_application.h src/game_state/search_steps/modifying_application.cpp
+        src/game_state/blocks/actions.h src/stl_extension/vector.h
+        src/game_state/blocks/modifying_application.h src/game_state/blocks/modifying_application.cpp
         src/game_description/construction/graph_creator.cc src/game_description/construction/graph_creator.h src/game_description/construction/declarations_creator.h
         src/game_description/moves/moves.h src/game_description/moves/moves.cc
         src/game_description/construction/moves_creator.cc src/game_description/construction/moves_creator.h
         src/game_description/construction/arithmetic_creator.cc src/game_description/construction/arithmetic_creator.h
         src/utility/moves_visitor.h src/utility/printer.cc
         src/utility/printer.h src/game_state/construction/blocks_creator.cc src/game_state/construction/blocks_creator.h
-        src/game_state/search_steps/arithmetic_operation.cc src/game_state/search_steps/arithmetic_operation.h
-        src/game_description/board.cc src/game_state/search_steps/block.h src/game_state/construction/game_state_creator.h
+        src/game_description/moves/arithmetic_operation.cc src/game_description/moves/arithmetic_operation.h
+        src/game_description/board.cc src/game_state/blocks/block.h src/game_state/construction/game_state_creator.h
         src/game_description/construction/declarations_creator.cc src/game_state/construction/game_state_creator.cc
         )
 
