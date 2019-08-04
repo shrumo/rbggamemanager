@@ -87,7 +87,6 @@ namespace rbg {
     }
 
     MoveRevertInformation Apply(const std::vector<ModifierApplication> &move) {
-      moves_.clear();
       Block *previous_search_step = steps_.current_position.current();
       std::vector<ActionRevertInfo> revert_infos;
       revert_infos.reserve(move.size());
@@ -101,6 +100,7 @@ namespace rbg {
       steps_.collection.stack().reset();
       MakeKeeperClosure(revert_infos);
       moves_calculated=false;
+      moves_.clear();
       return {previous_search_step, revert_infos};
     }
 
@@ -112,6 +112,8 @@ namespace rbg {
         current_pos_ = step.vertex;
       }
       steps_.current_position.set_current(revert_info.previous_search_step);
+      moves_calculated=false;
+      moves_.clear();
     }
 
     const Declarations &declarations() const {
