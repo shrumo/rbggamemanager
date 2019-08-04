@@ -14,15 +14,19 @@
 using namespace rbg;
 
 int main(int argc, char *argv[]) {
-  if (argc != 3) {
-    std::cerr << "Usage " << argv[0] << " <host> <port>\n";
+  if (argc != 3 && argc != 4) {
+    std::cerr << "Usage " << argv[0] << " <host> <port> <seed>\n";
     return 1;
   }
 
-  srand(static_cast<unsigned int>(time(nullptr)));
+  if(argc == 4) {
+    srand(atoi(argv[3]));
+  } else {
+    srand(static_cast<unsigned int>(time(nullptr)));
+  }
 
   rbg_parser::messages_container msg;
-  SynchronousClient client(argv[argc - 2], argv[argc - 1]);
+  SynchronousClient client(argv[1], argv[2]);
 
   GameState state = CreateGameState(client.description());
   auto actions_translator = ActionsDescriptionsMap(client.description());
@@ -46,6 +50,11 @@ int main(int argc, char *argv[]) {
       moves = state.Moves();
     } else {
       auto move = client.Read();
+      std::cout << "Received move:" << std::endl;
+       for(const auto& mod : move) {
+        std::cout << "\t" << state.declarations().initial_board.vertices_names().Name(mod.vertex) << " (" << mod.vertex << ") "
+           << actions_translator[mod.modifier_index] << " (" << mod.modifier_index << ")" << std::endl;
+      }
       state.Apply(move);
       moves = state.Moves();
     }
