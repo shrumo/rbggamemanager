@@ -126,6 +126,7 @@ namespace rbg {
       std::cout << "Got a move from client " << client
                 << " which is player "
                 << state_.declarations().players_resolver.Name(client_player_id)
+                << "(" << client_player_id << ")"
                 << std::endl;
       std::cout << message << std::endl;
       if (client_player_id != state_.current_player()) {
@@ -145,6 +146,8 @@ namespace rbg {
       if (available_moves_.empty()) {
         Stop();
       }
+      std::cout << "Expecting move from " << state_.declarations().players_resolver.Name(state_.current_player())
+                << "(" << state_.current_player() << ")" << std::endl;
       return true;
     }
 
