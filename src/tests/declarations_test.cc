@@ -33,6 +33,8 @@ int main() {
   assert(result.players_resolver.size() == 2 + 1);
   assert(result.players_resolver.contains("red"));
   assert(result.players_resolver.contains("blue"));
+  assert(result.players_resolver.Id("red") == 1);
+  assert(result.players_resolver.Id("blue") == 2);
 
   assert(result.variables_resolver.size() == 3);
   assert(result.variables_resolver.contains("red"));

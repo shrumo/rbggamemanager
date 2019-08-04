@@ -17,8 +17,8 @@ const string kSmallGameDeclarations = R"LIM(
     [e,e])
 
 //   Board indices:
-//   0 1
-//   2 3
+//   1 2
+//   3 4
 )LIM";
 
 void TestPlayerSwitch() {
@@ -39,7 +39,7 @@ void TestShiftCheckSearchStep() {
   auto game = CreateGameState(kSmallGameDeclarations + "#rules = ->red right ->blue");
   auto moves = game.Moves();
   assert(moves.size() == 1);
-  assert(moves[0][0].vertex == 1);
+  assert(moves[0][0].vertex == 2);
   auto game_no_move = CreateGameState(kSmallGameDeclarations + "#rules = ->red right right ->blue");
   auto moves_empty = game_no_move.Moves();
   assert(moves_empty.empty());
