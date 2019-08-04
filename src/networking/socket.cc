@@ -2,9 +2,9 @@
 // Created by shrum on 02.07.19.
 //
 
-#include "coder.h"
+#include "socket.h"
 
-std::string EncodeMove(const rbg::GameMove &move) {
+std::string rbg::EncodeMove(const rbg::GameMove &move) {
   std::stringstream stream;
   for (size_t i = 0; i < move.size(); i++) {
     const auto &modifier_application = move[i];
@@ -15,7 +15,7 @@ std::string EncodeMove(const rbg::GameMove &move) {
   return stream.str();
 }
 
-rbg::GameMove DecodeMove(const std::string &message) {
+rbg::GameMove rbg::DecodeMove(const std::string &message) {
   std::stringstream stream(message);
   rbg::GameMove result;
   while (stream.peek() != std::char_traits<char>::eof()) {
@@ -25,3 +25,6 @@ rbg::GameMove DecodeMove(const std::string &message) {
   }
   return result;
 }
+
+
+

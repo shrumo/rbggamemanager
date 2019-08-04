@@ -22,10 +22,8 @@ int main(int argc, char *argv[]) {
 
   try {
     asio::io_service io_service;
-    Server server(buffer.str(), io_service,
-                  static_cast<unsigned short>(std::atoi(argv[argc - 1])));
-
-    io_service.run();
+    Server server(buffer.str(), static_cast<unsigned short>(std::atoi(argv[argc - 1])));
+    server.Run();
   }
   catch (std::exception &e) {
     std::cerr << "Exception: " << e.what() << "\n";

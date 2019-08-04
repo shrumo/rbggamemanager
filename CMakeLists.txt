@@ -46,7 +46,7 @@ set(GAMESTATE_FILES ${PARSER_FILES} ${GRAPH_FILES} src/game_description/names_re
         src/game_description/construction/declarations_creator.cc src/game_state/construction/game_state_creator.cc
         )
 
-set(NETWORKING_FILES ${GAMESTATE_FILES} src/networking/server.h src/networking/server.cc src/networking/coder.h src/networking/synchronous_client.h src/networking/coder.cc)
+set(NETWORKING_FILES ${GAMESTATE_FILES} src/networking/server.h src/networking/socket.h src/networking/client.h src/networking/socket.cc)
 
 set(ENV{PYTHONPATH} ${PYTHON_PATH}:${CMAKE_CURRENT_BINARY_DIR})
 
@@ -111,9 +111,9 @@ add_test(chess_test chess_test)
 add_executable(board_test src/game_description/board.h src/game_description/board.cc src/tests/board_test.cc)
 add_test(board_test board_test)
 
-add_custom_target(python_test ALL COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/src/tests/python_test.py ${CMAKE_CURRENT_BINARY_DIR}/python_test.py
+add_custom_target(python_bindings_test ALL COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/src/tests/python_bindings_test.py ${CMAKE_CURRENT_BINARY_DIR}/python_bindings_test.py
         DEPENDS rbg)
-add_test(python_test ${PYTHON_EXECUTABLE} python_test.py)
+add_test(python_bindings_test ${PYTHON_EXECUTABLE} python_bindings_test.py)
 
 
 
