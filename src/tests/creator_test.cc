@@ -6,7 +6,6 @@
 #include <game_description/construction/graph_creator.h>
 #include <queue>
 #include <utility/printer.h>
-#include <game_description/construction/declarations_creator.h>
 
 using namespace rbg;
 using namespace std;
@@ -67,8 +66,8 @@ vector<int> SortedActionIndices(const vector<const Move *> &path) {
 
 int main() {
   auto pg = ParseGame(kSmallGame);
-  auto decl = CreateDeclarations(*pg);
-  auto result = CreateVisitedChecksNfa(*pg->get_moves(), decl).nfa;
+  auto declarations = Declarations(*pg);
+  auto result = CreateVisitedChecksNfa(*pg->get_moves(), declarations).nfa;
   auto paths = ShortestPaths(result.graph, result.initial, result.final);
 
   for (const auto &path : paths) {
@@ -77,13 +76,13 @@ int main() {
 
   cout << "The graph looks like this:\n";
   cout << GraphDescription(result.graph,
-                           [&](const unique_ptr<Move> &move) { return MoveDescription(*move, decl); })
+                           [&](const unique_ptr<Move> &move) { return MoveDescription(*move, declarations); })
        << "\n";
   cout << "The shortest move:\n";
   for (const auto &path : paths) {
     for (const auto &move : path) {
       if (move) {
-        cout << MoveDescription(*move, decl);
+        cout << MoveDescription(*move, declarations);
         if (move->indexed()) {
           cout << "(" << dynamic_cast<const IndexedMove *>(move)->index() << ")";
         }

@@ -11,7 +11,6 @@
 #include <iomanip>
 #include "game_description/construction/graph_creator.h"
 #include <parser/parser_wrapper.h>
-#include "game_description/construction/declarations_creator.h"
 #include "game_state/game_state.h"
 
 using namespace rbg;
@@ -23,7 +22,7 @@ public:
       : declarations_(declarations) {}
 
   std::string VariableCase(const VariableValue &variable_value) override {
-    return declarations_.variables_resolver.Name(variable_value.variable_id());
+    return declarations_.variables_resolver().Name(variable_value.variable_id());
   }
 
   std::string ConstantCase(const ConstantValue &constant_value) override {
@@ -106,7 +105,7 @@ public:
       : declarations_(declarations) {}
 
   std::string ShiftCase(const Shift &move) override {
-    return declarations_.initial_board.edges_names().Name(move.edge_id());
+    return declarations_.initial_board().edges_names().Name(move.edge_id());
   }
 
   std::string ShiftTableCase(const ShiftTable &move) override {
@@ -136,7 +135,7 @@ public:
   }
 
   std::string OffCase(const Off &move) override {
-    return "[" + declarations_.pieces_resolver.Name(move.piece()) + "]";
+    return "[" + declarations_.pieces_resolver().Name(move.piece()) + "]";
   }
 
   std::string OnCase(const On &move) override {
@@ -146,14 +145,14 @@ public:
         result += ", ";
       }
       piece_id_t piece = move.pieces()[i];
-      result += declarations_.pieces_resolver.Name(piece);
+      result += declarations_.pieces_resolver().Name(piece);
     }
     result += "}";
     return result;
   }
 
   std::string PlayerSwitchCase(const PlayerSwitch &move) override {
-    return "->" + declarations_.players_resolver.Name(move.player());
+    return "->" + declarations_.players_resolver().Name(move.player());
   }
 
   std::string KeeperSwitchCase(const KeeperSwitch &) override {
@@ -161,12 +160,12 @@ public:
   }
 
   std::string AssignmentCase(const Assignment &move) override {
-    return "[" + declarations_.variables_resolver.Name(move.get_variable()) + "= " +
+    return "[" + declarations_.variables_resolver().Name(move.get_variable()) + "= " +
            ArithmeticOperationPrinter(declarations_)(move.get_value_expression()) + "]";
   }
 
   std::string PlayerCheckCase(const PlayerCheck &move) override {
-    return "{" + declarations_.players_resolver.Name(move.player()) + "}";
+    return "{" + declarations_.players_resolver().Name(move.player()) + "}";
   }
 
   std::string ConditionCase(const Condition &move) override {
@@ -196,7 +195,7 @@ std::string rbg::MoveDescription(const Move &move, const Declarations &declarati
 std::unordered_map<uint, std::string> rbg::ActionsDescriptionsMap(const std::string &game_text) {
   std::unordered_map<uint, std::string> result;
   auto game = ParseGame(ParseGame(game_text)->to_rbg());
-  Declarations declarations = CreateDeclarations(*game);
+  Declarations declarations = Declarations(*game);
   VisitedChecksNfa nfa = CreateVisitedChecksNfa(*game->get_moves(), declarations);
   for(node_t node: nfa.nfa.graph.nodes()) {
     for(const auto& edge : nfa.nfa.graph.EdgesFrom(node)) {
@@ -212,8 +211,8 @@ std::unordered_map<uint, std::string> rbg::ActionsDescriptionsMap(const std::str
 std::string rbg::RectangularBoardDescription(const BoardContent &board_content, const Declarations &declarations) {
   size_t width = 0;
   size_t height = 0;
-  for (vertex_id_t v = 1; v < static_cast<ssize_t >(declarations.initial_board.vertices_count()); v++) {
-    std::string vertex_name = declarations.initial_board.vertices_names().Name(v);
+  for (vertex_id_t v = 1; v < static_cast<ssize_t >(declarations.initial_board().vertices_count()); v++) {
+    std::string vertex_name = declarations.initial_board().vertices_names().Name(v);
     std::stringstream stream(vertex_name);
     char placeholders[3] = {'\0', '\0', '\0'};
     stream >> placeholders[0] >> placeholders[1];
@@ -226,8 +225,8 @@ std::string rbg::RectangularBoardDescription(const BoardContent &board_content, 
     height = std::max(y + 1, height);
   }
   std::vector<piece_id_t> field(width * height);
-  for (vertex_id_t v = 1; v < static_cast<ssize_t >(declarations.initial_board.vertices_count()); v++) {
-    std::string vertex_name = declarations.initial_board.vertices_names().Name(v);
+  for (vertex_id_t v = 1; v < static_cast<ssize_t >(declarations.initial_board().vertices_count()); v++) {
+    std::string vertex_name = declarations.initial_board().vertices_names().Name(v);
     std::stringstream stream(vertex_name);
     char placeholder;
     stream >> placeholder >> placeholder;
@@ -238,7 +237,7 @@ std::string rbg::RectangularBoardDescription(const BoardContent &board_content, 
   std::stringstream s;
   for (size_t y = 0; y < height; y++) {
     for (size_t x = 0; x < width; x++) {
-      std::string name = declarations.pieces_resolver.Name(field[x + y * width]);
+      std::string name = declarations.pieces_resolver().Name(field[x + y * width]);
       if (name == "empty" || name == "e") {
         s << "[" << std::setw(3) << " " << "] ";
       } else {
@@ -253,12 +252,12 @@ std::string rbg::RectangularBoardDescription(const BoardContent &board_content, 
 
 std::string rbg::VariablesValuesDescription(const GameState &state) {
   std::stringstream s;
-  for (variable_id_t id = 0; id < state.declarations().variables_resolver.size(); id++) {
-          auto variable_name = state.declarations().variables_resolver.Name(id);
+  for (variable_id_t id = 0; id < state.declarations().variables_resolver().size(); id++) {
+          auto variable_name = state.declarations().variables_resolver().Name(id);
           s << "\t" << variable_name << " (" << id << ") : " << state.variables_values()[id];
-          if (state.declarations().players_resolver.contains(variable_name)) {
+          if (state.declarations().players_resolver().contains(variable_name)) {
             s << " (result for player " << variable_name << " ("
-                      << state.declarations().players_resolver.Id(variable_name) << "))";
+                      << state.declarations().players_resolver().Id(variable_name) << "))";
           }
           s << std::endl;
         }

@@ -51,7 +51,7 @@ namespace rbg {
     always_inline     revert_info_t Apply(GameState *state) const {
 
       vertex_id_t previous_vertex = state->current_pos_;
-      state->current_pos_ = state->declarations().initial_board.NextVertex(state->current_pos_, edge_id_);
+      state->current_pos_ = state->declarations().initial_board().NextVertex(state->current_pos_, edge_id_);
       return previous_vertex;
 
     }
@@ -72,7 +72,7 @@ namespace rbg {
 
     always_inline     bool Check(GameState *state) const {
 
-      return state->current_pos() < state->declarations().initial_board.vertices_count();
+      return state->current_pos() < state->declarations().initial_board().vertices_count();
     }
   };
 
@@ -303,7 +303,7 @@ namespace rbg {
 
     always_inline     bool Check(GameState *state) const {
 
-      return state->variables_values()[variable_id_] <= state->declarations().variables_bounds[variable_id_];
+      return state->variables_values()[variable_id_] <= state->declarations().variable_bound(variable_id_);
     }
 
   private:

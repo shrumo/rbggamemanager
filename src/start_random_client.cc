@@ -33,7 +33,7 @@ int main(int argc, char *argv[]) {
 
   player_id_t assigned_player = client.player();
 
-  std::cout << "I am player: " << state.declarations().players_resolver.Name(assigned_player) << " (" << assigned_player << ")"
+  std::cout << "I am player: " << state.declarations().players_resolver().Name(assigned_player) << " (" << assigned_player << ")"
             << std::endl;
 
   auto moves = state.Moves();
@@ -47,7 +47,7 @@ int main(int argc, char *argv[]) {
       state.Apply(move);
       std::cout << "Sending move:" << std::endl;
       for(const auto& mod : move) {
-        std::cout << "\t" << state.declarations().initial_board.vertices_names().Name(mod.vertex) << " (" << mod.vertex << ") "
+        std::cout << "\t" << state.declarations().initial_board().vertices_names().Name(mod.vertex) << " (" << mod.vertex << ") "
            << actions_translator[mod.modifier_index] << " (" << mod.modifier_index << ")" << std::endl;
       }
       client.Write(move);
@@ -56,14 +56,14 @@ int main(int argc, char *argv[]) {
       auto move = client.Read();
       std::cout << "Received move:" << std::endl;
        for(const auto& mod : move) {
-        std::cout << "\t" << state.declarations().initial_board.vertices_names().Name(mod.vertex) << " (" << mod.vertex << ") "
+        std::cout << "\t" << state.declarations().initial_board().vertices_names().Name(mod.vertex) << " (" << mod.vertex << ") "
            << actions_translator[mod.modifier_index] << " (" << mod.modifier_index << ")" << std::endl;
       }
       state.Apply(move);
       moves = state.Moves();
     }
   }
-  std::cout << "\n";
+    std::cout << "\n";
   std::cout << RectangularBoardDescription(state.board_content(), state.declarations()) << std::endl;
   std::cout << "Variables values at end are:" << std::endl;
   std::cout << VariablesValuesDescription(state) << std::endl;

@@ -66,9 +66,9 @@ namespace rbg {
 
     GameState(const Declarations &declarations, SearchStepsInformation steps)
         : declarations_(declarations), current_pos_(1),
-          variables_values_(declarations.variables_resolver.size(), 0),
-          current_player_(declarations.keeper_id),
-          board_(declarations.initial_board.initial_content()), steps_(std::move(steps)),
+          variables_values_(declarations.variables_resolver().size(), 0),
+          current_player_(declarations.keeper_id()),
+          board_(declarations.initial_board().initial_content()), steps_(std::move(steps)),
           moves_calculated(false) {
       steps_.current_position.SetParent(&steps_.collection);
       applied_modifiers_.reserve(10);
@@ -142,9 +142,9 @@ namespace rbg {
 
     void Reset() {
       current_pos_ = 1;
-      variables_values_ = std::vector<variable_value_t >(declarations_.variables_resolver.size(), 0);
-          current_player_ = declarations_.keeper_id;
-          board_ = declarations_.initial_board.initial_content();
+      variables_values_ = std::vector<variable_value_t >(declarations_.variables_resolver().size(), 0);
+          current_player_ = declarations_.keeper_id();
+          board_ = declarations_.initial_board().initial_content();
           steps_.current_position.reset();
           steps_.collection.stack().reset();
           moves_calculated = false;
@@ -159,7 +159,7 @@ namespace rbg {
   private:
     void MakeKeeperClosure(std::vector<ActionRevertInfo> &steps_revert_information) {
       bool exists = true;
-      while (exists && current_player_ == declarations_.keeper_id) {
+      while (exists && current_player_ == declarations_.keeper_id()) {
         applied_modifiers_.clear();
         moves_.clear();
         exists = steps_.current_position.current()->RunAndApplyFirst(this, &steps_revert_information, current_pos_);

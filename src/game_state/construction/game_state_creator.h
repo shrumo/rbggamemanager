@@ -6,7 +6,6 @@
 #define RBGGAMEMANAGER_GAME_STATE_CREATOR_H
 
 #include <game_state/game_state.h>
-#include "game_description/construction/declarations_creator.h"
 #include <parser/parser_wrapper.h>
 
 namespace rbg {

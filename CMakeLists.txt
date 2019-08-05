@@ -35,7 +35,7 @@ set(GAMESTATE_FILES ${PARSER_FILES} ${GRAPH_FILES} src/game_description/names_re
         src/utility/calculate_perft.h
         src/game_state/blocks/actions.h src/stl_extension/vector.h
         src/game_state/blocks/modifying_application.h src/game_state/blocks/modifying_application.cpp
-        src/game_description/construction/graph_creator.cc src/game_description/construction/graph_creator.h src/game_description/construction/declarations_creator.h
+        src/game_description/construction/graph_creator.cc src/game_description/construction/graph_creator.h
         src/game_description/moves/moves.h src/game_description/moves/moves.cc
         src/game_description/construction/moves_creator.cc src/game_description/construction/moves_creator.h
         src/game_description/construction/arithmetic_creator.cc src/game_description/construction/arithmetic_creator.h
@@ -43,7 +43,7 @@ set(GAMESTATE_FILES ${PARSER_FILES} ${GRAPH_FILES} src/game_description/names_re
         src/utility/printer.h src/game_state/construction/blocks_creator.cc src/game_state/construction/blocks_creator.h
         src/game_description/moves/arithmetic_operation.cc src/game_description/moves/arithmetic_operation.h
         src/game_description/board.cc src/game_state/blocks/block.h src/game_state/construction/game_state_creator.h
-        src/game_description/construction/declarations_creator.cc src/game_state/construction/game_state_creator.cc
+        src/game_state/construction/game_state_creator.cc
         )
 
 set(NETWORKING_FILES ${GAMESTATE_FILES} src/networking/server.h src/networking/socket.h src/networking/client.h src/networking/socket.cc)
@@ -89,7 +89,7 @@ add_executable(creator_test ${GAMESTATE_FILES} src/tests/creator_test.cc)
 target_link_libraries(creator_test rbgParser)
 add_test(creator_test creator_test)
 
-add_executable(searchsteps_test  ${GAMESTATE_FILES} src/tests/search_steps_test.cc)
+add_executable(searchsteps_test  ${GAMESTATE_FILES} src/tests/single_blocks_test.cc)
 target_link_libraries(searchsteps_test rbgParser)
 add_test(searchsteps_test searchsteps_test)
 

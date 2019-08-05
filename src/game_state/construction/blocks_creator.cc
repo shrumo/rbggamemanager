@@ -246,7 +246,7 @@ CreateStepsInCollection(const Nfa<std::unique_ptr<Move>> &game_graph, BlocksColl
 
 SearchStepsInformation
 rbg::CreateSearchSteps(const VisitedChecksNfa &game_graph, const Declarations &declarations) {
-  BlocksCollection collection(game_graph.visited_checks_count, declarations.initial_board.vertices_count());
+  BlocksCollection collection(game_graph.visited_checks_count, declarations.initial_board().vertices_count());
   auto point = CreateStepsInCollection(game_graph.nfa, collection, declarations);
   return SearchStepsInformation{std::move(collection), point};
 }

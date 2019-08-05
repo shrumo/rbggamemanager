@@ -63,7 +63,7 @@ int main() {
       } else {
         first_printed = true;
       }
-      cout << e.vertex << " (" << game.declarations().initial_board.vertices_names().Name(e.vertex) << ")"
+      cout << e.vertex << " (" << game.declarations().initial_board().vertices_names().Name(e.vertex) << ")"
            << " "
            << e.modifier_index;
     }

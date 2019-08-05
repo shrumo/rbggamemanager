@@ -26,25 +26,24 @@ int main(int argc, const char *argv[]) {
 
   mt19937 rng(seed);
 
-  std::ifstream filestream(argv[1]);
+  std::ifstream file_stream(argv[1]);
   std::stringstream buffer;
-  buffer << filestream.rdbuf();
+  buffer << file_stream.rdbuf();
 
   auto game = CreateGameState(buffer.str());
   auto actions_translator = ActionsDescriptionsMap(buffer.str());
   auto moves = game.Moves();
   while(!moves.empty()) {
     uniform_int_distribution<> random_index(0, moves.size()-1);
-    cout << "Current player is: " << game.declarations().players_resolver.Name(game.current_player()) << " (" << game.current_player() << ")" << endl;
-    cout << "Variables values are:" << std::endl;
-    for(variable_id_t id = 0; id < game.declarations().variables_resolver.size(); id++) {
-      cout << "\t" << game.declarations().variables_resolver.Name(id) << " (" << id << ") : " << game.variables_values()[id] << std::endl;
-    }
+    cout << "Current player is: " << game.declarations().players_resolver().Name(game.current_player()) << " (" << game.current_player() << ")" << endl;
+
     cout << RectangularBoardDescription(game.board_content(), game.declarations());
+    cout << "Variables values are:" << std::endl;
+    cout << VariablesValuesDescription(game) << std::endl;
     auto move = moves[random_index(rng)];
     cout << "Chosen move:" << std::endl;
     for(const auto& mod : move) {
-      cout << "\t" << game.declarations().initial_board.vertices_names().Name(mod.vertex) << " (" << mod.vertex << ") "
+      cout << "\t" << game.declarations().initial_board().vertices_names().Name(mod.vertex) << " (" << mod.vertex << ") "
            << actions_translator[mod.modifier_index] << " (" << mod.modifier_index << ")" << std::endl;
     }
     game.Apply(moves[random_index(rng)]);

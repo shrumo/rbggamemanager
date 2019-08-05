@@ -8,7 +8,6 @@
 #include "game_description/construction/graph_creator.h"
 #include <pybind11/stl.h>
 #include <pybind11/complex.h>
-#include "game_description/construction/declarations_creator.h"
 #include <utility/printer.h>
 
 
@@ -38,7 +37,7 @@ Nfa<std::string> translate(const Nfa<std::unique_ptr<Move>> &nfa, const Declarat
 
 Nfa<std::string> CreateStringNfa(const std::string &game_text) {
   auto pg = ParseGame(game_text);
-  auto decl = CreateDeclarations(*pg);
+  auto decl = Declarations(*pg);
   return translate(CreateVisitedChecksNfa(*pg->get_moves(), decl).nfa, decl);
 }
 

@@ -20,10 +20,10 @@ public:
 
   unique_ptr<ArithmeticOperation>
   VariableArithmeticCase(const rbg_parser::variable_arithmetic &expression) override {
-    if (declarations_.pieces_resolver.contains(expression.get_content().to_string())) {
-      return make_unique<PieceCountValue>(declarations_.pieces_resolver.Id(expression.get_content().to_string()));
+    if (declarations_.pieces_resolver().contains(expression.get_content().to_string())) {
+      return make_unique<PieceCountValue>(declarations_.pieces_resolver().Id(expression.get_content().to_string()));
     }
-    return make_unique<VariableValue>(declarations_.variables_resolver.Id(expression.get_content().to_string()));
+    return make_unique<VariableValue>(declarations_.variables_resolver().Id(expression.get_content().to_string()));
   }
 
   unique_ptr<ArithmeticOperation>

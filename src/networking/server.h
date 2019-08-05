@@ -29,10 +29,10 @@ namespace rbg {
     }
 
     void Run() {
-      while (clients_sockets_.size() != state_.declarations().players_resolver.size() - 1) {
+      while (clients_sockets_.size() != state_.declarations().players_resolver().size() - 1) {
         tcp::socket socket(io_service_);
         std::cout << "Waiting for clients..."
-                  << "(" << state_.declarations().players_resolver.size() - 1 - clients_sockets_.size()
+                  << "(" << state_.declarations().players_resolver().size() - 1 - clients_sockets_.size()
                   << " more needed)"
                   << std::endl;
         acceptor_.accept(socket);
@@ -43,7 +43,7 @@ namespace rbg {
         std::cout << "Sending game text to client " << i << std::endl;
         clients_sockets_[i].WriteString(game_text_);
         std::cout << "Sending player id "
-                  << state_.declarations().players_resolver.Name(client_player_id(i))
+                  << state_.declarations().players_resolver().Name(client_player_id(i))
                   << "(" << client_player_id(i) << ")"
                   << " to client " << i << std::endl;
         clients_sockets_[i].WriteString(std::to_string(client_player_id(i)));
@@ -58,19 +58,19 @@ namespace rbg {
 
         std::cout << "Expecting move from " << player_socket_index(state_.current_player())
                   << " which is player "
-                  << state_.declarations().players_resolver.Name(state_.current_player())
+                  << state_.declarations().players_resolver().Name(state_.current_player())
                   << " (" << state_.current_player() << ")" << std::endl;
 
         auto move = DecodeMove(clients_sockets_[player_socket_index(state_.current_player())].ReadString());
 
         std::cout << "Got a move from client " << player_socket_index(state_.current_player())
                   << " which is player "
-                  << state_.declarations().players_resolver.Name(state_.current_player())
+                  << state_.declarations().players_resolver().Name(state_.current_player())
                   << " (" << state_.current_player() << "): "
                   << std::endl;
 
         for (const auto &mod : move) {
-          std::cout << "\t" << state_.declarations().initial_board.vertices_names().Name(mod.vertex) << " ("
+          std::cout << "\t" << state_.declarations().initial_board().vertices_names().Name(mod.vertex) << " ("
                     << mod.vertex << ") "
                     << actions_translator_[mod.modifier_index] << " (" << mod.modifier_index << ")" << std::endl;
         }
@@ -85,7 +85,7 @@ namespace rbg {
             continue;
           }
           std::cout << "Sending the move to " << i << " which is player "
-                    << state_.declarations().players_resolver.Name(client_player_id(i))
+                    << state_.declarations().players_resolver().Name(client_player_id(i))
                     << " (" << client_player_id(i) << ")"
                     << std::endl;
           clients_sockets_[i].WriteString(EncodeMove(move));

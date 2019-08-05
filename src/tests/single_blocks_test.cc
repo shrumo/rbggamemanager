@@ -26,7 +26,7 @@ void TestPlayerSwitch() {
   auto moves = game.Moves();
   assert(moves.size() == 1);
   game.Apply(moves[0]);
-  assert(game.current_player() == game.declarations().players_resolver.Id("blue"));
+  assert(game.current_player() == game.declarations().players_resolver().Id("blue"));
 }
 
 void TestMultipleSearchStep() {
@@ -66,8 +66,8 @@ void TestAssignment() {
   assert(moves.size() == 1);
   assert(moves[0].size() == 3);
   game.Apply(moves[0]);
-  assert(game.variables_values()[game.declarations().variables_resolver.Id("turn")] == 10);
-  assert(game.variables_values()[game.declarations().variables_resolver.Id("blue")] == 15);
+  assert(game.variables_values()[game.declarations().variables_resolver().Id("turn")] == 10);
+  assert(game.variables_values()[game.declarations().variables_resolver().Id("blue")] == 15);
   auto game_no_move = CreateGameState(
       kSmallGameDeclarations + "#rules = ->red [$turn = 10] [$blue = turn + 70] ->blue");
   auto moves_empty = game_no_move.Moves();
@@ -81,8 +81,8 @@ void TestExpressions() {
   assert(moves.size() == 1);
   assert(moves[0].size() == 3);
   game.Apply(moves[0]);
-  assert(game.variables_values()[game.declarations().variables_resolver.Id("blue")] == 6);
-  assert(game.variables_values()[game.declarations().variables_resolver.Id("red")] == ((6 + 2) * 4 + 1) / (5 - 1) &&
+  assert(game.variables_values()[game.declarations().variables_resolver().Id("blue")] == 6);
+  assert(game.variables_values()[game.declarations().variables_resolver().Id("red")] == ((6 + 2) * 4 + 1) / (5 - 1) &&
          "Make sure the division is an integer divison.");
 }
 

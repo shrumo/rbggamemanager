@@ -103,8 +103,8 @@ GraphBoardMultiplication rbg::CreateNfaBoardMultiplication(const Nfa<std::unique
       vector<vertex_id_t> reachable_vertices;
       if (transition.content()->type() == MoveType::kShiftType) {
         edge_id_t edge_id = dynamic_cast<Shift *>(transition.content().get())->edge_id();
-        vertex_id_t next = declarations.initial_board.NextVertex(top.vertex, edge_id);
-        if (next != declarations.initial_board.vertices_count()) {
+        vertex_id_t next = declarations.initial_board().NextVertex(top.vertex, edge_id);
+        if (next != declarations.initial_board().vertices_count()) {
           reachable_vertices.push_back(next);
         }
       } else if (transition.content()->type() == MoveType::kShiftTableType) {
@@ -136,7 +136,7 @@ uint AddVisitedChecks(Nfa<unique_ptr<Move>> &nfa, const Declarations &declaratio
   unordered_map<node_t, node_t> last_visited_by_search_from;
   for (const auto& pair : graph_times_board.graph_with_board.nodes_map()) {
     node_t node = pair.first;
-    last_visited_by_search_from[node] = declarations.initial_board.vertices_count(); // tu jest tez blad
+    last_visited_by_search_from[node] = declarations.initial_board().vertices_count();
   }
   unordered_map<node_t, bool> should_add_check(nfa.graph.nodes_map().size());
   to_start_searches_from.push(graph_times_board.node_mapping[{nfa.initial, 0}]);
@@ -151,7 +151,7 @@ uint AddVisitedChecks(Nfa<unique_ptr<Move>> &nfa, const Declarations &declaratio
       to_visit.pop();
       for (edge_id_t transition_id : graph_times_board.graph_with_board.edges_ids_from(current)) {
         const auto& transition = graph_times_board.graph_with_board.GetEdge(transition_id);
-        if (last_visited_by_search_from[transition.to()] == declarations.initial_board.vertices_count()) {
+        if (last_visited_by_search_from[transition.to()] == declarations.initial_board().vertices_count()) {
           if (is_modifier_type(transition.content()->type())) {
             to_start_searches_from.push(transition.to());
             last_visited_by_search_from[transition.to()] = transition.to();
