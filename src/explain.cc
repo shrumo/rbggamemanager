@@ -33,6 +33,9 @@ int main(int argc, const char *argv[]) {
   auto game = CreateGameState(buffer.str());
   auto actions_translator = ActionsDescriptionsMap(buffer.str());
   auto moves = game.Moves();
+
+  std::cout << game.declarations().initial_board().vertices_names() << std::endl;
+
   while(!moves.empty()) {
     uniform_int_distribution<> random_index(0, moves.size()-1);
     cout << "Current player is: " << game.declarations().players_resolver().Name(game.current_player()) << " (" << game.current_player() << ")" << endl;
@@ -46,7 +49,7 @@ int main(int argc, const char *argv[]) {
       cout << "\t" << game.declarations().initial_board().vertices_names().Name(mod.vertex) << " (" << mod.vertex << ") "
            << actions_translator[mod.modifier_index] << " (" << mod.modifier_index << ")" << std::endl;
     }
-    game.Apply(moves[random_index(rng)]);
+    game.Apply(move);
     moves = game.Moves();
     cout << endl;
   }

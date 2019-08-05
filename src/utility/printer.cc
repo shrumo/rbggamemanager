@@ -211,7 +211,7 @@ std::unordered_map<uint, std::string> rbg::ActionsDescriptionsMap(const std::str
 std::string rbg::RectangularBoardDescription(const BoardContent &board_content, const Declarations &declarations) {
   size_t width = 0;
   size_t height = 0;
-  for (vertex_id_t v = 1; v < static_cast<ssize_t >(declarations.initial_board().vertices_count()); v++) {
+  for (vertex_id_t v = 1; v < declarations.initial_board().vertices_count(); v++) {
     std::string vertex_name = declarations.initial_board().vertices_names().Name(v);
     std::stringstream stream(vertex_name);
     char placeholders[3] = {'\0', '\0', '\0'};
@@ -225,7 +225,7 @@ std::string rbg::RectangularBoardDescription(const BoardContent &board_content, 
     height = std::max(y + 1, height);
   }
   std::vector<piece_id_t> field(width * height);
-  for (vertex_id_t v = 1; v < static_cast<ssize_t >(declarations.initial_board().vertices_count()); v++) {
+  for (vertex_id_t v = 1; v < declarations.initial_board().vertices_count(); v++) {
     std::string vertex_name = declarations.initial_board().vertices_names().Name(v);
     std::stringstream stream(vertex_name);
     char placeholder;
@@ -241,7 +241,7 @@ std::string rbg::RectangularBoardDescription(const BoardContent &board_content, 
       if (name == "empty" || name == "e") {
         s << "[" << std::setw(3) << " " << "] ";
       } else {
-        s << "[" << std::setw(3) << name.substr(0, (unsigned long) 3)
+        s << "[" << std::setw(3) << name.substr(0, 3)
           << "] ";
       }
     }
