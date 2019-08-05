@@ -5,13 +5,14 @@
 #include "printer.h"
 
 #include "utility/moves_visitor.h"
-#include <utility/arithmetic_operation_visitor.h>
+#include "utility/arithmetic_operation_visitor.h"
 #include "game_description/moves/moves.h"
 #include <sstream>
 #include <iomanip>
 #include "game_description/construction/graph_creator.h"
 #include <parser/parser_wrapper.h>
 #include "game_description/construction/declarations_creator.h"
+#include "game_state/game_state.h"
 
 using namespace rbg;
 
@@ -247,5 +248,19 @@ std::string rbg::RectangularBoardDescription(const BoardContent &board_content, 
     }
     s << '\n';
   }
+  return s.str();
+}
+
+std::string rbg::VariablesValuesDescription(const GameState &state) {
+  std::stringstream s;
+  for (variable_id_t id = 0; id < state.declarations().variables_resolver.size(); id++) {
+          auto variable_name = state.declarations().variables_resolver.Name(id);
+          s << "\t" << variable_name << " (" << id << ") : " << state.variables_values()[id];
+          if (state.declarations().players_resolver.contains(variable_name)) {
+            s << " (result for player " << variable_name << " ("
+                      << state.declarations().players_resolver.Id(variable_name) << "))";
+          }
+          s << std::endl;
+        }
   return s.str();
 }

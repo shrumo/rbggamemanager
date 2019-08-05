@@ -51,19 +51,10 @@ namespace rbg {
       auto moves = state_.Moves();
       available_moves_ = std::unordered_set<GameMove>(moves.begin(), moves.end());
       while (!available_moves_.empty()) {
-
-
+        std::cout << "\n";
         std::cout << RectangularBoardDescription(state_.board_content(), state_.declarations()) << std::endl;
         std::cout << "Variables values are:" << std::endl;
-        for (variable_id_t id = 0; id < state_.declarations().variables_resolver.size(); id++) {
-          auto variable_name = state_.declarations().variables_resolver.Name(id);
-          std::cout << "\t" << variable_name << " (" << id << ") : " << state_.variables_values()[id];
-          if (state_.declarations().players_resolver.contains(variable_name)) {
-            std::cout << " (result for player " << variable_name << " ("
-                      << state_.declarations().players_resolver.Id(variable_name) << "))";
-          }
-          std::cout << std::endl;
-        }
+        std::cout << VariablesValuesDescription(state_) << std::endl;
 
         std::cout << "Expecting move from " << player_socket_index(state_.current_player())
                   << " which is player "
@@ -107,20 +98,10 @@ namespace rbg {
       }
 
       std::cout << "Game ended." << std::endl;
-
+      std::cout << "\n";
       std::cout << RectangularBoardDescription(state_.board_content(), state_.declarations()) << std::endl;
       std::cout << "Variables values at end are:" << std::endl;
-      for (variable_id_t id = 0; id < state_.declarations().variables_resolver.size(); id++) {
-        auto variable_name = state_.declarations().variables_resolver.Name(id);
-        std::cout << "\t" << variable_name << " (" << id << ") : " << state_.variables_values()[id];
-        if (state_.declarations().players_resolver.contains(variable_name)) {
-          auto player_id = state_.declarations().players_resolver.Id(variable_name);
-          std::cout << " (result for " << player_socket_index(player_id) << " which is player " << variable_name << " ("
-                    << player_id << "))";
-        }
-        std::cout << std::endl;
-      }
-
+      std::cout << VariablesValuesDescription(state_) << std::endl;
     }
 
   private:

@@ -39,17 +39,10 @@ int main(int argc, char *argv[]) {
   auto moves = state.Moves();
   while (!moves.empty()) {
     if (state.current_player() == assigned_player) {
+      std::cout << "\n";
       std::cout << RectangularBoardDescription(state.board_content(), state.declarations()) << std::endl;
-        std::cout << "Variables values are:" << std::endl;
-        for (variable_id_t id = 0; id < state.declarations().variables_resolver.size(); id++) {
-          auto variable_name = state.declarations().variables_resolver.Name(id);
-          std::cout << "\t" << variable_name << " (" << id << ") : " << state.variables_values()[id];
-          if (state.declarations().players_resolver.contains(variable_name)) {
-            std::cout << " (result for player " << variable_name << " ("
-                      << state.declarations().players_resolver.Id(variable_name) << "))";
-          }
-          std::cout << std::endl;
-        }
+      std::cout << "Variables values are:" << std::endl;
+      std::cout << VariablesValuesDescription(state) << std::endl;
       auto move = moves[rand() % moves.size()];
       state.Apply(move);
       std::cout << "Sending move:" << std::endl;
@@ -70,15 +63,9 @@ int main(int argc, char *argv[]) {
       moves = state.Moves();
     }
   }
+  std::cout << "\n";
   std::cout << RectangularBoardDescription(state.board_content(), state.declarations()) << std::endl;
   std::cout << "Variables values at end are:" << std::endl;
-  for(variable_id_t id = 0; id < state.declarations().variables_resolver.size(); id++) {
-    auto variable_name = state.declarations().variables_resolver.Name(id);
-    std::cout << "\t" << variable_name << " (" << id << ") : " << state.variables_values()[id];
-    if(state.declarations().players_resolver.contains(variable_name)) {
-      std::cout << " (result for player " << variable_name << " (" << state.declarations().players_resolver.Id(variable_name) << "))";
-    }
-    std::cout << std::endl;
-  }
+  std::cout << VariablesValuesDescription(state) << std::endl;
   return 0;
 }

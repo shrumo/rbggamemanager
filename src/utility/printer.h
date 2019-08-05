@@ -14,6 +14,7 @@ namespace rbg {
   std::unordered_map<uint,std::string> ActionsDescriptionsMap(const std::string& game_text);
 
   std::string RectangularBoardDescription(const BoardContent &board_content, const Declarations &declarations);
+  std::string VariablesValuesDescription(const GameState& state);
 }
 
 
