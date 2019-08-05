@@ -70,11 +70,11 @@ namespace rbg {
     }
 
     vertex_id_t AddVertexName(const std::string &v) {
-      return vertices_resolver_.Id(v);
+      return vertices_resolver_.AddName(v);
     }
 
     vertex_id_t AddEdgeName(const std::string &e) {
-      return edges_resolver_.Id(e);
+      return edges_resolver_.AddName(e);
     }
 
     vertex_id_t NextVertex(vertex_id_t current, shift_edge_id edge) const {

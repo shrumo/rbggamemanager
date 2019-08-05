@@ -178,7 +178,7 @@ public:
   }
 
   std::string VisitedQueryCase(const VisitedQuery &move) override {
-    return "<VisitedQuery " + std::to_string(move.visited_array_index()) + ">";
+    return "<VisitedQuery>";
   }
 
   std::string EmptyCase(const Empty &) override {
@@ -196,9 +196,9 @@ std::unordered_map<uint, std::string> rbg::ActionsDescriptionsMap(const std::str
   std::unordered_map<uint, std::string> result;
   auto game = ParseGame(ParseGame(game_text)->to_rbg());
   Declarations declarations = Declarations(*game);
-  VisitedChecksNfa nfa = CreateVisitedChecksNfa(*game->get_moves(), declarations);
-  for(node_t node: nfa.nfa.graph.nodes()) {
-    for(const auto& edge : nfa.nfa.graph.EdgesFrom(node)) {
+  auto nfa = CreateNfa(*game->get_moves(), declarations);
+  for(node_t node: nfa.graph.nodes()) {
+    for(const auto& edge : nfa.graph.EdgesFrom(node)) {
       if(edge.content()->indexed()) {
         const auto& indexed_edge = dynamic_cast<const IndexedMove&>(*edge.content());
         result[indexed_edge.index()] = MoveDescription(*edge.content(), declarations);

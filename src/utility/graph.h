@@ -24,6 +24,20 @@ namespace rbg {
   using node_t = uint;
   using edge_id_t = uint;
 
+  // Returns nodes ids.
+  // Every subsequent call to this function will give different value.
+  static node_t new_node_id() {
+    static node_t next_node_id_ = 0;
+    return next_node_id_++;
+  }
+
+  // Return edges ids.
+  // Every subsequent call to this function will give different value.
+  static edge_id_t new_edge_id() {
+    static edge_id_t next_edge_id_ = 0;
+    return next_edge_id_++;
+  }
+
   template<typename EdgeContent>
   class Node;
 
@@ -125,18 +139,14 @@ namespace rbg {
   template<typename EdgeContent>
   class Graph {
   public:
-    Graph() : next_node_id_(0), next_edge_id_(0) {}
-
     node_t NewNode() {
-      node_t node_id = next_node_id_;
-      next_node_id_++;
+      node_t node_id = new_node_id();
       nodes_.emplace(node_id,Node<EdgeContent>(node_id));
       return node_id;
     }
 
      edge_id_t AddEdge(node_t from, EdgeContent content, node_t to) {
-      edge_id_t edge_id = next_edge_id_;
-      next_edge_id_++;
+      edge_id_t edge_id = new_edge_id();
       edges_.insert(std::pair<edge_id_t,Edge<EdgeContent>>{edge_id, Edge<EdgeContent>(edge_id, from, std::move(content), to)});
       nodes_.at(from).out_edges_.PushBack(edge_id);
       nodes_.at(to).in_edges_.insert(edge_id);
@@ -276,9 +286,6 @@ namespace rbg {
   private:
     std::unordered_map<node_t, Node<EdgeContent>> nodes_;
     std::unordered_map<edge_id_t, Edge<EdgeContent>> edges_;
-
-    node_t next_node_id_;
-    edge_id_t next_edge_id_;
   };
 
   template<typename Letter>

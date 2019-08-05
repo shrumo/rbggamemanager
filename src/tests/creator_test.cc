@@ -67,7 +67,7 @@ vector<int> SortedActionIndices(const vector<const Move *> &path) {
 int main() {
   auto pg = ParseGame(kSmallGame);
   auto declarations = Declarations(*pg);
-  auto result = CreateVisitedChecksNfa(*pg->get_moves(), declarations).nfa;
+  auto result = CreateNfa(*pg->get_moves(), declarations);
   auto paths = ShortestPaths(result.graph, result.initial, result.final);
 
   for (const auto &path : paths) {

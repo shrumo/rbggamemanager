@@ -17,7 +17,9 @@ namespace rbg {
   public:
     NamesResolver() = default;
 
-    name_id_t Id(const std::string &name) {
+    // Adds the name to the names resolver.
+    // When called with the name that already exists, returns the id of that name.
+    name_id_t AddName(const std::string &name) {
       auto name_iterator = names_ids_.find(name);
       if (name_iterator != names_ids_.end()) {
         return name_iterator->second;

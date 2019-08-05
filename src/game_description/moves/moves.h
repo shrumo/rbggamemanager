@@ -299,6 +299,7 @@ namespace rbg {
     std::unique_ptr<ArithmeticOperation> value_;
   };
 
+  // Condition is true if there is a legal path from initial to final.
   class Condition : public IndexedMove {
   public:
     Condition(std::unique_ptr<Nfa<std::unique_ptr<Move>>> nfa, bool negated, uint index)
@@ -336,17 +337,10 @@ namespace rbg {
 
   class VisitedQuery : public Move {
   public:
-    explicit VisitedQuery(uint visited_array_index)
-        : Move(MoveType::kVisitedCheck), visited_array_index_(visited_array_index) {}
+    explicit VisitedQuery()
+        : Move(MoveType::kVisitedCheck) {}
 
     void Accept(MoveVisitor &visitor) const override { visitor.Visit(*this); }
-
-    uint visited_array_index() const {
-      return visited_array_index_;
-    }
-
-  private:
-    uint visited_array_index_;
   };
 
   class Empty : public Move {

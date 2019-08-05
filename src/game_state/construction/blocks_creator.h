@@ -100,7 +100,7 @@ namespace rbg {
     SearchStepsPoint current_position;
   };
 
-  SearchStepsInformation CreateSearchSteps(const VisitedChecksNfa &nfa, const Declarations &declarations);
+  SearchStepsInformation CreateSearchSteps(const Nfa<std::unique_ptr<Move>> &nfa, const Declarations &declarations);
 }
 
 

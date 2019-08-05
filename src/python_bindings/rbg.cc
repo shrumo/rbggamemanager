@@ -38,7 +38,7 @@ Nfa<std::string> translate(const Nfa<std::unique_ptr<Move>> &nfa, const Declarat
 Nfa<std::string> CreateStringNfa(const std::string &game_text) {
   auto pg = ParseGame(game_text);
   auto decl = Declarations(*pg);
-  return translate(CreateVisitedChecksNfa(*pg->get_moves(), decl).nfa, decl);
+  return translate(CreateNfa(*pg->get_moves(), decl), decl);
 }
 
 namespace py = pybind11;

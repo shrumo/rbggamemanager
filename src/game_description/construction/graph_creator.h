@@ -52,7 +52,7 @@ namespace rbg {
   Nfa<std::unique_ptr<Move>> ThompsonsConstruction(const rbg_parser::game_move &rbg_move,
                                                    const Declarations &declarations);
 
-  VisitedChecksNfa CreateVisitedChecksNfa(const rbg_parser::game_move &rbg_move, const Declarations &declarations);
+  Nfa<std::unique_ptr<Move>> CreateNfa(const rbg_parser::game_move &rbg_move, const Declarations &declarations);
 }
 
 

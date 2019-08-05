@@ -25,25 +25,25 @@ namespace rbg {
                         game.get_declarations().get_legal_pieces().size()),
           keeper_id_{0} {
       for (const auto &piece : game.get_declarations().get_legal_pieces()) {
-        pieces_resolver_.Id(piece.to_string());
+        pieces_resolver_.AddName(piece.to_string());
       }
       auto players_tokens = std::vector<std::pair<rbg_parser::token, uint>>(
           game.get_declarations().get_legal_players().begin(), game.get_declarations().get_legal_players().end());
 
       // Add keeper player id, this also makes sure that first player has index 1.
-      keeper_id_ = players_resolver_.Id(">");
+      keeper_id_ = players_resolver_.AddName(">");
 
       std::sort(players_tokens.begin(), players_tokens.end(),
                 [](const std::pair<rbg_parser::token, uint> &a, const std::pair<rbg_parser::token, uint> &b) {
                   return a.first.get_position() < b.first.get_position();
                 });
       for (const auto &player : players_tokens) {
-        auto variable_id = variables_resolver_.Id(player.first.to_string());
-        players_resolver_.Id(player.first.to_string());
+        auto variable_id = variables_resolver_.AddName(player.first.to_string());
+        players_resolver_.AddName(player.first.to_string());
         variables_bounds_[variable_id] = player.second;
       }
       for (const auto &variable : game.get_declarations().get_legal_variables()) {
-        auto variable_id = variables_resolver_.Id(variable.first.to_string());
+        auto variable_id = variables_resolver_.AddName(variable.first.to_string());
         variables_bounds_[variable_id] = variable.second;
       }
 
@@ -66,7 +66,8 @@ namespace rbg {
           initial_board_.AddEdge(source_id, initial_board_.edges_names().Id(edge.first.to_string()), target_id);
         }
         initial_board_.initial_content().set(source_id,
-                                            pieces_resolver_.Id(game.get_board().get_starting_piece(id).to_string()));
+                                             pieces_resolver_.AddName(
+                                                 game.get_board().get_starting_piece(id).to_string()));
       }
     }
 

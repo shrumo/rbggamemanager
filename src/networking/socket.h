@@ -20,7 +20,7 @@ namespace rbg {
     explicit StringSocket(asio::io_service& service) : socket_(service) {}
     explicit StringSocket(tcp::socket socket) : socket_(std::move(socket)) {}
 
-    explicit StringSocket(StringSocket&& other) :
+    StringSocket(StringSocket&& other) noexcept :
       socket_(std::move(other.socket_)), buffer{}
     {
       std::string content = std::string(asio::buffers_begin(buffer.data()),

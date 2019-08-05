@@ -69,6 +69,17 @@ public:
     return {initial, final};
   }
 
+  GraphCreatorResult MoveCheckCase(const rbg_parser::move_check &move) override {
+    auto check_move = make_unique<Condition>(
+        std::make_unique<Nfa<unique_ptr<Move>>>(ThompsonsConstruction(*move.get_content(), declarations_)), move.is_negated(),
+        move.index_in_expression());
+      node_t initial = graph_.NewNode();
+    node_t final = graph_.NewNode();
+    graph_.AddEdge(initial, std::move(check_move) , final);
+    return {initial, final};
+  }
+
+
   GraphCreatorResult GameMoveCase(const rbg_parser::game_move &m) override {
     // Move representation graph edge
     node_t initial = graph_.NewNode();
@@ -139,7 +150,7 @@ uint AddVisitedChecks(Nfa<unique_ptr<Move>> &nfa, const Declarations &declaratio
     last_visited_by_search_from[node] = declarations.initial_board().vertices_count();
   }
   unordered_map<node_t, bool> should_add_check(nfa.graph.nodes_map().size());
-  to_start_searches_from.push(graph_times_board.node_mapping[{nfa.initial, 0}]);
+  to_start_searches_from.push(graph_times_board.node_mapping[{1, nfa.initial}]);
   while (!to_start_searches_from.empty()) {
     node_t search_from = to_start_searches_from.front();
     to_start_searches_from.pop();
@@ -188,7 +199,7 @@ uint AddVisitedChecks(Nfa<unique_ptr<Move>> &nfa, const Declarations &declaratio
           for (edge_id_t in_transition_id : transitions_to) {
             nfa.graph.ChangeEdgeTarget(in_transition_id, visited_check);
           }
-          nfa.graph.AddEdge(visited_check, make_unique<VisitedQuery>(visited_checks_index), v);
+          nfa.graph.AddEdge(visited_check, make_unique<VisitedQuery>(), v);
           visited_checks_index++;
           to_visit.push(v);
           visited.insert(v);
@@ -242,9 +253,9 @@ void HandleMultipleOutNodes(Graph<unique_ptr<Move>> &graph) {
   }
 }
 
-VisitedChecksNfa rbg::CreateVisitedChecksNfa(const rbg_parser::game_move &rbg_move, const Declarations &declarations) {
+Nfa<std::unique_ptr<Move>> rbg::CreateNfa(const rbg_parser::game_move &rbg_move, const Declarations &declarations) {
   auto nfa = ThompsonsConstruction(rbg_move, declarations);
-  uint visited_checks_count = AddVisitedChecks(nfa, declarations);
+  AddVisitedChecks(nfa, declarations);
   HandleMultipleOutNodes(nfa.graph);
-  return VisitedChecksNfa{visited_checks_count, move(nfa)};
+  return nfa;
 }
