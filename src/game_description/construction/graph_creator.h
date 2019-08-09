@@ -12,45 +12,47 @@
 #include "game_description/moves/moves.h"
 
 namespace rbg {
-  struct VertexNode {
-    vertex_id_t vertex;
-    node_t node;
+  class NfaBoardProduct : public Graph<const Move*> {
+  public:
+    explicit NfaBoardProduct(const Nfa<std::unique_ptr<Move>> &nfa,
+                             const Board &board,
+                             const std::vector<vertex_id_t> &initials);
 
-    bool operator==(const VertexNode &b) const {
-      return node == b.node && vertex == b.vertex;
+    // Returns the node of the NfaBoardProduct that corresponds to this vertex node pair.
+    node_t node(vertex_id_t vertex, node_t node) const {
+      return node_mapping_.at({vertex, node});
     }
-  };
-}
 
-namespace std {
-  template<>
-  struct hash<rbg::VertexNode> {
-    std::size_t operator()(const rbg::VertexNode &node_vertex_pair) const {
-      return hash<rbg::node_t>()(node_vertex_pair.node) ^ hash<rbg::vertex_id_t>()(node_vertex_pair.vertex);
+    // Returns the vertex node pair that this NfaBoardProduct node corresponds to.
+    std::pair<vertex_id_t, node_t> vertex_node(node_t node) const {
+      const auto& result = reverse_node_mapping_.at(node);
+      return {result.vertex, result.node};
     }
+
+    const NfaBoardProduct& sub_nfa_board(node_t condition_initial_node) const {
+      return *sub_graphs_.at(condition_initial_node);
+    }
+
+  private:
+    struct VertexNode {
+      vertex_id_t vertex;
+      node_t node;
+
+      bool operator==(const VertexNode& b) const {
+        return vertex == b.vertex && node == b.node;
+      }
+    };
+
+    struct VertexNodeHash {
+      std::size_t operator()(const VertexNode& v) const {
+        return v.vertex * 5693 + v.node;
+      }
+    };
+
+    std::unordered_map<node_t, std::unique_ptr<NfaBoardProduct>> sub_graphs_;
+    std::unordered_map<VertexNode, node_t, VertexNodeHash> node_mapping_;
+    std::unordered_map<node_t, VertexNode> reverse_node_mapping_;
   };
-}
-
-namespace rbg {
-  struct VisitedChecksNfa {
-    uint visited_checks_count;
-    Nfa<std::unique_ptr<Move>> nfa;
-  };
-
-  struct GraphBoardMultiplication {
-    explicit GraphBoardMultiplication(const Nfa<std::unique_ptr<Move>> &nfa) : original_nfa(nfa) {}
-
-    const Nfa<std::unique_ptr<Move>> &original_nfa;
-    Graph<const Move *> graph_with_board{};
-    std::unordered_map<VertexNode, node_t> node_mapping{};
-    std::unordered_map<node_t, VertexNode> reverse_node_mapping{};
-  };
-
-  GraphBoardMultiplication CreateNfaBoardMultiplication(const Nfa<std::unique_ptr<Move>> &nfa,
-                                                        const Declarations &declarations);
-
-  Nfa<std::unique_ptr<Move>> ThompsonsConstruction(const rbg_parser::game_move &rbg_move,
-                                                   const Declarations &declarations);
 
   Nfa<std::unique_ptr<Move>> CreateNfa(const rbg_parser::game_move &rbg_move, const Declarations &declarations);
 }
