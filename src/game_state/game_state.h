@@ -40,27 +40,13 @@ namespace rbg {
 
     friend class PlayerTest;
 
+    friend class ConditionVisitedCheckTest;
+
     friend class VisitedCheckTest;
-
-    friend class VisitedCheckSearchStep;
-
-    friend class ShiftStep;
-
-    friend class OnStep;
-
-    friend class OffStep;
-
-    friend class PlayerSwitchStep;
-
-    friend class AssignmentStep;
 
     friend class VariableValue;
 
     friend class PieceCountValue;
-
-    friend class PlayerCheckStep;
-
-    friend class RegisterModifierApplication;
 
     friend class ModifyingApplication;
 

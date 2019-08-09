@@ -41,6 +41,37 @@ namespace rbg {
     ResetableBitArrayStackChunk stack_chunk_;
   };
 
+  class ConditionVisitedCheckTest {
+  public:
+    static constexpr ActionTypeTrait kind = ActionTypeTrait::kSpecial;
+
+    explicit ConditionVisitedCheckTest(ResetableBitArrayStackChunk bit_array_stack_chunk)
+        : stack_chunk_(bit_array_stack_chunk) {
+    }
+
+    template<typename NextBlockElements>
+    always_inline void Run(GameState *state, NextBlockElements *next) {
+      next->Run(state);
+    }
+
+    template<typename NextBlockElements>
+    always_inline bool RunAndApplyFirst(GameState *state,
+                          std::vector<ActionRevertInfo> *revert_infos,
+                          vertex_id_t revert_vertex,
+                          NextBlockElements *next) {
+      bool result = next->RunAndApplyFirst(state, revert_infos, revert_vertex);
+      return result;
+    }
+
+    template<typename NextBlockElements>
+    always_inline bool RunAndFindEnd(GameState *state, NextBlockElements *next) {
+      bool result = next->RunAndFindEnd(state);
+      return result;
+    }
+  private:
+    ResetableBitArrayStackChunk stack_chunk_;
+  };
+
   class ShiftAction {
   public:
     static constexpr ActionTypeTrait kind = ActionTypeTrait::kApplication;
@@ -191,7 +222,7 @@ namespace rbg {
 
     static constexpr ActionTypeTrait kind = ActionTypeTrait::kCheck;
 
-    explicit ConditionCheckTest(Block* steps_point)
+    explicit ConditionCheckTest(Block *steps_point)
         : steps_point_(std::move(steps_point)) {};
 
     always_inline     bool Check(GameState *state) const {
@@ -201,7 +232,7 @@ namespace rbg {
 
 
   private:
-    Block* steps_point_;
+    Block *steps_point_;
   };
 
 
@@ -210,7 +241,7 @@ namespace rbg {
 
     static constexpr ActionTypeTrait kind = ActionTypeTrait::kCheck;
 
-    explicit NegatedConditionCheckTest(Block* steps_point)
+    explicit NegatedConditionCheckTest(Block *steps_point)
         : steps_point_(std::move(steps_point)) {};
 
     always_inline     bool Check(GameState *state) const {
@@ -220,7 +251,7 @@ namespace rbg {
 
 
   private:
-    Block* steps_point_;
+    Block *steps_point_;
   };
 
 

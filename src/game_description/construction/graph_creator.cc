@@ -313,7 +313,7 @@ void HandleMultipleOutNodes(Graph<unique_ptr<Move>> &graph) {
         if (handled.find(transition.to()) != handled.end()) {
           to_erase.push_back(transition_id);
         } else {
-          handled.insert(transition_id);
+          handled.insert(transition.to());
         }
       }
       for (edge_id_t transition_id : to_erase) {

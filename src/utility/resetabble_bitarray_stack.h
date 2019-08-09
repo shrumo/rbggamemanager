@@ -25,6 +25,9 @@ namespace rbg {
       threshold_ = 1;
     }
 
+//    ResettableBitArray(ResettableBitArray&&) = delete;
+//    ResettableBitArray(const ResettableBitArray&) = delete;
+
     bool operator[](const uint index) const {
       return data_[index] == threshold_;
     }

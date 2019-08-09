@@ -12,7 +12,7 @@ using namespace std;
 
 SearchStepsPoint
 CreateStepsInCollection(const Nfa<std::unique_ptr<Move>> &nfa, BlocksCollection &collection,
-                        const Declarations &declarations, const std::unordered_map<edge_id_t, uint> &visited_check_indices);
+                        const Declarations &declarations, const std::unordered_map<edge_id_t, uint> &visited_check_indices, bool condition);
 
 template<typename Branch>
 struct BlocksCreatorResult {
@@ -182,22 +182,32 @@ template<typename Branch>
 class VisitedCheckCreator : public MoveFunction<BlocksCreatorResult<Branch>> {
 public:
   explicit VisitedCheckCreator(BlocksCollection &collection, const Declarations &declarations,
-                             uint visited_check_index)
-      : collection_(collection), declarations_(declarations), visited_check_index_(visited_check_index) {
+                             uint visited_check_index, bool condition)
+      : collection_(collection), declarations_(declarations), visited_check_index_(visited_check_index), condition_(condition) {
   }
 
   BlocksCreatorResult<Branch> VisitedQueryCase(const VisitedQuery &) override {
-    auto block = CreateBlockUniquePtr(VisitedCheckTest(collection_.GetBitArrayChunk(visited_check_index_)),
-                             Branch{});
-    auto branch = block->content().branch();
-    uint step_index = collection_.AddBlock(std::move(block));
-    return {step_index, branch};
+    if(!condition_) {
+      auto block = CreateBlockUniquePtr(VisitedCheckTest(collection_.GetBitArrayChunk(visited_check_index_)),
+                                        Branch{});
+      auto branch = block->content().branch();
+      uint step_index = collection_.AddBlock(std::move(block));
+      return {step_index, branch};
+    }
+    else {
+       auto block = CreateBlockUniquePtr(ConditionVisitedCheckTest(collection_.GetBitArrayChunk(visited_check_index_)),
+                                        Branch{});
+      auto branch = block->content().branch();
+      uint step_index = collection_.AddBlock(std::move(block));
+      return {step_index, branch};
+    }
   }
 
   private:
   BlocksCollection &collection_;
   const Declarations &declarations_;
   uint visited_check_index_;
+  bool condition_;
 };
 
   template<typename Branch>
@@ -213,13 +223,13 @@ public:
    BlocksCreatorResult<Branch> ConditionCase(const Condition &move) override {
     if (move.negated()) {
       auto block = CreateBlockUniquePtr(NegatedConditionCheckTest(
-          CreateStepsInCollection(move.nfa(), collection_, declarations_, visited_check_indices_).current()), Branch{});
+          CreateStepsInCollection(move.nfa(), collection_, declarations_, visited_check_indices_, true).current()), Branch{});
       auto branch = block->content().branch();
       uint step_index = collection_.AddBlock(std::move(block));
       return {step_index, branch};
     } else {
       auto block = CreateBlockUniquePtr(ConditionCheckTest(
-          CreateStepsInCollection(move.nfa(), collection_, declarations_, visited_check_indices_).current()), Branch{});
+          CreateStepsInCollection(move.nfa(), collection_, declarations_, visited_check_indices_, true).current()), Branch{});
       auto branch = block->content().branch();
       uint step_index = collection_.AddBlock(std::move(block));
       return {step_index, branch};
@@ -273,7 +283,8 @@ void CreateStepsInCollectionRecursive(const Graph<std::unique_ptr<Move>> &game_g
                                       const Declarations &declarations,
                                       const std::unordered_map<edge_id_t, uint>& visited_check_indices,
                                       node_t current,
-                                      unordered_map<node_t, uint> *nodes_blocks) {
+                                      unordered_map<node_t, uint> *nodes_blocks,
+                                      bool condition=false) {
 
   if(game_graph.EdgesFrom(current).size() == 0) {
     (*nodes_blocks)[current] = collection.AddBlock(CreateBlockUniquePtr(BranchEmpty()));
@@ -284,15 +295,15 @@ void CreateStepsInCollectionRecursive(const Graph<std::unique_ptr<Move>> &game_g
     BlocksCreatorResult<BranchSingle> result{};
     if(edge.content()->type() == MoveType :: kVisitedCheck) {
       uint visited_check_index = visited_check_indices.at(edge.id());
-      result = VisitedCheckCreator<BranchSingle>(collection, declarations, visited_check_index)(*edge.content());
+      result = VisitedCheckCreator<BranchSingle>(collection, declarations, visited_check_index, condition)(*edge.content());
     } else if(edge.content()->type() == MoveType :: kConditionCheck) {
       result = ConditionCheckCreator<BranchSingle>(collection, declarations, game_graph, visited_check_indices)(*edge.content());
     } else {
-      result = SearchStepCreator<BranchSingle>(collection, declarations)(*edge.content());
+      result = SearchStepCreator<BranchSingle>(collection, declarations, !condition)(*edge.content());
     }
     (*nodes_blocks)[current]  = result.block_collection_index;
     if(nodes_blocks->find(next) == nodes_blocks->end() ) {
-      CreateStepsInCollectionRecursive(game_graph, collection, declarations, visited_check_indices, next, nodes_blocks);
+      CreateStepsInCollectionRecursive(game_graph, collection, declarations, visited_check_indices, next, nodes_blocks, condition);
     }
     result.branch_pointer->AddNext(collection.GetBlockPointer(nodes_blocks->at(next)));
   }
@@ -304,7 +315,7 @@ void CreateStepsInCollectionRecursive(const Graph<std::unique_ptr<Move>> &game_g
       assert(edge.content()->type() == MoveType::kEmpty && "The multiple branch only supports epsilon transitions for now.");
        uint next = edge.to();
        if(nodes_blocks->find(next) == nodes_blocks->end() ) {
-         CreateStepsInCollectionRecursive(game_graph, collection, declarations, visited_check_indices, next, nodes_blocks);
+         CreateStepsInCollectionRecursive(game_graph, collection, declarations, visited_check_indices, next, nodes_blocks, condition);
        }
        result.branch_pointer->AddNext(collection.GetBlockPointer(nodes_blocks->at(next)));
     }
@@ -313,9 +324,9 @@ void CreateStepsInCollectionRecursive(const Graph<std::unique_ptr<Move>> &game_g
 
 SearchStepsPoint
 CreateStepsInCollection(const Nfa<std::unique_ptr<Move>>& nfa, BlocksCollection &collection,
-                        const Declarations &declarations, const std::unordered_map<edge_id_t, uint>& visited_check_indices) {
+                        const Declarations &declarations, const std::unordered_map<edge_id_t, uint>& visited_check_indices, bool condition=false) {
   std::unordered_map<node_t, uint> nodes_blocks;
-  CreateStepsInCollectionRecursive(nfa.graph, collection, declarations, visited_check_indices, nfa.initial , &nodes_blocks);
+  CreateStepsInCollectionRecursive(nfa.graph, collection, declarations, visited_check_indices, nfa.initial , &nodes_blocks, condition);
   return SearchStepsPoint{collection, collection.GetBlockPointer(nodes_blocks.at(nfa.initial))};
 }
 

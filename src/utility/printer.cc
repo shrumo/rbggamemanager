@@ -177,7 +177,7 @@ public:
     return result.str();
   }
 
-  std::string VisitedQueryCase(const VisitedQuery &move) override {
+  std::string VisitedQueryCase(const VisitedQuery &) override {
     return "<VisitedQuery>";
   }
 

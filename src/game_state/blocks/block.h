@@ -368,6 +368,30 @@ namespace rbg {
       }
     }
 
+     /* ------------------------ If the action is of type SPECIAL, those methods are defined. ----------------------- */
+     /* This kind of action gives tha action full control of what is happening in each call. */
+
+    template<ActionTypeTrait ActionKind = Action::kind>
+    typename std::enable_if<ActionKind == ActionTypeTrait::kSpecial,
+        void>::type Run(GameState *state) {
+      action_.Run(state, &next_elements_);
+    }
+
+
+    template<ActionTypeTrait ActionKind = Action::kind>
+    typename std::enable_if<ActionKind == ActionTypeTrait::kSpecial,
+        bool>::type RunAndApplyFirst(GameState *state,
+                                     std::vector<ActionRevertInfo> *revert_infos,
+                                     vertex_id_t revert_vertex) {
+      return action_.RunAndApplyFirst(state, revert_infos, revert_vertex, &next_elements_);
+    }
+
+    template<ActionTypeTrait ActionKind = Action::kind>
+    typename std::enable_if<ActionKind == ActionTypeTrait::kSpecial,
+        bool>::type RunAndFindEnd(GameState *state) {
+      return action_.RunAndFindEnd(state, &next_elements_);
+    }
+
     /* ------------------------ Those functions are defined always in a BlockContent -------------------------------- */
     Action *action() {
       return &action_;

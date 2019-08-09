@@ -15,7 +15,9 @@ namespace rbg{
     kApplication,
     kModifier,
     kSwitch,
+    kSpecial,
   };
+
   class ModifyingApplication {
   public:
     explicit ModifyingApplication(uint index) : index_(index) {}
