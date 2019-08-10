@@ -8,16 +8,16 @@
 using namespace rbg;
 
 void ModifyingApplication::PushVisitedStackAndAddToApplied(rbg::GameState *state) const {
-  state->steps_.collection.PushStacks();
+  state->blocks_.PushStacks();
   state->applied_modifiers_.push_back(ModifierApplication{state->current_pos_, index_});
 }
 
 void ModifyingApplication::PopVisitedStackAndAddToApplied(rbg::GameState *state)  const {
   state->applied_modifiers_.pop_back();
-  state->steps_.collection.PopStacks();
+  state->blocks_.PopStacks();
 }
 
-vertex_id_t ModifyingApplication::weird_current_state_pos(GameState *state) const {
+vertex_id_t ModifyingApplication::modified_position(GameState *state) const {
   return state->current_pos_;
 }
 

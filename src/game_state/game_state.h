@@ -50,22 +50,22 @@ namespace rbg {
 
     friend class ModifyingApplication;
 
-    GameState(const Declarations &declarations, SearchStepsInformation steps)
+    GameState(const Declarations &declarations, BlocksCollection steps)
         : declarations_(declarations), current_pos_(1),
           variables_values_(declarations.variables_resolver().size(), 0),
           current_player_(declarations.keeper_id()),
-          board_(declarations.initial_board().initial_content()), steps_(std::move(steps)),
+          board_(declarations.initial_board().initial_content()), blocks_(std::move(steps)),
+          current_block_(blocks_.initial()),
           moves_calculated(false) {
-      steps_.current_position.SetParent(&steps_.collection);
       applied_modifiers_.reserve(10);
       moves_.reserve(10);
       std::vector<ActionRevertInfo> initial_keeper_step_revert_information;
       MakeKeeperClosure(initial_keeper_step_revert_information);
     }
 
-    const std::vector<std::vector<ModifierApplication>>& Moves() {
-      if(!moves_calculated) {
-        steps_.current_position.current()->Run(this);
+    const std::vector<std::vector<ModifierApplication>> &Moves() {
+      if (!moves_calculated) {
+        current_block_->Run(this);
         moves_calculated = true;
         return moves_;
       }
@@ -73,19 +73,19 @@ namespace rbg {
     }
 
     MoveRevertInformation Apply(const std::vector<ModifierApplication> &move) {
-      Block *previous_search_step = steps_.current_position.current();
+      Block *previous_search_step = current_block_;
       std::vector<ActionRevertInfo> revert_infos;
       revert_infos.reserve(move.size());
       for (const auto &mod_application : move) {
         vertex_id_t previous_vertex = current_pos_;
-        const ModifyingApplication* modifier = steps_.collection.Modifier(mod_application.modifier_index);
+        const ModifyingApplication *modifier = blocks_.Modifier(mod_application.modifier_index);
         current_pos_ = mod_application.vertex;
         revert_infos.push_back(ActionRevertInfo{modifier, previous_vertex, modifier->Apply(this)});
       }
-      steps_.current_position.set_current(steps_.collection.Switch(move.back().modifier_index));
-      steps_.collection.ResetStacks();
+      current_block_ = blocks_.Switch(move.back().modifier_index);
+      blocks_.ResetStacks();
       MakeKeeperClosure(revert_infos);
-      moves_calculated=false;
+      moves_calculated = false;
       moves_.clear();
       return {previous_search_step, revert_infos};
     }
@@ -97,8 +97,8 @@ namespace rbg {
         step.application->Revert(this, step.revert_name);
         current_pos_ = step.vertex;
       }
-      steps_.current_position.set_current(revert_info.previous_search_step);
-      moves_calculated=false;
+      current_block_ = revert_info.previous_search_step;
+      moves_calculated = false;
       moves_.clear();
     }
 
@@ -118,22 +118,18 @@ namespace rbg {
       return current_player_;
     }
 
-    const SearchStepsInformation &search_steps() const {
-      return steps_;
-    }
-
     const std::vector<variable_value_t> &variables_values() const {
       return variables_values_;
     }
 
     void Reset() {
       current_pos_ = 1;
-      variables_values_ = std::vector<variable_value_t >(declarations_.variables_resolver().size(), 0);
-          current_player_ = declarations_.keeper_id();
-          board_ = declarations_.initial_board().initial_content();
-          steps_.current_position.reset();
-          steps_.collection.ResetStacks();
-          moves_calculated = false;
+      variables_values_ = std::vector<variable_value_t>(declarations_.variables_resolver().size(), 0);
+      current_player_ = declarations_.keeper_id();
+      board_ = declarations_.initial_board().initial_content();
+      current_block_ = blocks_.initial();
+      blocks_.ResetStacks();
+      moves_calculated = false;
       applied_modifiers_.clear();
       applied_modifiers_.reserve(10);
       moves_.clear();
@@ -148,11 +144,11 @@ namespace rbg {
       while (exists && current_player_ == declarations_.keeper_id()) {
         applied_modifiers_.clear();
         moves_.clear();
-        exists = steps_.current_position.current()->RunAndApplyFirst(this, &steps_revert_information, current_pos_);
-        steps_.collection.ResetStacks();
-        if(exists) {
-          steps_.current_position.set_current(steps_.collection.Switch(applied_modifiers_.back().modifier_index));
-          steps_.collection.ResetStacks();
+        exists = current_block_->RunAndApplyFirst(this, &steps_revert_information, current_pos_);
+        blocks_.ResetStacks();
+        if (exists) {
+          current_block_ = blocks_.Switch(applied_modifiers_.back().modifier_index);
+          blocks_.ResetStacks();
           applied_modifiers_.clear();
         }
       }
@@ -164,7 +160,8 @@ namespace rbg {
     std::vector<variable_value_t> variables_values_;
     player_id_t current_player_;
     BoardContent board_;
-    SearchStepsInformation steps_;
+    BlocksCollection blocks_;
+    Block *current_block_;
     std::vector<ModifierApplication> applied_modifiers_;
     std::vector<std::vector<ModifierApplication>> moves_;
     bool moves_calculated;

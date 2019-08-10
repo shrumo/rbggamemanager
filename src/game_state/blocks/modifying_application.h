@@ -25,7 +25,7 @@ namespace rbg{
     virtual name_id_t Apply(GameState *state) const = 0;
     virtual void Revert(GameState *state, name_id_t) const = 0;
 
-    vertex_id_t weird_current_state_pos(GameState *state) const;
+    vertex_id_t modified_position(GameState *state) const;
 
     uint index() const { return index_; }
 

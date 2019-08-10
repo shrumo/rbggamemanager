@@ -304,7 +304,7 @@ namespace rbg {
       action_.PushVisitedStackAndAddToApplied(state);
       typename Action::revert_info_t action_revert_info = action_.Apply(state);
       revert_infos->push_back(ActionRevertInfo{&action_, revert_vertex, action_revert_info});
-      if (next_elements_.RunAndApplyFirst(state, revert_infos, action_.weird_current_state_pos(state))) {
+      if (next_elements_.RunAndApplyFirst(state, revert_infos, action_.modified_position(state))) {
         return true;
       }
       action_.Revert(state, action_revert_info);
@@ -349,7 +349,7 @@ namespace rbg {
                                      vertex_id_t) {
       action_.PushVisitedStackAndAddToApplied(state);
       typename Action::revert_info_t action_revert_info = action_.Apply(state);
-      revert_infos->push_back(ActionRevertInfo{&action_, action_.weird_current_state_pos(state), action_revert_info});
+      revert_infos->push_back(ActionRevertInfo{&action_, action_.modified_position(state), action_revert_info});
       return true;
     }
 

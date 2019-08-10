@@ -21,12 +21,12 @@ namespace rbg {
           condition_results_count_(condition_checks_count) {}
 
     uint AddBlock(std::unique_ptr<Block> step) {
-      searchsteps_.emplace_back(std::move(step));
-      return searchsteps_.size() - 1;
+      search_steps_.emplace_back(std::move(step));
+      return search_steps_.size() - 1;
     }
 
     Block* GetBlockPointer(uint index) {
-      return searchsteps_[index].get();
+      return search_steps_[index].get();
     }
 
     ResetableBitArrayStackChunk GetVisitedArrayChunk(uint index) {
@@ -72,8 +72,16 @@ namespace rbg {
       return switches_.at(modifier_index);
     }
 
+    Block* initial() {
+      return search_steps_[initial_index_].get();
+    }
+
+    void set_initial(uint initial_block_index) {
+      initial_index_ = initial_block_index;
+    }
+
   private:
-    std::vector<std::unique_ptr<Block>> searchsteps_;
+    std::vector<std::unique_ptr<Block>> search_steps_;
     std::unique_ptr<ResettableBitArrayStack> visited_info_stack_;
     std::unique_ptr<ResettableBitArrayStack> conditions_results_;
     uint visited_checks_count_;
@@ -81,44 +89,10 @@ namespace rbg {
 
     std::unordered_map<uint, const ModifyingApplication*> modifiers_;
     std::unordered_map<uint, Block*> switches_;
+    uint initial_index_;
   };
 
-  class SearchStepsPoint {
-  public:
-    explicit SearchStepsPoint(BlocksCollection &parent_collection, Block *initial = nullptr) :
-        parent_(&parent_collection), current_(initial), initial_(initial) {}
-
-    void SetInitial(uint index) {
-      initial_ = parent_->GetBlockPointer(index);
-    }
-
-    Block *current() {
-      return current_;
-    }
-
-    void set_current(Block *step) {
-      current_ = step;
-    }
-
-    void SetParent(BlocksCollection *parent) {
-      parent_ = parent;
-    }
-
-    void reset() {
-      current_ = initial_;
-    }
-  private:
-    BlocksCollection *parent_;
-    Block *current_;
-    Block *initial_;
-  };
-
-  struct SearchStepsInformation {
-    BlocksCollection collection;
-    SearchStepsPoint current_position;
-  };
-
-  SearchStepsInformation CreateSearchSteps(const Nfa<std::unique_ptr<Move>> &nfa, const Declarations &declarations);
+  BlocksCollection CreateSearchSteps(const Nfa<std::unique_ptr<Move>> &nfa, const Declarations &declarations);
 }
 
 

@@ -11,8 +11,8 @@ namespace {
   using namespace rbg;
   using namespace std;
 
-  SearchStepsPoint
-  CreateStepsInCollection(const Nfa<std::unique_ptr<Move>> &nfa, BlocksCollection &collection,
+  uint
+  CreateStepsInCollection(const Nfa<std::unique_ptr<Move>> &nfa, BlocksCollection *collection,
                           const Declarations &declarations,
                           const std::pair<std::unordered_map<edge_id_t, uint>, std::unordered_map<edge_id_t, uint>> &visited_check_indices,
                           bool condition);
@@ -26,7 +26,7 @@ namespace {
   template<typename Branch>
   class SearchStepCreator : public MoveFunction<BlocksCreatorResult<Branch>> {
   public:
-    explicit SearchStepCreator(BlocksCollection &collection, const Declarations &declarations,
+    explicit SearchStepCreator(BlocksCollection *collection, const Declarations &declarations,
                                bool register_modifiers = true)
         : collection_(collection), declarations_(declarations), register_modifiers_(register_modifiers) {
     }
@@ -34,7 +34,7 @@ namespace {
     BlocksCreatorResult<Branch> ShiftCase(const Shift &move) override {
       auto block = CreateBlockUniquePtr(ShiftAction(move.edge_id()), OutOfBoundsTest{}, Branch{});
       auto branch = block->content().branch();
-      uint index = collection_.AddBlock(std::move(block));
+      uint index = collection_->AddBlock(std::move(block));
       return BlocksCreatorResult<Branch>{index, branch};
     }
 
@@ -50,7 +50,7 @@ namespace {
           auto block = CreateBlockUniquePtr(EqualComparisonTest(
               std::move(left_result), std::move(right_result)), Branch{});
           auto branch = block->content().branch();
-          uint index = collection_.AddBlock(std::move(block));
+          uint index = collection_->AddBlock(std::move(block));
           return {index, branch};
         }
         case ComparisonType::kNotEqual: {
@@ -59,7 +59,7 @@ namespace {
               std::move(right_result)
           ), Branch{});
           auto branch = block->content().branch();
-          uint index = collection_.AddBlock(std::move(block));
+          uint index = collection_->AddBlock(std::move(block));
           return {index, branch};
         }
         case ComparisonType::kLess: {
@@ -68,7 +68,7 @@ namespace {
               std::move(right_result)
           ), Branch{});
           auto branch = block->content().branch();
-          uint index = collection_.AddBlock(std::move(block));
+          uint index = collection_->AddBlock(std::move(block));
           return {index, branch};
         }
         case ComparisonType::kLessEqual: {
@@ -77,7 +77,7 @@ namespace {
               std::move(right_result)
           ), Branch{});
           auto branch = block->content().branch();
-          uint index = collection_.AddBlock(std::move(block));
+          uint index = collection_->AddBlock(std::move(block));
           return {index, branch};
         }
 
@@ -87,7 +87,7 @@ namespace {
               std::move(left_result)
           ), Branch{});
           auto branch = block->content().branch();
-          uint index = collection_.AddBlock(std::move(block));
+          uint index = collection_->AddBlock(std::move(block));
           return {index, branch};
         }
         case ComparisonType::kGreaterEqual: {
@@ -96,7 +96,7 @@ namespace {
               std::move(left_result)
           ), Branch{});
           auto branch = block->content().branch();
-          uint index = collection_.AddBlock(std::move(block));
+          uint index = collection_->AddBlock(std::move(block));
           return {index, branch};
         }
       }
@@ -109,16 +109,16 @@ namespace {
       auto branch = block->content().branch();
 
       if (register_modifiers_) {
-        collection_.RegisterModifier(move.index(), block->template GetAction<0>());
+        collection_->RegisterModifier(move.index(), block->template GetAction<0>());
       }
-      uint step_index = collection_.AddBlock(std::move(block));
+      uint step_index = collection_->AddBlock(std::move(block));
       return {step_index, branch};
     }
 
     BlocksCreatorResult<Branch> OnCase(const On &move) override {
       auto block = CreateBlockUniquePtr(OnTest(move.pieces_table()), Branch{});
       auto branch = block->content().branch();
-      uint step_index = collection_.AddBlock(std::move(block));
+      uint step_index = collection_->AddBlock(std::move(block));
       return {step_index, branch};
     }
 
@@ -126,11 +126,11 @@ namespace {
       auto block = CreateBlockUniquePtr(PlayerSwitchApplication(move.player(), move.index()), Branch{});
       auto branch = block->content().branch();
       if (register_modifiers_) {
-        collection_.RegisterModifier(move.index(), block->template GetAction<0>());
+        collection_->RegisterModifier(move.index(), block->template GetAction<0>());
 
       }
-      collection_.RegisterSwitch(move.index(), block->template GetSubAbstractBlock<1>());
-      uint step_index = collection_.AddBlock(std::move(block));
+      collection_->RegisterSwitch(move.index(), block->template GetSubAbstractBlock<1>());
+      uint step_index = collection_->AddBlock(std::move(block));
       return {step_index, branch};
     }
 
@@ -138,11 +138,11 @@ namespace {
       auto block = CreateBlockUniquePtr(PlayerSwitchApplication(move.keeper_id(), move.index()), Branch{});
       auto branch = block->content().branch();
       if (register_modifiers_) {
-        collection_.RegisterModifier(move.index(), block->template GetAction<0>());
+        collection_->RegisterModifier(move.index(), block->template GetAction<0>());
 
       }
-      collection_.RegisterSwitch(move.index(), block->template GetSubAbstractBlock<1>());
-      uint step_index = collection_.AddBlock(std::move(block));
+      collection_->RegisterSwitch(move.index(), block->template GetSubAbstractBlock<1>());
+      uint step_index = collection_->AddBlock(std::move(block));
       return {step_index, branch};
     }
 
@@ -155,28 +155,28 @@ namespace {
                                         Branch{});
       auto branch = block->content().branch();
       if (register_modifiers_) {
-        collection_.RegisterModifier(move.index(), block->template GetAction<0>());
+        collection_->RegisterModifier(move.index(), block->template GetAction<0>());
       }
-      uint step_index = collection_.AddBlock(std::move(block));
+      uint step_index = collection_->AddBlock(std::move(block));
       return {step_index, branch};
     }
 
     BlocksCreatorResult<Branch> PlayerCheckCase(const PlayerCheck &move) override {
       auto block = CreateBlockUniquePtr(PlayerTest(move.player()), Branch{});
       auto branch = block->content().branch();
-      uint step_index = collection_.AddBlock(std::move(block));
+      uint step_index = collection_->AddBlock(std::move(block));
       return {step_index, branch};
     }
 
     BlocksCreatorResult<Branch> EmptyCase(const Empty &) override {
       auto block = CreateBlockUniquePtr(Branch{});
       auto branch = block->content().branch();
-      uint step_index = collection_.AddBlock(std::move(block));
+      uint step_index = collection_->AddBlock(std::move(block));
       return {step_index, branch};
     }
 
   private:
-    BlocksCollection &collection_;
+    BlocksCollection *collection_;
     const Declarations &declarations_;
     bool register_modifiers_;
   };
@@ -184,21 +184,21 @@ namespace {
   template<typename Branch>
   class VisitedCheckCreator : public MoveFunction<BlocksCreatorResult<Branch>> {
   public:
-    explicit VisitedCheckCreator(BlocksCollection &collection, const Declarations &declarations,
+    explicit VisitedCheckCreator(BlocksCollection *collection, const Declarations &declarations,
                                  uint visited_check_index)
         : collection_(collection), declarations_(declarations), visited_check_index_(visited_check_index) {
     }
 
     BlocksCreatorResult<Branch> VisitedQueryCase(const VisitedQuery &) override {
-      auto block = CreateBlockUniquePtr(VisitedCheckTest(collection_.GetVisitedArrayChunk(visited_check_index_)),
+      auto block = CreateBlockUniquePtr(VisitedCheckTest(collection_->GetVisitedArrayChunk(visited_check_index_)),
                                         Branch{});
       auto branch = block->content().branch();
-      uint step_index = collection_.AddBlock(std::move(block));
+      uint step_index = collection_->AddBlock(std::move(block));
       return {step_index, branch};
     }
 
   private:
-    BlocksCollection &collection_;
+    BlocksCollection *collection_;
     const Declarations &declarations_;
     uint visited_check_index_;
   };
@@ -206,7 +206,7 @@ namespace {
   template<typename Branch>
   class ConditionVisitedCheckCreator : public MoveFunction<BlocksCreatorResult<Branch>> {
   public:
-    explicit ConditionVisitedCheckCreator(BlocksCollection &collection, const Declarations &declarations,
+    explicit ConditionVisitedCheckCreator(BlocksCollection *collection, const Declarations &declarations,
                                           uint visited_check_index, uint condition_results_index)
         : collection_(collection), declarations_(declarations), visited_check_index_(visited_check_index),
           condition_results_index_(condition_results_index) {
@@ -214,16 +214,16 @@ namespace {
 
     BlocksCreatorResult<Branch> VisitedQueryCase(const VisitedQuery &) override {
       auto block = CreateBlockUniquePtr(ConditionVisitedCheckTest(
-          collection_.GetVisitedArrayChunk(visited_check_index_),
-          collection_.GetConditionsResultsArrayChunk(condition_results_index_)),
+          collection_->GetVisitedArrayChunk(visited_check_index_),
+          collection_->GetConditionsResultsArrayChunk(condition_results_index_)),
                                         Branch{});
       auto branch = block->content().branch();
-      uint step_index = collection_.AddBlock(std::move(block));
+      uint step_index = collection_->AddBlock(std::move(block));
       return {step_index, branch};
     }
 
   private:
-    BlocksCollection &collection_;
+    BlocksCollection *collection_;
     const Declarations &declarations_;
     uint visited_check_index_;
     uint condition_results_index_;
@@ -232,7 +232,7 @@ namespace {
   template<typename Branch>
   class ConditionCheckCreator : public MoveFunction<BlocksCreatorResult<Branch>> {
   public:
-    explicit ConditionCheckCreator(BlocksCollection &collection, const Declarations &declarations,
+    explicit ConditionCheckCreator(BlocksCollection *collection, const Declarations &declarations,
                                    const Graph<std::unique_ptr<Move>> &graph,
                                    const std::pair<std::unordered_map<edge_id_t, uint>, std::unordered_map<edge_id_t, uint>> &visited_check_indices)
         : collection_(collection), declarations_(declarations), graph_(graph),
@@ -242,24 +242,26 @@ namespace {
 
     BlocksCreatorResult<Branch> ConditionCase(const Condition &move) override {
       if (move.negated()) {
-        auto block = CreateBlockUniquePtr(NegatedConditionCheckTest(
-            CreateStepsInCollection(move.nfa(), collection_, declarations_, visited_check_indices_, true).current()),
+        uint condition_initial_id = CreateStepsInCollection(move.nfa(), collection_, declarations_, visited_check_indices_, true);
+        Block* condition_initial_block = collection_->GetBlockPointer(condition_initial_id);
+        auto block = CreateBlockUniquePtr(NegatedConditionCheckTest(condition_initial_block),
                                           Branch{});
         auto branch = block->content().branch();
-        uint step_index = collection_.AddBlock(std::move(block));
+        uint step_index = collection_->AddBlock(std::move(block));
         return {step_index, branch};
       } else {
-        auto block = CreateBlockUniquePtr(ConditionCheckTest(
-            CreateStepsInCollection(move.nfa(), collection_, declarations_, visited_check_indices_, true).current()),
+        uint condition_initial_id = CreateStepsInCollection(move.nfa(), collection_, declarations_, visited_check_indices_, true);
+        Block* condition_initial_block = collection_->GetBlockPointer(condition_initial_id);
+        auto block = CreateBlockUniquePtr(ConditionCheckTest(condition_initial_block),
                                           Branch{});
         auto branch = block->content().branch();
-        uint step_index = collection_.AddBlock(std::move(block));
+        uint step_index = collection_->AddBlock(std::move(block));
         return {step_index, branch};
       }
     }
 
   private:
-    BlocksCollection &collection_;
+    BlocksCollection *collection_;
     const Declarations &declarations_;
     const Graph<std::unique_ptr<Move>> &graph_;
     const std::pair<std::unordered_map<edge_id_t, uint>, std::unordered_map<edge_id_t, uint>> &visited_check_indices_;
@@ -312,7 +314,7 @@ namespace {
     return {visited_indices, conditions_indices};
   }
 
-  void CreateStepsInCollectionRecursive(const Graph<std::unique_ptr<Move>> &game_graph, BlocksCollection &collection,
+  void CreateStepsInCollectionRecursive(const Graph<std::unique_ptr<Move>> &game_graph, BlocksCollection *collection,
                                         const Declarations &declarations,
                                         const std::pair<std::unordered_map<edge_id_t, uint>, std::unordered_map<edge_id_t, uint>> &visited_check_indices,
                                         node_t current,
@@ -320,7 +322,7 @@ namespace {
                                         bool condition = false) {
 
     if (game_graph.EdgesFrom(current).size() == 0) {
-      (*nodes_blocks)[current] = collection.AddBlock(CreateBlockUniquePtr(BranchEmpty()));
+      (*nodes_blocks)[current] = collection->AddBlock(CreateBlockUniquePtr(BranchEmpty()));
     } else if (game_graph.EdgesFrom(current).size() == 1) {
       const auto &edge = *game_graph.EdgesFrom(current).begin();
       uint next = edge.to();
@@ -348,9 +350,9 @@ namespace {
                                          nodes_blocks,
                                          condition);
       }
-      result.branch_pointer->AddNext(collection.GetBlockPointer(nodes_blocks->at(next)));
+      result.branch_pointer->AddNext(collection->GetBlockPointer(nodes_blocks->at(next)));
     } else {
-      auto result = CreateMultipleBranch(&collection);
+      auto result = CreateMultipleBranch(collection);
       (*nodes_blocks)[current] = result.block_collection_index;
 
       for (const auto &edge : game_graph.EdgesFrom(current)) {
@@ -361,27 +363,28 @@ namespace {
           CreateStepsInCollectionRecursive(game_graph, collection, declarations, visited_check_indices, next,
                                            nodes_blocks, condition);
         }
-        result.branch_pointer->AddNext(collection.GetBlockPointer(nodes_blocks->at(next)));
+        result.branch_pointer->AddNext(collection->GetBlockPointer(nodes_blocks->at(next)));
       }
     }
   }
 
-  SearchStepsPoint
-  CreateStepsInCollection(const Nfa<std::unique_ptr<Move>> &nfa, BlocksCollection &collection,
+  uint
+  CreateStepsInCollection(const Nfa<std::unique_ptr<Move>> &nfa, BlocksCollection *collection,
                           const Declarations &declarations,
                           const std::pair<std::unordered_map<edge_id_t, uint>, std::unordered_map<edge_id_t, uint>> &visited_check_indices,
                           bool condition = false) {
     std::unordered_map<node_t, uint> nodes_blocks;
     CreateStepsInCollectionRecursive(nfa.graph, collection, declarations, visited_check_indices, nfa.initial,
                                      &nodes_blocks, condition);
-    return SearchStepsPoint{collection, collection.GetBlockPointer(nodes_blocks.at(nfa.initial))};
+    return nodes_blocks.at(nfa.initial);
   }
 }
-SearchStepsInformation
+BlocksCollection
 rbg::CreateSearchSteps(const Nfa<std::unique_ptr<Move>> &game_nfa, const Declarations &declarations) {
   auto visited_indices = VisitedCheckIndices(game_nfa);
   BlocksCollection collection(visited_indices.first.size(), visited_indices.second.size(),
                               declarations.initial_board().vertices_count());
-  auto point = CreateStepsInCollection(game_nfa, collection, declarations, visited_indices);
-  return SearchStepsInformation{std::move(collection), point};
+  uint initial_index = CreateStepsInCollection(game_nfa, &collection, declarations, visited_indices);
+  collection.set_initial(initial_index);
+  return collection;
 }

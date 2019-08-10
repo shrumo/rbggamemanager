@@ -8,6 +8,6 @@ rbg::GameState rbg::CreateGameState(const std::string &game_text) {
   auto game = ParseGame(game_text);
   Declarations declarations = Declarations(*game);
   auto nfa = CreateNfa(*game->get_moves(), declarations);
-  SearchStepsInformation steps = CreateSearchSteps(nfa, declarations);
+  BlocksCollection steps = CreateSearchSteps(nfa, declarations);
   return GameState(declarations, std::move(steps));
 }
