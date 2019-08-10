@@ -45,31 +45,40 @@ namespace rbg {
   public:
     static constexpr ActionTypeTrait kind = ActionTypeTrait::kSpecial;
 
-    explicit ConditionVisitedCheckTest(ResetableBitArrayStackChunk bit_array_stack_chunk)
-        : stack_chunk_(bit_array_stack_chunk) {
+    explicit ConditionVisitedCheckTest(ResetableBitArrayStackChunk bit_array_stack_chunk,
+                                       ResetableBitArrayStackChunk results_chunk)
+        : stack_chunk_(bit_array_stack_chunk), results_chunk_(results_chunk) {
     }
 
     template<typename NextBlockElements>
-    always_inline void Run(GameState *state, NextBlockElements *next) {
-      next->Run(state);
+    always_inline void Run(GameState *, NextBlockElements *) {
+      assert(false && "This shouldn't be run.");
     }
 
     template<typename NextBlockElements>
-    always_inline bool RunAndApplyFirst(GameState *state,
-                          std::vector<ActionRevertInfo> *revert_infos,
-                          vertex_id_t revert_vertex,
-                          NextBlockElements *next) {
-      bool result = next->RunAndApplyFirst(state, revert_infos, revert_vertex);
-      return result;
+    always_inline bool RunAndApplyFirst(GameState *,
+                          std::vector<ActionRevertInfo> *,
+                          vertex_id_t ,
+                          NextBlockElements *) {
+      assert(false && "This shouldn't be run.");
     }
 
     template<typename NextBlockElements>
     always_inline bool RunAndFindEnd(GameState *state, NextBlockElements *next) {
+      bool visited = stack_chunk_[state->current_pos_];
+      if(visited) {
+        return results_chunk_[state->current_pos_];
+      }
+      stack_chunk_.set(state->current_pos_);
       bool result = next->RunAndFindEnd(state);
+      if(result) {
+        results_chunk_.set(state->current_pos_);
+      }
       return result;
     }
   private:
     ResetableBitArrayStackChunk stack_chunk_;
+    ResetableBitArrayStackChunk results_chunk_;
   };
 
   class ShiftAction {

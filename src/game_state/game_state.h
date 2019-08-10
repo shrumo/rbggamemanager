@@ -83,7 +83,7 @@ namespace rbg {
         revert_infos.push_back(ActionRevertInfo{modifier, previous_vertex, modifier->Apply(this)});
       }
       steps_.current_position.set_current(steps_.collection.Switch(move.back().modifier_index));
-      steps_.collection.stack().reset();
+      steps_.collection.ResetStacks();
       MakeKeeperClosure(revert_infos);
       moves_calculated=false;
       moves_.clear();
@@ -132,7 +132,7 @@ namespace rbg {
           current_player_ = declarations_.keeper_id();
           board_ = declarations_.initial_board().initial_content();
           steps_.current_position.reset();
-          steps_.collection.stack().reset();
+          steps_.collection.ResetStacks();
           moves_calculated = false;
       applied_modifiers_.clear();
       applied_modifiers_.reserve(10);
@@ -149,10 +149,10 @@ namespace rbg {
         applied_modifiers_.clear();
         moves_.clear();
         exists = steps_.current_position.current()->RunAndApplyFirst(this, &steps_revert_information, current_pos_);
-        steps_.collection.stack().reset();
+        steps_.collection.ResetStacks();
         if(exists) {
           steps_.current_position.set_current(steps_.collection.Switch(applied_modifiers_.back().modifier_index));
-          steps_.collection.stack().reset();
+          steps_.collection.ResetStacks();
           applied_modifiers_.clear();
         }
       }

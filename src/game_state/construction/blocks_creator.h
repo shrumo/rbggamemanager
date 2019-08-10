@@ -14,9 +14,11 @@ namespace rbg {
 
   class BlocksCollection {
   public:
-    BlocksCollection(uint visited_checks_count, uint board_size)
+    BlocksCollection(uint visited_checks_count, uint condition_checks_count, uint board_size)
         : visited_info_stack_(std::make_unique<ResettableBitArrayStack>(visited_checks_count * board_size)),
-          visited_checks_count_(visited_checks_count) {}
+          conditions_results_(std::make_unique<ResettableBitArrayStack>(condition_checks_count * board_size)),
+          visited_checks_count_(visited_checks_count),
+          condition_results_count_(condition_checks_count) {}
 
     uint AddBlock(std::unique_ptr<Block> step) {
       searchsteps_.emplace_back(std::move(step));
@@ -27,14 +29,31 @@ namespace rbg {
       return searchsteps_[index].get();
     }
 
-    ResetableBitArrayStackChunk GetBitArrayChunk(uint index) {
+    ResetableBitArrayStackChunk GetVisitedArrayChunk(uint index) {
       return {visited_info_stack_.get(),
               index * visited_info_stack_->bit_array_size() / visited_checks_count_,
               visited_info_stack_->bit_array_size() / visited_checks_count_};
     }
 
-    ResettableBitArrayStack &stack() {
-      return *visited_info_stack_;
+    ResetableBitArrayStackChunk GetConditionsResultsArrayChunk(uint index) {
+      return {conditions_results_.get(),
+              index * conditions_results_->bit_array_size() / condition_results_count_,
+              conditions_results_->bit_array_size() / condition_results_count_};
+    }
+
+    void ResetStacks() {
+      visited_info_stack_->reset();
+      conditions_results_->reset();
+    }
+
+    void PushStacks() {
+      visited_info_stack_->Push();
+      conditions_results_->Push();
+    }
+
+    void PopStacks() {
+      visited_info_stack_->Pop();
+      conditions_results_->Pop();
     }
 
     void RegisterModifier(uint modifier_index, const ModifyingApplication* application) {
@@ -56,13 +75,12 @@ namespace rbg {
   private:
     std::vector<std::unique_ptr<Block>> searchsteps_;
     std::unique_ptr<ResettableBitArrayStack> visited_info_stack_;
+    std::unique_ptr<ResettableBitArrayStack> conditions_results_;
     uint visited_checks_count_;
+    uint condition_results_count_;
 
     std::unordered_map<uint, const ModifyingApplication*> modifiers_;
     std::unordered_map<uint, Block*> switches_;
-
-    friend class NewVisitedCheckLayerApplication;
-    friend class PlayerSwitchApplication;
   };
 
   class SearchStepsPoint {
