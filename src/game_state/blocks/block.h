@@ -303,10 +303,11 @@ namespace rbg {
                                      vertex_id_t revert_vertex) {
       action_.PushVisitedStackAndAddToApplied(state);
       typename Action::revert_info_t action_revert_info = action_.Apply(state);
-      revert_infos->push_back(ActionRevertInfo{&action_, action_.weird_current_state_pos(state), action_revert_info});
-      if (next_elements_.RunAndApplyFirst(state, revert_infos, revert_vertex)) {
+      revert_infos->push_back(ActionRevertInfo{&action_, revert_vertex, action_revert_info});
+      if (next_elements_.RunAndApplyFirst(state, revert_infos, action_.weird_current_state_pos(state))) {
         return true;
       }
+      action_.Revert(state, action_revert_info);
       action_.PopVisitedStackAndAddToApplied(state);
       revert_infos->pop_back();
       return false;
@@ -328,7 +329,7 @@ namespace rbg {
       }
     }
 
-    /* ------------------------ If the action is of type MODIFIER, those methods are defined. ----------------------- */
+    /* ------------------------ If the action is of type SWITCH, those methods are defined. ----------------------- */
 
     template<ActionTypeTrait ActionKind = Action::kind>
     typename std::enable_if<ActionKind == ActionTypeTrait::kSwitch,

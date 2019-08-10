@@ -6,6 +6,7 @@
 #define RBGGAMEMANAGER_CALCULATE_PERFT_H
 
 #include "game_state/game_state.h"
+#include "utility/printer.h"
 
 namespace rbg {
 
