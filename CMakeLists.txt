@@ -34,7 +34,7 @@ set(GAMESTATE_FILES ${PARSER_FILES} ${GRAPH_FILES} src/game_description/names_re
         src/game_description/names_resolver.cc src/game_description/board.cc
         src/utility/calculate_perft.h
         src/game_state/blocks/actions.h src/stl_extension/vector.h
-        src/game_state/blocks/modifying_application.h src/game_state/blocks/modifying_application.cpp
+        src/game_state/blocks/modifying_application.h src/game_state/blocks/modifying_application.cc
         src/game_description/construction/graph_creator.cc src/game_description/construction/graph_creator.h
         src/game_description/moves/moves.h src/game_description/moves/moves.cc
         src/game_description/construction/moves_creator.cc src/game_description/construction/moves_creator.h

@@ -148,7 +148,7 @@ namespace {
   // Collects the node ids that require a visited check, because there are two paths to it from the same modifier.
   void CollectVisitedChecksNeededRecursive(const NfaBoardProduct &nfa_board_product,
                                            node_t current_vertex_node,
-                                           unordered_set<node_t> *visited,
+                                           unordered_map<node_t, node_t> *last_visited_from,
                                            unordered_set<node_t> *result
   ) {
     for (const auto &edge : nfa_board_product.EdgesFrom(current_vertex_node)) {
@@ -166,13 +166,13 @@ namespace {
         node_t sub_graph_initial = sub_nfa.initial;
         const auto &sub_board_product = nfa_board_product.sub_nfa_board(sub_graph_initial);
         node_t board_product_initial = sub_board_product.node(current_vertex, sub_graph_initial);
-        visited->insert(board_product_initial);
-        CollectVisitedChecksNeededRecursive(sub_board_product, board_product_initial, visited, result);
+        (*last_visited_from)[board_product_initial] = last_visited_from->at(current_vertex_node);
+        CollectVisitedChecksNeededRecursive(sub_board_product, board_product_initial, last_visited_from, result);
       }
 
-      if (visited->find(edge.to()) == visited->end()) {
-        visited->insert(edge.to());
-        CollectVisitedChecksNeededRecursive(nfa_board_product, edge.to(), visited, result);
+      if (last_visited_from->find(edge.to()) == last_visited_from->end()) {
+        (*last_visited_from)[edge.to()] = last_visited_from->at(current_vertex_node);
+        CollectVisitedChecksNeededRecursive(nfa_board_product, edge.to(), last_visited_from, result);
       } else {
         // There are two ways to get to edge.to()
         result->insert(nfa_board_product.vertex_node(edge.to()).second);
@@ -186,9 +186,10 @@ namespace {
     auto graph_times_board = NfaBoardProduct(nfa, board, {1});
     auto sources = VisitedCheckSearchSources(graph_times_board, graph_times_board.node(1, nfa.initial));
     std::unordered_set<node_t> result;
+    std::unordered_map<node_t, node_t> last_visited_from;
     for (const auto &source : sources) {
-      std::unordered_set<node_t> visited;
-      CollectVisitedChecksNeededRecursive(*source.second, source.first, &visited, &result);
+      last_visited_from[source.first] = source.first;
+      CollectVisitedChecksNeededRecursive(*source.second, source.first, &last_visited_from, &result);
     }
     return result;
   }

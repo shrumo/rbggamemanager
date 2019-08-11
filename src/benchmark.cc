@@ -27,12 +27,19 @@ int main(int argc, const char *argv[]) {
   std::stringstream buffer;
   buffer << filestream.rdbuf();
 
-  auto game = CreateGameState(buffer.str());
   auto begin = std::chrono::system_clock::now();
-  auto result = Perft(game, depth);
+  auto game = CreateGameState(buffer.str());
   auto end = std::chrono::system_clock::now();
   auto duration = std::chrono::duration<double>(end - begin).count();
-  std::cout << "Calculated fast perft for depth " << depth << " in "
+   std::cout << "Created the game state in in "
+            << std::fixed << std::showpoint
+            << duration
+            << "s" << std::endl;
+  begin = std::chrono::system_clock::now();
+  auto result = Perft(game, depth);
+  end = std::chrono::system_clock::now();
+  duration = std::chrono::duration<double>(end - begin).count();
+  std::cout << "Calculated perft for depth " << depth << " in "
             << std::fixed << std::showpoint
             << duration
             << "s" << std::endl;

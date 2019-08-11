@@ -20,7 +20,6 @@ namespace rbg {
 
   class GameState {
   public:
-    friend class ModifyingSearchStep;
 
     friend class VisitedCheckTest;
 
