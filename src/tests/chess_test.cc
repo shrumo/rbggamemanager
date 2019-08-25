@@ -7,10 +7,11 @@
 #include <iostream>
 #include <utility/printer.h>
 
-using namespace rbg;
-using namespace std;
+namespace {
+  using namespace rbg;
+  using namespace std;
 
-const char *kChessGame = R"LIM(
+  const char *kChessGame = R"LIM(
 // Chess
 // -- No rules about repeating states or tie after given number of turns without pawn moves.
 // -- The play is limited to 200 turns.
@@ -185,11 +186,11 @@ const char *kChessGame = R"LIM(
         turn(down;up;black;white)
     )*
 )LIM";
+}
 
 int main() {
   auto game = CreateGameState(kChessGame);
   auto result = Perft(game, 3);
-  std::cout << result.leaves_count << std::endl;
   assert(result.leaves_count == 8902);
   assert(result.nodes_count == 9323);
   game.Apply(game.Moves()[0]);

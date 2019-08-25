@@ -104,9 +104,21 @@ add_executable(gamestate_simple_test  ${GAMESTATE_FILES} src/tests/game_state_si
 target_link_libraries(gamestate_simple_test rbgParser)
 add_test(gamestate_simple_test gamestate_simple_test)
 
+add_executable(amazons_test ${GAMESTATE_FILES} src/tests/amazons_test.cc)
+target_link_libraries(amazons_test rbgParser)
+add_test(amazons_test amazons_test)
+
 add_executable(chess_test ${GAMESTATE_FILES} src/tests/chess_test.cc)
 target_link_libraries(chess_test rbgParser)
 add_test(chess_test chess_test)
+
+add_executable(reversi_test ${GAMESTATE_FILES} src/tests/reversi_test.cc)
+target_link_libraries(reversi_test rbgParser)
+add_test(reversi_test reversi_test)
+
+add_executable(tictactoe_test ${GAMESTATE_FILES} src/tests/tictactoe_test.cc)
+target_link_libraries(tictactoe_test rbgParser)
+add_test(tictactoe_test tictactoe_test)
 
 add_executable(board_test src/game_description/board.h src/game_description/board.cc src/tests/board_test.cc)
 add_test(board_test board_test)
