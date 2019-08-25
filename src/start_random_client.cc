@@ -15,7 +15,7 @@ using namespace rbg;
 
 int main(int argc, char *argv[]) {
   if (argc != 3 && argc != 4) {
-    std::cerr << "Usage " << argv[0] << " <host> <port> <seed>\n";
+    std::cerr << "Usage " << argv[0] << " <host> <port> [<seed>]\n";
     return 1;
   }
 

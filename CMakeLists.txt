@@ -127,6 +127,10 @@ add_custom_target(python_bindings_test ALL COMMAND ${CMAKE_COMMAND} -E copy ${CM
         DEPENDS rbg)
 add_test(python_bindings_test ${PYTHON_EXECUTABLE} python_bindings_test.py)
 
+add_custom_target(server_communication_test ALL COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/src/tests/server_communication_test.py ${CMAKE_CURRENT_BINARY_DIR}/server_communication_test.py
+        DEPENDS rbg)
+add_test(server_communication_test ${PYTHON_EXECUTABLE} server_communication_test.py)
+
 
 
 
