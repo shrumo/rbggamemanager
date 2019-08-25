@@ -181,8 +181,12 @@ public:
     return "<VisitedQuery>";
   }
 
-  std::string EmptyCase(const Empty &) override {
-    return "e";
+  std::string EmptyBackwardCase(const EmptyBackward &) override {
+    return "e_b";
+  }
+
+  std::string EmptyForwardCase(const EmptyForward &) override {
+    return "e_f";
   }
 private:
   const Declarations &declarations_;

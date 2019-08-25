@@ -33,7 +33,9 @@ namespace rbg {
 
   class VisitedQuery;
 
-  class Empty;
+  class EmptyBackward;
+
+  class EmptyForward;
 
   enum class MoveType {
     kShiftType,
@@ -47,7 +49,8 @@ namespace rbg {
     kPlayerCheck,
     kConditionCheck,
     kVisitedCheck,
-    kEmpty,
+    kBackwardEmpty,
+    kForwardEmpty
   };
 
   bool is_modifier_type(MoveType type);
@@ -76,7 +79,9 @@ namespace rbg {
 
     virtual void Visit(const VisitedQuery &) = 0;
 
-    virtual void Visit(const Empty &) = 0;
+    virtual void Visit(const EmptyBackward &) = 0;
+
+    virtual void Visit(const EmptyForward &) = 0;
   };
 
   class Move {
@@ -343,13 +348,20 @@ namespace rbg {
     void Accept(MoveVisitor &visitor) const override { visitor.Visit(*this); }
   };
 
-  class Empty : public Move {
+  class EmptyBackward : public Move {
   public:
-    Empty() : Move(MoveType::kEmpty) {}
+    EmptyBackward() : Move(MoveType::kBackwardEmpty) {}
 
     void Accept(MoveVisitor &visitor) const override { visitor.Visit(*this); }
   };
 
+
+  class EmptyForward : public Move {
+  public:
+    EmptyForward() : Move(MoveType::kForwardEmpty) {}
+
+    void Accept(MoveVisitor &visitor) const override { visitor.Visit(*this); }
+  };
 }
 
 #endif //RBGGAMEMANAGER_MOVES_H

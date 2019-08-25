@@ -89,9 +89,9 @@ add_executable(creator_test ${GAMESTATE_FILES} src/tests/creator_test.cc)
 target_link_libraries(creator_test rbgParser)
 add_test(creator_test creator_test)
 
-add_executable(searchsteps_test  ${GAMESTATE_FILES} src/tests/single_blocks_test.cc)
-target_link_libraries(searchsteps_test rbgParser)
-add_test(searchsteps_test searchsteps_test)
+add_executable(single_blocks_test  ${GAMESTATE_FILES} src/tests/single_blocks_test.cc)
+target_link_libraries(single_blocks_test rbgParser)
+add_test(single_blocks_test single_blocks_test)
 
 add_executable(declarations_test  ${GAMESTATE_FILES} src/tests/declarations_test.cc)
 target_link_libraries(declarations_test rbgParser)

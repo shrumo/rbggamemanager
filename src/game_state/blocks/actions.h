@@ -31,7 +31,7 @@ namespace rbg {
         : stack_chunk_(bit_array_stack_chunk) {
     }
 
-    always_inline   bool Check(GameState *state) {
+    inline bool Check(GameState *state) {
       bool result = stack_chunk_[state->current_pos_];
       stack_chunk_.set(state->current_pos_);
       return !result;
@@ -51,31 +51,32 @@ namespace rbg {
     }
 
     template<typename NextBlockElements>
-    always_inline void Run(GameState *, NextBlockElements *) {
+    inline void Run(GameState *, NextBlockElements *) {
       assert(false && "This shouldn't be run.");
     }
 
     template<typename NextBlockElements>
-    always_inline bool RunAndApplyFirst(GameState *,
-                          std::vector<ActionRevertInfo> *,
-                          vertex_id_t ,
-                          NextBlockElements *) {
+    inline bool RunAndApplyFirst(GameState *,
+                                 std::vector<ActionRevertInfo> *,
+                                 vertex_id_t,
+                                 NextBlockElements *) {
       assert(false && "This shouldn't be run.");
     }
 
     template<typename NextBlockElements>
-    always_inline bool RunAndFindEnd(GameState *state, NextBlockElements *next) {
+    inline bool RunAndFindEnd(GameState *state, NextBlockElements *next) {
       bool visited = stack_chunk_[state->current_pos_];
-      if(visited) {
+      if (visited) {
         return results_chunk_[state->current_pos_];
       }
       stack_chunk_.set(state->current_pos_);
       bool result = next->RunAndFindEnd(state);
-      if(result) {
+      if (result) {
         results_chunk_.set(state->current_pos_);
       }
       return result;
     }
+
   private:
     ResetableBitArrayStackChunk stack_chunk_;
     ResetableBitArrayStackChunk results_chunk_;
@@ -88,7 +89,7 @@ namespace rbg {
 
     explicit ShiftAction(shift_edge_id edge_id) : edge_id_(edge_id) {}
 
-    always_inline     revert_info_t Apply(GameState *state) const {
+    inline revert_info_t Apply(GameState *state) const {
 
       vertex_id_t previous_vertex = state->current_pos_;
       state->current_pos_ = state->declarations().initial_board().NextVertex(state->current_pos_, edge_id_);
@@ -96,7 +97,7 @@ namespace rbg {
 
     }
 
-    always_inline     void Revert(GameState *state, revert_info_t previous_vertex) const {
+    inline void Revert(GameState *state, revert_info_t previous_vertex) const {
 
       state->current_pos_ = previous_vertex;
     }
@@ -110,7 +111,7 @@ namespace rbg {
   public:
     static constexpr ActionTypeTrait kind = ActionTypeTrait::kCheck;
 
-    always_inline     bool Check(GameState *state) const {
+    inline bool Check(GameState *state) const {
 
       return state->current_pos() < state->declarations().initial_board().vertices_count();
     }
@@ -123,7 +124,7 @@ namespace rbg {
 
     explicit OnTest(std::vector<bool> pieces) : pieces_(std::move(pieces)) {}
 
-    always_inline     bool Check(GameState *state) const {
+    inline bool Check(GameState *state) const {
 
       return pieces_[state->board_.at(state->current_pos_)];
     }
@@ -139,7 +140,7 @@ namespace rbg {
 
     explicit PlayerTest(player_id_t player) : player_(player) {}
 
-    always_inline     bool Check(GameState *state) const {
+    inline bool Check(GameState *state) const {
 
       return state->current_player_ == player_;
     }
@@ -158,7 +159,7 @@ namespace rbg {
                                      std::unique_ptr<ArithmeticOperation> right) : left_(std::move(left)),
                                                                                    right_(std::move(right)) {}
 
-    always_inline     bool Check(GameState *state) const {
+    inline bool Check(GameState *state) const {
 
       return left_->Value(*state) <= right_->Value(*state);
     }
@@ -177,7 +178,7 @@ namespace rbg {
                                 std::unique_ptr<ArithmeticOperation> right) : left_(std::move(left)),
                                                                               right_(std::move(right)) {}
 
-    always_inline     bool Check(GameState *state) const {
+    inline bool Check(GameState *state) const {
 
       return left_->Value(*state) < right_->Value(*state);
     }
@@ -196,7 +197,7 @@ namespace rbg {
                                  std::unique_ptr<ArithmeticOperation> right) : left_(std::move(left)),
                                                                                right_(std::move(right)) {}
 
-    always_inline     bool Check(GameState *state) const {
+    inline bool Check(GameState *state) const {
 
       return left_->Value(*state) == right_->Value(*state);
     }
@@ -215,7 +216,7 @@ namespace rbg {
                                     std::unique_ptr<ArithmeticOperation> right) : left_(std::move(left)),
                                                                                   right_(std::move(right)) {}
 
-    always_inline     bool Check(GameState *state) const {
+    inline bool Check(GameState *state) const {
 
       return left_->Value(*state) != right_->Value(*state);
     }
@@ -234,7 +235,7 @@ namespace rbg {
     explicit ConditionCheckTest(Block *steps_point)
         : steps_point_(std::move(steps_point)) {};
 
-    always_inline     bool Check(GameState *state) const {
+    inline bool Check(GameState *state) const {
 
       return steps_point_->RunAndFindEnd(state);
     }
@@ -253,7 +254,7 @@ namespace rbg {
     explicit NegatedConditionCheckTest(Block *steps_point)
         : steps_point_(std::move(steps_point)) {};
 
-    always_inline     bool Check(GameState *state) const {
+    inline bool Check(GameState *state) const {
 
       return !steps_point_->RunAndFindEnd(state);
     }
@@ -341,7 +342,7 @@ namespace rbg {
 
     explicit VariableBoundsTest(variable_id_t variable_id) : variable_id_(variable_id) {}
 
-    always_inline     bool Check(GameState *state) const {
+    inline bool Check(GameState *state) const {
 
       return state->variables_values()[variable_id_] <= state->declarations().variable_bound(variable_id_);
     }

@@ -22,8 +22,12 @@ namespace {
     node_t final;
   };
 
-  unique_ptr<Move> e() {
-    return make_unique<Empty>();
+  unique_ptr<Move> e_b() {
+    return make_unique<EmptyBackward>();
+  }
+
+  unique_ptr<Move> e_f() {
+    return make_unique<EmptyForward>();
   }
 
   Nfa<unique_ptr<Move>> ThompsonsConstruction(const rbg_parser::game_move &rbg_move, const Declarations &declarations);
@@ -66,10 +70,10 @@ namespace {
       node_t initial = graph_.NewNode();
       node_t final = graph_.NewNode();
       GraphCreatorResult child_result = GraphCreator(graph_, declarations_)(*move.get_content());
-      graph_.AddEdge(initial, e(), child_result.initial);
-      graph_.AddEdge(child_result.final, e(), final);
-      graph_.AddEdge(child_result.final, e(), child_result.initial);
-      graph_.AddEdge(initial, e(), final);
+      graph_.AddEdge(initial, e_f(), child_result.initial);
+      graph_.AddEdge(child_result.final, e_f(), final);
+      graph_.AddEdge(child_result.final, e_b(), child_result.initial);
+      graph_.AddEdge(initial, e_f(), final);
       return {initial, final};
     }
 
@@ -238,9 +242,10 @@ namespace {
         // Add epsilon edges if there are multiple edges from this node
         for (edge_id_t transition_id : out_transitions) {
           auto &transition = graph.GetEdge(transition_id);
-          if (transition.content()->type() != MoveType::kEmpty) {
+          if (transition.content()->type() != MoveType::kBackwardEmpty
+             && transition.content()->type() != MoveType::kForwardEmpty ) {
             node_t new_node = graph.NewNode();
-            graph.AddEdge(node, e(), new_node);
+            graph.AddEdge(node, e_b(), new_node);
             graph.ChangeEdgeSource(transition_id, new_node);
           }
         }

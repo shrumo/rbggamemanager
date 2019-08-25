@@ -24,9 +24,9 @@ namespace {
   };
 
   template<typename Branch>
-  class SearchStepCreator : public MoveFunction<BlocksCreatorResult<Branch>> {
+  class BlockCreator : public MoveFunction<BlocksCreatorResult<Branch>> {
   public:
-    explicit SearchStepCreator(BlocksCollection *collection, const Declarations &declarations,
+    explicit BlockCreator(BlocksCollection *collection, const Declarations &declarations,
                                bool register_modifiers = true)
         : collection_(collection), declarations_(declarations), register_modifiers_(register_modifiers) {
     }
@@ -163,13 +163,6 @@ namespace {
 
     BlocksCreatorResult<Branch> PlayerCheckCase(const PlayerCheck &move) override {
       auto block = CreateBlockUniquePtr(PlayerTest(move.player()), Branch{});
-      auto branch = block->content().branch();
-      uint step_index = collection_->AddBlock(std::move(block));
-      return {step_index, branch};
-    }
-
-    BlocksCreatorResult<Branch> EmptyCase(const Empty &) override {
-      auto block = CreateBlockUniquePtr(Branch{});
       auto branch = block->content().branch();
       uint step_index = collection_->AddBlock(std::move(block));
       return {step_index, branch};
@@ -342,7 +335,7 @@ namespace {
         result = ConditionCheckCreator<BranchSingle>(collection, declarations, game_graph, visited_check_indices)(
             *edge.content());
       } else {
-        result = SearchStepCreator<BranchSingle>(collection, declarations, !condition)(*edge.content());
+        result = BlockCreator<BranchSingle>(collection, declarations, !condition)(*edge.content());
       }
       (*nodes_blocks)[current] = result.block_collection_index;
       if (nodes_blocks->find(next) == nodes_blocks->end()) {
@@ -356,7 +349,7 @@ namespace {
       (*nodes_blocks)[current] = result.block_collection_index;
 
       for (const auto &edge : game_graph.EdgesFrom(current)) {
-        assert(edge.content()->type() == MoveType::kEmpty &&
+        assert((edge.content()->type() == MoveType::kBackwardEmpty  || edge.content()->type() == MoveType::kForwardEmpty) &&
                "The multiple branch only supports epsilon transitions for now.");
         uint next = edge.to();
         if (nodes_blocks->find(next) == nodes_blocks->end()) {

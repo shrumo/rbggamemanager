@@ -7,14 +7,6 @@
 
 #include <utility>
 
-#ifndef always_inline
-#ifdef __GNUC__
-#define always_inline __attribute__((always_inline))
-#else
-#define always_inline inline
-#endif
-#endif
-
 namespace std_ext {
   template<typename A, typename B>
   class first_of_pair {

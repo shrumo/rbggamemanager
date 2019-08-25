@@ -15,19 +15,17 @@ def create_dag(nfa):
         adj[edge.a()] |= {(edge.b(), edge.value())}
 
     erased = {v: [] for v in adj.keys()}
-    entered = set()
-    left = set()
+    visited = set()
 
     def dfs(u):
-        nonlocal entered, left
-        entered |= {u}
+        nonlocal visited
+        visited |= {u}
         for i, (v, value) in enumerate(list(adj[u])):
-            if v not in entered:
+            if v not in visited:
                 dfs(v)
-            elif value == 'e' and v in entered and v not in left:
+            elif value == 'e_b':
                 adj[u] -= {(v, value)}
                 erased[u] += [v]
-        left |= {u}
 
     dfs(nfa.initial)
     return adj, erased

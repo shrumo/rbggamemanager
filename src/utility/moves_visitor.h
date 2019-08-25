@@ -34,7 +34,9 @@ namespace rbg {
 
     virtual ResultType VisitedQueryCase(const VisitedQuery &move) { return DefaultCase(move); }
 
-    virtual ResultType EmptyCase(const Empty &move) { return DefaultCase(move); }
+    virtual ResultType EmptyBackwardCase(const EmptyBackward &move) { return DefaultCase(move); }
+
+    virtual ResultType EmptyForwardCase(const EmptyForward &move) { return DefaultCase(move); }
 
     virtual ResultType DefaultCase(const Move &) { return ResultType(); }
 
@@ -103,8 +105,13 @@ namespace rbg {
       result_exists_ = true;
     };
 
-    void Visit(const Empty &m) override {
-      result_ = EmptyCase(m);
+    void Visit(const EmptyBackward &m) override {
+      result_ = EmptyBackwardCase(m);
+      result_exists_ = true;
+    };
+
+    void Visit(const EmptyForward &m) override {
+      result_ = EmptyForwardCase(m);
       result_exists_ = true;
     };
 
