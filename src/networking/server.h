@@ -8,7 +8,9 @@
 
 #include <asio.hpp>
 
+#include <chrono>
 #include <deque>
+#include <limits>
 
 #include "socket.h"
 #include <rbgParser/src/game_items.hpp>
@@ -22,9 +24,9 @@ namespace rbg {
 
   class Server {
   public:
-    explicit Server(const std::string &game_text, unsigned short port = 13)
+    explicit Server(const std::string &game_text, unsigned short port = 13, double deadline_seconds=std::numeric_limits<double>::max())
         : io_service_{}, acceptor_(io_service_, tcp::endpoint(tcp::v4(), port)),
-          state_(CreateGameState(game_text)), game_text_(game_text) {
+          state_(CreateGameState(game_text)), game_text_(game_text), deadline_seconds_(deadline_seconds) {
       actions_translator_ = ActionsDescriptionsMap(game_text);
     }
 
@@ -66,7 +68,15 @@ namespace rbg {
         auto move_string = clients_sockets_[player_socket_index(state_.current_player())].ReadString(); 
         auto end = std::chrono::system_clock::now();
         auto duration = std::chrono::duration<double>(end - begin).count();
-       
+
+        if(duration > deadline_seconds_) {
+                std::cout << "Deadline exceeded for client " << player_socket_index(state_.current_player()) 
+                          << " which is player " 
+                          <<  state_.declarations().players_resolver().Name(state_.current_player())
+                  << " (" << state_.current_player() << ")" << std::endl;
+                return;
+        }
+
         std::cout << "Received a move after " << duration << " seconds." << std::endl; 
 
         auto move = DecodeMove(move_string);
@@ -128,6 +138,7 @@ namespace rbg {
     std::unordered_set<GameMove> available_moves_;
     std::vector<StringSocket> clients_sockets_;
     std::unordered_map<uint, std::string> actions_translator_;
+    double deadline_seconds_;
   };
 }
 

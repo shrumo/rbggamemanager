@@ -131,6 +131,10 @@ add_custom_target(server_communication_test ALL COMMAND ${CMAKE_COMMAND} -E copy
         DEPENDS rbg)
 add_test(server_communication_test ${PYTHON_EXECUTABLE} server_communication_test.py)
 
+add_custom_target(exceeds_deadline_test ALL COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/src/tests/exceeds_deadline_test.py ${CMAKE_CURRENT_BINARY_DIR}/exceeds_deadline_test.py
+        DEPENDS rbg)
+add_test(exceeds_deadline_test ${PYTHON_EXECUTABLE} exceeds_deadline_test.py)
+
 
 
 

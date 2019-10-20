@@ -5,6 +5,9 @@
 #include <iostream>
 #include <memory>
 #include <vector>
+#include <chrono>
+#include <thread>
+#include <string>
 
 #include <networking/client.h>
 #include <rbgParser/src/game_items.hpp>
@@ -14,15 +17,20 @@
 using namespace rbg;
 
 int main(int argc, char *argv[]) {
-  if (argc != 3 && argc != 4) {
-    std::cerr << "Usage " << argv[0] << " <host> <port> [<seed>]\n";
+  if (argc < 3 || argc > 5 ) {
+    std::cerr << "Usage " << argv[0] << " <host> <port> [<seed>] [<sleep_time>]\n";
     return 1;
   }
 
-  if(argc == 4) {
+  if(argc == 4 || argc == 5) {
     srand(atoi(argv[3]));
   } else {
     srand(static_cast<unsigned int>(time(nullptr)));
+  }
+
+  double sleep_time = 0.0;
+  if(argc == 5) {
+    sleep_time = std::stod(argv[4]);
   }
 
   rbg_parser::messages_container msg;
@@ -50,6 +58,7 @@ int main(int argc, char *argv[]) {
         std::cout << "\t" << state.declarations().initial_board().vertices_names().Name(mod.vertex) << " (" << mod.vertex << ") "
            << actions_translator[mod.modifier_index] << " (" << mod.modifier_index << ")" << std::endl;
       }
+      std::this_thread::sleep_for(std::chrono::duration<double>(sleep_time));
       client.Write(move);
       moves = state.Moves();
     } else {
