@@ -48,6 +48,7 @@ namespace rbg {
                   << " to client " << i << std::endl;
         clients_sockets_[i].WriteString(std::to_string(client_player_id(i)));
       }
+
       auto moves = state_.Moves();
       available_moves_ = std::unordered_set<GameMove>(moves.begin(), moves.end());
       while (!available_moves_.empty()) {
@@ -61,7 +62,14 @@ namespace rbg {
                   << state_.declarations().players_resolver().Name(state_.current_player())
                   << " (" << state_.current_player() << ")" << std::endl;
 
-        auto move = DecodeMove(clients_sockets_[player_socket_index(state_.current_player())].ReadString());
+        auto begin = std::chrono::system_clock::now();
+        auto move_string = clients_sockets_[player_socket_index(state_.current_player())].ReadString(); 
+        auto end = std::chrono::system_clock::now();
+        auto duration = std::chrono::duration<double>(end - begin).count();
+       
+        std::cout << "Received a move after " << duration << " seconds." << std::endl; 
+
+        auto move = DecodeMove(move_string);
 
         std::cout << "Got a move from client " << player_socket_index(state_.current_player())
                   << " which is player "
