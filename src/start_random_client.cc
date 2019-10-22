@@ -13,28 +13,32 @@
 #include <rbgParser/src/game_items.hpp>
 #include <game_state/construction/game_state_creator.h>
 #include <utility/printer.h>
+#include <stl_extension/argparse.h>
 
 using namespace rbg;
 
-int main(int argc, char *argv[]) {
-  if (argc < 3 || argc > 5 ) {
-    std::cerr << "Usage " << argv[0] << " <host> <port> [<seed>] [<sleep_time>]\n";
-    return 1;
+int main(int argc, const char *argv[]) {
+  auto args = std_ext::parse_args(argc, argv);
+  
+  if (args.positional_args.size() != 2) {
+    std::cout << "Usage: " << argv[0] << " <host> <port> [--seed <random_seed>] [--sleep <sleep_time>]" << std::endl;
+    return 0;
   }
 
-  if(argc == 4 || argc == 5) {
-    srand(atoi(argv[3]));
-  } else {
+  if(args.flags.find("seed") != args.flags.end()) {
+    srand(std::stoi(args.flags.at("seed")));
+  }
+  else {
     srand(static_cast<unsigned int>(time(nullptr)));
   }
 
   double sleep_time = 0.0;
-  if(argc == 5) {
-    sleep_time = std::stod(argv[4]);
+  if(args.flags.find("sleep") != args.flags.end()) {
+    sleep_time = std::stod(args.flags.at("sleep"));
   }
 
   rbg_parser::messages_container msg;
-  Client client(argv[1], argv[2]);
+  Client client(args.positional_args[0], args.positional_args[1]);
 
   GameState state = CreateGameState(client.description());
   auto actions_translator = ActionsDescriptionsMap(client.description());

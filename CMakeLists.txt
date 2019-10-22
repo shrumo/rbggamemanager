@@ -23,7 +23,7 @@ include_directories(asio/asio/include)
 include_directories(src)
 include_directories(.)
 
-set(GRAPH_FILES src/utility/graph.h src/stl_extension/range.h src/stl_extension/utility.h src/stl_extension/iterator_transform.h)
+set(GRAPH_FILES src/utility/graph.h src/stl_extension/range.h src/stl_extension/argparse.h src/stl_extension/utility.h src/stl_extension/iterator_transform.h)
 
 set(PARSER_FILES src/parser/parser_wrapper.h src/parser/parser_actions.h src/parser/parser_wrapper.cc)
 

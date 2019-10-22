@@ -17,7 +17,7 @@ namespace rbg {
   class Client {
 
   public:
-    Client(const char *host, const char *port)
+    Client(const std::string& host, const std::string& port)
         : resolver_(io_service_),
           endpoint_iterator_(resolver_.resolve({host, port})),
           string_socket_(io_service_),
