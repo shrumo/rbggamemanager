@@ -11,6 +11,7 @@
 #include <chrono>
 #include <deque>
 #include <limits>
+#include <ostream>
 
 #include "socket.h"
 #include <rbgParser/src/game_items.hpp>
@@ -24,9 +25,14 @@ namespace rbg {
 
   class Server {
   public:
-    explicit Server(const std::string &game_text, unsigned short port = 13, double deadline_seconds=std::numeric_limits<double>::max())
+    explicit Server(const std::string &game_text, 
+                    unsigned short port = 13, 
+                    double deadline_seconds=std::numeric_limits<double>::max(),
+                    std::ostream *logging_stream = nullptr
+                    )
         : io_service_{}, acceptor_(io_service_, tcp::endpoint(tcp::v4(), port)),
-          state_(CreateGameState(game_text)), game_text_(game_text), deadline_seconds_(deadline_seconds) {
+          state_(CreateGameState(game_text)), game_text_(game_text), 
+          deadline_seconds_(deadline_seconds), logging_stream_(logging_stream) {
       actions_translator_ = ActionsDescriptionsMap(game_text);
     }
 
@@ -50,6 +56,9 @@ namespace rbg {
                   << " to client " << i << std::endl;
         clients_sockets_[i].WriteString(std::to_string(client_player_id(i)));
       }
+
+      size_t moves_done = 0;
+      auto game_begin = std::chrono::system_clock::now();
 
       auto moves = state_.Moves();
       available_moves_ = std::unordered_set<GameMove>(moves.begin(), moves.end());
@@ -110,6 +119,7 @@ namespace rbg {
         }
 
         state_.Apply(move);
+        moves_done++;
 
         moves = state_.Moves();
         available_moves_ = std::unordered_set<GameMove>(moves.begin(), moves.end());
@@ -120,6 +130,25 @@ namespace rbg {
       std::cout << RectangularBoardDescription(state_.board_content(), state_.declarations()) << std::endl;
       std::cout << "Variables values at end are:" << std::endl;
       std::cout << VariablesValuesDescription(state_) << std::endl;
+      
+      auto game_end = std::chrono::system_clock::now();
+      auto game_duration = std::chrono::duration<double>(game_end - game_begin).count();
+
+      std::cout << "The game took " << game_duration << "s and consisted of " << moves_done << " moves" << std::endl;
+
+      if(logging_stream_ != nullptr) {
+        auto& stream = *logging_stream_;
+        stream << game_duration << ", " << moves_done << ", ";
+        for (uint i = 0; i < clients_sockets_.size(); i++) {
+          if (i>0) {
+            stream << ",";
+          }
+          auto player_name = state_.declarations().players_resolver().Name(client_player_id(i));
+          variable_id_t player_variable_id = state_.declarations().variables_resolver().Id(player_name);
+          stream << state_.variables_values()[player_variable_id]; 
+        }
+        stream << std::endl;
+      }
     }
 
   private:
@@ -139,6 +168,7 @@ namespace rbg {
     std::vector<StringSocket> clients_sockets_;
     std::unordered_map<uint, std::string> actions_translator_;
     double deadline_seconds_;
+    std::ostream *logging_stream_;
   };
 }
 
