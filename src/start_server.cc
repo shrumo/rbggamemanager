@@ -17,7 +17,7 @@ int main(int argc, const char *argv[]) {
   auto args = std_ext::parse_args(argc, argv);
   
   if (args.positional_args.size() != 2) {
-    std::cout << "Usage: " << argv[0] << " <filename> <port> [--deadline <deadline_time>]" << std::endl;
+    std::cout << "Usage: " << argv[0] << " <filename> <port> [--deadline <deadline_time>] [--log <logging_file>]" << std::endl;
     return 0;
   }
 
