@@ -139,6 +139,11 @@ add_custom_target(server_logging_test ALL COMMAND ${CMAKE_COMMAND} -E copy ${CMA
         DEPENDS rbg)
 add_test(server_logging_test ${PYTHON_EXECUTABLE} server_logging_test.py)
 
+add_custom_target(continous_play_test ALL COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/src/tests/continous_play_test.py ${CMAKE_CURRENT_BINARY_DIR}/continous_play_test.py
+        DEPENDS rbg)
+add_test(continous_play_test ${PYTHON_EXECUTABLE} continous_play_test.py)
+
+
 
 
 

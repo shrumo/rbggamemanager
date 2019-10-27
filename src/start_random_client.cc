@@ -21,7 +21,7 @@ int main(int argc, const char *argv[]) {
   auto args = std_ext::parse_args(argc, argv);
   
   if (args.positional_args.size() != 2) {
-    std::cout << "Usage: " << argv[0] << " <host> <port> [--seed <random_seed>] [--sleep <sleep_time>]" << std::endl;
+    std::cout << "Usage: " << argv[0] << " <host> <port> [--seed <random_seed>] [--sleep <sleep_time>] [--time <time_to_disconnect>]" << std::endl;
     return 0;
   }
 
@@ -37,6 +37,11 @@ int main(int argc, const char *argv[]) {
     sleep_time = std::stod(args.flags.at("sleep"));
   }
 
+  double time_to_disconnect = 0.0;
+  if(args.flags.find("time") != args.flags.end()) {
+    time_to_disconnect = std::stod(args.flags.at("time"));
+  }
+
   rbg_parser::messages_container msg;
   Client client(args.positional_args[0], args.positional_args[1]);
 
@@ -48,6 +53,8 @@ int main(int argc, const char *argv[]) {
   std::cout << "I am player: " << state.declarations().players_resolver().Name(assigned_player) << " (" << assigned_player << ")"
             << std::endl;
 
+  auto first_game_begin = std::chrono::system_clock::now();
+  do {
   auto moves = state.Moves();
   while (!moves.empty()) {
     if (state.current_player() == assigned_player) {
@@ -80,5 +87,7 @@ int main(int argc, const char *argv[]) {
   std::cout << RectangularBoardDescription(state.board_content(), state.declarations()) << std::endl;
   std::cout << "Variables values at end are:" << std::endl;
   std::cout << VariablesValuesDescription(state) << std::endl;
+  state.Reset();
+  } while(std::chrono::duration<double>(std::chrono::system_clock::now() - first_game_begin).count() < time_to_disconnect);
   return 0;
 }
