@@ -20,9 +20,7 @@ print('Server got client B. (Server:', server_process.stdout.readline(), ')')
 moves_done = 0
 for line in server_process.stdout:
     line = str(line)
-    if 'Got a move' in line:
-        moves_done+=1
-        print('Server is working, moves done:', moves_done)
+    print(line)
 
 a_client_process.wait(timeout=10)
 b_client_process.wait(timeout=10)
@@ -36,7 +34,7 @@ assert(os.path.isfile(logging_filename))
 
 with open(logging_filename) as f:
   print('The logging file exists.')
-  elems = list(f.readline().split(','))
+  elems = list(f.readline().split(' '))
   assert(len(elems) == 4)
   time, depth, score_a, score_b = elems
   assert(float(time) < 60) # A TicTacToe game over localhost shouldn't take long

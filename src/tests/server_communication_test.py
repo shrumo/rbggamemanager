@@ -42,9 +42,7 @@ print('Server got client B. (Server:', server_process.stdout.readline(), ')')
 moves_done = 0
 for line in server_process.stdout:
     line = str(line)
-    if 'Got a move' in line:
-        moves_done+=1
-        print('Server is working, moves done:', moves_done)
+    print(line)
 
 a_client_process.wait(timeout=10)
 b_client_process.wait(timeout=10)

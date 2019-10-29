@@ -16,8 +16,7 @@ print('Server got client B. (Server:', server_process.stdout.readline(), ')')
 deadline_exceeded = False
 for line in server_process.stdout:
     line = str(line)
-    if 'turnCount' in line:
-        print('Server is working, turn:', line.split(':')[1][:-3])
+    print(line)
     if 'deadline exceeded' in line.lower() and 'client 0' in line.lower():
         print('Client A exceeded the time limit as expected. (Server:',line,')')
         deadline_exceeded = True

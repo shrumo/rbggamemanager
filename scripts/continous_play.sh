@@ -5,7 +5,7 @@
 ${0%/*}/make.sh
 
 echo "Starting server"
-${0%/*}/../build/start_server $1 5024 --log $3 > /dev/null &
+${0%/*}/../build/start_server $1 5024 --log $3 &
 echo "Waiting for server to turn up"
 sleep 5
 echo "Starting first client"

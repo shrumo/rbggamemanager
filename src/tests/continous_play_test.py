@@ -23,10 +23,7 @@ print('Server got client B. (Server:', server_process.stdout.readline(), ')')
 moves_done = 0
 for line in server_process.stdout:
     line = str(line)
-    if 'Got a move' in line:
-        moves_done+=1
-        if moves_done % 50 == 0:
-          print('Server is working, moves done:', moves_done)
+    print(line)
 
 a_client_process.wait(timeout=30)
 b_client_process.wait(timeout=30)
@@ -47,7 +44,7 @@ with open(logging_filename) as f:
   lines = list(f.readlines())
   assert(len(lines) > 5)
   for line in lines:
-    elems = list(line.split(','))
+    elems = list(line.split(' '))
     assert(len(elems) == 4)
     time, depth, score_a, score_b = elems
     assert(float(time) < 60) # A TicTacToe game over localhost shouldn't take long

@@ -65,16 +65,6 @@ namespace rbg {
         auto moves = state_.Moves();
         available_moves_ = std::unordered_set<GameMove>(moves.begin(), moves.end());
         while (!available_moves_.empty()) {
-          std::cout << "\n";
-          std::cout << RectangularBoardDescription(state_.board_content(), state_.declarations()) << std::endl;
-          std::cout << "Variables values are:" << std::endl;
-          std::cout << VariablesValuesDescription(state_) << std::endl;
-
-          std::cout << "Expecting move from " << player_socket_index(state_.current_player())
-                    << " which is player "
-                    << state_.declarations().players_resolver().Name(state_.current_player())
-                    << " (" << state_.current_player() << ")" << std::endl;
-
           auto begin = std::chrono::system_clock::now();
           auto move_string = clients_sockets_[player_socket_index(state_.current_player())].ReadString(); 
           auto end = std::chrono::system_clock::now();
@@ -88,21 +78,7 @@ namespace rbg {
                   return;
           }
 
-          std::cout << "Received a move after " << duration << " seconds." << std::endl; 
-
           auto move = DecodeMove(move_string);
-
-          std::cout << "Got a move from client " << player_socket_index(state_.current_player())
-                    << " which is player "
-                    << state_.declarations().players_resolver().Name(state_.current_player())
-                    << " (" << state_.current_player() << "): "
-                    << std::endl;
-
-          for (const auto &mod : move) {
-            std::cout << "\t" << state_.declarations().initial_board().vertices_names().Name(mod.vertex) << " ("
-                      << mod.vertex << ") "
-                      << actions_translator_[mod.modifier_index] << " (" << mod.modifier_index << ")" << std::endl;
-          }
 
           if (available_moves_.find(move) == available_moves_.end()) {
             std::cout << "The move sent by the client is not legal" << std::endl;
@@ -113,10 +89,6 @@ namespace rbg {
             if (i == player_socket_index(state_.current_player())) {
               continue;
             }
-            std::cout << "Sending the move to " << i << " which is player "
-                      << state_.declarations().players_resolver().Name(client_player_id(i))
-                      << " (" << client_player_id(i) << ")"
-                      << std::endl;
             clients_sockets_[i].WriteString(EncodeMove(move));
           }
 
@@ -126,18 +98,10 @@ namespace rbg {
           moves = state_.Moves();
           available_moves_ = std::unordered_set<GameMove>(moves.begin(), moves.end());
         }
-
-        std::cout << "Game ended." << std::endl;
-        std::cout << "\n";
-        std::cout << RectangularBoardDescription(state_.board_content(), state_.declarations()) << std::endl;
-        std::cout << "Variables values at end are:" << std::endl;
-        std::cout << VariablesValuesDescription(state_) << std::endl;
         
         auto game_end = std::chrono::system_clock::now();
         auto game_duration = std::chrono::duration<double>(game_end - game_begin).count();
-
-        std::cout << "The game took " << game_duration << "s and consisted of " << moves_done << " moves" << std::endl;
-
+        
         if(logging_stream_ != nullptr) {
           auto& stream = *logging_stream_;
           stream << game_duration << " " << moves_done << " ";
