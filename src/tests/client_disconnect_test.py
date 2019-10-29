@@ -3,20 +3,20 @@ import datetime
 import os
 import time
 
-logging_filename = 'tmp_file_from_continous_play_test_' + datetime.datetime.now().strftime("%I_%M%p_%B_%d_%Y")
+logging_filename = 'tmp_file_from_client_disconnect_test_' + datetime.datetime.now().strftime("%I_%M%p_%B_%d_%Y")
 
 print('TicTacToe')
-server_process = subprocess.Popen(['./start_server', '../rbgParser/examples/ticTacToe.rbg', '7981', '--log', logging_filename, '--shutdown', '10.0'], stdout=subprocess.PIPE)
+server_process = subprocess.Popen(['./start_server', '../rbgParser/examples/ticTacToe.rbg', '7981', '--log', logging_filename], stdout=subprocess.PIPE)
 
 server_start_time = time.time()
 
 print('Server waiting for clients. (Server:', server_process.stdout.readline(), ')')
 
-a_client_process = subprocess.Popen(['./start_random_client', 'localhost', '7981', '--seed', '0', '--time', '60000.0'], stdout=subprocess.DEVNULL)
+a_client_process = subprocess.Popen(['./start_random_client', 'localhost', '7981', '--seed', '0', '--time', '10.0'], stdout=subprocess.DEVNULL)
 
 print('Server got client A. (Server:', server_process.stdout.readline(), ')')
 
-b_client_process = subprocess.Popen(['./start_random_client', 'localhost', '7981', '--seed', '0', '--time', '60000.0'], stdout=subprocess.DEVNULL)
+b_client_process = subprocess.Popen(['./start_random_client', 'localhost', '7981', '--seed', '0', '--time', '10.0'], stdout=subprocess.DEVNULL)
 
 print('Server got client B. (Server:', server_process.stdout.readline(), ')')
 

@@ -17,7 +17,7 @@ int main(int argc, const char *argv[]) {
   auto args = std_ext::parse_args(argc, argv);
   
   if (args.positional_args.size() != 2) {
-    std::cout << "Usage: " << argv[0] << " <filename> <port> [--deadline <deadline_time>] [--log <logging_file>]" << std::endl;
+    std::cout << "Usage: " << argv[0] << " <filename> <port> [--deadline <deadline_time>] [--log <logging_file>] [--shutdown <shutdown_time>]" << std::endl;
     return 0;
   }
 
@@ -31,6 +31,11 @@ int main(int argc, const char *argv[]) {
     logging_file = std::make_unique<std::ofstream>(args.flags.at("log"));
   }
 
+  double shutdown_time = std::numeric_limits<double>::max();
+  if (args.flags.find("shutdown") != args.flags.end()) {
+    shutdown_time = std::stod(args.flags.at("shutdown"));
+  }
+
   std::ifstream filestream(args.positional_args[0]);
   std::stringstream buffer;
   buffer << filestream.rdbuf();
@@ -38,7 +43,7 @@ int main(int argc, const char *argv[]) {
   try {
     asio::io_service io_service;
     Server server(buffer.str(), static_cast<unsigned short>(std::stoi(args.positional_args[1])), deadline_in_seconds, logging_file.get());
-    server.Run();
+    server.Run(shutdown_time);
   }
   catch (std::exception &e) {
     std::cerr << "Exception: " << e.what() << "\n";

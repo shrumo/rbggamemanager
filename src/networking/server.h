@@ -36,7 +36,7 @@ namespace rbg {
       actions_translator_ = ActionsDescriptionsMap(game_text);
     }
 
-    void Run() {
+    void Run(double shutdown_timer=std::numeric_limits<double>::max()) {
       while (clients_sockets_.size() != state_.declarations().players_resolver().size() - 1) {
         tcp::socket socket(io_service_);
         std::cout << "Waiting for clients..."
@@ -57,7 +57,8 @@ namespace rbg {
         clients_sockets_[i].WriteString(std::to_string(client_player_id(i)));
       }
 
-      while(clients_sockets_.size() == state_.declarations().players_resolver().size() - 1) {
+      auto play_start = std::chrono::system_clock::now();
+      while(std::chrono::duration<double>(std::chrono::system_clock::now() - play_start).count() < shutdown_timer) {
         size_t moves_done = 0;
         auto game_begin = std::chrono::system_clock::now();
 
@@ -152,6 +153,8 @@ namespace rbg {
         }
         state_.Reset();
       }
+      auto play_end = std::chrono::system_clock::now();
+      std::cout << "Players played for " << std::chrono::duration<double>(play_end - play_start).count() << "s" << std::endl; 
     }
 
   private:

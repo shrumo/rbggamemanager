@@ -143,6 +143,11 @@ add_custom_target(continous_play_test ALL COMMAND ${CMAKE_COMMAND} -E copy ${CMA
         DEPENDS rbg)
 add_test(continous_play_test ${PYTHON_EXECUTABLE} continous_play_test.py)
 
+add_custom_target(client_disconnect_test ALL COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/src/tests/client_disconnect_test.py ${CMAKE_CURRENT_BINARY_DIR}/client_disconnect_test.py
+        DEPENDS rbg)
+add_test(client_disconnect_test ${PYTHON_EXECUTABLE} client_disconnect_test.py)
+
+
 
 
 
