@@ -16,8 +16,11 @@ namespace rbg {
   class BoardContent {
   public:
     BoardContent(uint vertices_count, uint piece_count)
-        : fields_(vertices_count),
-          pieces_counts_(piece_count) {}
+        : fields_(vertices_count, 0),
+          pieces_counts_(piece_count) {
+      // The piece on the <out> field (index 0) shouldn't be counted
+      pieces_counts_[0] = vertices_count - 1;
+    }
 
 
     piece_id_t at(vertex_id_t vertex) const {

@@ -119,6 +119,12 @@ void TestEqualComparison() {
   assert(moves_empty.empty());
 }
 
+void TestPiecesCounts() {
+  auto game = CreateGameState(
+      kSmallGameDeclarations + "#rules = ->red {$ e == 2 } {$ r == 1} {$ b == 1} {$ r == b} ->blue"); 
+  auto moves = game.Moves();
+  assert(moves.size() == 1);
+}
 
 void TestNotEqualComparison() {
   auto game = CreateGameState(
@@ -154,6 +160,7 @@ int main() {
     TestLessComparison();
     TestLessEqualComparison();
     TestEqualComparison();
+    TestPiecesCounts();
     TestNotEqualComparison();
     TestConditionCheckStep();
   } catch (const rbg_parser::message &m) {
