@@ -140,10 +140,10 @@ namespace rbg {
 
         if(logging_stream_ != nullptr) {
           auto& stream = *logging_stream_;
-          stream << game_duration << ", " << moves_done << ", ";
+          stream << game_duration << " " << moves_done << " ";
           for (uint i = 0; i < clients_sockets_.size(); i++) {
             if (i>0) {
-              stream << ",";
+              stream << " ";
             }
             auto player_name = state_.declarations().players_resolver().Name(client_player_id(i));
             variable_id_t player_variable_id = state_.declarations().variables_resolver().Id(player_name);
