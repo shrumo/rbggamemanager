@@ -147,6 +147,11 @@ add_custom_target(client_disconnect_test ALL COMMAND ${CMAKE_COMMAND} -E copy ${
         DEPENDS rbg)
 add_test(client_disconnect_test ${PYTHON_EXECUTABLE} client_disconnect_test.py)
 
+add_custom_target(server_games_limit_test ALL COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/src/tests/server_games_limit_test.py ${CMAKE_CURRENT_BINARY_DIR}/server_games_limit_test.py
+        DEPENDS rbg)
+add_test(server_games_limit_test ${PYTHON_EXECUTABLE} server_games_limit_test.py)
+
+
 
 
 
