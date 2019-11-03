@@ -286,6 +286,7 @@ NfaBoardProduct::NfaBoardProduct(const Nfa<std::unique_ptr<Move>> &nfa, const Bo
   for (vertex_id_t begin_vertex : initials) {
     to_visit.push({begin_vertex, nfa.initial});
     node_mapping_[{begin_vertex, nfa.initial}] = NewNode();
+    reverse_node_mapping_[node_mapping_[{begin_vertex, nfa.initial}]] = {begin_vertex, nfa.initial};
   }
 
   std::unordered_map<node_t, std::unordered_set<vertex_id_t>> conditions_initials;
