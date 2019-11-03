@@ -229,6 +229,7 @@ std::string rbg::RectangularBoardDescription(const BoardContent &board_content, 
     height = std::max(y + 1, height);
   }
   std::vector<piece_id_t> field(width * height);
+  std::vector<bool> playing(width * height, false);
   for (vertex_id_t v = 1; v < declarations.initial_board().vertices_count(); v++) {
     std::string vertex_name = declarations.initial_board().vertices_names().Name(v);
     std::stringstream stream(vertex_name);
@@ -237,10 +238,15 @@ std::string rbg::RectangularBoardDescription(const BoardContent &board_content, 
     size_t x, y;
     stream >> x >> placeholder >> y;
     field[x + y * width] = board_content.at(v);
+    playing[x + y * width] = true;
   }
   std::stringstream s;
   for (size_t y = 0; y < height; y++) {
     for (size_t x = 0; x < width; x++) {
+      if(!playing[x + y * width]) { 
+        s << " " << std::setw(3) << " " << "  ";
+        continue;
+      }
       std::string name = declarations.pieces_resolver().Name(field[x + y * width]);
       if (name == "empty" || name == "e") {
         s << "[" << std::setw(3) << " " << "] ";
