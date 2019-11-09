@@ -118,6 +118,9 @@ namespace rbg {
           stream << std::endl;
         }
         state_.Reset();
+        for (uint i = 0; i < clients_sockets_.size(); i++) {
+            clients_sockets_[i].WriteString("reset");
+          }
         games_count++;
         if (games_count % 200 == 0) {
           std::cout << games_count << " games were played so far." << std::endl;

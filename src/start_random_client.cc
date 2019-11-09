@@ -88,6 +88,7 @@ int main(int argc, const char *argv[]) {
   std::cout << "Variables values at end are:" << std::endl;
   std::cout << VariablesValuesDescription(state) << std::endl;
   state.Reset();
+  client.ReadReset();
   } while(std::chrono::duration<double>(std::chrono::system_clock::now() - first_game_begin).count() < time_to_disconnect);
   return 0;
 }

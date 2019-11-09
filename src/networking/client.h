@@ -43,6 +43,10 @@ namespace rbg {
       return DecodeMove(str);
     }
 
+    void ReadReset() {
+      string_socket_.ReadString();
+    }
+
   private:
     void Initialize() {
       game_description_ = string_socket_.ReadString();
