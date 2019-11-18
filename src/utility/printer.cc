@@ -220,11 +220,15 @@ std::string rbg::RectangularBoardDescription(const BoardContent &board_content, 
     std::stringstream stream(vertex_name);
     char placeholders[3] = {'\0', '\0', '\0'};
     stream >> placeholders[0] >> placeholders[1];
-    assert(std::string(placeholders) == "rx" && "The board should be created by rectangular keyword.");
+    if(std::string(placeholders) != "rx") {
+      return "Couldn't print, non rectangular board.";
+    }
     size_t x, y;
     char placeholder;
     stream >> x >> placeholder >> y;
-    assert(placeholder == 'y' && "The board should be created by rectangular keyword.");
+    if(placeholder != 'y') {
+      return "Couldn't print, non rectangular board.";
+    } 
     width = std::max(x + 1, width);
     height = std::max(y + 1, height);
   }
