@@ -96,8 +96,6 @@ int main(int argc, const char *argv[]) {
   auto actions_translator = ActionsDescriptionsMap(buffer.str());
   auto moves = game.Moves();
 
-  std::cout << game.declarations().initial_board().vertices_names() << std::endl;
-
   while(!moves.empty()) {
     uniform_int_distribution<> random_index(0, moves.size()-1);
     cout << "Current player is: " << game.declarations().players_resolver().Name(game.current_player()) << " (" << game.current_player() << ")" << endl;

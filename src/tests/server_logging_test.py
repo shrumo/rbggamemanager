@@ -35,12 +35,13 @@ assert(os.path.isfile(logging_filename))
 with open(logging_filename) as f:
   print('The logging file exists.')
   elems = list(f.readline().split(' '))
-  assert(len(elems) == 4)
-  time, depth, score_a, score_b = elems
+  assert(len(elems) == 5)
+  time, depth, available_moves, score_a, score_b = elems
   assert(float(time) < 60) # A TicTacToe game over localhost shouldn't take long
   assert(0 < int(depth) <= 9)
   assert(0 <= int(score_a) <= 100)
   assert(0 <= int(score_b) <= 100)
+  assert(1 <= int(available_moves) <= 45)
 
 print('Removing the logging file.')
 os.remove(logging_filename)

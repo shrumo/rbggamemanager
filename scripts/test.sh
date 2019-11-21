@@ -9,12 +9,15 @@ if [[ $# -eq 0 ]]
   then
     make test
   else
-    make $1
-    if [[ -f ./$1 ]]
-    then
-        ./$1
-    elif [[ -f ./$1.py ]]
-    then
-        python3 ./$1.py
-    fi
+    for name in $1 $1_test 
+    do
+      make $name 2> /dev/null
+      if [[ -f ./$name ]]
+      then
+        ./$name
+      elif [[ -f ./$name.py ]]
+      then
+        python3 ./$name.py
+      fi
+    done
 fi

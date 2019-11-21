@@ -66,6 +66,7 @@ namespace rbg {
 
         auto moves = state_.Moves();
         available_moves_ = std::unordered_set<GameMove>(moves.begin(), moves.end());
+        uint available_moves_overall = available_moves_.size();
         while (!available_moves_.empty()) {
           auto begin = std::chrono::system_clock::now();
           auto move_string = clients_sockets_[player_socket_index(state_.current_player())].ReadString(); 
@@ -99,6 +100,7 @@ namespace rbg {
 
           moves = state_.Moves();
           available_moves_ = std::unordered_set<GameMove>(moves.begin(), moves.end());
+          available_moves_overall += available_moves_.size();
         }
         
         auto game_end = std::chrono::system_clock::now();
@@ -106,7 +108,7 @@ namespace rbg {
         
         if(logging_stream_ != nullptr) {
           auto& stream = *logging_stream_;
-          stream << game_duration << " " << moves_done << " ";
+          stream << game_duration << " " << moves_done << " " << available_moves_overall << " ";
           for (uint i = 0; i < clients_sockets_.size(); i++) {
             if (i>0) {
               stream << " ";
