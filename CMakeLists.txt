@@ -2,9 +2,9 @@ cmake_minimum_required(VERSION 3.5.0)
 project(rbggamemanager)
 
 # Build in release by default
-if(NOT CMAKE_BUILD_TYPE)
-  set(CMAKE_BUILD_TYPE Release)
-endif()
+if (NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE Release)
+endif ()
 
 set(CMAKE_CXX_STANDARD 14)
 
@@ -54,14 +54,14 @@ find_package(Python3 COMPONENTS Interpreter Development)
 
 # Targets requiring python bindings
 if (${Python3_Development_FOUND})
-  pybind11_add_module(rbg src/python_bindings/rbg.cc ${GAMESTATE_FILES})
-  target_link_libraries(rbg PRIVATE rbgParser)
+    pybind11_add_module(rbg src/python_bindings/rbg.cc ${GAMESTATE_FILES})
+    target_link_libraries(rbg PRIVATE rbgParser)
 
-  add_custom_target(visualize_graph ALL
-          COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/src/python_widgets/graph_widget.py ${CMAKE_CURRENT_BINARY_DIR}/graph_widget.py
-          COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/src/python_widgets/visualize_graph.py ${CMAKE_CURRENT_BINARY_DIR}/visualize_graph.py
-          DEPENDS rbg)
-endif()
+    add_custom_target(visualize_graph ALL
+            COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/src/python_widgets/graph_widget.py ${CMAKE_CURRENT_BINARY_DIR}/graph_widget.py
+            COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/src/python_widgets/visualize_graph.py ${CMAKE_CURRENT_BINARY_DIR}/visualize_graph.py
+            DEPENDS rbg)
+endif ()
 
 
 add_executable(benchmark ${GRAPH_FILES} ${PARSER_FILES}
@@ -81,6 +81,13 @@ add_executable(move_decoder ${GRAPH_FILES} ${PARSER_FILES}
 
 target_link_libraries(move_decoder rbgParser)
 target_link_libraries(move_decoder pthread)
+
+add_executable(print ${GRAPH_FILES} ${PARSER_FILES}
+        ${CONSTRUCTION_FILES} ${GAMESTATE_FILES} ${NETWORKING_FILES} src/print.cc)
+
+target_link_libraries(print rbgParser)
+target_link_libraries(print pthread)
+
 
 add_executable(start_server ${NETWORKING_FILES} src/start_server.cc)
 target_link_libraries(start_server rbgParser)
@@ -103,18 +110,18 @@ add_executable(creator_test ${GAMESTATE_FILES} src/tests/creator_test.cc)
 target_link_libraries(creator_test rbgParser)
 add_test(creator_test creator_test)
 
-add_executable(single_blocks_test  ${GAMESTATE_FILES} src/tests/single_blocks_test.cc)
+add_executable(single_blocks_test ${GAMESTATE_FILES} src/tests/single_blocks_test.cc)
 target_link_libraries(single_blocks_test rbgParser)
 add_test(single_blocks_test single_blocks_test)
 
-add_executable(declarations_test  ${GAMESTATE_FILES} src/tests/declarations_test.cc)
+add_executable(declarations_test ${GAMESTATE_FILES} src/tests/declarations_test.cc)
 target_link_libraries(declarations_test rbgParser)
 add_test(declarations_test declarations_test)
 
 add_executable(namesresolver_test src/game_description/names_resolver.h src/game_description/names_resolver.cc src/tests/namesresolver_test.cc)
 add_test(namesresolver_test namesresolver_test)
 
-add_executable(gamestate_simple_test  ${GAMESTATE_FILES} src/tests/game_state_simple_test.cc)
+add_executable(gamestate_simple_test ${GAMESTATE_FILES} src/tests/game_state_simple_test.cc)
 target_link_libraries(gamestate_simple_test rbgParser)
 add_test(gamestate_simple_test gamestate_simple_test)
 
@@ -152,28 +159,28 @@ add_test(board_test board_test)
 
 # Tests requiring the python bindings
 if (${Python3_Devolpment_FOUND})
-  add_custom_target(python_bindings_test ALL COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/src/tests/python_bindings_test.py ${CMAKE_CURRENT_BINARY_DIR}/python_bindings_test.py
-    DEPENDS rbg)
-  add_test(python_bindings_test ${Python3_EXECUTABLE} python_bindings_test.py)
-endif()
+    add_custom_target(python_bindings_test ALL COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/src/tests/python_bindings_test.py ${CMAKE_CURRENT_BINARY_DIR}/python_bindings_test.py
+            DEPENDS rbg)
+    add_test(python_bindings_test ${Python3_EXECUTABLE} python_bindings_test.py)
+endif ()
 
 # Tests requiring the python interpreter
 if (${Python3_Interpreter_FOUND})
-  add_custom_target(server_communication_test ALL COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/src/tests/server_communication_test.py ${CMAKE_CURRENT_BINARY_DIR}/server_communication_test.py)
-  add_test(server_communication_test ${Python3_EXECUTABLE} server_communication_test.py)
+    add_custom_target(server_communication_test ALL COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/src/tests/server_communication_test.py ${CMAKE_CURRENT_BINARY_DIR}/server_communication_test.py)
+    add_test(server_communication_test ${Python3_EXECUTABLE} server_communication_test.py)
 
-  add_custom_target(exceeds_deadline_test ALL COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/src/tests/exceeds_deadline_test.py ${CMAKE_CURRENT_BINARY_DIR}/exceeds_deadline_test.py)
-  add_test(exceeds_deadline_test ${Python3_EXECUTABLE} exceeds_deadline_test.py)
+    add_custom_target(exceeds_deadline_test ALL COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/src/tests/exceeds_deadline_test.py ${CMAKE_CURRENT_BINARY_DIR}/exceeds_deadline_test.py)
+    add_test(exceeds_deadline_test ${Python3_EXECUTABLE} exceeds_deadline_test.py)
 
-  add_custom_target(server_logging_test ALL COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/src/tests/server_logging_test.py ${CMAKE_CURRENT_BINARY_DIR}/server_logging_test.py)
-  add_test(server_logging_test ${Python3_EXECUTABLE} server_logging_test.py)
+    add_custom_target(server_logging_test ALL COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/src/tests/server_logging_test.py ${CMAKE_CURRENT_BINARY_DIR}/server_logging_test.py)
+    add_test(server_logging_test ${Python3_EXECUTABLE} server_logging_test.py)
 
-  add_custom_target(continous_play_test ALL COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/src/tests/continous_play_test.py ${CMAKE_CURRENT_BINARY_DIR}/continous_play_test.py)
-  add_test(continous_play_test ${Python3_EXECUTABLE} continous_play_test.py)
+    add_custom_target(continous_play_test ALL COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/src/tests/continous_play_test.py ${CMAKE_CURRENT_BINARY_DIR}/continous_play_test.py)
+    add_test(continous_play_test ${Python3_EXECUTABLE} continous_play_test.py)
 
-  add_custom_target(client_disconnect_test ALL COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/src/tests/client_disconnect_test.py ${CMAKE_CURRENT_BINARY_DIR}/client_disconnect_test.py)
-  add_test(client_disconnect_test ${Python3_EXECUTABLE} client_disconnect_test.py)
+    add_custom_target(client_disconnect_test ALL COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/src/tests/client_disconnect_test.py ${CMAKE_CURRENT_BINARY_DIR}/client_disconnect_test.py)
+    add_test(client_disconnect_test ${Python3_EXECUTABLE} client_disconnect_test.py)
 
-  add_custom_target(server_games_limit_test ALL COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/src/tests/server_games_limit_test.py ${CMAKE_CURRENT_BINARY_DIR}/server_games_limit_test.py)
-  add_test(server_games_limit_test ${Python3_EXECUTABLE} server_games_limit_test.py)
-endif()
+    add_custom_target(server_games_limit_test ALL COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/src/tests/server_games_limit_test.py ${CMAKE_CURRENT_BINARY_DIR}/server_games_limit_test.py)
+    add_test(server_games_limit_test ${Python3_EXECUTABLE} server_games_limit_test.py)
+endif ()
