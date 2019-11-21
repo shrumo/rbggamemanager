@@ -118,6 +118,14 @@ add_executable(chess_test ${GAMESTATE_FILES} src/tests/chess_test.cc)
 target_link_libraries(chess_test rbgParser)
 add_test(chess_test chess_test)
 
+add_executable(arimaa_test ${GAMESTATE_FILES} src/tests/arimaa_test.cc)
+target_link_libraries(arimaa_test rbgParser)
+add_test(arimaa_test arimaa_test)
+
+add_executable(hex_test ${GAMESTATE_FILES} src/tests/hex_test.cc)
+target_link_libraries(hex_test rbgParser)
+add_test(hex_test hex_test)
+
 add_executable(reversi_test ${GAMESTATE_FILES} src/tests/reversi_test.cc)
 target_link_libraries(reversi_test rbgParser)
 add_test(reversi_test reversi_test)
