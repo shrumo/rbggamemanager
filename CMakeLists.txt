@@ -134,6 +134,11 @@ add_executable(tictactoe_test ${GAMESTATE_FILES} src/tests/tictactoe_test.cc)
 target_link_libraries(tictactoe_test rbgParser)
 add_test(tictactoe_test tictactoe_test)
 
+add_executable(server_encoding_test ${GAMESTATE_FILES} ${NETWORKING_FILES} src/tests/server_encoding_test.cc)
+target_link_libraries(server_encoding_test rbgParser)
+add_test(server_encoding_test server_encoding_test)
+target_link_libraries(server_encoding_test pthread)
+
 add_executable(board_test src/game_description/board.h src/game_description/board.cc src/tests/board_test.cc)
 add_test(board_test board_test)
 
