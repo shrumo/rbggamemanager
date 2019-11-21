@@ -70,9 +70,17 @@ add_executable(benchmark ${GRAPH_FILES} ${PARSER_FILES}
 target_link_libraries(benchmark rbgParser)
 
 add_executable(explain ${GRAPH_FILES} ${PARSER_FILES}
-        ${CONSTRUCTION_FILES} ${GAMESTATE_FILES} src/explain.cc)
+        ${CONSTRUCTION_FILES} ${GAMESTATE_FILES} ${NETWORKING_FILES} src/explain.cc)
 
 target_link_libraries(explain rbgParser)
+target_link_libraries(explain pthread)
+
+
+add_executable(move_decoder ${GRAPH_FILES} ${PARSER_FILES}
+        ${CONSTRUCTION_FILES} ${GAMESTATE_FILES} ${NETWORKING_FILES} src/move_decoder.cc)
+
+target_link_libraries(move_decoder rbgParser)
+target_link_libraries(move_decoder pthread)
 
 add_executable(start_server ${NETWORKING_FILES} src/start_server.cc)
 target_link_libraries(start_server rbgParser)

@@ -53,6 +53,13 @@ namespace rbg {
 
 namespace std {
   template<>
+  struct hash<rbg::ModifierApplication> {
+    std::size_t operator()(const rbg::ModifierApplication &m) const {
+      return (m.vertex) * 83 + m.modifier_index;;
+    }
+  };
+
+  template<>
   struct hash<rbg::GameMove> {
     std::size_t operator()(const rbg::GameMove &m) const {
       std::size_t result = 0;
