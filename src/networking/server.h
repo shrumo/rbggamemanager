@@ -67,7 +67,7 @@ namespace rbg {
         auto moves = state_.Moves();
         available_moves_ = std::unordered_set<GameMove>(moves.begin(), moves.end());
         uint available_moves_overall = available_moves_.size();
-        bool first_move = true;
+        std::vector<bool> first_move(clients_sockets_.size(), true);
         bool exceeded_deadline = false;
         // Indexed py player socket index, gives out how many times this player socket exceeded deadline when sending move
         std::vector<int> deadlines_exceeded(clients_sockets_.size(), 0);
@@ -84,13 +84,13 @@ namespace rbg {
                             << " which is player " 
                             <<  state_.declarations().players_resolver().Name(state_.current_player())
                     << " (" << state_.current_player() << ")" << std::endl;
-                  if(first_move) {
+                  if(first_move[player_socket_index(state_.current_player())]) {
                     first_move_deadline_exceeded[player_socket_index(state_.current_player())] = true;
                   }
                   deadlines_exceeded[player_socket_index(state_.current_player())]++;
                   exceeded_deadline = true;
           }
-          first_move = false;
+          first_move[player_socket_index(state_.current_player())] = false;
 
           auto move = DecodeMove(move_string);
 
