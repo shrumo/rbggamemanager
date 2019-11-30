@@ -67,6 +67,12 @@ namespace rbg {
         auto moves = state_.Moves();
         available_moves_ = std::unordered_set<GameMove>(moves.begin(), moves.end());
         uint available_moves_overall = available_moves_.size();
+        bool first_move = true;
+        bool exceeded_deadline = false;
+        // Indexed py player socket index, gives out how many times this player socket exceeded deadline when sending move
+        std::vector<int> deadlines_exceeded(clients_sockets_.size(), 0);
+        // Indexed by player, gives out information whether the player timed out the first move.
+        std::vector<bool> first_move_deadline_exceeded(clients_sockets_.size(), false);
         while (!available_moves_.empty()) {
           auto begin = std::chrono::system_clock::now();
           auto move_string = clients_sockets_[player_socket_index(state_.current_player())].ReadString(); 
@@ -78,10 +84,17 @@ namespace rbg {
                             << " which is player " 
                             <<  state_.declarations().players_resolver().Name(state_.current_player())
                     << " (" << state_.current_player() << ")" << std::endl;
-                  return;
+                  if(first_move) {
+                    first_move_deadline_exceeded[player_socket_index(state_.current_player())] = true;
+                  }
+                  deadlines_exceeded[player_socket_index(state_.current_player())]++;
+                  exceeded_deadline = true;
           }
+          first_move = false;
 
           auto move = DecodeMove(move_string);
+
+          std::cout << move_string << std::endl;
 
           if (available_moves_.find(move) == available_moves_.end()) {
             std::cout << "The move sent by the client is not legal" << std::endl;
@@ -115,7 +128,19 @@ namespace rbg {
             }
             auto player_name = state_.declarations().players_resolver().Name(client_player_id(i));
             variable_id_t player_variable_id = state_.declarations().variables_resolver().Id(player_name);
-            stream << state_.variables_values()[player_variable_id]; 
+            stream << state_.variables_values()[player_variable_id];
+          }
+          if(exceeded_deadline) {
+            stream << " timeouts=";
+            for (uint i = 0; i < clients_sockets_.size(); i++) {
+              if(i>0) {
+                stream <<",";
+              }
+              stream << deadlines_exceeded[i];
+              if(first_move_deadline_exceeded[i]) {
+                stream << "(-1)";
+              }
+            }
           }
           stream << std::endl;
         }
