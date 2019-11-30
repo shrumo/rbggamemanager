@@ -15,15 +15,23 @@ using namespace rbg;
 
 int main(int argc, const char *argv[]) {
   auto args = std_ext::parse_args(argc, argv);
-  
+
   if (args.positional_args.size() != 2) {
-    std::cout << "Usage: " << argv[0] << " <filename> <port> [--deadline <deadline_time>] [--log <logging_file>] [--shutdown <shutdown_time ms>] [--limit <games_limit>]" << std::endl;
+    std::cout << "Usage: " << argv[0]
+              << " <filename> <port> [--deadline <deadline_time ms>] [--log <logging_file>] [--shutdown <shutdown_time ms>] [--limit <games_limit>] [--first_move_deadline <deadline_time ms>]"
+              << std::endl;
     return 0;
   }
 
   double deadline_in_seconds = std::numeric_limits<double>::max();
+  double first_move_deadline_in_seconds = std::numeric_limits<double>::max();
   if (args.flags.find("deadline") != args.flags.end()) {
     deadline_in_seconds = std::stod(args.flags.at("deadline")) / 1000.0;
+    first_move_deadline_in_seconds = deadline_in_seconds;
+  }
+
+  if (args.flags.find("first_move_deadline") != args.flags.end()) {
+    first_move_deadline_in_seconds = std::stod(args.flags.at("first_move_deadline")) / 1000.0;
   }
 
   std::unique_ptr<std::ofstream> logging_file;
@@ -37,7 +45,7 @@ int main(int argc, const char *argv[]) {
   }
 
   std::size_t games_limit = std::numeric_limits<std::size_t>::max();
-  if(args.flags.find("limit") != args.flags.end()) {
+  if (args.flags.find("limit") != args.flags.end()) {
     games_limit = std::stoi(args.flags.at("limit"));
   }
 
@@ -47,7 +55,9 @@ int main(int argc, const char *argv[]) {
 
   try {
     asio::io_service io_service;
-    Server server(buffer.str(), static_cast<unsigned short>(std::stoi(args.positional_args[1])), deadline_in_seconds, logging_file.get());
+    Server server(buffer.str(), static_cast<unsigned short>(std::stoi(args.positional_args[1])), deadline_in_seconds,
+                  first_move_deadline_in_seconds,
+                  logging_file.get());
     server.Run(shutdown_time, games_limit);
   }
   catch (std::exception &e) {

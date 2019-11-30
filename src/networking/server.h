@@ -28,11 +28,13 @@ namespace rbg {
     explicit Server(const std::string &game_text, 
                     unsigned short port = 13, 
                     double deadline_seconds=std::numeric_limits<double>::max(),
+                    double first_move_deadline_seconds=std::numeric_limits<double>::max(),
                     std::ostream *logging_stream = nullptr
                     )
         : io_service_{}, acceptor_(io_service_, tcp::endpoint(tcp::v4(), port)),
           state_(CreateGameState(game_text)), game_text_(game_text), 
-          deadline_seconds_(deadline_seconds), logging_stream_(logging_stream) {
+          deadline_seconds_(deadline_seconds), first_move_deadline_seconds_(first_move_deadline_seconds),
+          logging_stream_(logging_stream) {
       actions_translator_ = ActionsDescriptionsMap(game_text);
     }
 
@@ -79,16 +81,25 @@ namespace rbg {
           auto end = std::chrono::system_clock::now();
           auto duration = std::chrono::duration<double>(end - begin).count();
 
-          if(duration > deadline_seconds_) {
-                  std::cout << "Deadline exceeded for client " << player_socket_index(state_.current_player()) 
-                            << " which is player " 
-                            <<  state_.declarations().players_resolver().Name(state_.current_player())
-                    << " (" << state_.current_player() << ")" << std::endl;
-                  if(first_move[player_socket_index(state_.current_player())]) {
-                    first_move_deadline_exceeded[player_socket_index(state_.current_player())] = true;
-                  }
-                  deadlines_exceeded[player_socket_index(state_.current_player())]++;
-                  exceeded_deadline = true;
+          if (first_move[player_socket_index(state_.current_player())]) {
+            if (duration > first_move_deadline_seconds_) {
+              std::cout << "First move deadline exceeded for client " << player_socket_index(state_.current_player())
+                        << " which is player "
+                        << state_.declarations().players_resolver().Name(state_.current_player())
+                        << " (" << state_.current_player() << ")" << std::endl;
+              first_move_deadline_exceeded[player_socket_index(state_.current_player())] = true;
+              deadlines_exceeded[player_socket_index(state_.current_player())]++;
+              exceeded_deadline = true;
+            }
+          } else {
+            if (duration > deadline_seconds_) {
+              std::cout << "Deadline exceeded for client " << player_socket_index(state_.current_player())
+                        << " which is player "
+                        << state_.declarations().players_resolver().Name(state_.current_player())
+                        << " (" << state_.current_player() << ")" << std::endl;
+              deadlines_exceeded[player_socket_index(state_.current_player())]++;
+              exceeded_deadline = true;
+            }
           }
           first_move[player_socket_index(state_.current_player())] = false;
 
@@ -99,8 +110,8 @@ namespace rbg {
             std::cout << "The move was: " << std::endl;
             for(const auto& mod : move) {
               std::cout << "\t" << state_.declarations().initial_board().vertices_names().Name(mod.vertex) << " (" << mod.vertex
-                   << ") "
-                   << actions_translator_[mod.modifier_index] << " (" << mod.modifier_index << ")" << std::endl;
+                        << ") "
+                        << actions_translator_[mod.modifier_index] << " (" << mod.modifier_index << ")" << std::endl;
             }
             return;
           }
@@ -142,7 +153,7 @@ namespace rbg {
               }
               stream << deadlines_exceeded[i];
               if(first_move_deadline_exceeded[i]) {
-                stream << "(-1)";
+                stream << "(1)";
               }
             }
           }
@@ -178,6 +189,7 @@ namespace rbg {
     std::vector<StringSocket> clients_sockets_;
     std::unordered_map<uint, std::string> actions_translator_;
     double deadline_seconds_;
+    double first_move_deadline_seconds_;
     std::ostream *logging_stream_;
   };
 }
