@@ -12,11 +12,11 @@ server_start_time = time.time()
 
 print('Server waiting for clients. (Server:', server_process.stdout.readline(), ')')
 
-a_client_process = subprocess.Popen(['./start_random_client', 'localhost', '7981', '--seed', '0', '--time', '10.0'], stdout=subprocess.DEVNULL)
+a_client_process = subprocess.Popen(['./start_random_client', 'localhost', '7981', '--seed', '0', '--time', '1000.0'], stdout=subprocess.DEVNULL)
 
 print('Server got client A. (Server:', server_process.stdout.readline(), ')')
 
-b_client_process = subprocess.Popen(['./start_random_client', 'localhost', '7981', '--seed', '0', '--time', '10.0'], stdout=subprocess.DEVNULL)
+b_client_process = subprocess.Popen(['./start_random_client', 'localhost', '7981', '--seed', '0', '--time', '1000.0'], stdout=subprocess.DEVNULL)
 
 print('Server got client B. (Server:', server_process.stdout.readline(), ')')
 
@@ -35,7 +35,7 @@ server_process.poll()
 
 server_end_time = time.time()
 
-assert(server_end_time - server_start_time > 10.0)
+assert(server_end_time - server_start_time > 1.0)
 
 assert(os.path.isfile(logging_filename))
 

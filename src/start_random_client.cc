@@ -21,7 +21,7 @@ int main(int argc, const char *argv[]) {
   auto args = std_ext::parse_args(argc, argv);
   
   if (args.positional_args.size() != 2) {
-    std::cout << "Usage: " << argv[0] << " <host> <port> [--seed <random_seed>] [--sleep <sleep_time>] [--time <time_to_disconnect>]" << std::endl;
+    std::cout << "Usage: " << argv[0] << " <host> <port> [--seed <random_seed>] [--sleep <sleep_time ms>] [--time <time_to_disconnect ms>]" << std::endl;
     return 0;
   }
 
@@ -34,12 +34,12 @@ int main(int argc, const char *argv[]) {
 
   double sleep_time = 0.0;
   if(args.flags.find("sleep") != args.flags.end()) {
-    sleep_time = std::stod(args.flags.at("sleep"));
+    sleep_time = std::stod(args.flags.at("sleep"))/1000.0; // Internally store times in seconds
   }
 
   double time_to_disconnect = 0.0;
   if(args.flags.find("time") != args.flags.end()) {
-    time_to_disconnect = std::stod(args.flags.at("time"));
+    time_to_disconnect = std::stod(args.flags.at("time"))/1000.0; // Internally store times in seconds
   }
 
   rbg_parser::messages_container msg;

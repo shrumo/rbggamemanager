@@ -6,7 +6,7 @@ import time
 logging_filename = 'tmp_file_from_continous_play_test_' + datetime.datetime.now().strftime("%I_%M%p_%B_%d_%Y")
 
 print('TicTacToe')
-server_process = subprocess.Popen(['./start_server', '../rbgParser/examples/ticTacToe.rbg', '7981', '--log', logging_filename, '--shutdown', '10.0'], stdout=subprocess.PIPE)
+server_process = subprocess.Popen(['./start_server', '../rbgParser/examples/ticTacToe.rbg', '7981', '--log', logging_filename, '--shutdown', '1000.0'], stdout=subprocess.PIPE)
 
 server_start_time = time.time()
 
@@ -35,7 +35,7 @@ server_process.poll()
 
 server_end_time = time.time()
 
-assert(server_end_time - server_start_time > 10.0)
+assert(server_end_time - server_start_time > 1.0)
 
 assert(os.path.isfile(logging_filename))
 

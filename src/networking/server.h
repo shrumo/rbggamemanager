@@ -94,10 +94,14 @@ namespace rbg {
 
           auto move = DecodeMove(move_string);
 
-          std::cout << move_string << std::endl;
-
           if (available_moves_.find(move) == available_moves_.end()) {
             std::cout << "The move sent by the client is not legal" << std::endl;
+            std::cout << "The move was: " << std::endl;
+            for(const auto& mod : move) {
+              std::cout << "\t" << state_.declarations().initial_board().vertices_names().Name(mod.vertex) << " (" << mod.vertex
+                   << ") "
+                   << actions_translator_[mod.modifier_index] << " (" << mod.modifier_index << ")" << std::endl;
+            }
             return;
           }
 

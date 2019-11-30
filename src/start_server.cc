@@ -17,13 +17,13 @@ int main(int argc, const char *argv[]) {
   auto args = std_ext::parse_args(argc, argv);
   
   if (args.positional_args.size() != 2) {
-    std::cout << "Usage: " << argv[0] << " <filename> <port> [--deadline <deadline_time>] [--log <logging_file>] [--shutdown <shutdown_time>] [--limit <games_limit>]" << std::endl;
+    std::cout << "Usage: " << argv[0] << " <filename> <port> [--deadline <deadline_time>] [--log <logging_file>] [--shutdown <shutdown_time ms>] [--limit <games_limit>]" << std::endl;
     return 0;
   }
 
   double deadline_in_seconds = std::numeric_limits<double>::max();
   if (args.flags.find("deadline") != args.flags.end()) {
-    deadline_in_seconds = std::stod(args.flags.at("deadline")); 
+    deadline_in_seconds = std::stod(args.flags.at("deadline")) / 1000.0;
   }
 
   std::unique_ptr<std::ofstream> logging_file;
@@ -33,7 +33,7 @@ int main(int argc, const char *argv[]) {
 
   double shutdown_time = std::numeric_limits<double>::max();
   if (args.flags.find("shutdown") != args.flags.end()) {
-    shutdown_time = std::stod(args.flags.at("shutdown"));
+    shutdown_time = std::stod(args.flags.at("shutdown")) / 1000.0;
   }
 
   std::size_t games_limit = std::numeric_limits<std::size_t>::max();
