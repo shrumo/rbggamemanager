@@ -2,10 +2,10 @@ import subprocess
 import datetime
 import os
 
-logging_filename = 'tmp_file_from_exceeds_deadline_test_' + datetime.datetime.now().strftime("%I_%M%p_%B_%d_%Y")
+results_logging_filename = 'tmp_file_from_exceeds_deadline_test_' + datetime.datetime.now().strftime("%I_%M%p_%B_%d_%Y")
 
 print('Chess')
-server_process = subprocess.Popen(['./start_server', '../rbgParser/examples/ticTacToe.rbg', '7982', '--deadline', '100','--first_move_deadline','10', '--log', logging_filename], stdout=subprocess.PIPE)
+server_process = subprocess.Popen(['./start_server', '../rbgParser/examples/ticTacToe.rbg', '7982', '--deadline', '100','--first_move_deadline','10', '--log_results', results_logging_filename], stdout=subprocess.PIPE)
 
 print('Server waiting for clients. (Server:', server_process.stdout.readline(), ')')
 
@@ -35,9 +35,9 @@ assert(a_client_process.poll() == 0)
 assert(b_client_process.poll() == 0)
 assert(server_process.poll() == 0)
 
-assert(os.path.isfile(logging_filename))
+assert(os.path.isfile(results_logging_filename))
 
-with open(logging_filename) as f:
+with open(results_logging_filename) as f:
     print('The logging file exists.')
     elems = list(f.readline().split())
     assert(len(elems) == 6)
@@ -55,5 +55,5 @@ with open(logging_filename) as f:
     assert(int(second_player_info[:-3]) == 1)
 
 # print('Removing the logging file.')
-# os.remove(logging_filename)
+# os.remove(results_logging_filename)
 

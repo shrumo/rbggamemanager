@@ -3,10 +3,10 @@ import datetime
 import os
 import time
 
-logging_filename = 'tmp_file_from_server_games_limit_test_' + datetime.datetime.now().strftime("%I_%M%p_%B_%d_%Y")
+results_logging_filename = 'tmp_results_file_from_server_games_limit_test_' + datetime.datetime.now().strftime("%I_%M%p_%B_%d_%Y")
 
 print('TicTacToe')
-server_process = subprocess.Popen(['./start_server', '../rbgParser/examples/ticTacToe.rbg', '7981', '--log', logging_filename, '--limit', '100'], stdout=subprocess.PIPE)
+server_process = subprocess.Popen(['./start_server', '../rbgParser/examples/ticTacToe.rbg', '7981', '--log_results', results_logging_filename, '--limit', '100'], stdout=subprocess.PIPE)
 
 print('Server waiting for clients. (Server:', server_process.stdout.readline(), ')')
 
@@ -31,9 +31,9 @@ a_client_process.poll()
 b_client_process.poll()
 server_process.poll()
 
-assert(os.path.isfile(logging_filename))
+assert(os.path.isfile(results_logging_filename))
 
-with open(logging_filename) as f:
+with open(results_logging_filename) as f:
   print('The logging file exists.')
   lines = list(f.readlines())
   assert(len(lines) == 100)
@@ -48,7 +48,7 @@ with open(logging_filename) as f:
     assert(1 <= int(available_moves) <= 45)
 
 print('Removing the logging file.')
-os.remove(logging_filename)
+os.remove(results_logging_filename)
   
 
 

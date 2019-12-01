@@ -23,22 +23,30 @@
 namespace rbg {
   using asio::ip::tcp;
 
+  struct ServerOptions {
+    std::string game_text;
+    unsigned short port = 8989;
+    double deadline_seconds = std::numeric_limits<double>::max();
+    double first_move_deadline_seconds = std::numeric_limits<double>::max();
+    double shutdown_after_seconds = std::numeric_limits<double>::max();
+    size_t shutdown_after_games =  std::numeric_limits<size_t>::max();
+    // The stream in which to store moves done in each game by each player.
+    // If nullptr then they won't be stored.
+    std::ostream *moves_logging_stream = nullptr;
+    // The stream in which to store the results of each game. If nullptr then 
+    // they won't be stored.
+    std::ostream *results_logging_stream = nullptr;
+  };
+
   class Server {
   public:
-    explicit Server(const std::string &game_text, 
-                    unsigned short port = 13, 
-                    double deadline_seconds=std::numeric_limits<double>::max(),
-                    double first_move_deadline_seconds=std::numeric_limits<double>::max(),
-                    std::ostream *logging_stream = nullptr
-                    )
-        : io_service_{}, acceptor_(io_service_, tcp::endpoint(tcp::v4(), port)),
-          state_(CreateGameState(game_text)), game_text_(game_text), 
-          deadline_seconds_(deadline_seconds), first_move_deadline_seconds_(first_move_deadline_seconds),
-          logging_stream_(logging_stream) {
-      actions_translator_ = ActionsDescriptionsMap(game_text);
+    explicit Server(ServerOptions options)
+        : options_(std::move(options)), io_service_{}, acceptor_(io_service_, tcp::endpoint(tcp::v4(), options_.port)),
+          state_(CreateGameState(options_.game_text)) {
+      actions_translator_ = ActionsDescriptionsMap(options_.game_text);
     }
 
-    void Run(double shutdown_timer=std::numeric_limits<double>::max(), std::size_t shutdown_after_games=std::numeric_limits<std::size_t>::max()) {
+    void Run() {
       while (clients_sockets_.size() != state_.declarations().players_resolver().size() - 1) {
         tcp::socket socket(io_service_);
         std::cout << "Waiting for clients..."
@@ -51,7 +59,7 @@ namespace rbg {
       }
       for (uint i = 0; i < clients_sockets_.size(); i++) {
         std::cout << "Sending game text to client " << i << std::endl;
-        clients_sockets_[i].WriteString(game_text_);
+        clients_sockets_[i].WriteString(options_.game_text);
         std::cout << "Sending player id "
                   << state_.declarations().players_resolver().Name(client_player_id(i))
                   << "(" << client_player_id(i) << ")"
@@ -61,8 +69,8 @@ namespace rbg {
 
       auto play_start = std::chrono::system_clock::now();
       size_t games_count = 0;
-      while(std::chrono::duration<double>(std::chrono::system_clock::now() - play_start).count() < shutdown_timer &&
-            games_count < shutdown_after_games) {
+      while(std::chrono::duration<double>(std::chrono::system_clock::now() - play_start).count() < options_.shutdown_after_seconds &&
+            games_count < options_.shutdown_after_games) {
         size_t moves_done = 0;
         auto game_begin = std::chrono::system_clock::now();
 
@@ -82,7 +90,7 @@ namespace rbg {
           auto duration = std::chrono::duration<double>(end - begin).count();
 
           if (first_move[player_socket_index(state_.current_player())]) {
-            if (duration > first_move_deadline_seconds_) {
+            if (duration > options_.first_move_deadline_seconds) {
               std::cout << "First move deadline exceeded for client " << player_socket_index(state_.current_player())
                         << " which is player "
                         << state_.declarations().players_resolver().Name(state_.current_player())
@@ -92,7 +100,7 @@ namespace rbg {
               exceeded_deadline = true;
             }
           } else {
-            if (duration > deadline_seconds_) {
+            if (duration > options_.deadline_seconds) {
               std::cout << "Deadline exceeded for client " << player_socket_index(state_.current_player())
                         << " which is player "
                         << state_.declarations().players_resolver().Name(state_.current_player())
@@ -102,6 +110,10 @@ namespace rbg {
             }
           }
           first_move[player_socket_index(state_.current_player())] = false;
+
+          if(options_.moves_logging_stream != nullptr) {
+            (*options_.moves_logging_stream) << move_string << "\n";
+          }
 
           auto move = DecodeMove(move_string);
 
@@ -134,8 +146,8 @@ namespace rbg {
         auto game_end = std::chrono::system_clock::now();
         auto game_duration = std::chrono::duration<double>(game_end - game_begin).count();
         
-        if(logging_stream_ != nullptr) {
-          auto& stream = *logging_stream_;
+        if(options_.results_logging_stream != nullptr) {
+          auto& stream = *options_.results_logging_stream;
           stream << game_duration << " " << moves_done << " " << available_moves_overall << " ";
           for (uint i = 0; i < clients_sockets_.size(); i++) {
             if (i>0) {
@@ -163,6 +175,9 @@ namespace rbg {
         for (uint i = 0; i < clients_sockets_.size(); i++) {
             clients_sockets_[i].WriteString("reset");
           }
+        if(options_.moves_logging_stream != nullptr) {
+          (*options_.moves_logging_stream) << "reset" << std::endl;
+        }
         games_count++;
         if (games_count % 200 == 0) {
           std::cout << games_count << " games were played so far." << std::endl;
@@ -180,17 +195,13 @@ namespace rbg {
     static uint player_socket_index(player_id_t player) {
       return player - 1;
     }
-
+    ServerOptions options_;
     asio::io_service io_service_;
     tcp::acceptor acceptor_;
     GameState state_;
-    std::string game_text_;
     std::unordered_set<GameMove> available_moves_;
     std::vector<StringSocket> clients_sockets_;
     std::unordered_map<uint, std::string> actions_translator_;
-    double deadline_seconds_;
-    double first_move_deadline_seconds_;
-    std::ostream *logging_stream_;
   };
 }
 

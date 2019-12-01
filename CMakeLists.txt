@@ -183,4 +183,7 @@ if (${Python3_Interpreter_FOUND})
 
     add_custom_target(server_games_limit_test ALL COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/src/tests/server_games_limit_test.py ${CMAKE_CURRENT_BINARY_DIR}/server_games_limit_test.py)
     add_test(server_games_limit_test ${Python3_EXECUTABLE} server_games_limit_test.py)
+
+    add_custom_target(moves_logging_test ALL COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/src/tests/moves_logging_test.py ${CMAKE_CURRENT_BINARY_DIR}/moves_logging_test.py)
+    add_test(moves_logging_test ${Python3_EXECUTABLE} moves_logging_test.py)
 endif ()
