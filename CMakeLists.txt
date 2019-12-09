@@ -172,6 +172,9 @@ if (${Python3_Interpreter_FOUND})
     add_custom_target(exceeds_deadline_test ALL COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/src/tests/exceeds_deadline_test.py ${CMAKE_CURRENT_BINARY_DIR}/exceeds_deadline_test.py)
     add_test(exceeds_deadline_test ${Python3_EXECUTABLE} exceeds_deadline_test.py)
 
+    add_custom_target(manager_exceeds_deadline_test ALL COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/src/tests/manager_exceeds_deadline_test.py ${CMAKE_CURRENT_BINARY_DIR}/manager_exceeds_deadline_test.py)
+    add_test(manager_exceeds_deadline_test ${Python3_EXECUTABLE} manager_exceeds_deadline_test.py)
+
     add_custom_target(server_logging_test ALL COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/src/tests/server_logging_test.py ${CMAKE_CURRENT_BINARY_DIR}/server_logging_test.py)
     add_test(server_logging_test ${Python3_EXECUTABLE} server_logging_test.py)
 

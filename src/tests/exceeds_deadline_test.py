@@ -4,7 +4,7 @@ import os
 
 results_logging_filename = 'tmp_file_from_exceeds_deadline_test_' + datetime.datetime.now().strftime("%I_%M%p_%B_%d_%Y")
 
-print('Chess')
+print('ticTacToe')
 server_process = subprocess.Popen(['./start_server', '../rbgParser/examples/ticTacToe.rbg', '7982', '--deadline', '100','--first_move_deadline','10', '--log_results', results_logging_filename], stdout=subprocess.PIPE)
 
 print('Server waiting for clients. (Server:', server_process.stdout.readline(), ')')
@@ -54,6 +54,6 @@ with open(results_logging_filename) as f:
     assert('(1)'  == second_player_info[-3:])
     assert(int(second_player_info[:-3]) == 1)
 
-# print('Removing the logging file.')
-# os.remove(results_logging_filename)
+print('Removing the logging file.')
+os.remove(results_logging_filename)
 
