@@ -53,14 +53,16 @@ set(ENV{PYTHONPATH} ${PYTHON_PATH}:${CMAKE_CURRENT_BINARY_DIR})
 find_package(Python3 COMPONENTS Interpreter Development)
 
 # Targets requiring python bindings
-if (${Python3_Development_FOUND})
-    pybind11_add_module(rbg src/python_bindings/rbg.cc ${GAMESTATE_FILES})
+if (${Python3_FOUND})
+    pybind11_add_module(rbg src/python_bindings/rbg_string_graph.cc ${GAMESTATE_FILES})
     target_link_libraries(rbg PRIVATE rbgParser)
 
     add_custom_target(visualize_graph ALL
             COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/src/python_widgets/graph_widget.py ${CMAKE_CURRENT_BINARY_DIR}/graph_widget.py
             COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/src/python_widgets/visualize_graph.py ${CMAKE_CURRENT_BINARY_DIR}/visualize_graph.py
             DEPENDS rbg)
+else()
+    message("For python binding install python3 development package. (sudo apt install python3-dev)")
 endif ()
 
 
@@ -158,7 +160,7 @@ add_executable(board_test src/game_description/board.h src/game_description/boar
 add_test(board_test board_test)
 
 # Tests requiring the python bindings
-if (${Python3_Devolpment_FOUND})
+if (${Python3_FOUND})
     add_custom_target(python_bindings_test ALL COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/src/tests/python_bindings_test.py ${CMAKE_CURRENT_BINARY_DIR}/python_bindings_test.py
             DEPENDS rbg)
     add_test(python_bindings_test ${Python3_EXECUTABLE} python_bindings_test.py)
