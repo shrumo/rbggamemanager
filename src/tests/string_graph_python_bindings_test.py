@@ -1,7 +1,7 @@
 #! /usr/bin/python3
-import rbg
+import rbg_string_graph
 
-nfa = rbg.create_nfa("""
+nfa = rbg_string_graph.create_nfa("""
 #players = red(100), blue(100)
 #pieces = e
 #variables = turn(10)

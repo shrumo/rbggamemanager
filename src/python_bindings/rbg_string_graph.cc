@@ -43,11 +43,11 @@ Nfa<std::string> CreateStringNfa(const std::string &game_text) {
 
 namespace py = pybind11;
 
-PYBIND11_MODULE(rbg, m) {
+PYBIND11_MODULE(rbg_string_graph, m) {
   m.doc() = R"pbdoc(
-        rbg module allows you to parse the games written in Regular Boardgames language
+        rbg_string_graph module allows you to parse the games written in Regular Boardgames language and show them as a graph. For playing purposes please use the rbg module. (This is only a simplified version.)
         -----------------------
-        .. currentmodule:: rbg
+        .. currentmodule:: rbg_string_graph
         .. autosummary::
            :toctree: _generate
            create_nfa

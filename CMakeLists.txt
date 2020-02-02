@@ -54,15 +54,23 @@ find_package(Python3 COMPONENTS Interpreter Development)
 
 # Targets requiring python bindings
 if (${Python3_FOUND})
-    pybind11_add_module(rbg src/python_bindings/rbg_string_graph.cc ${GAMESTATE_FILES})
-    target_link_libraries(rbg PRIVATE rbgParser)
+    pybind11_add_module(rbg_string_graph src/python_bindings/rbg_string_graph.cc ${GAMESTATE_FILES})
+    target_link_libraries(rbg_string_graph PRIVATE rbgParser)
 
     add_custom_target(visualize_graph ALL
             COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/src/python_widgets/graph_widget.py ${CMAKE_CURRENT_BINARY_DIR}/graph_widget.py
             COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/src/python_widgets/visualize_graph.py ${CMAKE_CURRENT_BINARY_DIR}/visualize_graph.py
-            DEPENDS rbg)
+            DEPENDS rbg_string_graph)
+
+    pybind11_add_module(rbg src/python_bindings/rbg.cc ${GAMESTATE_FILES} ${CONSTRUCTION_FILES} ${NETWORKING_FILES})
+    target_link_libraries(rbg PRIVATE rbgParser)
 else()
     message("For python binding install python3 development package. (sudo apt install python3-dev)")
+
+
+  add_custom_target(start_random_python_client ALL
+              COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/src/start_random_python_client.py ${CMAKE_CURRENT_BINARY_DIR}/start_random_python_client.py
+              DEPENDS rbg)
 endif ()
 
 
@@ -161,9 +169,16 @@ add_test(board_test board_test)
 
 # Tests requiring the python bindings
 if (${Python3_FOUND})
-    add_custom_target(python_bindings_test ALL COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/src/tests/python_bindings_test.py ${CMAKE_CURRENT_BINARY_DIR}/python_bindings_test.py
+    add_custom_target(string_graph_python_bindings_test ALL COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/src/tests/string_graph_python_bindings_test.py ${CMAKE_CURRENT_BINARY_DIR}/string_graph_python_bindings_test.py
+            DEPENDS rbg_string_graph)
+    add_test(string_graph_python_bindings_test ${Python3_EXECUTABLE} string_graph_python_bindings_test.py)
+    add_custom_target(python_bindings_perft_test ALL COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/src/tests/python_bindings_perft_test.py ${CMAKE_CURRENT_BINARY_DIR}/python_bindings_perft_test.py
             DEPENDS rbg)
-    add_test(python_bindings_test ${Python3_EXECUTABLE} python_bindings_test.py)
+    add_test(python_bindings_perft_test ${Python3_EXECUTABLE} python_bindings_perft_test.py)
+    add_custom_target(python_bindings_server_communication_test ALL 
+            COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/src/tests/python_bindings_server_communication_test.py ${CMAKE_CURRENT_BINARY_DIR}/python_bindings_server_communication_test.py
+            COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/src/start_random_python_client.py ${CMAKE_CURRENT_BINARY_DIR}/start_random_python_client.py)
+    add_test(python_bindings_server_communication_test ${Python3_EXECUTABLE} python_bindings_server_communication_test.py)
 endif ()
 
 # Tests requiring the python interpreter
