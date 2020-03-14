@@ -3,7 +3,7 @@ import argparse
 from collections import defaultdict
 from tkinter import *
 
-import rbg
+import rbg_string_graph as rbg
 from graph_widget import *
 
 
