@@ -64,6 +64,30 @@ Nfa<std::string> CreateStringNfa(const std::string &game_text) {
   return translate(CreateNfa(*pg->get_moves(), decl), decl);
 }
 
+void RemoveVisitedQueries(Nfa<std::string>* nfa) {
+  using rbg::node_t;
+  using rbg::edge_id_t;
+  std::vector<node_t> nodes_with_visited_edge;
+  for(const auto& edge : nfa->graph.edges_map()) {
+    if(edge.second.content() == "<VisitedQuery>") {
+        nodes_with_visited_edge.push_back(edge.second.from());
+    }
+  }
+  for(node_t node_id : nodes_with_visited_edge) {
+    node_t target = nfa->graph.EdgesFrom(node_id).begin()->to();
+    for(edge_id_t edge_id : std::vector<edge_id_t>(nfa->graph.edges_ids_to(node_id).begin(), nfa->graph.edges_ids_to(node_id).end())) {
+      nfa->graph.ChangeEdgeTarget(edge_id, target);
+    }
+    nfa->graph.EraseNode(node_id);
+  }
+}
+
+Nfa<std::string> CreateStringNfaPure(const std::string &game_text) {
+  auto result = CreateStringNfa(game_text);
+  RemoveVisitedQueries(&result);
+  return result;
+}
+
 namespace py = pybind11;
 
 PYBIND11_MODULE(rbg_string_graph, m) {
@@ -76,9 +100,11 @@ PYBIND11_MODULE(rbg_string_graph, m) {
            create_nfa
     )pbdoc";
 
-  m.def("create_nfa", &CreateStringNfa, R"pbdoc(
+  m.def("create_string_nfa", &CreateStringNfa, R"pbdoc(
         Returns the nfa.
     )pbdoc");
+
+  m.def("create_string_nfa_pure", &CreateStringNfaPure, "Returns an nfa as would be returned by Thompsons construction. (Without VisitedQueries.)");
 
   pybind11::class_<Edge<std::string>>(m, "Edge")
       .def("a", &Edge<std::string>::from)

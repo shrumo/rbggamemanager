@@ -100,10 +100,14 @@ def nodes_positions(nfa):
 
 
 # Returns the graph tk object that visualizes the given game. The objects parent is set to root.
-def create_nfa_visualization(root, game_text):
+def create_nfa_visualization(root, game_text, pure=True):
     graph = Graph(root)
 
-    nfa = rbg.create_nfa(game_text)
+    nfa=None
+    if pure:
+      nfa = rbg.create_string_nfa_pure(game_text)
+    else:
+      nfa = rbg.create_string_nfa(game_text)
     positions = nodes_positions(nfa)
 
     node_mapping = {}
@@ -133,6 +137,7 @@ def create_nfa_visualization(root, game_text):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("game_path", help="The path to the rbg game that should be visualized.")
+    parser.add_argument("--pure",default=True,type=bool)
     args = parser.parse_args()
 
     root = Tk()
@@ -144,7 +149,7 @@ def main():
     Grid.rowconfigure(root, 0, weight=1)
     Grid.columnconfigure(root, 0, weight=1)
 
-    graph = create_nfa_visualization(root, open(args.game_path).read())
+    graph = create_nfa_visualization(root, open(args.game_path).read(), args.pure)
     graph.grid(column=0, row=0, sticky=N + S + E + W)
 
     root.mainloop()
