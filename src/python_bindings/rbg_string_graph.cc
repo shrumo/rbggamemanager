@@ -25,9 +25,32 @@ Nfa<std::string> translate(const Nfa<std::unique_ptr<Move>> &nfa, const Declarat
 
   std::vector<std::string> tmp_res;
   for (const auto &edge: nfa.graph.edges_map()) {
+    if (edge.second.content()->type() == MoveType::kConditionCheck) {
+      auto rec_nfa = translate(dynamic_cast<Condition*>(edge.second.content().get())->nfa(), declarations);
+      std::vector<node_t> rec_sorted_nodes(rec_nfa.graph.nodes().begin(), rec_nfa.graph.nodes().end());
+      std::sort(rec_sorted_nodes.begin(), rec_sorted_nodes.end());
+      std::unordered_map<node_t, node_t> rec_node_mapping;
+      for (auto node : rec_sorted_nodes) {
+        node_t result_node = result.graph.NewNode();
+        rec_node_mapping[node] = result_node;
+      }
+      for(const auto &rec_edge: rec_nfa.graph.edges_map()) {
+        result.graph.AddEdge(rec_node_mapping.at(rec_edge.second.from()), 
+                             rec_edge.second.content(),
+                             rec_node_mapping.at(rec_edge.second.to()));
+      }
+      result.graph.AddEdge(node_mapping.at(edge.second.from()),
+                           "ConditionCheckBegin",
+                           rec_node_mapping.at(rec_nfa.initial));
+      result.graph.AddEdge(rec_node_mapping.at(rec_nfa.final),
+                           "ConditionCheckEnd",
+                           node_mapping.at(edge.second.to()));
+    }
+    else {
     result.graph.AddEdge(node_mapping.at(edge.second.from()),
                          MoveDescription(*edge.second.content(), declarations),
                          node_mapping.at(edge.second.to()));
+    }
   }
 
   result.initial = node_mapping.at(nfa.initial);
