@@ -6,10 +6,10 @@ cd "${0%/*}" # This changes your current directory to the one where the file is 
 ./make.sh
 
 echo "Chess"
-../build/benchmark ../rbgParser/examples/chess.rbg 4
+../build/benchmark ../rbgGames/games/chess.rbg --depth 4
 echo "Reversi"
-../build/benchmark ../rbgParser/examples/reversi.rbg 4
+../build/benchmark ../rbgGames/games/reversi.rbg --depth 4
 echo "Amazons"
-../build/benchmark ../rbgParser/examples/amazons.rbg 2
+../build/benchmark ../rbgGames/games/amazons.rbg --depth 2
 echo "TicTacToe"
-../build/benchmark ../rbgParser/examples/ticTacToe.rbg 9
+../build/benchmark ../rbgGames/games/ticTacToe.rbg --depth 9
