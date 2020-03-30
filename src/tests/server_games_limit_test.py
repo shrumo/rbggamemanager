@@ -6,7 +6,7 @@ import time
 results_logging_filename = 'tmp_results_file_from_server_games_limit_test_' + datetime.datetime.now().strftime("%I_%M%p_%B_%d_%Y")
 
 print('TicTacToe')
-server_process = subprocess.Popen(['./start_server', '../rbgParser/examples/ticTacToe.rbg', '7981', '--log_results', results_logging_filename, '--limit', '100'], stdout=subprocess.PIPE)
+server_process = subprocess.Popen(['./start_server', '../rbgGames/games/ticTacToe.rbg', '7981', '--log_results', results_logging_filename, '--limit', '100'], stdout=subprocess.PIPE)
 
 print('Server waiting for clients. (Server:', server_process.stdout.readline(), ')')
 

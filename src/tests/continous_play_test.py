@@ -6,7 +6,7 @@ import time
 results_logging_filename = 'tmp_results_file_from_continous_play_test_' + datetime.datetime.now().strftime("%I_%M%p_%B_%d_%Y")
 
 print('TicTacToe')
-server_process = subprocess.Popen(['./start_server', '../rbgParser/examples/ticTacToe.rbg', '7981', '--log_results', results_logging_filename, '--shutdown', '1000.0'], stdout=subprocess.PIPE)
+server_process = subprocess.Popen(['./start_server', '../rbgGames/games/ticTacToe.rbg', '7981', '--log_results', results_logging_filename, '--shutdown', '1000.0'], stdout=subprocess.PIPE)
 
 server_start_time = time.time()
 

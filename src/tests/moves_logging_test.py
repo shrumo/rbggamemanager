@@ -6,7 +6,7 @@ import time
 moves_logging_filename = 'tmp_moves_file_from_client_disconnect_test_' + datetime.datetime.now().strftime("%I_%M%p_%B_%d_%Y")
 
 print('TicTacToe')
-server_process = subprocess.Popen(['./start_server', '../rbgParser/examples/ticTacToe.rbg', '7981', '--log_moves', moves_logging_filename,'--limit','2'], stdout=subprocess.PIPE)
+server_process = subprocess.Popen(['./start_server', '../rbgGames/games/ticTacToe.rbg', '7981', '--log_moves', moves_logging_filename,'--limit','2'], stdout=subprocess.PIPE)
 
 server_start_time = time.time()
 

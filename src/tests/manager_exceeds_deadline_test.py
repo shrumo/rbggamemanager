@@ -5,7 +5,7 @@ import os
 results_logging_filename = 'tmp_file_from_manager_exceeds_deadline_test_' + datetime.datetime.now().strftime("%I_%M%p_%B_%d_%Y")
 
 print('Chess')
-server_process = subprocess.Popen(['./start_server', '../rbgParser/examples/chess.rbg', '7982', '--deadline', '0.01', '--log_results', results_logging_filename], stdout=subprocess.PIPE)
+server_process = subprocess.Popen(['./start_server', '../rbgGames/games/chess.rbg', '7982', '--deadline', '0.01', '--log_results', results_logging_filename], stdout=subprocess.PIPE)
 
 print('Server waiting for clients. (Server:', server_process.stdout.readline(), ')')
 
