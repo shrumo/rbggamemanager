@@ -9,4 +9,4 @@
 	url = https://github.com/chriskohlhoff/asio.git
 [submodule "rbgGames"]
 	path = rbgGames
-	url = https://github.com/marekesz/rbgGames
+	url = https://github.com/marekesz/rbgGames.git
