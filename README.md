@@ -96,6 +96,8 @@ looks like by doing: (this requires tkinter)
 ./scripts/visualize_with_tk.sh ./rbgGames/games/breakthrough.rbg 
 ```
 
+![visualizer](https://raw.githubusercontent.com/shrumo/rbggamemanager/master/example_visualizer.png)
+
 ## Tests
 
 To test the code run `test.sh` from `scripts/`.
