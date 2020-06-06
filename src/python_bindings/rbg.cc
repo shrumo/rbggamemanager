@@ -29,7 +29,9 @@ PYBIND11_MODULE(rbg, m) {
     .def("description",&Client::description)
     .def("player",&Client::player)
     .def("Read",&Client::Read)
-    .def("ReadReset",&Client::ReadReset);
+    .def("ReadReset",&Client::ReadReset)
+    .def("FetchPlayerIdAndDeadline", &Client::FetchPlayerIdAndDeadline)
+    .def("deadline",&Client::deadline);
 
   pybind11::class_<MoveRevertInformation>(m, "MoveRevertInformation");
  

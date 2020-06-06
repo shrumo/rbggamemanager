@@ -21,7 +21,7 @@ int main(int argc, const char *argv[]) {
   auto args = std_ext::parse_args(argc, argv);
   
   if (args.positional_args.size() != 2) {
-    std::cout << "Usage: " << argv[0] << " <host> <port> [--seed <random_seed>] [--sleep <sleep_time ms>] [--time <time_to_disconnect ms>]" << std::endl;
+    std::cout << "Usage: " << argv[0] << " <host> <port> [--seed <random_seed>] [--sleep <sleep_time ms>] [--time <time_to_disconnect ms>] [--additional_compilation_time <compilation_time ms>]" << std::endl;
     return 0;
   }
 
@@ -42,16 +42,26 @@ int main(int argc, const char *argv[]) {
     time_to_disconnect = std::stod(args.flags.at("time"))/1000.0; // Internally store times in seconds
   }
 
+  double additional_compilation_time = 0.0;
+  if(args.flags.find("additional_compilation_time") != args.flags.end()) {
+    additional_compilation_time = std::stod(args.flags.at("additional_compilation_time"))/1000.0;
+  }
+
   rbg_parser::messages_container msg;
   Client client(args.positional_args[0], args.positional_args[1]);
 
   GameState state = CreateGameState(client.description());
   auto actions_translator = ActionsDescriptionsMap(client.description());
 
+  std::this_thread::sleep_for(std::chrono::duration<double>(additional_compilation_time));
+  
+  client.FetchPlayerIdAndDeadline();
+
   player_id_t assigned_player = client.player();
 
-  std::cout << "I am player: " << state.declarations().players_resolver().Name(assigned_player) << " (" << assigned_player << ")"
-            << std::endl;
+  std::cout << "I am player: " << state.declarations().players_resolver().Name(assigned_player) << " (" << assigned_player << ")\n";
+  
+  std::cout << "The deadline to make a move on this server is: " << client.deadline() << " seconds" << std::endl;
 
   auto first_game_begin = std::chrono::system_clock::now();
   do {
@@ -69,6 +79,7 @@ int main(int argc, const char *argv[]) {
         std::cout << "\t" << state.declarations().initial_board().vertices_names().Name(mod.vertex) << " (" << mod.vertex << ") "
            << actions_translator[mod.modifier_index] << " (" << mod.modifier_index << ")" << std::endl;
       }
+      // This sleep is to pretend I am doing something important
       std::this_thread::sleep_for(std::chrono::duration<double>(sleep_time));
       client.Write(move);
       moves = state.Moves();

@@ -7,8 +7,9 @@ def main():
   parser.add_argument("port",help="The port to connect to.")
   args = parser.parse_args()
   client = Client(args.host, args.port)
-  player = client.player()
   state = CreateGameState(client.description())
+  client.FetchPlayerIdAndDeadline()
+  player = client.player()
   print('I am player',state.declarations().players_resolver().Name(player))
   moves = state.Moves()
   while moves:

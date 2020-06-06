@@ -18,7 +18,7 @@ int main(int argc, const char *argv[]) {
 
   if (args.positional_args.size() != 2) {
     std::cout << "Usage: " << argv[0]
-              << " <filename> <port> [--deadline <deadline_time ms>] [--log_results <(result_logging_file|stdout)>] [--log_moves <(moves_logging_file|stdout)> [--shutdown <shutdown_time ms>] [--limit <games_limit>] [--first_move_deadline <deadline_time ms>]"
+              << " <filename> <port> [--deadline <deadline_time ms>] [--log_results <(result_logging_file|stdout)>] [--log_moves <(moves_logging_file|stdout)> [--shutdown <shutdown_time ms>] [--limit <games_limit>] [--time_for_player_compilation <compilation_time ms>]"
               << std::endl;
     return 0;
   }
@@ -29,11 +29,11 @@ int main(int argc, const char *argv[]) {
 
   if (args.flags.find("deadline") != args.flags.end()) {
     options.deadline_seconds = std::stod(args.flags.at("deadline")) / 1000.0;
-    options.first_move_deadline_seconds = std::stod(args.flags.at("deadline")) / 1000.0;;
+    options.time_for_player_compilation = options.deadline_seconds;
   }
 
-  if (args.flags.find("first_move_deadline") != args.flags.end()) {
-    options.first_move_deadline_seconds = std::stod(args.flags.at("first_move_deadline")) / 1000.0;
+  if (args.flags.find("time_for_player_compilation") != args.flags.end()) {
+    options.time_for_player_compilation = std::stod(args.flags.at("time_for_player_compilation")) / 1000.0;
   }
 
   std::unique_ptr<std::ofstream> results_logging_file;

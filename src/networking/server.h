@@ -26,8 +26,11 @@ namespace rbg {
   struct ServerOptions {
     std::string game_text;
     unsigned short port = 8989;
+    // The number of seconds player have to make their move
     double deadline_seconds = std::numeric_limits<double>::max();
-    double first_move_deadline_seconds = std::numeric_limits<double>::max();
+    // The number of seconds we give players for compilation. 
+    // This is the time after sending the game text and before sending the deadline and the player id.
+    double time_for_player_compilation = 0;
     double shutdown_after_seconds = std::numeric_limits<double>::max();
     size_t shutdown_after_games = std::numeric_limits<size_t>::max();
     // The stream in which to store moves done in each game by each player.
@@ -47,6 +50,7 @@ namespace rbg {
     }
 
     void Run() {
+      // Wait for all the clients to connect
       while (clients_sockets_.size() != state_.declarations().players_resolver().size() - 1) {
         tcp::socket socket(io_service_);
         std::cout << "Waiting for clients..."
@@ -57,15 +61,25 @@ namespace rbg {
         std::cout << "Got client number " << clients_sockets_.size() << std::endl;
         clients_sockets_.emplace_back(std::move(socket));
       }
+
+      // Send the game text to clients
       for (uint i = 0; i < clients_sockets_.size(); i++) {
         std::cout << "Sending game text to client " << i << std::endl;
         clients_sockets_[i].WriteString(options_.game_text);
-        std::cout << "Sending player id "
-                  << state_.declarations().players_resolver().Name(client_player_id(i))
-                  << "(" << client_player_id(i) << ")"
-                  << " to client " << i << std::endl;
-        clients_sockets_[i].WriteString(std::to_string(client_player_id(i)));
       }
+      std::this_thread::sleep_for(std::chrono::duration<double>(options_.time_for_player_compilation));
+   
+
+      // Send the deadline and the player ids
+      for (uint i = 0; i < clients_sockets_.size(); i++) {
+         std::cout << "Sending player id "
+                   << state_.declarations().players_resolver().Name(client_player_id(i))
+                   << "(" << client_player_id(i) << ")"
+                   << " to client " << i << std::endl;
+         clients_sockets_[i].WriteString(std::to_string(options_.deadline_seconds));
+         clients_sockets_[i].WriteString(std::to_string(client_player_id(i)));
+      }
+
 
       auto play_start = std::chrono::system_clock::now();
       size_t games_count = 0;
@@ -79,12 +93,9 @@ namespace rbg {
         auto moves = state_.Moves();
         available_moves_ = std::unordered_set<GameMove>(moves.begin(), moves.end());
         uint available_moves_overall = available_moves_.size();
-        std::vector<bool> first_move(clients_sockets_.size(), true);
         bool exceeded_deadline = false;
         // Indexed py player socket index, gives out how many times this player socket exceeded deadline when sending move
         std::vector<int> deadlines_exceeded(clients_sockets_.size(), 0);
-        // Indexed by player, gives out information whether the player timed out the first move.
-        std::vector<bool> first_move_deadline_exceeded(clients_sockets_.size(), false);
         while (!available_moves_.empty()) {
           auto manager_end = std::chrono::system_clock::now();
 
@@ -99,29 +110,15 @@ namespace rbg {
           auto end = std::chrono::system_clock::now();
           auto duration = std::chrono::duration<double>(end - manager_begin).count();
 
-          if (first_move[player_socket_index(state_.current_player())]) {
-            if (duration > options_.first_move_deadline_seconds) {
-              std::cout << "First move deadline exceeded for client " << player_socket_index(state_.current_player())
-                        << " which is player "
-                        << state_.declarations().players_resolver().Name(state_.current_player())
-                        << " (" << state_.current_player() << ") the move was received after " << duration << "s."
-                        << std::endl;
-              first_move_deadline_exceeded[player_socket_index(state_.current_player())] = true;
-              deadlines_exceeded[player_socket_index(state_.current_player())]++;
-              exceeded_deadline = true;
-            }
-          } else {
-            if (duration > options_.deadline_seconds) {
-              std::cout << "Deadline exceeded for client " << player_socket_index(state_.current_player())
-                        << " which is player "
-                        << state_.declarations().players_resolver().Name(state_.current_player())
-                        << " (" << state_.current_player() << ") the move was received after " << duration << "s."
-                        << std::endl;
-              deadlines_exceeded[player_socket_index(state_.current_player())]++;
-              exceeded_deadline = true;
-            }
+          if (duration > options_.deadline_seconds) {
+            std::cout << "Deadline exceeded for client " << player_socket_index(state_.current_player())
+                      << " which is player "
+                      << state_.declarations().players_resolver().Name(state_.current_player())
+                      << " (" << state_.current_player() << ") the move was received after " << duration << "s."
+                      << std::endl;
+            deadlines_exceeded[player_socket_index(state_.current_player())]++;
+            exceeded_deadline = true;
           }
-          first_move[player_socket_index(state_.current_player())] = false;
 
           if (options_.moves_logging_stream != nullptr) {
             (*options_.moves_logging_stream) << move_string << "\n";
@@ -176,9 +173,6 @@ namespace rbg {
                 stream << ",";
               }
               stream << deadlines_exceeded[i];
-              if (first_move_deadline_exceeded[i]) {
-                stream << "(1)";
-              }
             }
             if (manager_deadline_exceeded) {
               stream << ",manager";

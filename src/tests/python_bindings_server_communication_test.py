@@ -11,6 +11,7 @@ print('Server got client A. (Server:', server_process.stdout.readline(), ')')
 
 b_client_process = subprocess.Popen(['python3','start_random_python_client.py', 'localhost', '7981'], stdout=subprocess.DEVNULL)
 
+print('Server waiting for the second client. (Server:', server_process.stdout.readline(), ')')
 print('Server got python B. (Server:', server_process.stdout.readline(), ')')
 
 for line in server_process.stdout:

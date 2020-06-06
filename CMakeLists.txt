@@ -206,4 +206,8 @@ if (${Python3_Interpreter_FOUND})
 
     add_custom_target(moves_logging_test ALL COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/src/tests/moves_logging_test.py ${CMAKE_CURRENT_BINARY_DIR}/moves_logging_test.py)
     add_test(moves_logging_test ${Python3_EXECUTABLE} moves_logging_test.py)
+
+    add_custom_target(player_long_compilation_test ALL COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/src/tests/player_long_compilation_test.py ${CMAKE_CURRENT_BINARY_DIR}/player_long_compilation_test.py)
+    add_test(player_long_compilation_test ${Python3_EXECUTABLE} player_long_compilation_test.py)
+e
 endif ()

@@ -16,6 +16,7 @@ print('Server got client A. (Server:', server_process.stdout.readline(), ')')
 
 b_client_process = subprocess.Popen(['./start_random_client', 'localhost', '7981', '--seed', '0', '--time', '60000.0'], stdout=subprocess.DEVNULL)
 
+print('Server waiting for the second client. (Server:', server_process.stdout.readline(), ')')
 print('Server got client B. (Server:', server_process.stdout.readline(), ')')
 
 moves_done = 0

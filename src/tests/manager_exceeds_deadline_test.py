@@ -15,12 +15,12 @@ print('Server got client A. (Server:', server_process.stdout.readline(), ')')
 
 b_client_process = subprocess.Popen(['./start_random_client', 'localhost', '7982','--seed', '0'], stdout=subprocess.DEVNULL)
 
+print('Server waiting for the second client. (Server:', server_process.stdout.readline(), ')')
 print('Server got client B. (Server:', server_process.stdout.readline(), ')')
 
 deadline_exceeded = False
 for line in server_process.stdout:
     line = str(line)
-    print(line)
     if 'manager exceeded' in line.lower() and not deadline_exceeded:
         print('Manager exceeded the deadline as expected')
         deadline_exceeded = True
@@ -46,8 +46,6 @@ with open(results_logging_filename) as f:
     assert(0 <= int(score_b) <= 100)
     assert('=' in timeouts_text)
     first_player_info, second_player_info, manager = timeouts_text.split('=')[1].split(',')
-    assert('(1)'  == first_player_info[-3:])
-    assert('(1)'  == second_player_info[-3:])
     assert('manager' in manager)
 
 print('Removing the logging file.')
