@@ -5,11 +5,11 @@ import os
 results_logging_filename = 'tmp_file_player_long_compilation_test_' + datetime.datetime.now().strftime("%I_%M%p_%B_%d_%Y")
 
 print('ticTacToe')
-server_process = subprocess.Popen(['./start_server', '../rbgGames/games/ticTacToe.rbg', '7982', '--deadline', '100', '--log_results', results_logging_filename], '--time_for_player_compilation', 400, stdout=subprocess.PIPE)
+server_process = subprocess.Popen(['./start_server', '../rbgGames/games/ticTacToe.rbg', '7982', '--deadline', '100', '--log_results', results_logging_filename, '--time_for_player_compilation', '400'], stdout=subprocess.PIPE)
 
 print('Server waiting for clients. (Server:', server_process.stdout.readline(), ')')
 
-a_client_process = subprocess.Popen(['./start_random_client', 'localhost', '7982','--seed', '0', '--sleep', '80', '--additional_compilation_time', 400], stdout=subprocess.DEVNULL)
+a_client_process = subprocess.Popen(['./start_random_client', 'localhost', '7982','--seed', '0', '--sleep', '80', '--additional_compilation_time', '400'], stdout=subprocess.DEVNULL)
 
 print('Server got client A. (Server:', server_process.stdout.readline(), ')')
 
