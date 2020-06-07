@@ -53,21 +53,23 @@ int main(int argc, const char *argv[]) {
   GameState state = CreateGameState(client.description());
   auto actions_translator = ActionsDescriptionsMap(client.description());
 
-  std::this_thread::sleep_for(std::chrono::duration<double>(additional_compilation_time));
-  
-  client.FetchPlayerIdAndDeadline();
-
   player_id_t assigned_player = client.player();
 
-  std::cout << "I am player: " << state.declarations().players_resolver().Name(assigned_player) << " (" << assigned_player << ")\n";
-  
-  std::cout << "The deadline to make a move on this server is: " << client.deadline() << " seconds" << std::endl;
+  std::cout << "I am player: " << state.declarations().players_resolver().Name(assigned_player) << " (" << assigned_player << ")\n"; 
+  std::cout << "I had " << client.preparation_time() << " seconds to prepare to play" << std::endl;
 
+  std::this_thread::sleep_for(std::chrono::duration<double>(additional_compilation_time));
+  
+  client.Ready();
+ 
   auto first_game_begin = std::chrono::system_clock::now();
   do {
   auto moves = state.Moves();
   while (!moves.empty()) {
     if (state.current_player() == assigned_player) {
+      std::cout << "Its my turn, waiting for deadline from server." << std::endl;
+      double deadline = client.ReadDeadline();
+      std::cout << "The deadline to make the move is " << deadline << " seconds." << std::endl;
       std::cout << "\n";
       std::cout << RectangularBoardDescription(state.board_content(), state.declarations()) << std::endl;
       std::cout << "Variables values are:" << std::endl;

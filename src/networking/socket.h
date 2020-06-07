@@ -28,18 +28,27 @@ namespace rbg {
       buffer.sputn(content.data(), content.size());
     }
 
-    std::string ReadString() {
-      asio::read_until(socket_, buffer, '\0');
+    std::string ExtractNextStringFromBuffer() {
       std::string res;
       std::istream is(&buffer);
       std::getline(is, res, '\0');
-      return res;
+      return res; 
+    }
+
+    std::string ReadString() {
+      asio::read_until(socket_, buffer, '\0');
+      return ExtractNextStringFromBuffer();
+    }
+
+    template<typename Handler>
+    void AsyncReadString(Handler handler) {
+      asio::async_read_until(socket_, buffer, '\0', handler);
     }
 
     void WriteString(const std::string &data) {
       asio::write(socket_, asio::buffer(data.c_str(),
                                        data.length() + 1));
-    }
+    } 
 
     tcp::socket& socket() {
       return socket_;

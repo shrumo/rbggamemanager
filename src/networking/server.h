@@ -1,16 +1,15 @@
 //
-// Created by shrum on 02.07.19.
+// Create by shrum on 06.06.2020.
 //
 
 #ifndef RBGGAMEMANAGER_SERVER_H
 #define RBGGAMEMANAGER_SERVER_H
 
-
 #include <asio.hpp>
-
-#include <chrono>
+                  
+#include <chrono> 
 #include <deque>
-#include <limits>
+#include <limits> 
 #include <ostream>
 
 #include "socket.h"
@@ -20,6 +19,8 @@
 #include <game_state/game_state.h>
 #include <utility/printer.h>
 
+#include <mutex>
+
 namespace rbg {
   using asio::ip::tcp;
 
@@ -28,9 +29,9 @@ namespace rbg {
     unsigned short port = 8989;
     // The number of seconds player have to make their move
     double deadline_seconds = std::numeric_limits<double>::max();
-    // The number of seconds we give players for compilation. 
+    // The number of seconds we give players for preparation. 
     // This is the time after sending the game text and before sending the deadline and the player id.
-    double time_for_player_compilation = 0;
+    double time_for_player_preparation = 0;
     double shutdown_after_seconds = std::numeric_limits<double>::max();
     size_t shutdown_after_games = std::numeric_limits<size_t>::max();
     // The stream in which to store moves done in each game by each player.
@@ -42,179 +43,235 @@ namespace rbg {
   };
 
   class Server {
-  public:
+   public:
     explicit Server(ServerOptions options)
-        : options_(std::move(options)), io_service_{}, acceptor_(io_service_, tcp::endpoint(tcp::v4(), options_.port)),
+        : options_(std::move(options)), io_context_{}, acceptor_(io_context_, tcp::endpoint(tcp::v4(), options_.port)),
           state_(CreateGameState(options_.game_text)) {
       actions_translator_ = ActionsDescriptionsMap(options_.game_text);
     }
 
+
+    // Some things are synchronous, some asynchronous
     void Run() {
-      // Wait for all the clients to connect
-      while (clients_sockets_.size() != state_.declarations().players_resolver().size() - 1) {
-        tcp::socket socket(io_service_);
-        std::cout << "Waiting for clients..."
-                  << "(" << state_.declarations().players_resolver().size() - 1 - clients_sockets_.size()
-                  << " more needed)"
-                  << std::endl;
-        acceptor_.accept(socket);
-        std::cout << "Got client number " << clients_sockets_.size() << std::endl;
-        clients_sockets_.emplace_back(std::move(socket));
-      }
-
-      // Send the game text to clients
-      for (uint i = 0; i < clients_sockets_.size(); i++) {
-        std::cout << "Sending game text to client " << i << std::endl;
-        clients_sockets_[i].WriteString(options_.game_text);
-      }
-      std::this_thread::sleep_for(std::chrono::duration<double>(options_.time_for_player_compilation));
-   
-
-      // Send the deadline and the player ids
-      for (uint i = 0; i < clients_sockets_.size(); i++) {
-         std::cout << "Sending player id "
-                   << state_.declarations().players_resolver().Name(client_player_id(i))
-                   << "(" << client_player_id(i) << ")"
-                   << " to client " << i << std::endl;
-         clients_sockets_[i].WriteString(std::to_string(options_.deadline_seconds));
-         clients_sockets_[i].WriteString(std::to_string(client_player_id(i)));
-      }
-
-
-      auto play_start = std::chrono::system_clock::now();
-      size_t games_count = 0;
-      while (std::chrono::duration<double>(std::chrono::system_clock::now() - play_start).count() <
-             options_.shutdown_after_seconds &&
-             games_count < options_.shutdown_after_games) {
-        size_t moves_done = 0;
-        auto game_begin = std::chrono::system_clock::now();
-        bool manager_deadline_exceeded = false;
-        auto manager_begin = std::chrono::system_clock::now();
-        auto moves = state_.Moves();
-        available_moves_ = std::unordered_set<GameMove>(moves.begin(), moves.end());
-        uint available_moves_overall = available_moves_.size();
-        bool exceeded_deadline = false;
-        // Indexed py player socket index, gives out how many times this player socket exceeded deadline when sending move
-        std::vector<int> deadlines_exceeded(clients_sockets_.size(), 0);
-        while (!available_moves_.empty()) {
-          auto manager_end = std::chrono::system_clock::now();
-
-          auto manager_duration = std::chrono::duration<double>(manager_end - manager_begin).count();
-          if (manager_duration > options_.deadline_seconds) {
-            std::cout << "Manager exceeded the deadline. The calculation took him " << manager_duration << "s."
-                      << std::endl;
-            exceeded_deadline = true;
-            manager_deadline_exceeded = true;
-          }
-          auto move_string = clients_sockets_[player_socket_index(state_.current_player())].ReadString();
-          auto end = std::chrono::system_clock::now();
-          auto duration = std::chrono::duration<double>(end - manager_begin).count();
-
-          if (duration > options_.deadline_seconds) {
-            std::cout << "Deadline exceeded for client " << player_socket_index(state_.current_player())
-                      << " which is player "
-                      << state_.declarations().players_resolver().Name(state_.current_player())
-                      << " (" << state_.current_player() << ") the move was received after " << duration << "s."
-                      << std::endl;
-            deadlines_exceeded[player_socket_index(state_.current_player())]++;
-            exceeded_deadline = true;
-          }
-
-          if (options_.moves_logging_stream != nullptr) {
-            (*options_.moves_logging_stream) << move_string << "\n";
-          }
-
-          auto move = DecodeMove(move_string);
-
-          if (available_moves_.find(move) == available_moves_.end()) {
-            std::cout << "The move sent by the client is not legal" << std::endl;
-            std::cout << "The move was: " << std::endl;
-            for (const auto &mod : move) {
-              std::cout << "\t" << state_.declarations().initial_board().vertices_names().Name(mod.vertex) << " ("
-                        << mod.vertex
-                        << ") "
-                        << actions_translator_[mod.modifier_index] << " (" << mod.modifier_index << ")" << std::endl;
-            }
-            return;
-          }
-
-          for (uint i = 0; i < clients_sockets_.size(); i++) {
-            if (i == player_socket_index(state_.current_player())) {
-              continue;
-            }
-            clients_sockets_[i].WriteString(EncodeMove(move));
-          }
-          state_.Apply(move);
-          moves_done++;
-          manager_begin = std::chrono::system_clock::now();
-          moves = state_.Moves();
-          available_moves_ = std::unordered_set<GameMove>(moves.begin(), moves.end());
-          available_moves_overall += available_moves_.size();
+      { 
+        std::lock_guard<std::mutex> guard(mutex_);
+        // Wait for all the clients to connect
+        while (clients_sockets_.size() != state_.declarations().players_resolver().size() - 1) {
+          tcp::socket socket(io_context_);
+          std::cout << "Waiting for clients..."
+                    << "(" << state_.declarations().players_resolver().size() - 1 - clients_sockets_.size()
+                    << " more needed)"
+                    << std::endl;
+          acceptor_.accept(socket);
+          std::cout << "Got client number " << clients_sockets_.size() << std::endl;
+          clients_sockets_.emplace_back(std::move(socket));
         }
 
-        auto game_end = std::chrono::system_clock::now();
-        auto game_duration = std::chrono::duration<double>(game_end - game_begin).count();
+        // Send the game text to clients
+        for (uint i = 0; i < clients_sockets_.size(); i++) {
+          std::cout << "Sending time for preparation to client " << i << std::endl; 
+          clients_sockets_[i].WriteString(std::to_string(options_.time_for_player_preparation)); 
+          std::cout << "Sending game text to client " << i << std::endl; 
+          clients_sockets_[i].WriteString(options_.game_text); 
+          std::cout << "Sending player id "
+                     << state_.declarations().players_resolver().Name(client_player_id(i))
+                     << "(" << client_player_id(i) << ")"
+                     << " to client " << i << std::endl;
+          clients_sockets_[i].WriteString(std::to_string(client_player_id(i)));
+        }
+      } // mutex unlock
+      if(!WaitForReady()) {
+        std::cout << "Somebody exceeded the preparation time" << std::endl;
+      }
+      {
+        std::lock_guard<std::mutex> guard(mutex_);
+        auto play_start = std::chrono::system_clock::now();
+        size_t games_count = 0;
+        while (std::chrono::duration<double>(std::chrono::system_clock::now() - play_start).count() <
+               options_.shutdown_after_seconds &&
+               games_count < options_.shutdown_after_games) {
+          size_t moves_done = 0;
+          auto game_begin = std::chrono::system_clock::now();
+          bool manager_deadline_exceeded = false;
+          auto manager_begin = std::chrono::system_clock::now();
+          auto moves = state_.Moves();
+          available_moves_ = std::unordered_set<GameMove>(moves.begin(), moves.end());
+          uint available_moves_overall = available_moves_.size();
+          bool exceeded_deadline = false;
+          // Indexed py player socket index, gives out how many times this player socket exceeded deadline when sending move
+          std::vector<int> deadlines_exceeded(clients_sockets_.size(), 0);
+          while (!available_moves_.empty()) {
+            auto manager_end = std::chrono::system_clock::now();
 
-        if (options_.results_logging_stream != nullptr) {
-          auto &stream = *options_.results_logging_stream;
-          stream << game_duration << " " << moves_done << " " << available_moves_overall << " ";
-          for (uint i = 0; i < clients_sockets_.size(); i++) {
-            if (i > 0) {
-              stream << " ";
+            auto manager_duration = std::chrono::duration<double>(manager_end - manager_begin).count();
+            if (manager_duration > options_.deadline_seconds) {
+              std::cout << "Manager exceeded the deadline. The calculation took him " << manager_duration << "s."
+                        << std::endl;
+              exceeded_deadline = true;
+              manager_deadline_exceeded = true;
             }
-            auto player_name = state_.declarations().players_resolver().Name(client_player_id(i));
-            variable_id_t player_variable_id = state_.declarations().variables_resolver().Id(player_name);
-            stream << state_.variables_values()[player_variable_id];
+            clients_sockets_[player_socket_index(state_.current_player())].WriteString(std::to_string(options_.deadline_seconds)); 
+            auto move_string = clients_sockets_[player_socket_index(state_.current_player())].ReadString();
+            auto end = std::chrono::system_clock::now();
+            auto duration = std::chrono::duration<double>(end - manager_begin).count();
+
+            if (duration > options_.deadline_seconds) {
+              std::cout << "Deadline exceeded for client " << player_socket_index(state_.current_player())
+                        << " which is player "
+                        << state_.declarations().players_resolver().Name(state_.current_player())
+                        << " (" << state_.current_player() << ") the move was received after " << duration << "s."
+                        << std::endl;
+              deadlines_exceeded[player_socket_index(state_.current_player())]++;
+              exceeded_deadline = true;
+            }
+
+            if (options_.moves_logging_stream != nullptr) {
+              (*options_.moves_logging_stream) << move_string << "\n";
+            }
+
+            auto move = DecodeMove(move_string);
+
+
+            if (available_moves_.find(move) == available_moves_.end()) {
+              std::cout << "The move sent by the client is not legal" << std::endl;
+              std::cout << "The move was: " << std::endl;
+              for (const auto &mod : move) {
+                std::cout << "\t" << state_.declarations().initial_board().vertices_names().Name(mod.vertex) << " ("
+                          << mod.vertex
+                          << ") "
+                          << actions_translator_[mod.modifier_index] << " (" << mod.modifier_index << ")" << std::endl;
+              }
+              return;
+            }
+
+            for (uint i = 0; i < clients_sockets_.size(); i++) {
+              if (i == player_socket_index(state_.current_player())) {
+                continue;
+              }
+              clients_sockets_[i].WriteString(EncodeMove(move));
+            }
+            state_.Apply(move);
+            moves_done++;
+            manager_begin = std::chrono::system_clock::now();
+            moves = state_.Moves();
+            available_moves_ = std::unordered_set<GameMove>(moves.begin(), moves.end());
+            available_moves_overall += available_moves_.size();
           }
-          if (exceeded_deadline) {
-            stream << " timeouts=";
+
+          auto game_end = std::chrono::system_clock::now();
+          auto game_duration = std::chrono::duration<double>(game_end - game_begin).count();
+
+          if (options_.results_logging_stream != nullptr) {
+            auto &stream = *options_.results_logging_stream;
+            stream << game_duration << " " << moves_done << " " << available_moves_overall << " ";
             for (uint i = 0; i < clients_sockets_.size(); i++) {
               if (i > 0) {
-                stream << ",";
+                stream << " ";
               }
-              stream << deadlines_exceeded[i];
+              auto player_name = state_.declarations().players_resolver().Name(client_player_id(i));
+              variable_id_t player_variable_id = state_.declarations().variables_resolver().Id(player_name);
+              stream << state_.variables_values()[player_variable_id];
             }
-            if (manager_deadline_exceeded) {
-              stream << ",manager";
+            if (exceeded_deadline) {
+              stream << " timeouts=";
+              for (uint i = 0; i < clients_sockets_.size(); i++) {
+                if (i > 0) {
+                  stream << ",";
+                }
+                stream << deadlines_exceeded[i];
+              }
+              if (manager_deadline_exceeded) {
+                stream << ",manager";
+              }
             }
+            stream << std::endl;
           }
-          stream << std::endl;
+          state_.Reset();
+          for (uint i = 0; i < clients_sockets_.size(); i++) {
+            clients_sockets_[i].WriteString("reset");
+          }
+          if (options_.moves_logging_stream != nullptr) {
+            (*options_.moves_logging_stream) << "reset" << std::endl;
+          }
+          games_count++;
+          if (games_count % 200 == 0) {
+            std::cout << games_count << " games were played so far." << std::endl;
+          }
         }
-        state_.Reset();
-        for (uint i = 0; i < clients_sockets_.size(); i++) {
-          clients_sockets_[i].WriteString("reset");
-        }
-        if (options_.moves_logging_stream != nullptr) {
-          (*options_.moves_logging_stream) << "reset" << std::endl;
-        }
-        games_count++;
-        if (games_count % 200 == 0) {
-          std::cout << games_count << " games were played so far." << std::endl;
-        }
-      }
-      auto play_end = std::chrono::system_clock::now();
-      std::cout << "Players played for " << std::chrono::duration<double>(play_end - play_start).count() << "s"
-                << std::endl;
+        auto play_end = std::chrono::system_clock::now();
+        std::cout << "Players played for " << std::chrono::duration<double>(play_end - play_start).count() << "s"
+                  << std::endl;
+      } // mutex unlock
     }
-
-  private:
+ 
+   private:
     static player_id_t client_player_id(uint client_socket_index) {
-      return client_socket_index + 1;
+     return client_socket_index + 1;
     }
 
     static uint player_socket_index(player_id_t player) {
       return player - 1;
     }
 
-    ServerOptions options_;
-    asio::io_service io_service_;
+    // Await ready signal from all clients. 
+    // Please do not hold the mutex while calling.
+    bool WaitForReady() {
+      {
+      std::lock_guard<std::mutex> guard(mutex_); 
+      asio::steady_timer timer(io_context_, std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::duration<double>(options_.time_for_player_preparation)));
+       // Send the deadline and the player ids
+      for (uint i = 0; i < clients_sockets_.size(); i++) {
+        clients_sockets_[i].AsyncReadString([this,i,&timer](const asio::error_code& error, std::size_t size){HandleReady(size, i, error, timer);});
+      } 
+      timer.async_wait([this](const asio::error_code& error){HandleTimeout(error);}); 
+      } // unlock mutex for io_context to run
+      io_context_.run();
+      std::lock_guard<std::mutex> guard(mutex_);
+      return players_ready == clients_sockets_.size();
+    }
+
+    void HandleTimeout(const asio::error_code& error) {
+      if (error) { 
+        std::cout << "Something went wrong with the timeout" << std::endl;
+        return;
+      }
+      std::lock_guard<std::mutex> guard(mutex_);
+      for (uint i = 0; i < clients_sockets_.size(); i++) {
+        clients_sockets_[i].socket().cancel();
+      }
+    }
+
+    void HandleReady(std::size_t message_size, uint player, const asio::error_code& error, asio::steady_timer &timer_to_cancel) {
+      std::lock_guard<std::mutex> guard(mutex_);
+      if (error || message_size != 6 /* size of string "ready" + null char */) {
+        std::cout << "Something went wrong when receiving ready from player " << player << std::endl;
+        return;
+      }
+      std::string players_message = clients_sockets_[player].ExtractNextStringFromBuffer();
+      players_ready++;
+      if (players_message != "ready") {
+        std::cout << "Player sent a bad ready message. She sent " << players_message << " instead of ready. Ignoring that." << std::endl;
+      }
+      std::cout << "Got ready from player " << player << std::endl; 
+      if (players_ready == clients_sockets_.size()) {
+        timer_to_cancel.cancel();
+      }
+    }
+
+
+    mutable std::mutex mutex_;
+
+    const ServerOptions options_;
+    asio::io_context io_context_;
     tcp::acceptor acceptor_;
+    
     GameState state_;
     std::unordered_set<GameMove> available_moves_;
     std::vector<StringSocket> clients_sockets_;
-    std::unordered_map<uint, std::string> actions_translator_;
+    size_t players_ready = 0;
+    std::unordered_map<uint, std::string> actions_translator_;   
   };
+
 }
 
-
-#endif //RBGGAMEMANAGER_SERVER_H
+#endif

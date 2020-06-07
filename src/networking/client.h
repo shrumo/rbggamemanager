@@ -23,7 +23,7 @@ namespace rbg {
           string_socket_(io_service_),
           assigned_player_{0} {
       asio::connect(string_socket_.socket(), endpoint_iterator_);
-      GetGameDescription();
+        Initialize();
     }
 
     void Write(const rbg::GameMove &move) {
@@ -38,8 +38,8 @@ namespace rbg {
       return assigned_player_;
     }
 
-    double deadline() const {
-      return deadline_seconds_; 
+    double preparation_time() const {
+      return preparation_time_seconds_;
     }
 
     GameMove Read() {
@@ -47,21 +47,26 @@ namespace rbg {
       return DecodeMove(str);
     }
 
+    void Ready() {
+        string_socket_.WriteString("ready");
+        std::cout << "WROTE ready" << std::endl;
+    }
+
+    double ReadDeadline() { 
+      auto deadline_seconds_str = string_socket_.ReadString();
+      return std::atof(deadline_seconds_str.c_str());
+    }
+
     void ReadReset() {
       string_socket_.ReadString();
     }
-
-    void FetchPlayerIdAndDeadline() { 
-      auto deadline_seconds_str = string_socket_.ReadString();
-      deadline_seconds_ = std::atof(deadline_seconds_str.c_str());
-
+  private:
+    void Initialize() {
+      auto preparation_time_seconds_str = string_socket_.ReadString();
+      preparation_time_seconds_ = std::atoi(preparation_time_seconds_str.c_str());
+      game_description_ = string_socket_.ReadString();
       auto player_id_str = string_socket_.ReadString();
       assigned_player_ = std::atoi(player_id_str.c_str());
-    }
-
-  private:
-    void GetGameDescription() {
-      game_description_ = string_socket_.ReadString();
     }
 
     asio::io_service io_service_;
@@ -73,6 +78,7 @@ namespace rbg {
     std::string game_description_;
     player_id_t assigned_player_;
     double deadline_seconds_;
+    double preparation_time_seconds_;
   };
 }
 #endif //RBGGAMEMANAGER_CLIENT_H

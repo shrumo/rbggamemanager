@@ -43,16 +43,22 @@ There are also various modes to play the games yourself (`--interactive help`) a
 The exchange between server and clients happends over TCP.
 A message is a **null terminated string**. (A sequence of characters ending with `\null`.)
 
-The first message is sent by manager to the player. It contains the **low level RBG language game**.
+The first message is sent by manager to the player. It contains time (in seconds) the player will have for preparation to start playing.
+Then a message containing **low level RBG language game** is sent.
+The last preparation message contains a numer that represents the player the client is representing. (1 means the first player that appears in `#player` macro)
 
-The server then waits for some time (`time_for_player_compilation` flag)
+The server then waits for clients to send `ready` message. 
+If it arrives too late (`time_for_player_preparation`), the server ignores that and just starts the game.
+The game is started as soon as every player sends a `ready` message or `time_for_player_preparation` went up.
+
+
 Afterwards the server sends the deadline as a **real number** (possibly containing a '.') 
-representing the number of seconds a player has to make a move.
+representing the number of seconds a player has to make a move, to the player that
+should take turn now.
 
-The second message contains a number that represents which player is the client. 
-(1 means the first player that appears in `#player` macro)
+The server then waits for the player to send the move.
 
-Now the moves are being sent. The client who controls the player who has the 
+The client who controls the player who has the 
 current turn sends a message of the form:
 
 ```
@@ -61,9 +67,14 @@ vertex_1 modifier_index_1 vertex_2 modifier_index_2 ...
 
 The vertices are numbered starting from 1 as they appear in `#board` macro. 
 The modifier indices are indices of modifier actions in the game rules.
+
+It then sends this move to all the other players.
+
+This cycle, of sending deadline, receiving a move and propagating it to other players is continued until the game is over. 
+
 After the game is played, the `reset` message is sent and another game can be played. (If the client disconnects then no further games are played and the server shuts down.)
 The next game starts without the initial message. 
-(The game, deadline and the player assignment is not sent the second time.)
+(The game, preparation deadline and the player assignment is not sent the second time.)
 
 ## Server logging
 

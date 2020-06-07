@@ -8,12 +8,13 @@ def main():
   args = parser.parse_args()
   client = Client(args.host, args.port)
   state = CreateGameState(client.description())
-  client.FetchPlayerIdAndDeadline()
+  client.Ready()
   player = client.player()
   print('I am player',state.declarations().players_resolver().Name(player))
   moves = state.Moves()
   while moves:
     if state.current_player() == player:
+      client.ReadDeadline()
       move = moves[0]
       state.Apply(move)
       client.Write(move)
