@@ -13,7 +13,11 @@ set(CMAKE_CXX_FLAGS_DEBUG "-g -O0")
 set(CMAKE_CXX_FLAGS_RELEASE "-Ofast -march=native")
 
 add_subdirectory(rbgParser)
-add_subdirectory(pybind11)
+
+
+if (EXISTS "pybind11/.git")
+    add_subdirectory(pybind11)
+endif()
 
 find_package(Threads)
 
@@ -53,6 +57,7 @@ set(ENV{PYTHONPATH} ${PYTHON_PATH}:${CMAKE_CURRENT_BINARY_DIR})
 find_package(Python3 COMPONENTS Interpreter Development)
 
 # Targets requiring python bindings
+if (EXISTS "${MY_SOURCE_DIR}/pybind11/.git")
 if (${Python3_FOUND})
     pybind11_add_module(rbg_string_graph src/python_bindings/rbg_string_graph.cc ${GAMESTATE_FILES})
     target_link_libraries(rbg_string_graph PRIVATE rbgParser)
@@ -63,14 +68,13 @@ if (${Python3_FOUND})
             DEPENDS rbg_string_graph)
 
     pybind11_add_module(rbg src/python_bindings/rbg.cc ${GAMESTATE_FILES} ${CONSTRUCTION_FILES} ${NETWORKING_FILES})
-    target_link_libraries(rbg PRIVATE rbgParser)
-else()
-    message("For python binding install python3 development package. (sudo apt install python3-dev)")
-
-
   add_custom_target(start_random_python_client ALL
               COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/src/start_random_python_client.py ${CMAKE_CURRENT_BINARY_DIR}/start_random_python_client.py
               DEPENDS rbg)
+    target_link_libraries(rbg PRIVATE rbgParser)
+else()
+    message("For python binding install python3 development package. (sudo apt install python3-dev)")
+endif ()
 endif ()
 
 
@@ -168,6 +172,7 @@ add_executable(board_test src/game_description/board.h src/game_description/boar
 add_test(board_test board_test)
 
 # Tests requiring the python bindings
+if (EXISTS "${MY_SOURCE_DIR}/pybind11/.git")
 if (${Python3_FOUND})
     add_custom_target(string_graph_python_bindings_test ALL COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/src/tests/string_graph_python_bindings_test.py ${CMAKE_CURRENT_BINARY_DIR}/string_graph_python_bindings_test.py
             DEPENDS rbg_string_graph)
@@ -179,6 +184,7 @@ if (${Python3_FOUND})
             COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/src/tests/python_bindings_server_communication_test.py ${CMAKE_CURRENT_BINARY_DIR}/python_bindings_server_communication_test.py
             COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/src/start_random_python_client.py ${CMAKE_CURRENT_BINARY_DIR}/start_random_python_client.py)
     add_test(python_bindings_server_communication_test ${Python3_EXECUTABLE} python_bindings_server_communication_test.py)
+endif ()
 endif ()
 
 # Tests requiring the python interpreter
