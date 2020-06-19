@@ -21,7 +21,7 @@ int main(int argc, const char *argv[]) {
   auto args = std_ext::parse_args(argc, argv);
   
   if (args.positional_args.size() != 2) {
-    std::cout << "Usage: " << argv[0] << " <host> <port> [--seed <random_seed>] [--sleep <sleep_time ms>] [--time <time_to_disconnect ms>] [--additional_compilation_time <compilation_time ms>]" << std::endl;
+    std::cout << "Usage: " << argv[0] << " <host> <port> [--seed <random_seed>] [--sleep <sleep_time ms>] [--time <time_to_disconnect ms>] [--additional_preparation_time <preparation_time ms>]" << std::endl;
     return 0;
   }
 
@@ -43,8 +43,8 @@ int main(int argc, const char *argv[]) {
   }
 
   double additional_compilation_time = 0.0;
-  if(args.flags.find("additional_compilation_time") != args.flags.end()) {
-    additional_compilation_time = std::stod(args.flags.at("additional_compilation_time"))/1000.0;
+  if(args.flags.find("additional_preparation_time") != args.flags.end()) {
+    additional_compilation_time = std::stod(args.flags.at("additional_preparation_time"))/1000.0;
   }
 
   rbg_parser::messages_container msg;

@@ -49,7 +49,6 @@ namespace rbg {
 
     void Ready() {
         string_socket_.WriteString("ready");
-        std::cout << "WROTE ready" << std::endl;
     }
 
     double ReadDeadline() { 

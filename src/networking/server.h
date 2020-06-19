@@ -30,8 +30,7 @@ namespace rbg {
     // The number of seconds player have to make their move
     double deadline_seconds = std::numeric_limits<double>::max();
     // The number of seconds we give players for preparation. 
-    // This is the time after sending the game text and before sending the deadline and the player id.
-    double time_for_player_preparation = 0;
+    double time_for_player_preparation = std::numeric_limits<double>::max() ;
     double shutdown_after_seconds = std::numeric_limits<double>::max();
     size_t shutdown_after_games = std::numeric_limits<size_t>::max();
     // The stream in which to store moves done in each game by each player.
@@ -80,8 +79,14 @@ namespace rbg {
           clients_sockets_[i].WriteString(std::to_string(client_player_id(i)));
         }
       } // mutex unlock
+      bool exceeded_initial_deadline = false;
       if(!WaitForReady()) {
-        std::cout << "Somebody exceeded the preparation time" << std::endl;
+        for(uint i = 0; i < clients_sockets_.size(); i++) {
+            if(players_ready_.find(i) == players_ready_.end()) {
+                std::cout << "Client " << i << " was late with sending ready." << std::endl;    
+                exceeded_initial_deadline = true;
+            }    
+        }
       }
       {
         std::lock_guard<std::mutex> guard(mutex_);
@@ -97,7 +102,7 @@ namespace rbg {
           auto moves = state_.Moves();
           available_moves_ = std::unordered_set<GameMove>(moves.begin(), moves.end());
           uint available_moves_overall = available_moves_.size();
-          bool exceeded_deadline = false;
+          bool exceeded_deadline = exceeded_initial_deadline;
           // Indexed py player socket index, gives out how many times this player socket exceeded deadline when sending move
           std::vector<int> deadlines_exceeded(clients_sockets_.size(), 0);
           while (!available_moves_.empty()) {
@@ -179,6 +184,9 @@ namespace rbg {
                   stream << ",";
                 }
                 stream << deadlines_exceeded[i];
+                if (players_ready_.find(i) == players_ready_.end()) {
+                    stream << "(lateready)";    
+                }
               }
               if (manager_deadline_exceeded) {
                 stream << ",manager";
@@ -218,43 +226,31 @@ namespace rbg {
     bool WaitForReady() {
       {
       std::lock_guard<std::mutex> guard(mutex_); 
-      asio::steady_timer timer(io_context_, std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::duration<double>(options_.time_for_player_preparation)));
-       // Send the deadline and the player ids
+      auto time_sent = std::chrono::system_clock::now(); 
+      // Send the deadline and the player ids
       for (uint i = 0; i < clients_sockets_.size(); i++) {
-        clients_sockets_[i].AsyncReadString([this,i,&timer](const asio::error_code& error, std::size_t size){HandleReady(size, i, error, timer);});
+        clients_sockets_[i].AsyncReadString([this,i,time_sent](const asio::error_code& error, std::size_t size){HandleReady(size, i, error, time_sent);});
       } 
-      timer.async_wait([this](const asio::error_code& error){HandleTimeout(error);}); 
       } // unlock mutex for io_context to run
       io_context_.run();
       std::lock_guard<std::mutex> guard(mutex_);
-      return players_ready == clients_sockets_.size();
+      return players_ready_.size() == clients_sockets_.size();
     }
 
-    void HandleTimeout(const asio::error_code& error) {
-      if (error) { 
-        std::cout << "Something went wrong with the timeout" << std::endl;
-        return;
-      }
-      std::lock_guard<std::mutex> guard(mutex_);
-      for (uint i = 0; i < clients_sockets_.size(); i++) {
-        clients_sockets_[i].socket().cancel();
-      }
-    }
-
-    void HandleReady(std::size_t message_size, uint player, const asio::error_code& error, asio::steady_timer &timer_to_cancel) {
+    void HandleReady(std::size_t message_size, uint player, const asio::error_code& error, std::chrono::time_point<std::chrono::system_clock> time_sent) {
       std::lock_guard<std::mutex> guard(mutex_);
       if (error || message_size != 6 /* size of string "ready" + null char */) {
         std::cout << "Something went wrong when receiving ready from player " << player << std::endl;
         return;
       }
+      auto ready_received_time = std::chrono::system_clock::now();
       std::string players_message = clients_sockets_[player].ExtractNextStringFromBuffer();
-      players_ready++;
       if (players_message != "ready") {
-        std::cout << "Player sent a bad ready message. She sent " << players_message << " instead of ready. Ignoring that." << std::endl;
+        std::cout << "Player sent a bad ready message. She sent " << players_message << " instead of ready. Treating it as ready." << std::endl;
       }
       std::cout << "Got ready from player " << player << std::endl; 
-      if (players_ready == clients_sockets_.size()) {
-        timer_to_cancel.cancel();
+      if(std::chrono::duration<double>(ready_received_time - time_sent).count() < options_.time_for_player_preparation) { 
+        players_ready_.insert(player);
       }
     }
 
@@ -268,7 +264,7 @@ namespace rbg {
     GameState state_;
     std::unordered_set<GameMove> available_moves_;
     std::vector<StringSocket> clients_sockets_;
-    size_t players_ready = 0;
+    std::unordered_set<uint> players_ready_;
     std::unordered_map<uint, std::string> actions_translator_;   
   };
 

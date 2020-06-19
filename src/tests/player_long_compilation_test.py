@@ -9,11 +9,11 @@ server_process = subprocess.Popen(['./start_server', '../rbgGames/games/ticTacTo
 
 print('Server waiting for clients. (Server:', server_process.stdout.readline(), ')')
 
-a_client_process = subprocess.Popen(['./start_random_client', 'localhost', '7982','--seed', '0', '--sleep', '80', '--additional_preparation_time', '400'], stdout=subprocess.DEVNULL)
+a_client_process = subprocess.Popen(['./start_random_client', 'localhost', '7982','--seed', '0', '--sleep', '80', '--additional_preparation_time', '600'], stdout=subprocess.DEVNULL)
 
 print('Server got client A. (Server:', server_process.stdout.readline(), ')')
 
-b_client_process = subprocess.Popen(['./start_random_client', 'localhost', '7982','--seed', '0', '--sleep', '80'], stdout=subprocess.DEVNULL)
+b_client_process = subprocess.Popen(['./start_random_client', 'localhost', '7982','--seed', '0', '--sleep', '80', '--additional_preparation_time','200'], stdout=subprocess.DEVNULL)
 
 print('Server waiting for the second client. (Server:', server_process.stdout.readline(), ')')
 print('Server got client B. (Server:', server_process.stdout.readline(), ')')
@@ -36,15 +36,17 @@ assert(os.path.isfile(results_logging_filename))
 assert(os.path.isfile(results_logging_filename))
 
 with open(results_logging_filename) as f:
-  print('The logging file exists. Checking whether there were no timeouts.')
+  print('The logging file exists. Checking whether there was a preparation timeout.')
   elems = list(f.readline().split(' '))
-  assert(len(elems) == 5)
-  time, depth, available_moves, score_a, score_b = elems
+  print(elems)
+  assert(len(elems) == 6)
+  time, depth, available_moves, score_a, score_b, timeout = elems
   assert(float(time) < 60) # A TicTacToe game over localhost shouldn't take long
   assert(0 < int(depth) <= 9)
   assert(0 <= int(score_a) <= 100)
   assert(0 <= int(score_b) <= 100)
   assert(1 <= int(available_moves) <= 45)
+  assert('lateready' in timeout)
 
 print('Removing the logging file.')
 os.remove(results_logging_filename)
