@@ -53,7 +53,7 @@ namespace rbg {
 
     double ReadDeadline() { 
       auto deadline_seconds_str = string_socket_.ReadString();
-      return std::atof(deadline_seconds_str.c_str());
+      return std::stod(deadline_seconds_str.c_str());
     }
 
     void ReadReset() {
@@ -62,7 +62,7 @@ namespace rbg {
   private:
     void Initialize() {
       auto preparation_time_seconds_str = string_socket_.ReadString();
-      preparation_time_seconds_ = std::atoi(preparation_time_seconds_str.c_str());
+      preparation_time_seconds_ = std::stod(preparation_time_seconds_str.c_str());
       game_description_ = string_socket_.ReadString();
       auto player_id_str = string_socket_.ReadString();
       assigned_player_ = std::atoi(player_id_str.c_str());

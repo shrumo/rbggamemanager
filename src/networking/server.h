@@ -68,7 +68,7 @@ namespace rbg {
 
         // Send the game text to clients
         for (uint i = 0; i < clients_sockets_.size(); i++) {
-          std::cout << "Sending time for preparation to client " << i << std::endl; 
+          std::cout << "Sending time for preparation which is " << options_.time_for_player_preparation << " to client " << i << std::endl; 
           clients_sockets_[i].WriteString(std::to_string(options_.time_for_player_preparation)); 
           std::cout << "Sending game text to client " << i << std::endl; 
           clients_sockets_[i].WriteString(options_.game_text); 
