@@ -43,6 +43,8 @@ namespace rbg {
 
     virtual ResultType OffCase(const rbg_parser::off &move) { return GameMoveCase(move); }
 
+    virtual ResultType NoopCase(const rbg_parser::noop &) { return DefaultCase(); } 
+
     virtual ResultType AssignmentCase(const rbg_parser::assignment &move) { return GameMoveCase(move); }
 
     virtual ResultType PlayerSwitchCase(const rbg_parser::player_switch &move) { return GameMoveCase(move); }
@@ -155,6 +157,11 @@ namespace rbg {
 
     void dispatch(const rbg_parser::arithmetic_operation &m) override {
       result_ = ArithmeticOperationCase(m);
+      result_exists_ = true;
+    }
+
+    void dispatch(const rbg_parser::noop &m) override {
+      result_ = NoopCase(m);
       result_exists_ = true;
     }
 

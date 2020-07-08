@@ -88,6 +88,10 @@ namespace {
       return {initial, final};
     }
 
+    GraphCreatorResult NoopCase(const rbg_parser::noop &) override {
+        node_t only_node = graph_.NewNode();
+        return {only_node, only_node};
+    }
 
     GraphCreatorResult GameMoveCase(const rbg_parser::game_move &m) override {
       // Move representation graph edge
