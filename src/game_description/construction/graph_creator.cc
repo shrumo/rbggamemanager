@@ -85,8 +85,10 @@ namespace {
     }
 
     GraphCreatorResult NoopCase(const rbg_parser::noop &) override {
-        node_t only_node = graph_.NewNode();
-        return {only_node, only_node};
+        node_t initial = graph_.NewNode();
+        node_t final = graph_.NewNode();
+        graph_.AddEdge(initial, e_f(), final);
+        return {initial, final};
     }
 
     GraphCreatorResult GameMoveCase(const rbg_parser::game_move &m) override {
@@ -278,6 +280,31 @@ namespace {
       }
     }
   }
+
+  void EraseNoops(Graph<unique_ptr<Move>> &graph)
+  {
+
+    std::vector<node_t> nodes_without_effect;
+    for (node_t node : std::vector<node_t>(graph.nodes().begin(), graph.nodes().end()))
+    {
+      const std::list<edge_id_t>& out_transitions = graph.edges_ids_from(node);
+      if (out_transitions.size() == 1)
+      {
+        edge_id_t transition_id = out_transitions.front();
+        auto &transition = graph.GetEdge(transition_id);
+        if (transition.content()->type() == MoveType::kForwardEmpty)
+        {
+          nodes_without_effect.push_back(node);
+        }
+      }
+    }
+    for (node_t node : nodes_without_effect)
+    {
+      auto &transition = graph.GetEdge(graph.edges_ids_from(node).front());
+      graph.MergeWithNode(node, transition.to());
+      graph.EraseEdge(transition.id());
+    }
+  }
 }
 
 NfaBoardProduct::NfaBoardProduct(const Nfa<std::unique_ptr<Move>> &nfa, const Board &board,
@@ -349,6 +376,7 @@ Nfa<std::unique_ptr<Move>> rbg::CreateNfa(const rbg_parser::game_move &rbg_move,
   auto nodes_that_need_visited_check = VisitedCheckNeededSet(nfa, declarations.initial_board());
   AddVisitedChecks(&nfa, nodes_that_need_visited_check);
   HandleMultipleOutNodes(nfa.graph);
+  EraseNoops(nfa.graph);
   return nfa;
 }
 

@@ -33,7 +33,7 @@ namespace {
   )
 
 #turn(me; opp) =
-  ->me~player anySquare {e} ->> [me]
+  ->me~player anySquare {e} ->> . [me]
   (
       {! winAt(me)}
     + {? winAt(me)} [$ me~player=100] [$ opp~player=0] ->> {}
