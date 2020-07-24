@@ -301,7 +301,7 @@ namespace {
     for (node_t node : nodes_without_effect)
     {
       auto &transition = graph.GetEdge(graph.edges_ids_from(node).front());
-      graph.MergeWithNode(node, transition.to());
+      graph.MergeWithNode(transition.to(), node);
       graph.EraseEdge(transition.id());
     }
   }

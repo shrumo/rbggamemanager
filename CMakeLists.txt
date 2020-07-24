@@ -51,8 +51,6 @@ set(GAMESTATE_FILES ${PARSER_FILES} ${GRAPH_FILES} src/game_description/names_re
 
 set(NETWORKING_FILES ${GAMESTATE_FILES} src/networking/server.h src/networking/socket.h src/networking/client.h src/networking/socket.cc)
 
-set(ENV{PYTHONPATH} ${PYTHON_PATH}:${CMAKE_CURRENT_BINARY_DIR})
-
 find_package(Python3 COMPONENTS Interpreter Development)
 
 # Targets requiring python bindings
@@ -169,7 +167,7 @@ add_executable(board_test src/game_description/board.h src/game_description/boar
 add_test(board_test board_test)
 
 # Tests requiring the python bindings
-if (FALSE AND EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/pybind11/.git" AND ${Python3_FOUND})
+if (EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/pybind11/.git" AND ${Python3_FOUND})
     add_custom_target(string_graph_python_bindings_test ALL COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/src/tests/string_graph_python_bindings_test.py ${CMAKE_CURRENT_BINARY_DIR}/string_graph_python_bindings_test.py
             DEPENDS rbg_string_graph)
     add_test(string_graph_python_bindings_test ${Python3_EXECUTABLE} string_graph_python_bindings_test.py)
