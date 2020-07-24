@@ -139,7 +139,7 @@ namespace {
 int main() {
   auto parsed_tic_tac_toe = ParseGame(kTicTacToeGame);
   auto parse_labeled = ParseGame(kLabeledTicTacToeGame);
-  std::cout << "The games are the same " << (parsed_tic_tac_toe->to_rbg() == parse_labeled->to_rbg()) << std::endl;
+  std::cout << "The games are the same " << (parsed_tic_tac_toe->to_rbg(rbg_parser::options{}) == parse_labeled->to_rbg(rbg_parser::options{})) << std::endl;
 
   auto game = CreateGameState(kLabeledTicTacToeGame);
   auto moves = game.Moves();

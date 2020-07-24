@@ -6,7 +6,6 @@
 #define RBGGAMEMANAGER_PARSER_ACTIONS_H
 
 #include"rbgParser/src/sum.hpp"
-#include"rbgParser/src/prioritized_sum.hpp"
 #include"rbgParser/src/concatenation.hpp"
 #include"rbgParser/src/star_move.hpp"
 #include"rbgParser/src/shift.hpp"

@@ -104,7 +104,7 @@ public:
     if(print_numbers_) {
       result += "/*" + std::to_string(move.index_in_expression()) +"*/";
     }
-    return result + trim(move.to_rbg()); }
+    return result + trim(move.to_rbg(rbg_parser::options{})); }
 
 private:
   size_t indent_;
@@ -129,9 +129,9 @@ int main(int argc, const char *argv[]) {
     style = args.flags.at("style");
   }
   if(style == "original") {
-    std::cout << parsed_game->to_rbg(false);
+    std::cout << parsed_game->to_rbg(rbg_parser::options{}, false);
   } else if (style == "original_pretty") {
-    std::cout << parsed_game->to_rbg(true);
+    std::cout << parsed_game->to_rbg(rbg_parser::options{}, true);
   } else {
     std::cout << "#board = " << parsed_game->get_board().to_rbg(true) << "\n";
     std::cout << parsed_game->get_declarations().to_rbg() << "\n";

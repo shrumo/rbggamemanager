@@ -31,8 +31,6 @@ namespace rbg {
   public:
     virtual ResultType SumCase(const rbg_parser::sum &move) { return GameMoveCase(move); }
 
-    virtual ResultType PrioritizedSumCase(const rbg_parser::prioritized_sum &move) { return GameMoveCase(move); }
-
     virtual ResultType ConcatenationCase(const rbg_parser::concatenation &move) { return GameMoveCase(move); }
 
     virtual ResultType StarCase(const rbg_parser::star_move &move) { return GameMoveCase(move); }
@@ -87,11 +85,6 @@ namespace rbg {
   private:
     void dispatch(const rbg_parser::sum &m) override {
       result_ = SumCase(m);
-      result_exists_ = true;
-    }
-
-    void dispatch(const rbg_parser::prioritized_sum &m) override {
-      result_ = PrioritizedSumCase(m);
       result_exists_ = true;
     }
 

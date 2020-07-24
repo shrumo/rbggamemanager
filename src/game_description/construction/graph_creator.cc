@@ -51,10 +51,6 @@ namespace {
       return {initial, final};
     }
 
-    GraphCreatorResult PrioritizedSumCase(const rbg_parser::prioritized_sum &) override {
-      assert(false);
-    }
-
     GraphCreatorResult ConcatenationCase(const rbg_parser::concatenation &concatenation) override {
       node_t initial = graph_.NewNode();
       node_t last_final = initial;

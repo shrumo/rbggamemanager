@@ -198,7 +198,7 @@ std::string rbg::MoveDescription(const Move &move, const Declarations &declarati
 
 std::unordered_map<uint, std::string> rbg::ActionsDescriptionsMap(const std::string &game_text) {
   std::unordered_map<uint, std::string> result;
-  auto game = ParseGame(ParseGame(game_text)->to_rbg());
+  auto game = ParseGame(ParseGame(game_text)->to_rbg(rbg_parser::options{}));
   Declarations declarations = Declarations(*game);
   auto nfa = CreateNfa(*game->get_moves(), declarations);
   for(node_t node: nfa.graph.nodes()) {
