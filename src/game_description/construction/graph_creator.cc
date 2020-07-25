@@ -111,97 +111,7 @@ namespace {
     return Nfa<unique_ptr<Move>>{std::move(graph), result.initial, result.final};
   }
 
-
-  // A recursive function called by VisitedCheckSearchSources.
-  // This is a DFS.
-  void CollectVisitedCheckSearchSourcesRecursive(const NfaBoardProduct &nfa_board_product,
-                                                 node_t current_vertex_node,
-                                                 unordered_set<node_t> *visited,
-                                                 unordered_map<node_t, const NfaBoardProduct *> *result) {
-    for (const auto &edge : nfa_board_product.EdgesFrom(current_vertex_node)) {
-      if (is_modifier_type(edge.content()->type())) {
-        assert(result->find(edge.to()) == result->end() || result->at(edge.to()) == &nfa_board_product);
-        (*result)[edge.to()] = &nfa_board_product;
-      }
-
-      if (edge.content()->type() == MoveType::kConditionCheck) {
-        vertex_id_t current_vertex = nfa_board_product.vertex_node(current_vertex_node).first;
-        const auto &sub_nfa = dynamic_cast<const Condition *>(edge.content())->nfa();
-        node_t sub_nfa_initial = sub_nfa.initial;
-        const auto &sub_board_product = nfa_board_product.sub_nfa_board(sub_nfa_initial);
-        node_t sub_board_product_initial = sub_board_product.node(current_vertex, sub_nfa_initial);
-        visited->insert(sub_board_product_initial);
-        CollectVisitedCheckSearchSourcesRecursive(sub_board_product, sub_board_product_initial, visited, result);
-      }
-
-      if (visited->find(edge.to()) == visited->end()) {
-        visited->insert(edge.to());
-        CollectVisitedCheckSearchSourcesRecursive(nfa_board_product, edge.to(), visited, result);
-      }
-    }
-  }
-
-  // Returns all the nodes with their respective sub graphs that have a modifier edge coming in and are reachable from the given node.
-  std::unordered_map<node_t, const NfaBoardProduct *>
-  VisitedCheckSearchSources(const NfaBoardProduct &nfa_board_product,
-                            node_t start_vertex_node) {
-    std::unordered_set<node_t> visited;
-    std::unordered_map<node_t, const NfaBoardProduct *> result;
-    CollectVisitedCheckSearchSourcesRecursive(nfa_board_product, start_vertex_node, &visited, &result);
-    return result;
-  }
-
-  // Collects the node ids that require a visited check, because there are two paths to it from the same modifier.
-  void CollectVisitedChecksNeededRecursive(const NfaBoardProduct &nfa_board_product,
-                                           node_t current_vertex_node,
-                                           unordered_map<node_t, node_t> *last_visited_from,
-                                           unordered_set<node_t> *result
-  ) {
-    for (const auto &edge : nfa_board_product.EdgesFrom(current_vertex_node)) {
-
-      // If the transition is a modifier, we will start a search from it later on.
-      // Here we stop the search.
-      if (is_modifier_type(edge.content()->type())) {
-        continue;
-      }
-
-      // Collect the nodes that need visited checks also from the sub graph
-      if (edge.content()->type() == MoveType::kConditionCheck) {
-        vertex_id_t current_vertex = nfa_board_product.vertex_node(current_vertex_node).first;
-        const auto &sub_nfa = dynamic_cast<const Condition *>(edge.content())->nfa();
-        node_t sub_graph_initial = sub_nfa.initial;
-        const auto &sub_board_product = nfa_board_product.sub_nfa_board(sub_graph_initial);
-        node_t board_product_initial = sub_board_product.node(current_vertex, sub_graph_initial);
-        (*last_visited_from)[board_product_initial] = last_visited_from->at(current_vertex_node);
-        CollectVisitedChecksNeededRecursive(sub_board_product, board_product_initial, last_visited_from, result);
-      }
-
-      if (last_visited_from->find(edge.to()) == last_visited_from->end()) {
-        (*last_visited_from)[edge.to()] = last_visited_from->at(current_vertex_node);
-        CollectVisitedChecksNeededRecursive(nfa_board_product, edge.to(), last_visited_from, result);
-      } else {
-        // There are two ways to get to edge.to()
-        result->insert(nfa_board_product.vertex_node(edge.to()).second);
-      }
-
-    }
-  }
-
-  unordered_set<node_t> VisitedCheckNeededSet(const Nfa<unique_ptr<Move>> &nfa,
-                                              const Board &board) {
-    auto graph_times_board = NfaBoardProduct(nfa, board, {1});
-    auto sources = VisitedCheckSearchSources(graph_times_board, graph_times_board.node(1, nfa.initial));
-    std::unordered_set<node_t> result;
-    std::unordered_map<node_t, node_t> last_visited_from;
-    for (const auto &source : sources) {
-      last_visited_from[source.first] = source.first;
-      CollectVisitedChecksNeededRecursive(*source.second, source.first, &last_visited_from, &result);
-    }
-    return result;
-  }
-
-
-  void AddVisitedChecks(Nfa<unique_ptr<Move>> *nfa, const unordered_set<node_t> &check_needed) {
+  void AddVisitedChecks(Nfa<unique_ptr<Move>> *nfa) {
     queue<node_t> to_visit;
     unordered_set<node_t> visited;
     to_visit.push(nfa->initial);
@@ -214,11 +124,10 @@ namespace {
         auto &transition = nfa->graph.GetEdge(transition_id);
         node_t v = transition.to();
         if (transition.content()->type() == MoveType::kConditionCheck) {
-          AddVisitedChecks(&dynamic_cast<Condition *>(transition.modifiable_content().get())->nfa(),
-                           check_needed);
+          AddVisitedChecks(&dynamic_cast<Condition *>(transition.modifiable_content().get())->nfa());
         }
         if (visited.find(transition.to()) == visited.end()) {
-          if (check_needed.find(transition.to()) != check_needed.end()) {
+          if (nfa->graph.edges_ids_to(transition.to()).size() > 1) {
             node_t visited_check = nfa->graph.NewNode();
             unordered_set<edge_id_t> transitions_to = nfa->graph.edges_ids_to(transition.to());
             for (edge_id_t in_transition_id : transitions_to) {
@@ -373,8 +282,7 @@ NfaBoardProduct::NfaBoardProduct(const Nfa<std::unique_ptr<Move>> &nfa, const Bo
 
 Nfa<std::unique_ptr<Move>> rbg::CreateNfa(const rbg_parser::game_move &rbg_move, const Declarations &declarations) {
   auto nfa = ThompsonsConstruction(rbg_move, declarations);
-  auto nodes_that_need_visited_check = VisitedCheckNeededSet(nfa, declarations.initial_board());
-  AddVisitedChecks(&nfa, nodes_that_need_visited_check);
+  AddVisitedChecks(&nfa);
   HandleMultipleOutNodes(nfa.graph);
   EraseNoops(nfa.graph);
   return nfa;

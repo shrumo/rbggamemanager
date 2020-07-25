@@ -80,6 +80,7 @@ target_link_libraries(benchmark rbgParser)
 
 add_executable(explain ${GRAPH_FILES} ${PARSER_FILES}
         ${CONSTRUCTION_FILES} ${GAMESTATE_FILES} ${NETWORKING_FILES} src/explain.cc)
+target_compile_options(explain PRIVATE "-g" "-O0")
 
 target_link_libraries(explain rbgParser)
 target_link_libraries(explain pthread)
@@ -141,6 +142,7 @@ add_test(amazons_test amazons_test)
 add_executable(chess_test ${GAMESTATE_FILES} src/tests/chess_test.cc)
 target_link_libraries(chess_test rbgParser)
 add_test(chess_test chess_test)
+target_compile_options(chess_test PRIVATE "-g" "-O0")
 
 add_executable(arimaa_test ${GAMESTATE_FILES} src/tests/arimaa_test.cc)
 target_link_libraries(arimaa_test rbgParser)
@@ -184,6 +186,9 @@ endif ()
 if (${Python3_Interpreter_FOUND})
     add_custom_target(server_communication_test ALL COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/src/tests/server_communication_test.py ${CMAKE_CURRENT_BINARY_DIR}/server_communication_test.py)
     add_test(server_communication_test ${Python3_EXECUTABLE} server_communication_test.py)
+
+    add_custom_target(gess_test ALL COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/src/tests/gess_test.py ${CMAKE_CURRENT_BINARY_DIR}/gess_test.py)
+    add_test(gess_test ${Python3_EXECUTABLE} gess_test.py)
 
     add_custom_target(exceeds_deadline_test ALL COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/src/tests/exceeds_deadline_test.py ${CMAKE_CURRENT_BINARY_DIR}/exceeds_deadline_test.py)
     add_test(exceeds_deadline_test ${Python3_EXECUTABLE} exceeds_deadline_test.py)
