@@ -125,7 +125,7 @@ namespace {
     )
 
 #standardPawnMove(forward; backward; color; oppColor) =
-    pickUpPiece(color~Pawn)
+    pickUpPiece(color~Pawn) .
     (
         (
             forward {empty}

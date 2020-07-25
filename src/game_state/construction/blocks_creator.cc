@@ -168,6 +168,13 @@ namespace {
       return {step_index, branch};
     }
 
+    BlocksCreatorResult<Branch> DefaultCase(const Move&) override {
+      auto block = CreateBlockUniquePtr(Branch{});
+      auto branch = block->content().branch();
+      uint step_index = collection_->AddBlock(std::move(block));
+      return {step_index, branch};
+    }
+
   private:
     BlocksCollection *collection_;
     const Declarations &declarations_;
