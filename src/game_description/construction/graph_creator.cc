@@ -190,17 +190,17 @@ namespace {
     }
   }
 
-  void EraseNoops(Graph<unique_ptr<Move>> &graph)
+  void EraseNoops(Nfa<unique_ptr<Move>> &nfa)
   {
 
     std::vector<node_t> nodes_without_effect;
-    for (node_t node : std::vector<node_t>(graph.nodes().begin(), graph.nodes().end()))
+    for (node_t node : std::vector<node_t>(nfa.graph.nodes().begin(), nfa.graph.nodes().end()))
     {
-      const std::list<edge_id_t>& out_transitions = graph.edges_ids_from(node);
+      const std::list<edge_id_t>& out_transitions = nfa.graph.edges_ids_from(node);
       if (out_transitions.size() == 1)
       {
         edge_id_t transition_id = out_transitions.front();
-        auto &transition = graph.GetEdge(transition_id);
+        auto &transition = nfa.graph.GetEdge(transition_id);
         if (transition.content()->type() == MoveType::kForwardEmpty)
         {
           nodes_without_effect.push_back(node);
@@ -209,9 +209,16 @@ namespace {
     }
     for (node_t node : nodes_without_effect)
     {
-      auto &transition = graph.GetEdge(graph.edges_ids_from(node).front());
-      graph.MergeWithNode(transition.to(), node);
-      graph.EraseEdge(transition.id());
+      auto &transition = nfa.graph.GetEdge(nfa.graph.edges_ids_from(node).front());
+      if(node == nfa.initial) {
+        nfa.initial = transition.to();
+      }
+      if(node == nfa.final) {
+        nfa.final = transition.to();
+      }
+      nfa.graph.MergeWithNode(transition.to(), node);
+      nfa.graph.EraseEdge(transition.id());
+
     }
   }
 }
@@ -284,7 +291,7 @@ Nfa<std::unique_ptr<Move>> rbg::CreateNfa(const rbg_parser::game_move &rbg_move,
   auto nfa = ThompsonsConstruction(rbg_move, declarations);
   AddVisitedChecks(&nfa);
   HandleMultipleOutNodes(nfa.graph);
-  EraseNoops(nfa.graph);
+  EraseNoops(nfa);
   return nfa;
 }
 

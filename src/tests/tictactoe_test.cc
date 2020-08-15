@@ -39,7 +39,7 @@ namespace {
     + {? winAt(me)} [$ me~player=100] [$ opp~player=0] ->> {}
   )
 
-#rules = [$ xplayer=50] [$ oplayer=50] (
+#rules = . . . . . [$ xplayer=50] [$ oplayer=50] (
     turn(x; o)
     turn(o; x)
   )*
