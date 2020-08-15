@@ -92,78 +92,93 @@ int main(int argc, const char *argv[]) {
   std::stringstream buffer;
   buffer << file_stream.rdbuf();
 
-  auto game = CreateGameState(buffer.str());
-  auto actions_translator = ActionsDescriptionsMap(buffer.str());
-  auto moves = game.Moves();
+  bool repeat = true;
 
-  while(!moves.empty()) {
-    uniform_int_distribution<> random_index(0, moves.size()-1);
-    cout << "Current player is: " << game.declarations().players_resolver().Name(game.current_player()) << " (" << game.current_player() << ")" << endl;
+  while (repeat) { 
+      auto game = CreateGameState(buffer.str());
+      auto actions_translator = ActionsDescriptionsMap(buffer.str());
+      auto moves = game.Moves();
+      while(!moves.empty()) {
+        uniform_int_distribution<> random_index(0, moves.size()-1);
+        cout << "Current player is: " << game.declarations().players_resolver().Name(game.current_player()) << " (" << game.current_player() << ")" << endl;
 
-    cout << RectangularBoardDescription(game.board_content(), game.declarations());
-    cout << "Variables values are:" << std::endl;
-    cout << VariablesValuesDescription(game) << std::endl;
-    auto move = moves[0];
-    if(interactive == "help") {
-      std::cout << "Which move do you want to choose: " << std::endl;
-      std::cout << -1 << ") random" << std::endl;
-      for(size_t i = 0; i < moves.size(); i++) {
-        std::cout << i << ") ";
-        for(const auto& mod : moves[i]) {
-          cout << "\t" << game.declarations().initial_board().vertices_names().Name(mod.vertex) << " (" << mod.vertex
-               << ") "
-               << actions_translator[mod.modifier_index] << " (" << mod.modifier_index << ")" << std::endl;
+        cout << RectangularBoardDescription(game.board_content(), game.declarations());
+        cout << "Variables values are:" << std::endl;
+        cout << VariablesValuesDescription(game) << std::endl;
+        auto move = moves[0];
+        if(interactive == "help") {
+          std::cout << "Which move do you want to choose: " << std::endl;
+          std::cout << -1 << ") random" << std::endl;
+          for(size_t i = 0; i < moves.size(); i++) {
+            std::cout << i << ") ";
+            for(const auto& mod : moves[i]) {
+              cout << "\t" << game.declarations().initial_board().vertices_names().Name(mod.vertex) << " (" << mod.vertex
+                   << ") "
+                   << actions_translator[mod.modifier_index] << " (" << mod.modifier_index << ")" << std::endl;
+            }
+          }
+          int index;
+          cin >> index;
+          move = moves[index];
+          if (index == -1) {
+            move = moves[random_index(rng)];
+          }
         }
-      }
-      int index;
-      cin >> index;
-      move = moves[index];
-      if (index == -1) {
-        move = moves[random_index(rng)];
-      }
-    }
-    else if (interactive == "full") {
-      std::cout << "Put in a move encoding: (you can do it partially) " << std::endl;
-      move = GameMove();
-      std::string append_move_encoded;
-      while(!MoveExists(moves,move) || !append_move_encoded.empty()) {
-        if(MovesWithPrefix(moves, move).size() == 0) {
-          std::cout << "Resetting." << std::endl;
+        else if (interactive == "full") {
+          std::cout << "Put in a move encoding: (you can do it partially) " << std::endl;
           move = GameMove();
-        }
+          std::string append_move_encoded;
+          while(!MoveExists(moves,move) || !append_move_encoded.empty()) {
+            if(MovesWithPrefix(moves, move).size() == 0) {
+              std::cout << "Resetting." << std::endl;
+              move = GameMove();
+            }
 
-        std::cout << "You put in so far: " << std::endl;
-        for (const auto &mod : move) {
-          cout << "\t" << game.declarations().initial_board().vertices_names().Name(mod.vertex) << " (" << mod.vertex
-               << ") "
+            std::cout << "You put in so far: " << std::endl;
+            for (const auto &mod : move) {
+              cout << "\t" << game.declarations().initial_board().vertices_names().Name(mod.vertex) << " (" << mod.vertex
+                   << ") "
+                   << actions_translator[mod.modifier_index] << " (" << mod.modifier_index << ")" << std::endl;
+            }
+
+            std::cout << "Next possible modifiers: " << std::endl;
+            for (const auto &mod : PossibleNextModifiers(moves, move)) {
+              cout << "\t" << game.declarations().initial_board().vertices_names().Name(mod.vertex) << " (" << mod.vertex
+                   << ") "
+                   << actions_translator[mod.modifier_index] << " (" << mod.modifier_index << ")" << std::endl;
+            }
+            if (PossibleNextModifiers(moves, move).empty()) {
+                std::cout << "Accepting the current modifiers as a full move." << std::endl;
+                break;
+            }
+            std::cout << "Put in next vertex modifier or leave empty: " << std::endl;
+            std::getline(std::cin, append_move_encoded);
+            auto move_append = DecodeMove(append_move_encoded);
+            move.insert(move.end(),move_append.begin(), move_append.end());
+          }
+        }
+        else {
+          move = moves[random_index(rng)];
+        }
+        cout << "Chosen move:" << std::endl;
+        for(const auto& mod : move) {
+          cout << "\t" << game.declarations().initial_board().vertices_names().Name(mod.vertex) << " (" << mod.vertex << ") "
                << actions_translator[mod.modifier_index] << " (" << mod.modifier_index << ")" << std::endl;
         }
-
-        std::cout << "Next possible modifiers: " << std::endl;
-        for (const auto &mod : PossibleNextModifiers(moves, move)) {
-          cout << "\t" << game.declarations().initial_board().vertices_names().Name(mod.vertex) << " (" << mod.vertex
-               << ") "
-               << actions_translator[mod.modifier_index] << " (" << mod.modifier_index << ")" << std::endl;
-        }
-
-        std::cout << "Put in next vertex modifier or leave empty: " << std::endl;
-        std::getline(std::cin, append_move_encoded);
-        auto move_append = DecodeMove(append_move_encoded);
-        move.insert(move.end(),move_append.begin(), move_append.end());
+        game.Apply(move);
+        moves = game.Moves();
+        cout << endl;
       }
-    }
-    else {
-      move = moves[random_index(rng)];
-    }
-    cout << "Chosen move:" << std::endl;
-    for(const auto& mod : move) {
-      cout << "\t" << game.declarations().initial_board().vertices_names().Name(mod.vertex) << " (" << mod.vertex << ") "
-           << actions_translator[mod.modifier_index] << " (" << mod.modifier_index << ")" << std::endl;
-    }
-    game.Apply(move);
-    moves = game.Moves();
-    cout << endl;
-  }
-
+      std::string option;
+      cout << "Put in 'reset' to play another game" << endl;
+      cin >> option;
+      if(option == "reset") {
+        cout << "Playing another game." << endl;
+        repeat = true;
+      }
+      else {
+        repeat = false;
+      }
+   }
 
 }
