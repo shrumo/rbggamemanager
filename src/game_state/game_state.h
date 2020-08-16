@@ -41,6 +41,10 @@ namespace rbg {
 
     friend class ConditionVisitedCheckTest;
 
+    friend class NegatedConditionCheckTest;
+
+    friend class ConditionCheckTest;
+
     friend class VisitedCheckTest;
 
     friend class VariableValue;

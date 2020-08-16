@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.5.0)
 project(rbggamemanager)
 
+
 # Build in release by default
 if (NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release)
@@ -159,6 +160,10 @@ add_test(reversi_test reversi_test)
 add_executable(tictactoe_test ${GAMESTATE_FILES} src/tests/tictactoe_test.cc)
 target_link_libraries(tictactoe_test rbgParser)
 add_test(tictactoe_test tictactoe_test)
+
+add_executable(weird_conditions_test ${GAMESTATE_FILES} src/tests/weird_conditions_test.cc)
+target_link_libraries(weird_conditions_test rbgParser)
+add_test(weird_conditions_test weird_conditions_test)
 
 add_executable(server_encoding_test ${GAMESTATE_FILES} ${NETWORKING_FILES} src/tests/server_encoding_test.cc)
 target_link_libraries(server_encoding_test rbgParser)

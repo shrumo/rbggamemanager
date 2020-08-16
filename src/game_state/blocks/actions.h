@@ -66,7 +66,7 @@ namespace rbg {
     template<typename NextBlockElements>
     inline bool RunAndFindEnd(GameState *state, NextBlockElements *next) {
       bool visited = stack_chunk_[state->current_pos_];
-      if (visited) {
+      if (visited || results_chunk_[state->current_pos_]) {
         return results_chunk_[state->current_pos_];
       }
       stack_chunk_.set(state->current_pos_);
@@ -125,7 +125,6 @@ namespace rbg {
     explicit OnTest(std::vector<bool> pieces) : pieces_(std::move(pieces)) {}
 
     inline bool Check(GameState *state) const {
-
       return pieces_[state->board_.at(state->current_pos_)];
     }
 
@@ -236,8 +235,10 @@ namespace rbg {
         : steps_point_(std::move(steps_point)) {};
 
     inline bool Check(GameState *state) const {
-
-      return steps_point_->RunAndFindEnd(state);
+      state->blocks_.PushVisitedStack();
+      bool result = steps_point_->RunAndFindEnd(state);
+      state->blocks_.PopVisitedStack();
+      return result;
     }
 
 
@@ -255,8 +256,10 @@ namespace rbg {
         : steps_point_(std::move(steps_point)) {};
 
     inline bool Check(GameState *state) const {
-
-      return !steps_point_->RunAndFindEnd(state);
+      state->blocks_.PushVisitedStack();
+      bool result =  !steps_point_->RunAndFindEnd(state);
+      state->blocks_.PopVisitedStack();
+      return result;
     }
 
 

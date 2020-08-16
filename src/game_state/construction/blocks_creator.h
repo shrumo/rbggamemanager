@@ -56,6 +56,14 @@ namespace rbg {
       conditions_results_->Pop();
     }
 
+    void PushVisitedStack() {
+      visited_info_stack_->Push();
+    }
+
+    void PopVisitedStack() {
+      visited_info_stack_->Pop();
+    }
+
     void RegisterModifier(uint modifier_index, const ModifyingApplication* application) {
       modifiers_[modifier_index] = application;
     }
