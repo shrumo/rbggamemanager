@@ -10,6 +10,7 @@
 #include <game_state/construction/game_state_creator.h>
 #include <utility/calculate_perft.h>
 #include <utility/printer.h>
+#include <utility/shift_table_checker.h>
 #include <stl_extension/argparse.h>
 #include <networking/socket.h>
 
@@ -37,15 +38,16 @@ std::string trim(std::string s)
 
 struct PrinterOptions
 {
-  bool print_numbers; // print the indices modifiers in a neat comment
-  bool add_dots_in_alternatives; // whether to add dots between each alternative element
+  bool print_numbers = false;                      // print the indices modifiers in a neat comment
+  bool add_dots_in_alternatives = false;           // whether to add dots between each alternative element
+  bool disable_adding_dots_in_shifttables = false; // if add_dots_in_alternatives is
 };
 
 class Printer : public AstFunction<std::string>
 {
 public:
   Printer(const PrinterOptions &options, size_t indent = 0) : options_(options), indent_(indent) {}
-  virtual std::string SumCase(const rbg_parser::sum &move)
+  std::string SumCase(const rbg_parser::sum &move) override
   {
 
     if (move.get_content().size() == 1)
@@ -59,6 +61,7 @@ public:
     result += "\n" + times(kIndentChars, indent_ + 1);
 
     bool first = true;
+    bool is_part_of_shift_table = ContainsOnlyShifts(move);
     for (const auto &m : move.get_content())
     {
       if (first)
@@ -70,7 +73,8 @@ public:
         result += "+";
         result += "\n" + times(kIndentChars, indent_ + 1);
       }
-      if(options_.add_dots_in_alternatives) {
+      if (options_.add_dots_in_alternatives && (!options_.disable_adding_dots_in_shifttables || !is_part_of_shift_table))
+      {
         result += ".";
       }
       result += Printer(options_, indent_ + 1)(*m);
@@ -82,7 +86,7 @@ public:
     return result;
   }
 
-  virtual std::string ConcatenationCase(const rbg_parser::concatenation &move)
+  std::string ConcatenationCase(const rbg_parser::concatenation &move) override
   {
     if (move.get_content().size() == 1)
     {
@@ -111,14 +115,14 @@ public:
 
     return result;
   }
-  virtual std::string StarCase(const rbg_parser::star_move &move)
+  std::string StarCase(const rbg_parser::star_move &move) override
   {
     std::string result;
     result += Printer(options_, indent_)(*move.get_content()) + "*";
     return result;
   }
 
-  virtual std::string MoveCheckCase(const rbg_parser::move_check &move)
+  std::string MoveCheckCase(const rbg_parser::move_check &move) override
   {
     std::string prefix = move.is_negated() ? "{!" : "{?";
     // We don't want to print the modifier indices inside conditional expressions, because they are not relevant
@@ -127,9 +131,9 @@ public:
     return prefix + "\n" + times(kIndentChars, indent_ + 1) + Printer(condition_options, indent_ + 1)(*move.get_content()) + "\n" + times(kIndentChars, indent_) + "}";
   }
 
-  virtual std::string ArithmeticExpressionCase(const rbg_parser::arithmetic_expression &expr) { return expr.to_rbg(); }
+  std::string ArithmeticExpressionCase(const rbg_parser::arithmetic_expression &expr) override { return expr.to_rbg(); } 
 
-  virtual std::string GameMoveCase(const rbg_parser::game_move &move)
+  std::string GameMoveCase(const rbg_parser::game_move &move) override
   {
     std::string result;
     if (options_.print_numbers && move.is_modifier())
@@ -139,7 +143,7 @@ public:
     return result + trim(move.to_rbg(rbg_parser::options{}));
   }
 
-  virtual std::string NoopCase(const rbg_parser::noop &) { return "."; }
+  std::string NoopCase(const rbg_parser::noop &) override { return "."; } 
 
 private:
   const PrinterOptions &options_;
@@ -152,7 +156,7 @@ int main(int argc, const char *argv[])
 
   if (args.positional_args.size() != 1)
   {
-    std::cout << "Usage: " << argv[0] << " <game_file> [--modifier_indices true|false] [--add_dots_in_alternatives true|false]" << std::endl;
+    std::cout << "Usage: " << argv[0] << " <game_file> [--modifier_indices true|false] [--add_dots_in_alternatives true|false] [--disable_adding_dots_in_shifttables true|false]" << std::endl;
     return 0;
   }
 
@@ -166,18 +170,17 @@ int main(int argc, const char *argv[])
 
   if (args.flags.find("modifier_indices") != args.flags.end())
   {
-    if (args.flags.at("modifier_indices") == "true")
-    {
-      printer_options.print_numbers = true;
-    }
+    printer_options.print_numbers = args.flags.at("modifier_indices") == "true";
   }
 
   if (args.flags.find("add_dots_in_alternatives") != args.flags.end())
   {
-    if (args.flags.at("add_dots_in_alternatives") == "true")
-    {
-      printer_options.add_dots_in_alternatives = true;
-    }
+    printer_options.add_dots_in_alternatives = args.flags.at("add_dots_in_alternatives") == "true";
+  }
+
+  if (args.flags.find("disable_adding_dots_in_shifttables") != args.flags.end())
+  {
+    printer_options.disable_adding_dots_in_shifttables = args.flags.at("disable_adding_dots_in_shifttables") == "true";
   }
 
   std::cout << "#board = " << parsed_game->get_board().to_rbg(true) << "\n";
