@@ -38,6 +38,7 @@ std::string trim(std::string s)
 struct PrinterOptions
 {
   bool print_numbers; // print the indices modifiers in a neat comment
+  bool add_dots_in_alternatives; // whether to add dots between each alternative element
 };
 
 class Printer : public AstFunction<std::string>
@@ -68,6 +69,9 @@ public:
       {
         result += "+";
         result += "\n" + times(kIndentChars, indent_ + 1);
+      }
+      if(options_.add_dots_in_alternatives) {
+        result += ".";
       }
       result += Printer(options_, indent_ + 1)(*m);
     }
@@ -148,7 +152,7 @@ int main(int argc, const char *argv[])
 
   if (args.positional_args.size() != 1)
   {
-    std::cout << "Usage: " << argv[0] << " <game_file> [--modifier_indices true|false]" << std::endl;
+    std::cout << "Usage: " << argv[0] << " <game_file> [--modifier_indices true|false] [--add_dots_in_alternatives true|false]" << std::endl;
     return 0;
   }
 
@@ -165,6 +169,14 @@ int main(int argc, const char *argv[])
     if (args.flags.at("modifier_indices") == "true")
     {
       printer_options.print_numbers = true;
+    }
+  }
+
+  if (args.flags.find("add_dots_in_alternatives") != args.flags.end())
+  {
+    if (args.flags.at("add_dots_in_alternatives") == "true")
+    {
+      printer_options.add_dots_in_alternatives = true;
     }
   }
 
