@@ -70,12 +70,11 @@ namespace {
   [$ xplayer=50][$ oplayer=50]
 (
   (
-//3          4     5      6       7       8
+//3
   ->xplayer (up* + down*)(left* + right*)){e}
-//9   10
+//4   5
   ->> [x]
   (
-//  11
     {!
       up left {x} (up left + down right down right){x} +
       down right {x} down right {x} +
@@ -86,7 +85,6 @@ namespace {
       left {x} (left + right right) {x} +
       right {x} right {x}
     } +
-//  12
     {?
       up left {x} (up left + down right down right){x} +
       down right {x} down right {x} +
@@ -97,15 +95,14 @@ namespace {
       left {x} (left + right right) {x} +
       right {x} right {x}
     }
-//  13             14            15  16
+//  6              7             8
     [$ xplayer=100][$ oplayer=0] ->> {}
   )
-//17         18    19     20      21      22
+//9
   ->oplayer (up* + down*)(left* + right*) {e}
-//23  24
+//10  11
   ->> [o]
   (
-//25
   {!
     up left {o}( up left + down right down right){o} +
     down right {o}down right {o} +
@@ -117,7 +114,6 @@ namespace {
     right {o}right {o}
   }
   +
-//26
   {?
     up left {o}( up left + down right down right){o} +
     down right {o}down right {o} +
@@ -128,7 +124,7 @@ namespace {
     left {o}(left + right right){o} +
     right {o}right {o}
   }
-//27             28           29 30
+//12             13           14
   [$ oplayer=100][$ xplayer=0]->>{}
   )
 )*
@@ -146,7 +142,7 @@ int main() {
   std::vector<bool> exists(9);
   std::cout << RectangularBoardDescription(game.board_content(), game.declarations());
   std::cout << VariablesValuesDescription(game);
-  std::cout << "Possible tic tac toe o moves after x middle move (5 9): " << std::endl;
+  std::cout << "Possible tic tac toe o moves after x middle move (5 4): " << std::endl;
   std::cout << "Possible tic tac toe x moves: " << std::endl;
   for(const auto& move : moves) {
     auto move_text = EncodeMove(move);
@@ -154,19 +150,19 @@ int main() {
     std::stringstream stream(move_text);
     int vertex, identifier;
     stream >> vertex >> identifier;
-    assert(identifier == 9); // The identifier of the keeper switch
+    assert(identifier == 4); // The identifier of the keeper switch
     exists[vertex-1] = true;
   }
   std::cout << std::endl;
   for(size_t i = 0; i < exists.size(); i++) {
     assert(exists[i] == true);
   }
-  auto middle_move = DecodeMove("5 9");
+  auto middle_move = DecodeMove("5 4");
   game.Apply(middle_move);
   moves = game.Moves();
   std::cout << RectangularBoardDescription(game.board_content(), game.declarations());
   std::cout << VariablesValuesDescription(game);
-  std::cout << "Possible tic tac toe o moves after x middle move (5 9): " << std::endl;
+  std::cout << "Possible tic tac toe o moves after x middle move (5 4): " << std::endl;
   exists.clear();
   for(const auto& move : moves) {
     auto move_text = EncodeMove(move);
@@ -174,7 +170,7 @@ int main() {
     std::stringstream stream(move_text);
     int vertex, identifier;
     stream >> vertex >> identifier;
-    assert(identifier == 23); // The identifier of the keeper switch
+    assert(identifier == 10); // The identifier of the keeper switch
     exists[vertex-1] = true;
   }
   std::cout << std::endl;
@@ -186,12 +182,12 @@ int main() {
       assert(exists[i] == true);
     }
   }
-  auto right_upper_corner_move = DecodeMove("3 23");
+  auto right_upper_corner_move = DecodeMove("3 10");
   game.Apply(right_upper_corner_move);
   std::cout << RectangularBoardDescription(game.board_content(), game.declarations());
   std::cout << VariablesValuesDescription(game);
   moves = game.Moves();
-  std::cout << "Possible tic tac toe x moves after x middle move (5 9) and right upper corner o move (3 23): " << std::endl;
+  std::cout << "Possible tic tac toe x moves after x middle move (5 4) and right upper corner o move (3 10): " << std::endl;
   exists.clear();
   for(const auto& move : moves) {
     auto move_text = EncodeMove(move);
@@ -199,7 +195,7 @@ int main() {
     std::stringstream stream(move_text);
     int vertex, identifier;
     stream >> vertex >> identifier;
-    assert(identifier == 9); // The identifier of the keeper switch
+    assert(identifier == 4); // The identifier of the keeper switch
     exists[vertex-1] = true;
   }
   std::cout << std::endl;

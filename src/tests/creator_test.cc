@@ -17,7 +17,7 @@ const char *kSmallGame = R"LIM(
 #board = rectangle(up, down, left, right,
     [e,e]
     [e,e])
-//      1       2    3      4      5        6                  7           8     9            10                  11
+//      1                                   2                  3                                                  4
 #rules= ->red ( up + down + left + right )* [$ turn = turn+1] ([$red = 20] {e} + {? left {e}} {$turn < red + e})* ->blue
 )LIM";
 
@@ -71,7 +71,7 @@ int main() {
   auto paths = ShortestPaths(result.graph, result.initial, result.final);
 
   for (const auto &path : paths) {
-    assert(SortedActionIndices(path) == vector<int>({1, 6, 11}));
+    assert(SortedActionIndices(path) == vector<int>({1, 2, 4}));
   }
 
   cout << "The graph looks like this:\n";
