@@ -156,13 +156,8 @@ public:
   std::string MoveCheckCase(const rbg_parser::move_check &move) override
   {
     std::string prefix = move.is_negated() ? "{!" : "{?";
-    PrinterOptions condition_options = options_;
 
-    // Resetting stuff that is not important in conditionals
-    condition_options.print_numbers = false;
-    condition_options.add_dots_in_alternatives = false;
-    condition_options.disable_adding_dots_in_shifttables = false;
-    return prefix + "\n" + times(kIndentChars, indent_ + 1) + Printer(condition_options, indent_ + 1)(*move.get_content()) + "\n" + times(kIndentChars, indent_) + "}";
+    return prefix + "\n" + times(kIndentChars, indent_ + 1) + Printer({}, indent_ + 1)(*move.get_content()) + "\n" + times(kIndentChars, indent_) + "}";
   }
 
   std::string ArithmeticExpressionCase(const rbg_parser::arithmetic_expression &expr) override { return expr.to_rbg(); }
