@@ -38,9 +38,9 @@ std::string trim(std::string s)
 
 struct PrinterOptions
 {
-  bool print_numbers = false;                      // print the indices modifiers in a neat comment
-  bool add_dots_in_alternatives = false;           // whether to add dots between each alternative element
-  bool disable_adding_dots_in_shifttables = false; // if add_dots_in_alternatives is
+  bool print_numbers = false;                      // print the indices modifiers in a neat comment (ignored in conditionals)
+  bool add_dots_in_alternatives = false;           // whether to add dots between each alternative element (ignored in conditionals)
+  bool disable_adding_dots_in_shifttables = false; // if add_dots_in_alternatives is (ignored in conditionals)
 };
 
 class Printer : public AstFunction<std::string>
@@ -125,9 +125,12 @@ public:
   std::string MoveCheckCase(const rbg_parser::move_check &move) override
   {
     std::string prefix = move.is_negated() ? "{!" : "{?";
-    // We don't want to print the modifier indices inside conditional expressions, because they are not relevant
     PrinterOptions condition_options = options_;
+
+    // Resetting stuff that is not important in conditionals
     condition_options.print_numbers = false;
+    condition_options.add_dots_in_alternatives = false;
+    condition_options.disable_adding_dots_in_shifttables = false;
     return prefix + "\n" + times(kIndentChars, indent_ + 1) + Printer(condition_options, indent_ + 1)(*move.get_content()) + "\n" + times(kIndentChars, indent_) + "}";
   }
 

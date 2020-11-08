@@ -220,4 +220,6 @@ if (${Python3_Interpreter_FOUND})
     add_custom_target(player_long_compilation_test ALL COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/src/tests/player_long_compilation_test.py ${CMAKE_CURRENT_BINARY_DIR}/player_long_compilation_test.py)
     add_test(player_long_compilation_test ${Python3_EXECUTABLE} player_long_compilation_test.py)
 
+    add_custom_target(print_test ALL COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/src/tests/print_test.py ${CMAKE_CURRENT_BINARY_DIR}/print_test.py)
+    add_test(print_test ${Python3_EXECUTABLE} print_test.py)
 endif ()
