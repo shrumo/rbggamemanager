@@ -39,7 +39,10 @@ std::string trim(std::string s)
 struct PrinterOptions
 {
   bool print_numbers = false;                      // print the indices modifiers in a neat comment (ignored in conditionals)
-  bool add_dots_in_alternatives = false;           // whether to add dots between each alternative element (ignored in conditionals)
+  bool add_dots_in_alternatives = false;           // add dots between each alternative element (ignored in conditionals)
+  bool add_dots_in_stars = false;                  // add dots inside star statements (ignored in conditionals)
+  bool add_dots_after_alternatives = false;        // add dots after alternative (ignored in conditionals)
+  bool add_dots_after_stars = false;               // add dots after stars (ignored in conditionals)
   bool disable_adding_dots_in_shifttables = false; // if add_dots_in_alternatives is (ignored in conditionals)
 };
 
@@ -75,13 +78,17 @@ public:
       }
       if (options_.add_dots_in_alternatives && (!options_.disable_adding_dots_in_shifttables || !is_part_of_shift_table))
       {
-        result += ".";
+        result += " .";
       }
       result += Printer(options_, indent_ + 1)(*m);
     }
 
     result += "\n" + times(kIndentChars, indent_);
     result += ")";
+
+    if(options_.add_dots_after_alternatives) {
+      result += " .";
+    }
 
     return result;
   }
@@ -98,8 +105,9 @@ public:
     result += "( ";
 
     bool first = true;
-    for (const auto &m : move.get_content())
+    for (size_t i = 0; i < move.get_content().size(); i++)
     {
+      const auto &m = move.get_content()[i];
       if (first)
       {
         first = false;
@@ -109,6 +117,15 @@ public:
         result += " ";
       }
       result += Printer(options_, indent_)(*m);
+
+      if(result.back() == '*') {
+        bool is_previous_part_of_shift_table = ContainsOnlyShifts(*m);
+        bool is_next_part_of_shift_table = i + 1 < move.get_content().size() && ContainsOnlyShifts(*move.get_content()[i+1]);
+
+        if(options_.add_dots_after_stars && (!options_.disable_adding_dots_in_shifttables || !is_previous_part_of_shift_table || !is_next_part_of_shift_table)) {
+          result += " .";
+        }
+      }
     }
 
     result += " )";
@@ -117,8 +134,22 @@ public:
   }
   std::string StarCase(const rbg_parser::star_move &move) override
   {
+    bool is_part_of_shift_table = ContainsOnlyShifts(move);
     std::string result;
-    result += Printer(options_, indent_)(*move.get_content()) + "*";
+
+    if(options_.add_dots_in_stars && (!options_.disable_adding_dots_in_shifttables || !is_part_of_shift_table)) {
+      result += "( . ";
+    }
+
+    result += Printer(options_, indent_)(*move.get_content());
+
+    if(options_.add_dots_in_stars && (!options_.disable_adding_dots_in_shifttables || !is_part_of_shift_table)) {
+      result += ")";
+    }
+
+    // The star has to be the last character of a result here as we are cheking that in ConcatenationCase
+    result += "*";
+
     return result;
   }
 
@@ -134,7 +165,7 @@ public:
     return prefix + "\n" + times(kIndentChars, indent_ + 1) + Printer(condition_options, indent_ + 1)(*move.get_content()) + "\n" + times(kIndentChars, indent_) + "}";
   }
 
-  std::string ArithmeticExpressionCase(const rbg_parser::arithmetic_expression &expr) override { return expr.to_rbg(); } 
+  std::string ArithmeticExpressionCase(const rbg_parser::arithmetic_expression &expr) override { return expr.to_rbg(); }
 
   std::string GameMoveCase(const rbg_parser::game_move &move) override
   {
@@ -146,7 +177,7 @@ public:
     return result + trim(move.to_rbg(rbg_parser::options{}));
   }
 
-  std::string NoopCase(const rbg_parser::noop &) override { return "."; } 
+  std::string NoopCase(const rbg_parser::noop &) override { return "."; }
 
 private:
   const PrinterOptions &options_;
@@ -159,7 +190,13 @@ int main(int argc, const char *argv[])
 
   if (args.positional_args.size() != 1)
   {
-    std::cout << "Usage: " << argv[0] << " <game_file> [--modifier_indices true|false] [--add_dots_in_alternatives true|false] [--disable_adding_dots_in_shifttables true|false]" << std::endl;
+    std::cout << "Usage: " << argv[0] << " <game_file> [--modifier_indices true|false]"
+                                         "[--add_dots_in_alternatives true|false]"
+                                         "[--disable_adding_dots_in_shifttables true|false]"
+                                         "[--add_dots_in_stars true|false]"
+                                         "[--add_dots_after_alternatives true|false]"
+                                         "[--add_dots_after_stars true|false]"
+              << std::endl;
     return 0;
   }
 
@@ -185,6 +222,22 @@ int main(int argc, const char *argv[])
   {
     printer_options.disable_adding_dots_in_shifttables = args.flags.at("disable_adding_dots_in_shifttables") == "true";
   }
+
+  if (args.flags.find("add_dots_in_stars") != args.flags.end())
+  {
+    printer_options.add_dots_in_stars = args.flags.at("add_dots_in_stars") == "true";
+  }
+
+  if (args.flags.find("add_dots_after_alternatives") != args.flags.end())
+  {
+    printer_options.add_dots_after_alternatives = args.flags.at("add_dots_after_alternatives") == "true";
+  }
+
+  if (args.flags.find("add_dots_after_stars") != args.flags.end())
+  {
+    printer_options.add_dots_after_stars = args.flags.at("add_dots_after_stars") == "true";
+  }
+
 
   std::cout << "#board = " << parsed_game->get_board().to_rbg(true) << "\n";
   std::cout << parsed_game->get_declarations().to_rbg() << "\n";
