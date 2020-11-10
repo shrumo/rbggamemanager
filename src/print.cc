@@ -150,7 +150,6 @@ public:
       result += ")";
     }
 
-    // The star has to be the last character of a result here as we are cheking that in ConcatenationCase
     result += "*";
 
     return result;
