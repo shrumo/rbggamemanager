@@ -86,10 +86,6 @@ public:
     result += "\n" + times(kIndentChars, indent_);
     result += ")";
 
-    if(options_.add_dots_after_alternatives) {
-      result += " .";
-    }
-
     return result;
   }
 
@@ -118,12 +114,19 @@ public:
       }
       result += Printer(options_, indent_)(*m);
 
-      if(result.back() == '*') {
+      if(ParserNodeType(*m) == NodeType::kSum && options_.add_dots_after_alternatives) {
         bool is_previous_part_of_shift_table = ContainsOnlyShifts(*m);
         bool is_next_part_of_shift_table = i + 1 < move.get_content().size() && ContainsOnlyShifts(*move.get_content()[i+1]);
+        if(!is_previous_part_of_shift_table || !is_next_part_of_shift_table) {
+           result += " .";
+        }
+      }
 
-        if(options_.add_dots_after_stars && (!options_.disable_adding_dots_in_shifttables || !is_previous_part_of_shift_table || !is_next_part_of_shift_table)) {
-          result += " .";
+      if(ParserNodeType(*m) == NodeType::kStar && options_.add_dots_after_stars) {
+        bool is_previous_part_of_shift_table = ContainsOnlyShifts(*m);
+        bool is_next_part_of_shift_table = i + 1 < move.get_content().size() && ContainsOnlyShifts(*move.get_content()[i+1]);
+        if(!is_previous_part_of_shift_table || !is_next_part_of_shift_table) {
+           result += " .";
         }
       }
     }

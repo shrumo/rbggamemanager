@@ -44,6 +44,7 @@ set(GAMESTATE_FILES ${PARSER_FILES} ${GRAPH_FILES} src/game_description/names_re
         src/game_description/construction/moves_creator.cc src/game_description/construction/moves_creator.h
         src/game_description/construction/arithmetic_creator.cc src/game_description/construction/arithmetic_creator.h
         src/utility/moves_visitor.h src/utility/printer.cc
+        src/utility/move_type.h  src/utility/move_type.cc
         src/utility/printer.h src/game_state/construction/blocks_creator.cc src/game_state/construction/blocks_creator.h
         src/utility/shift_table_checker.h src/utility/shift_table_checker.cc
         src/game_description/moves/arithmetic_operation.cc src/game_description/moves/arithmetic_operation.h

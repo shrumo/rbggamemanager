@@ -9,6 +9,7 @@
 #include <game_description/board.h>
 #include <game_description/moves/arithmetic_operation.h>
 #include <utility/graph.h>
+#include <utility/move_type.h>
 
 namespace rbg {
   class Shift;
@@ -36,22 +37,6 @@ namespace rbg {
   class EmptyBackward;
 
   class EmptyForward;
-
-  enum class MoveType {
-    kShiftType,
-    kShiftTableType,
-    kArithmeticComparisonType,
-    kOffType,
-    kOnType,
-    kPlayerSwitchType,
-    kKeeperSwitchType,
-    kAssignmentType,
-    kPlayerCheck,
-    kConditionCheck,
-    kVisitedCheck,
-    kBackwardEmpty,
-    kForwardEmpty
-  };
 
   bool is_modifier_type(MoveType type);
 
