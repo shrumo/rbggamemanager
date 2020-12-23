@@ -119,6 +119,10 @@ add_executable(parser_test ${GRAPH_FILES} ${PARSER_FILES} src/tests/parser_test.
 target_link_libraries(parser_test rbgParser)
 add_test(parser_test parser_test)
 
+add_executable(nfa_board_product_test ${GAMESTATE_FILES} src/tests/nfa_board_product_test.cc)
+target_link_libraries(nfa_board_product_test rbgParser)
+add_test(nfa_board_product_test nfa_board_product_test)
+
 add_executable(creator_test ${GAMESTATE_FILES} src/tests/creator_test.cc)
 target_link_libraries(creator_test rbgParser)
 add_test(creator_test creator_test)

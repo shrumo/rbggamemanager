@@ -272,7 +272,7 @@ NfaBoardProduct::NfaBoardProduct(const Nfa<std::unique_ptr<Move>> &nfa, const Bo
         }
         node_t current_node = node_mapping_[top];
         node_t next_node = node_mapping_[next_node_vertex_pair];
-        AddEdge(current_node, transition.content().get(), next_node);
+        AddEdge(current_node, transition_id, next_node);
       }
     }
   }

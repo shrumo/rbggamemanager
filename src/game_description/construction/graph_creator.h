@@ -12,7 +12,8 @@
 #include "game_description/moves/moves.h"
 
 namespace rbg {
-  class NfaBoardProduct : public Graph<const Move*> {
+  // On edge of the graph are ids of original edges and a move that corresponds to that edge.
+  class NfaBoardProduct : public Graph<edge_id_t> {
   public:
     explicit NfaBoardProduct(const Nfa<std::unique_ptr<Move>> &nfa,
                              const Board &board,
@@ -27,6 +28,10 @@ namespace rbg {
     std::pair<vertex_id_t, node_t> vertex_node(node_t node) const {
       const auto& result = reverse_node_mapping_.at(node);
       return {result.vertex, result.node};
+    }
+
+    bool vertex_node_exists(vertex_id_t vertex, node_t node) const {
+      return node_mapping_.find({vertex, node}) != node_mapping_.end();
     }
 
     const NfaBoardProduct& sub_nfa_board(node_t condition_initial_node) const {
