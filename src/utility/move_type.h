@@ -28,6 +28,9 @@ namespace rbg {
   };
 
   NodeType ParserNodeType(const rbg_parser::game_move& move);
+  MoveType ParserMoveType(const rbg_parser::game_move & move);
+  bool IsModifier(MoveType type);
+  bool IsModifier(const rbg_parser::game_move& move);
 
  } // namespace rbg
 

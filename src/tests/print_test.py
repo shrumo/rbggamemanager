@@ -53,7 +53,25 @@ out = subprocess.getoutput('./print {} --add_dots_in_alternatives true --add_dot
 assert('#rules' in out)
 rules = out[out.find('#rules'):]
 rules = rules.replace(' ','').replace('\n','')
-print('All add dots options with disable_adding_dots_in_shifttables:',rules)
+print('Some dots options with disable_adding_dots_in_shifttables:',rules)
 assert(rules == '#rules=(->redup*(left+right).(.(up{e}))*.up(.left+.(right{e})).up[b](left*+right*)(up*+down*).->blue)')
+
+
+out = subprocess.getoutput('./print {} --add_dots_in_alternatives true --disable_adding_dots_in_shifttables true --omit_dots_with_same_level_modifiers true'.format(tmp_game_filename))
+
+assert('#rules' in out)
+rules = out[out.find('#rules'):]
+rules = rules.replace(' ','').replace('\n','')
+print('Dots in alternatives, omitting shifttables and omitting same concatenation dots:',rules)
+assert(rules == '#rules=(->redup*(left+right)(up{e})*.up(.left+.(right{e}))up[b](left*+right*)(up*+down*)->blue)')
+
+
+out = subprocess.getoutput('./print {} --add_dots_in_alternatives true --add_dots_after_alternatives true --omit_dots_with_same_level_modifiers true'.format(tmp_game_filename))
+
+assert('#rules' in out)
+rules = out[out.find('#rules'):]
+rules = rules.replace(' ','').replace('\n','')
+print('Dots in and after alternatives omitting same concatenation dots:',rules)
+assert(rules == '#rules=(->redup*(.left+.right).(up{e})*.up(.left+.(right{e})).up[b](.left*+.right*)(.up*+.down*).->blue)')
 
 os.remove(tmp_game_filename)
