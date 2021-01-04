@@ -38,13 +38,13 @@ std::string trim(std::string s)
 
 struct PrinterOptions
 {
-  bool print_numbers = false;                       // print the indices modifiers in a neat comment (ignored in conditionals)
-  bool add_dots_in_alternatives = false;            // add dots between each alternative element (ignored in conditionals)
-  bool add_dots_in_stars = false;                   // add dots inside star statements (ignored in conditionals)
-  bool add_dots_after_alternatives = false;         // add dots after alternative (ignored in conditionals)
-  bool add_dots_after_stars = false;                // add dots after stars (ignored in conditionals)
-  bool disable_adding_dots_in_shifttables = false;  // if add_dots_in_alternatives is (ignored in conditionals)
-  bool one_dot_or_modifier_per_concat = false; // there will be only one dot per concatenation
+  bool print_numbers = false;                      // print the indices modifiers in a neat comment (ignored in conditionals)
+  bool add_dots_in_alternatives = false;           // add dots between each alternative element (ignored in conditionals)
+  bool add_dots_in_stars = false;                  // add dots inside star statements (ignored in conditionals)
+  bool add_dots_after_alternatives = false;        // add dots after alternative (ignored in conditionals)
+  bool add_dots_after_stars = false;               // add dots after stars (ignored in conditionals)
+  bool disable_adding_dots_in_shifttables = false; // if add_dots_in_alternatives is (ignored in conditionals)
+  bool one_dot_or_modifier_per_concat = false;     // there will be only one dot per concatenation
 };
 
 class Printer : public AstFunction<std::string>
@@ -77,15 +77,25 @@ public:
         result += "+";
         result += "\n" + times(kIndentChars, indent_ + 1);
       }
+
+      bool modifier_or_dot_exist = ParserNodeType(*m) == NodeType::kMove && IsModifier(*m);
       if (options_.add_dots_in_alternatives && (!options_.disable_adding_dots_in_shifttables || !is_part_of_shift_table))
       {
-
-        if ( !options_.one_dot_or_modifier_per_concat || ParserNodeType(*m) != NodeType::kMove || !IsModifier(*m))
+        if (!options_.one_dot_or_modifier_per_concat || !modifier_or_dot_exist)
         {
           result += " .";
+          modifier_or_dot_exist = true;
         }
       }
+
       result += Printer(options_, indent_ + 1)(*m);
+
+      if (AddDotAfterSegment(*m) &&
+          (!options_.one_dot_or_modifier_per_concat || !modifier_or_dot_exist) &&
+          (!options_.disable_adding_dots_in_shifttables || !is_part_of_shift_table))
+      {
+        result += ".";
+      }
     }
 
     result += "\n" + times(kIndentChars, indent_);
@@ -129,25 +139,11 @@ public:
       }
       result += Printer(options_, indent_)(*m);
 
-      if (ParserNodeType(*m) == NodeType::kSum && options_.add_dots_after_alternatives)
+      if (AddDotAfterSegment(*m))
       {
         bool is_previous_part_of_shift_table = ContainsOnlyShifts(*m);
         bool is_next_part_of_shift_table = i + 1 < move.get_content().size() && ContainsOnlyShifts(*move.get_content()[i + 1]);
-        if (!is_previous_part_of_shift_table || !is_next_part_of_shift_table)
-        {
-          if (!options_.one_dot_or_modifier_per_concat || !modifier_or_dot_exist)
-          {
-            result += " .";
-            modifier_or_dot_exist = true;
-          }
-        }
-      }
-
-      if (ParserNodeType(*m) == NodeType::kStar && options_.add_dots_after_stars)
-      {
-        bool is_previous_part_of_shift_table = ContainsOnlyShifts(*m);
-        bool is_next_part_of_shift_table = i + 1 < move.get_content().size() && ContainsOnlyShifts(*move.get_content()[i + 1]);
-        if (!is_previous_part_of_shift_table || !is_next_part_of_shift_table)
+        if (!options_.disable_adding_dots_in_shifttables || !is_previous_part_of_shift_table || !is_next_part_of_shift_table)
         {
           if (!options_.one_dot_or_modifier_per_concat || !modifier_or_dot_exist)
           {
@@ -167,14 +163,31 @@ public:
     bool is_part_of_shift_table = ContainsOnlyShifts(move);
     std::string result;
 
-    if (options_.add_dots_in_stars && (!options_.disable_adding_dots_in_shifttables || !is_part_of_shift_table))
+    bool modifier_or_dot_exist = ParserNodeType(*move.get_content()) == NodeType::kMove && IsModifier(*move.get_content());
+    bool add_before = options_.add_dots_in_stars && (!options_.disable_adding_dots_in_shifttables || !is_part_of_shift_table);
+    bool add_after = AddDotAfterSegment(*move.get_content()) && (!options_.disable_adding_dots_in_shifttables || !is_part_of_shift_table);
+
+    bool adding_parantheses = (add_before || add_after) && (!options_.one_dot_or_modifier_per_concat || !modifier_or_dot_exist);
+    if (adding_parantheses)
     {
-      result += "( . ";
+      result += "(";
+    }
+
+    if (add_before && (!options_.one_dot_or_modifier_per_concat || !modifier_or_dot_exist))
+    {
+      result += ". ";
+      modifier_or_dot_exist = true;
     }
 
     result += Printer(options_, indent_)(*move.get_content());
 
-    if (options_.add_dots_in_stars && (!options_.disable_adding_dots_in_shifttables || !is_part_of_shift_table))
+    if (add_after && (!options_.one_dot_or_modifier_per_concat || !modifier_or_dot_exist))
+    {
+      result += ". ";
+      modifier_or_dot_exist = true;
+    }
+
+    if (adding_parantheses)
     {
       result += ")";
     }
@@ -204,6 +217,19 @@ public:
   }
 
   std::string NoopCase(const rbg_parser::noop &) override { return "."; }
+
+  bool AddDotAfterSegment(const rbg_parser::game_move &move)
+  {
+    if (ParserNodeType(move) == NodeType::kStar && options_.add_dots_after_stars)
+    {
+      return true;
+    }
+    if (ParserNodeType(move) == NodeType::kSum && options_.add_dots_after_alternatives)
+    {
+      return true;
+    }
+    return false;
+  }
 
 private:
   const PrinterOptions &options_;
