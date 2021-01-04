@@ -57,21 +57,46 @@ print('Some dots options with disable_adding_dots_in_shifttables:',rules)
 assert(rules == '#rules=(->redup*(left+right).(.(up{e}))*.up(.left+.(right{e})).up[b](left*+right*)(up*+down*).->blue)')
 
 
-out = subprocess.getoutput('./print {} --add_dots_in_alternatives true --disable_adding_dots_in_shifttables true --omit_dots_with_same_level_modifiers true'.format(tmp_game_filename))
+out = subprocess.getoutput('./print {} --add_dots_in_alternatives true --disable_adding_dots_in_shifttables true --one_dot_or_modifier_per_concat true'.format(tmp_game_filename))
 
 assert('#rules' in out)
 rules = out[out.find('#rules'):]
 rules = rules.replace(' ','').replace('\n','')
 print('Dots in alternatives, omitting shifttables and omitting same concatenation dots:',rules)
-assert(rules == '#rules=(->redup*(left+right)(up{e})*.up(.left+.(right{e}))up[b](left*+right*)(up*+down*)->blue)')
+assert(rules == '#rules=(->redup*(left+right)(up{e})*up(.left+.(right{e}))up[b](left*+right*)(up*+down*)->blue)')
 
 
-out = subprocess.getoutput('./print {} --add_dots_in_alternatives true --add_dots_after_alternatives true --omit_dots_with_same_level_modifiers true'.format(tmp_game_filename))
+out = subprocess.getoutput('./print {} --add_dots_in_alternatives true --add_dots_after_alternatives true --one_dot_or_modifier_per_concat true'.format(tmp_game_filename))
 
 assert('#rules' in out)
 rules = out[out.find('#rules'):]
 rules = rules.replace(' ','').replace('\n','')
 print('Dots in and after alternatives omitting same concatenation dots:',rules)
-assert(rules == '#rules=(->redup*(.left+.right).(up{e})*.up(.left+.(right{e})).up[b](.left*+.right*)(.up*+.down*).->blue)')
+assert(rules == '#rules=(->redup*(.left+.right)(up{e})*up(.left+.(right{e}))up[b](.left*+.right*)(.up*+.down*)->blue)')
 
 os.remove(tmp_game_filename)
+
+second_tmp_game_filename = 'second_tmp_game.rbg'
+second_tmp_game_text = '''
+#players = red(100), blue(50)
+#pieces = e, x, y
+#variables = turn(10)
+#board = rectangle(up, down, left, right,
+    [y,x]
+    [e,e])
+
+#rules = ([x] + [y])
+'''
+
+with open(second_tmp_game_filename,'w') as f:
+    print(second_tmp_game_text, file=f)
+
+out = subprocess.getoutput('./print {} --add_dots_in_alternatives true --one_dot_or_modifier_per_concat true'.format(second_tmp_game_filename))
+
+rules = out[out.find('#rules'):]
+rules = rules.replace(' ','').replace('\n','')
+print('([x] + [y]) with dots in alternative, when omitting dots on the same level as modifier:',rules)
+assert(rules == '#rules=([x]+[y])')
+
+os.remove(second_tmp_game_filename)
+

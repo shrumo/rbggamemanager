@@ -44,7 +44,7 @@ struct PrinterOptions
   bool add_dots_after_alternatives = false;         // add dots after alternative (ignored in conditionals)
   bool add_dots_after_stars = false;                // add dots after stars (ignored in conditionals)
   bool disable_adding_dots_in_shifttables = false;  // if add_dots_in_alternatives is (ignored in conditionals)
-  bool omit_dots_with_same_level_modifiers = false; // there will be only one dot per concatenation
+  bool one_dot_or_modifier_per_concat = false; // there will be only one dot per concatenation
 };
 
 class Printer : public AstFunction<std::string>
@@ -79,7 +79,11 @@ public:
       }
       if (options_.add_dots_in_alternatives && (!options_.disable_adding_dots_in_shifttables || !is_part_of_shift_table))
       {
-        result += " .";
+
+        if ( !options_.one_dot_or_modifier_per_concat || ParserNodeType(*m) != NodeType::kMove || !IsModifier(*m))
+        {
+          result += " .";
+        }
       }
       result += Printer(options_, indent_ + 1)(*m);
     }
@@ -106,7 +110,7 @@ public:
 
     for (const auto &move : move.get_content())
     {
-      if (IsModifier(*move))
+      if (ParserNodeType(*move) == NodeType::kMove && IsModifier(*move))
       {
         modifier_or_dot_exist = true;
       }
@@ -131,7 +135,7 @@ public:
         bool is_next_part_of_shift_table = i + 1 < move.get_content().size() && ContainsOnlyShifts(*move.get_content()[i + 1]);
         if (!is_previous_part_of_shift_table || !is_next_part_of_shift_table)
         {
-          if (!options_.omit_dots_with_same_level_modifiers || !modifier_or_dot_exist)
+          if (!options_.one_dot_or_modifier_per_concat || !modifier_or_dot_exist)
           {
             result += " .";
             modifier_or_dot_exist = true;
@@ -145,7 +149,7 @@ public:
         bool is_next_part_of_shift_table = i + 1 < move.get_content().size() && ContainsOnlyShifts(*move.get_content()[i + 1]);
         if (!is_previous_part_of_shift_table || !is_next_part_of_shift_table)
         {
-          if (!options_.omit_dots_with_same_level_modifiers || !modifier_or_dot_exist)
+          if (!options_.one_dot_or_modifier_per_concat || !modifier_or_dot_exist)
           {
             result += " .";
             modifier_or_dot_exist = true;
@@ -218,7 +222,7 @@ int main(int argc, const char *argv[])
                                          "[--add_dots_in_stars true|false]"
                                          "[--add_dots_after_alternatives true|false]"
                                          "[--add_dots_after_stars true|false]"
-                                         "[--omit_dots_with_same_level_modifiers true|false]"
+                                         "[--one_dot_or_modifier_per_concat true|false]"
               << std::endl;
     return 0;
   }
@@ -261,9 +265,9 @@ int main(int argc, const char *argv[])
     printer_options.add_dots_after_stars = args.flags.at("add_dots_after_stars") == "true";
   }
 
-  if (args.flags.find("omit_dots_with_same_level_modifiers") != args.flags.end())
+  if (args.flags.find("one_dot_or_modifier_per_concat") != args.flags.end())
   {
-    printer_options.add_dots_after_stars = args.flags.at("omit_dots_with_same_level_modifiers") == "true";
+    printer_options.one_dot_or_modifier_per_concat = args.flags.at("one_dot_or_modifier_per_concat") == "true";
   }
 
   std::cout << "#board = " << parsed_game->get_board().to_rbg(true) << "\n";
