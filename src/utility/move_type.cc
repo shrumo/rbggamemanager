@@ -7,9 +7,9 @@ namespace rbg {
 
 class GetNodeTypeFn : public AstFunction<NodeType> {
   public:
-     NodeType SumCase(const rbg_parser::sum &move) override { return NodeType::kSum; }
-     NodeType ConcatenationCase(const rbg_parser::concatenation &move) override { return NodeType::kConcat; }
-     NodeType StarCase(const rbg_parser::star_move &move) override { return NodeType::kStar; }
+     NodeType SumCase(const rbg_parser::sum &) override { return NodeType::kSum; }
+     NodeType ConcatenationCase(const rbg_parser::concatenation &) override { return NodeType::kConcat; }
+     NodeType StarCase(const rbg_parser::star_move &) override { return NodeType::kStar; }
      NodeType GameMoveCase(const rbg_parser::game_move &) { return NodeType::kMove; }
 };
 
