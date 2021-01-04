@@ -38,8 +38,6 @@ namespace rbg {
 
   class EmptyForward;
 
-  bool is_modifier_type(MoveType type);
-
   class MoveVisitor {
   public:
     virtual void Visit(const Shift &) = 0;
