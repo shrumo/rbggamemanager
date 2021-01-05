@@ -43,8 +43,9 @@ struct PrinterOptions
   bool add_dots_in_stars = false;                  // add dots inside star statements (ignored in conditionals)
   bool add_dots_after_alternatives = false;        // add dots after alternative (ignored in conditionals)
   bool add_dots_after_stars = false;               // add dots after stars (ignored in conditionals)
-  bool disable_adding_dots_in_shifttables = false; // if add_dots_in_alternatives is (ignored in conditionals)
+  bool disable_adding_dots_in_shifttables = false; // disables adding dots in shifttables
   bool one_dot_or_modifier_per_concat = false;     // there will be only one dot per concatenation
+  bool dots_only_in_shifttables = false;           // dots will be added only in shifttables
 };
 
 class Printer : public AstFunction<std::string>
@@ -79,7 +80,9 @@ public:
       }
 
       bool modifier_or_dot_exist = ParserNodeType(*m) == NodeType::kMove && IsModifier(*m);
-      if (options_.add_dots_in_alternatives && (!options_.disable_adding_dots_in_shifttables || !is_part_of_shift_table))
+      if (options_.add_dots_in_alternatives &&
+          (!options_.disable_adding_dots_in_shifttables || !is_part_of_shift_table) &&
+          (!options_.dots_only_in_shifttables || is_part_of_shift_table))
       {
         if (!options_.one_dot_or_modifier_per_concat || !modifier_or_dot_exist)
         {
@@ -92,7 +95,7 @@ public:
 
       if (AddDotAfterSegment(*m) &&
           (!options_.one_dot_or_modifier_per_concat || !modifier_or_dot_exist) &&
-          (!options_.disable_adding_dots_in_shifttables || !is_part_of_shift_table))
+          (!options_.disable_adding_dots_in_shifttables || !is_part_of_shift_table) && (!options_.dots_only_in_shifttables || is_part_of_shift_table))
       {
         result += ".";
       }
@@ -143,7 +146,9 @@ public:
       {
         bool is_previous_part_of_shift_table = ContainsOnlyShifts(*m);
         bool is_next_part_of_shift_table = i + 1 < move.get_content().size() && ContainsOnlyShifts(*move.get_content()[i + 1]);
-        if (!options_.disable_adding_dots_in_shifttables || !is_previous_part_of_shift_table || !is_next_part_of_shift_table)
+
+        if ((!options_.disable_adding_dots_in_shifttables || !is_previous_part_of_shift_table || !is_next_part_of_shift_table) &&
+            (!options_.dots_only_in_shifttables || (is_previous_part_of_shift_table && is_next_part_of_shift_table)))
         {
           if (!options_.one_dot_or_modifier_per_concat || !modifier_or_dot_exist)
           {
@@ -165,7 +170,7 @@ public:
 
     bool modifier_or_dot_exist = ParserNodeType(*move.get_content()) == NodeType::kMove && IsModifier(*move.get_content());
     bool add_before = options_.add_dots_in_stars && (!options_.disable_adding_dots_in_shifttables || !is_part_of_shift_table);
-    bool add_after = AddDotAfterSegment(*move.get_content()) && (!options_.disable_adding_dots_in_shifttables || !is_part_of_shift_table);
+    bool add_after = AddDotAfterSegment(*move.get_content()) && (!options_.disable_adding_dots_in_shifttables || !is_part_of_shift_table) && (!options_.dots_only_in_shifttables || is_part_of_shift_table);
 
     bool adding_parantheses = (add_before || add_after) && (!options_.one_dot_or_modifier_per_concat || !modifier_or_dot_exist);
     if (adding_parantheses)
@@ -245,6 +250,7 @@ int main(int argc, const char *argv[])
     std::cout << "Usage: " << argv[0] << " <game_file> [--modifier_indices true|false]"
                                          "[--add_dots_in_alternatives true|false]"
                                          "[--disable_adding_dots_in_shifttables true|false]"
+                                         "[--dots_only_in_shifttables true|false]"
                                          "[--add_dots_in_stars true|false]"
                                          "[--add_dots_after_alternatives true|false]"
                                          "[--add_dots_after_stars true|false]"
@@ -294,6 +300,11 @@ int main(int argc, const char *argv[])
   if (args.flags.find("one_dot_or_modifier_per_concat") != args.flags.end())
   {
     printer_options.one_dot_or_modifier_per_concat = args.flags.at("one_dot_or_modifier_per_concat") == "true";
+  }
+
+  if (args.flags.find("dots_only_in_shifttables") != args.flags.end())
+  {
+    printer_options.dots_only_in_shifttables = args.flags.at("dots_only_in_shifttables") == "true";
   }
 
   std::cout << "#board = " << parsed_game->get_board().to_rbg(true) << "\n";
