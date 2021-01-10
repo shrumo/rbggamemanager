@@ -9,7 +9,7 @@
 #include <parser/parser_wrapper.h>
 
 namespace rbg {
-  GameState CreateGameState(const std::string &game_text);
+GameState CreateGameState(const std::string &game_text);
 }
 
-#endif //RBGGAMEMANAGER_GAME_STATE_CREATOR_H
+#endif  // RBGGAMEMANAGER_GAME_STATE_CREATOR_H

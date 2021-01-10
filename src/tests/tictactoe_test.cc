@@ -4,14 +4,15 @@
 
 #include <game_state/construction/game_state_creator.h>
 #include <utility/calculate_perft.h>
-#include <iostream>
 #include <utility/printer.h>
 
-namespace {
-  using namespace rbg;
-  using namespace std;
+#include <iostream>
 
-  const char *kTicTacToeGame = R"LIM(
+namespace {
+using namespace rbg;
+using namespace std;
+
+const char *kTicTacToeGame = R"LIM(
 // TicTacToe
 
 #players = xplayer(100), oplayer(100)
@@ -45,7 +46,7 @@ namespace {
   )*
 
 )LIM";
-}
+}  // namespace
 
 int main() {
   auto game = CreateGameState(kTicTacToeGame);
@@ -53,5 +54,6 @@ int main() {
   assert(result.leaves_count == 127872);
   assert(result.nodes_count == 549946);
   game.Apply(game.Moves()[0]);
-  std::cout << RectangularBoardDescription(game.board_content(), game.declarations());
+  std::cout << RectangularBoardDescription(game.board_content(),
+                                           game.declarations());
 }

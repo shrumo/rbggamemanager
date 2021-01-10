@@ -2,15 +2,16 @@
 // Created by shrum on 21.05.19.
 //
 #include <utility/graph.h>
+
 #include <algorithm>
-#include <iostream>
 #include <cassert>
+#include <iostream>
 
 using namespace rbg;
 
 std::vector<node_t> SortedOutNeighbours(const Graph<int> &g, node_t node) {
   std::vector<node_t> result;
-  for(const auto& edge : g.EdgesFrom(node)) {
+  for (const auto &edge : g.EdgesFrom(node)) {
     result.push_back(edge.to());
   }
   std::sort(result.begin(), result.end());
@@ -19,7 +20,7 @@ std::vector<node_t> SortedOutNeighbours(const Graph<int> &g, node_t node) {
 
 std::vector<node_t> SortedInNeighbours(const Graph<int> &g, node_t node) {
   std::vector<node_t> result;
-  for(const auto& edge : g.EdgesTo(node)) {
+  for (const auto &edge : g.EdgesTo(node)) {
     result.push_back(edge.from());
   }
   std::sort(result.begin(), result.end());
@@ -47,7 +48,9 @@ int main() {
 
   assert(g.nodes_map().size() == 4);
   assert(g.edges_map().size() == 5);
-  std::cout << GraphDescription(g, [](const int &a) { return std::to_string(a); }) << std::endl;
+  std::cout << GraphDescription(g, [](const int &a) {
+    return std::to_string(a);
+  }) << std::endl;
   assert(SortedInNeighbours(g, v1) == std::vector<node_t>({v3, v4}));
   assert(SortedInNeighbours(g, v2) == std::vector<node_t>({v1}));
 
@@ -71,6 +74,6 @@ int main() {
   g.MergeWithNode(v2, v3);
   assert(SortedOutNeighbours(g, v2) == std::vector<node_t>({v2, v2, v4}));
 
-  std::cout << GraphDescription(g, [](const int &a) { return std::to_string(a); });
-
+  std::cout << GraphDescription(g,
+                                [](const int &a) { return std::to_string(a); });
 }

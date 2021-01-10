@@ -17,7 +17,8 @@ namespace rbg {
     kConditionCheck,
     kVisitedCheck,
     kBackwardEmpty,
-    kForwardEmpty
+    kForwardEmpty,
+    kNoop
   };
 
   enum class NodeType {

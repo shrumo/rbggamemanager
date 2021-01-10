@@ -2,6 +2,7 @@
 // Created by shrum on 03.06.19.
 //
 #include <parser/parser_wrapper.h>
+
 #include <cassert>
 
 using namespace rbg;
@@ -41,12 +42,11 @@ class ActionsCount : public AstFunction<int> {
     return result;
   }
 
-  int GameMoveCase(const rbg_parser::game_move &) override {
-    return 1;
-  }
+  int GameMoveCase(const rbg_parser::game_move &) override { return 1; }
 
   int DefaultCase() override {
-    throw std::logic_error("This shouldn't match. We are not visiting arithmetic nodes.");
+    throw std::logic_error(
+        "This shouldn't match. We are not visiting arithmetic nodes.");
   }
 };
 

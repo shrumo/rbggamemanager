@@ -4,14 +4,15 @@
 
 #include <game_state/construction/game_state_creator.h>
 #include <utility/calculate_perft.h>
-#include <iostream>
 #include <utility/printer.h>
 
-namespace {
-  using namespace rbg;
-  using namespace std;
+#include <iostream>
 
-  const char *kArimaaGame = R"LIM(
+namespace {
+using namespace rbg;
+using namespace std;
+
+const char *kArimaaGame = R"LIM(
 // Arimaa
 // -- The state after the move must be different.
 // -- No rule forbidding a state repeated three times.
@@ -216,7 +217,7 @@ namespace {
     )*
 
 )LIM";
-}
+}  // namespace
 
 int main() {
   auto game = CreateGameState(kArimaaGame);
@@ -224,5 +225,6 @@ int main() {
   assert(result.leaves_count == 8160);
   assert(result.nodes_count == 8257);
   game.Apply(game.Moves()[0]);
-  std::cout << RectangularBoardDescription(game.board_content(), game.declarations());
+  std::cout << RectangularBoardDescription(game.board_content(),
+                                           game.declarations());
 }

@@ -4,14 +4,15 @@
 
 #include <game_state/construction/game_state_creator.h>
 #include <utility/calculate_perft.h>
-#include <iostream>
 #include <utility/printer.h>
 
-namespace {
-  using namespace rbg;
-  using namespace std;
+#include <iostream>
 
-  const char *kWeirdConditionsTest = R"LIM(
+namespace {
+using namespace rbg;
+using namespace std;
+
+const char* kWeirdConditionsTest = R"LIM(
   // Weird one
 
   #players = one(100)
@@ -50,21 +51,19 @@ namespace {
       {! anyNeighbour(x)* anyNeighbour(e) }
       ->one
   )LIM";
-}
+}  // namespace
 
 int main() {
   try {
-      auto game = CreateGameState(kWeirdConditionsTest);
-      auto moves = game.Moves();
-      assert(moves.size() == 0);
-      std::cout << RectangularBoardDescription(game.board_content(), game.declarations());
-      std::cout << "There should be no moves." << std::endl;
-  }
-  catch(rbg_parser::message& m){
-    std::cout<<m.as_error()<<std::endl;
-  }
-  catch(std::exception& e){
-    std::cout<<e.what()<<std::endl;
+    auto game = CreateGameState(kWeirdConditionsTest);
+    auto moves = game.Moves();
+    assert(moves.size() == 0);
+    std::cout << RectangularBoardDescription(game.board_content(),
+                                             game.declarations());
+    std::cout << "There should be no moves." << std::endl;
+  } catch (rbg_parser::message& m) {
+    std::cout << m.as_error() << std::endl;
+  } catch (std::exception& e) {
+    std::cout << e.what() << std::endl;
   }
 }
- 

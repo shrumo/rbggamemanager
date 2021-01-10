@@ -4,14 +4,15 @@
 
 #include <game_state/construction/game_state_creator.h>
 #include <utility/calculate_perft.h>
-#include <iostream>
 #include <utility/printer.h>
 
-namespace {
-  using namespace rbg;
-  using namespace std;
+#include <iostream>
 
-  const char *kChessGame = R"LIM(
+namespace {
+using namespace rbg;
+using namespace std;
+
+const char *kChessGame = R"LIM(
 // Chess
 // -- No rules about repeating states or tie after given number of turns without pawn moves.
 // -- The play is limited to 200 turns.
@@ -186,7 +187,7 @@ namespace {
         turn(down;up;black;white)
     )*
 )LIM";
-}
+}  // namespace
 
 int main() {
   auto game = CreateGameState(kChessGame);
@@ -194,5 +195,6 @@ int main() {
   assert(result.leaves_count == 8902);
   assert(result.nodes_count == 9323);
   game.Apply(game.Moves()[0]);
-  std::cout << RectangularBoardDescription(game.board_content(), game.declarations());
+  std::cout << RectangularBoardDescription(game.board_content(),
+                                           game.declarations());
 }

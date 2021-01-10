@@ -8,7 +8,8 @@
 #include "game_description/moves/moves.h"
 
 namespace rbg {
-  std::unique_ptr<Move> CreateMove(const rbg_parser::game_move &move, const Declarations &declarations);
+std::unique_ptr<Move> CreateMove(const rbg_parser::game_move &move,
+                                 const Declarations &declarations);
 }
 
-#endif //RBGGAMEMANAGER_MOVES_CREATOR_H
+#endif  // RBGGAMEMANAGER_MOVES_CREATOR_H

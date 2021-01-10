@@ -3,6 +3,7 @@
 //
 
 #include "arithmetic_operation.h"
+
 #include "game_state/game_state.h"
 
 using namespace rbg;

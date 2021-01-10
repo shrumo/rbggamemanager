@@ -4,15 +4,15 @@
 
 #include <game_state/construction/game_state_creator.h>
 #include <utility/calculate_perft.h>
-#include <iostream>
 #include <utility/printer.h>
 
+#include <iostream>
 
 namespace {
-  using namespace rbg;
-  using namespace std;
+using namespace rbg;
+using namespace std;
 
-  const char *kAmazonsGame = R"LIM(
+const char *kAmazonsGame = R"LIM(
 // Amazons
 
 #players = white(100), black(100)
@@ -53,7 +53,7 @@ namespace {
 
 #rules = (turn(w; white; black) turn(b; black; white))*
 )LIM";
-}
+}  // namespace
 
 int main() {
   auto game = CreateGameState(kAmazonsGame);
@@ -61,5 +61,6 @@ int main() {
   assert(result.leaves_count == 4307152);
   assert(result.nodes_count == 4309329);
   game.Apply(game.Moves()[0]);
-  std::cout << RectangularBoardDescription(game.board_content(), game.declarations());
+  std::cout << RectangularBoardDescription(game.board_content(),
+                                           game.declarations());
 }

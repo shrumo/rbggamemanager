@@ -3,6 +3,7 @@
 //
 
 #include <game_state/construction/game_state_creator.h>
+
 #include <iostream>
 
 using namespace rbg;
@@ -62,9 +63,11 @@ int main() {
       } else {
         first_printed = true;
       }
-      cout << e.vertex << " (" << game.declarations().initial_board().vertices_names().Name(e.vertex) << ")"
-           << " "
-           << e.modifier_index;
+      cout << e.vertex << " ("
+           << game.declarations().initial_board().vertices_names().Name(
+                  e.vertex)
+           << ")"
+           << " " << e.modifier_index;
     }
     cout << "\n";
   }

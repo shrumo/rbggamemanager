@@ -5,180 +5,183 @@
 #ifndef RBGGAMEMANAGER_ARITHMETIC_OPERATION_H
 #define RBGGAMEMANAGER_ARITHMETIC_OPERATION_H
 
-#include <vector>
 #include <game_description/declarations.h>
 
+#include <vector>
+
 namespace rbg {
-  class GameState;
+class GameState;
 }
 
 namespace rbg {
-  class VariableValue;
+class VariableValue;
 
-  class ConstantValue;
+class ConstantValue;
 
-  class SumValue;
+class SumValue;
 
-  class SubtractionValue;
+class SubtractionValue;
 
-  class ProductValue;
+class ProductValue;
 
-  class DivisionValue;
+class DivisionValue;
 
-  class PieceCountValue;
+class PieceCountValue;
 
-  class ArithmeticOperationVisitor {
-  public:
-    virtual void Visit(const VariableValue &) = 0;
+class ArithmeticOperationVisitor {
+ public:
+  virtual void Visit(const VariableValue &) = 0;
 
-    virtual void Visit(const ConstantValue &) = 0;
+  virtual void Visit(const ConstantValue &) = 0;
 
-    virtual void Visit(const SumValue &) = 0;
+  virtual void Visit(const SumValue &) = 0;
 
-    virtual void Visit(const SubtractionValue &) = 0;
+  virtual void Visit(const SubtractionValue &) = 0;
 
-    virtual void Visit(const ProductValue &) = 0;
+  virtual void Visit(const ProductValue &) = 0;
 
-    virtual void Visit(const DivisionValue &) = 0;
+  virtual void Visit(const DivisionValue &) = 0;
 
-    virtual void Visit(const PieceCountValue &) = 0;
-  };
+  virtual void Visit(const PieceCountValue &) = 0;
+};
 
-  class ArithmeticOperation {
-  public:
-    virtual variable_value_t Value(const GameState &s) const = 0;
+class ArithmeticOperation {
+ public:
+  virtual variable_value_t Value(const GameState &s) const = 0;
 
-    virtual void Accept(ArithmeticOperationVisitor &) const = 0;
+  virtual void Accept(ArithmeticOperationVisitor &) const = 0;
 
-    virtual ~ArithmeticOperation() = default;
-  };
+  virtual ~ArithmeticOperation() = default;
+};
 
-  class VariableValue : public ArithmeticOperation {
-  public:
-    explicit VariableValue(variable_id_t variable_id) : variable_id_(variable_id) {}
+class VariableValue : public ArithmeticOperation {
+ public:
+  explicit VariableValue(variable_id_t variable_id)
+      : variable_id_(variable_id) {}
 
-    variable_value_t Value(const GameState &s) const override;
+  variable_value_t Value(const GameState &s) const override;
 
+  void Accept(ArithmeticOperationVisitor &visitor) const override {
+    visitor.Visit(*this);
+  }
 
-    void Accept(ArithmeticOperationVisitor &visitor) const override {
-      visitor.Visit(*this);
-    }
+  variable_id_t variable_id() const { return variable_id_; }
 
+ private:
+  variable_id_t variable_id_;
+};
 
-    variable_id_t variable_id() const { return variable_id_; }
+class ConstantValue : public ArithmeticOperation {
+ public:
+  explicit ConstantValue(variable_value_t value) : value_(value) {}
 
-  private:
-    variable_id_t variable_id_;
-  };
+  variable_value_t Value(const GameState &) const override;
 
-  class ConstantValue : public ArithmeticOperation {
-  public:
-    explicit ConstantValue(variable_value_t value) : value_(value) {}
+  void Accept(ArithmeticOperationVisitor &visitor) const override {
+    visitor.Visit(*this);
+  }
 
-    variable_value_t Value(const GameState &) const override;
+  variable_value_t value() const { return value_; }
 
-    void Accept(ArithmeticOperationVisitor &visitor) const override {
-      visitor.Visit(*this);
-    }
+ private:
+  variable_value_t value_;
+};
 
-    variable_value_t value() const { return value_; }
+class SumValue : public ArithmeticOperation {
+ public:
+  explicit SumValue(std::vector<std::unique_ptr<ArithmeticOperation>> summands)
+      : summands_(std::move(summands)) {}
 
-  private:
-    variable_value_t value_;
-  };
+  variable_value_t Value(const GameState &s) const override;
 
-  class SumValue : public ArithmeticOperation {
-  public:
-    explicit SumValue(std::vector<std::unique_ptr<ArithmeticOperation>> summands) : summands_(std::move(summands)) {}
+  void Accept(ArithmeticOperationVisitor &visitor) const override {
+    visitor.Visit(*this);
+  }
 
-    variable_value_t Value(const GameState &s) const override;
+  const std::vector<std::unique_ptr<ArithmeticOperation>> &summands() const {
+    return summands_;
+  }
 
-    void Accept(ArithmeticOperationVisitor &visitor) const override {
-      visitor.Visit(*this);
-    }
+ private:
+  std::vector<std::unique_ptr<ArithmeticOperation>> summands_;
+};
 
-    const std::vector<std::unique_ptr<ArithmeticOperation>> &summands() const {
-      return summands_;
-    }
+class SubtractionValue : public ArithmeticOperation {
+ public:
+  explicit SubtractionValue(
+      std::vector<std::unique_ptr<ArithmeticOperation>> elements)
+      : elements_(std::move(elements)) {}
 
-  private:
-    std::vector<std::unique_ptr<ArithmeticOperation>> summands_;
-  };
+  variable_value_t Value(const GameState &s) const override;
 
-  class SubtractionValue : public ArithmeticOperation {
-  public:
-    explicit SubtractionValue(std::vector<std::unique_ptr<ArithmeticOperation>> elements) : elements_(
-        std::move(elements)) {}
+  void Accept(ArithmeticOperationVisitor &visitor) const override {
+    visitor.Visit(*this);
+  }
 
-    variable_value_t Value(const GameState &s) const override;
+  const std::vector<std::unique_ptr<ArithmeticOperation>> &elements() const {
+    return elements_;
+  }
 
-    void Accept(ArithmeticOperationVisitor &visitor) const override {
-      visitor.Visit(*this);
-    }
+ private:
+  std::vector<std::unique_ptr<ArithmeticOperation>> elements_;
+};
 
+class ProductValue : public ArithmeticOperation {
+ public:
+  explicit ProductValue(
+      std::vector<std::unique_ptr<ArithmeticOperation>> factors)
+      : factors_(std::move(factors)) {}
 
-    const std::vector<std::unique_ptr<ArithmeticOperation>> &elements() const {
-      return elements_;
-    }
+  variable_value_t Value(const GameState &s) const override;
 
-  private:
-    std::vector<std::unique_ptr<ArithmeticOperation>> elements_;
-  };
+  void Accept(ArithmeticOperationVisitor &visitor) const override {
+    visitor.Visit(*this);
+  }
 
-  class ProductValue : public ArithmeticOperation {
-  public:
-    explicit ProductValue(std::vector<std::unique_ptr<ArithmeticOperation>> factors) : factors_(std::move(factors)) {}
+  const std::vector<std::unique_ptr<ArithmeticOperation>> &factors() const {
+    return factors_;
+  }
 
-    variable_value_t Value(const GameState &s) const override;
+ private:
+  std::vector<std::unique_ptr<ArithmeticOperation>> factors_;
+};
 
-    void Accept(ArithmeticOperationVisitor &visitor) const override {
-      visitor.Visit(*this);
-    }
+class DivisionValue : public ArithmeticOperation {
+ public:
+  explicit DivisionValue(
+      std::vector<std::unique_ptr<ArithmeticOperation>> elements)
+      : elements_(std::move(elements)) {}
 
+  variable_value_t Value(const GameState &s) const override;
 
-    const std::vector<std::unique_ptr<ArithmeticOperation>> &factors() const {
-      return factors_;
-    }
+  void Accept(ArithmeticOperationVisitor &visitor) const override {
+    visitor.Visit(*this);
+  }
 
-  private:
-    std::vector<std::unique_ptr<ArithmeticOperation>> factors_;
-  };
+  const std::vector<std::unique_ptr<ArithmeticOperation>> &elements() const {
+    return elements_;
+  }
 
-  class DivisionValue : public ArithmeticOperation {
-  public:
-    explicit DivisionValue(std::vector<std::unique_ptr<ArithmeticOperation>> elements) : elements_(
-        std::move(elements)) {}
+ private:
+  std::vector<std::unique_ptr<ArithmeticOperation>> elements_;
+};
 
-    variable_value_t Value(const GameState &s) const override;
+class PieceCountValue : public ArithmeticOperation {
+ public:
+  explicit PieceCountValue(piece_id_t piece) : piece_(piece) {}
 
-    void Accept(ArithmeticOperationVisitor &visitor) const override {
-      visitor.Visit(*this);
-    }
+  variable_value_t Value(const GameState &s) const override;
 
-    const std::vector<std::unique_ptr<ArithmeticOperation>> &elements() const {
-      return elements_;
-    }
+  void Accept(ArithmeticOperationVisitor &visitor) const override {
+    visitor.Visit(*this);
+  }
 
-  private:
-    std::vector<std::unique_ptr<ArithmeticOperation>> elements_;
-  };
+  piece_id_t piece() const { return piece_; }
 
-  class PieceCountValue : public ArithmeticOperation {
-  public:
-    explicit PieceCountValue(piece_id_t piece) : piece_(piece) {}
+ private:
+  piece_id_t piece_;
+};
 
-    variable_value_t Value(const GameState &s) const override;
+}  // namespace rbg
 
-    void Accept(ArithmeticOperationVisitor &visitor) const override {
-      visitor.Visit(*this);
-    }
-
-    piece_id_t piece() const { return piece_; }
-
-  private:
-    piece_id_t piece_;
-  };
-
-}
-
-#endif //RBGGAMEMANAGER_ARITHMETIC_OPERATION_H
+#endif  // RBGGAMEMANAGER_ARITHMETIC_OPERATION_H

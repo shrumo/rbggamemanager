@@ -3,16 +3,20 @@
 //
 
 #include "modifying_application.h"
+
 #include <game_state/game_state.h>
 
 using namespace rbg;
 
-void ModifyingApplication::PushVisitedStackAndAddToApplied(rbg::GameState *state) const {
+void ModifyingApplication::PushVisitedStackAndAddToApplied(
+    rbg::GameState *state) const {
   state->blocks_.PushStacks();
-  state->applied_modifiers_.push_back(ModifierApplication{state->current_pos_, index_});
+  state->applied_modifiers_.push_back(
+      ModifierApplication{state->current_pos_, index_});
 }
 
-void ModifyingApplication::PopVisitedStackAndAddToApplied(rbg::GameState *state)  const {
+void ModifyingApplication::PopVisitedStackAndAddToApplied(
+    rbg::GameState *state) const {
   state->applied_modifiers_.pop_back();
   state->blocks_.PopStacks();
 }

@@ -8,9 +8,9 @@ std::string rbg::EncodeMove(const rbg::GameMove &move) {
   std::stringstream stream;
   for (size_t i = 0; i < move.size(); i++) {
     const auto &modifier_application = move[i];
-    stream << modifier_application.vertex << " " << modifier_application.modifier_index;
-    if (i != move.size() - 1)
-      stream << " ";
+    stream << modifier_application.vertex << " "
+           << modifier_application.modifier_index;
+    if (i != move.size() - 1) stream << " ";
   }
   return stream.str();
 }
@@ -25,6 +25,3 @@ rbg::GameMove rbg::DecodeMove(const std::string &message) {
   }
   return result;
 }
-
-
-

@@ -3,6 +3,7 @@
 //
 
 #include <game_description/board.h>
+
 #include <cassert>
 #include <iostream>
 

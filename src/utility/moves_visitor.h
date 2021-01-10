@@ -38,6 +38,8 @@ namespace rbg {
 
     virtual ResultType EmptyForwardCase(const EmptyForward &move) { return DefaultCase(move); }
 
+    virtual ResultType NoopCase(const Noop &move) { return DefaultCase(move); }
+
     virtual ResultType DefaultCase(const Move &) { return ResultType(); }
 
     template<typename NodeType>
@@ -112,6 +114,11 @@ namespace rbg {
 
     void Visit(const EmptyForward &m) override {
       result_ = EmptyForwardCase(m);
+      result_exists_ = true;
+    };
+
+    void Visit(const Noop &m) override {
+      result_ = NoopCase(m);
       result_exists_ = true;
     };
 

@@ -3,6 +3,7 @@
 //
 
 #include <game_description/names_resolver.h>
+
 #include <cassert>
 #include <iostream>
 
@@ -14,7 +15,8 @@ int main() {
   resolver.AddName("cat");
   assert(resolver.size() == 1);
   assert(resolver.AddName("cat") == 0 &&
-         "The indices given to the names should range from 0 to size and be in order of adding.");
+         "The indices given to the names should range from 0 to size and be in "
+         "order of adding.");
   resolver.AddName("dog");
   assert(resolver.size() == 2);
   resolver.AddName("cat");

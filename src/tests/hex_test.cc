@@ -4,14 +4,15 @@
 
 #include <game_state/construction/game_state_creator.h>
 #include <utility/calculate_perft.h>
-#include <iostream>
 #include <utility/printer.h>
 
-namespace {
-  using namespace rbg;
-  using namespace std;
+#include <iostream>
 
-  const char *kHexGame = R"LIM(
+namespace {
+using namespace rbg;
+using namespace std;
+
+const char *kHexGame = R"LIM(
 // Hex
 
 #players = red(100), blue(100)
@@ -59,7 +60,7 @@ namespace {
     turn(blue; red; NE; SW; b)
   )*
 )LIM";
-}
+}  // namespace
 
 int main() {
   auto game = CreateGameState(kHexGame);
@@ -67,5 +68,6 @@ int main() {
   assert(result.leaves_count == 1727880);
   assert(result.nodes_count == 1742522);
   game.Apply(game.Moves()[0]);
-  std::cout << RectangularBoardDescription(game.board_content(), game.declarations());
+  std::cout << RectangularBoardDescription(game.board_content(),
+                                           game.declarations());
 }

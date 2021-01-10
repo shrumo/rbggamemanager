@@ -8,31 +8,26 @@
 #include <unordered_map>
 
 namespace std_ext {
-  template<typename Iterator>
-  class range {
-   public:
-    range(Iterator begin, Iterator end, std::size_t size) : begin_(begin), end_(end), size_(size) {}
+template <typename Iterator>
+class range {
+ public:
+  range(Iterator begin, Iterator end, std::size_t size)
+      : begin_(begin), end_(end), size_(size) {}
 
-    range(Iterator begin, Iterator end) : begin_(begin), end_(end) {
-      size_ = end - begin;
-    }
+  range(Iterator begin, Iterator end) : begin_(begin), end_(end) {
+    size_ = end - begin;
+  }
 
-    Iterator begin() {
-      return begin_;
-    }
+  Iterator begin() { return begin_; }
 
-    Iterator end() {
-      return end_;
-    }
+  Iterator end() { return end_; }
 
-    size_t size() const {
-      return size_;
-    }
+  size_t size() const { return size_; }
 
-  private:
-    Iterator begin_, end_;
-    std::size_t size_;
-  };
-}
+ private:
+  Iterator begin_, end_;
+  std::size_t size_;
+};
+}  // namespace std_ext
 
-#endif //RBGGAMEMANAGER_RANGE_H
+#endif  // RBGGAMEMANAGER_RANGE_H
