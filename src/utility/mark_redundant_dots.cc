@@ -15,27 +15,11 @@ bool IsModifierNode(const Nfa<std::unique_ptr<Move>> &nfa,
 bool MultipleModifierPathsForward(const Nfa<std::unique_ptr<Move>> &nfa,
                                   const NfaBoardProduct &board_product,
                                   node_t noop_vertex_node) {
-  std::unordered_set<node_t> visited;
-  std::queue<node_t> to_visit;
-
-  visited.insert(noop_vertex_node);
-  to_visit.push(noop_vertex_node);
-  while (!to_visit.empty()) {
-    node_t current = to_visit.front();
-    to_visit.pop();
-    for (const auto &edge : board_product.EdgesFrom(current)) {
-      if (visited.find(edge.to()) != visited.end()) {
-        if (IsModifierNode(nfa, board_product, edge.to())) {
-          return true;
-        }
-        continue;
-      }
-
-      to_visit.push(edge.to());
-      visited.insert(edge.to());
-    }
+  while(board_product.edges_ids_from(noop_vertex_node).size() == 1 && !IsModifierNode(nfa, board_product, noop_vertex_node)) {
+    noop_vertex_node = board_product.EdgesFrom(noop_vertex_node).begin()->to();
   }
-  return false;
+
+  return board_product.edges_ids_from(noop_vertex_node).size() > 1;
 }
 
 bool MultipleModifierPathsBackward(const Nfa<std::unique_ptr<Move>> &nfa,
@@ -44,24 +28,11 @@ bool MultipleModifierPathsBackward(const Nfa<std::unique_ptr<Move>> &nfa,
   std::unordered_set<node_t> visited;
   std::queue<node_t> to_visit;
 
-  visited.insert(noop_vertex_node);
-  to_visit.push(noop_vertex_node);
-  while (!to_visit.empty()) {
-    node_t current = to_visit.front();
-    to_visit.pop();
-    for (const auto &edge : board_product.EdgesTo(current)) {
-      if (visited.find(edge.to()) != visited.end()) {
-        if (IsModifierNode(nfa, board_product, edge.from())) {
-          return true;
-        }
-        continue;
-      }
-
-      to_visit.push(edge.from());
-      visited.insert(edge.from());
-    }
+   while(board_product.edges_ids_to(noop_vertex_node).size() == 1 && !IsModifierNode(nfa, board_product, noop_vertex_node)) {
+    noop_vertex_node = board_product.EdgesTo(noop_vertex_node).begin()->from();
   }
-  return false;
+
+  return board_product.edges_ids_to(noop_vertex_node).size() > 1;
 }
 
 bool IsNoopRedundant(const NfaBoardProduct &board_product, node_t nfa_noop_node,
