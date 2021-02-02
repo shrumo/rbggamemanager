@@ -1,4 +1,5 @@
 from rbg import *
+import random
 import argparse
 
 def main():
@@ -15,13 +16,17 @@ def main():
   while moves:
     if state.current_player() == player:
       client.ReadDeadline()
-      move = moves[0]
+      move = moves[random.randint(0,len(moves)-1)]
       state.Apply(move)
       client.Write(move)
     else:
       move = client.Read()
       state.Apply(move)
     moves = state.Moves()
+    if not moves:
+        client.ReadReset()
+        state = CreateGameState(client.description())
+        moves = state.Moves()
 
 if __name__=="__main__":
   main()
