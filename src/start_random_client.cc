@@ -41,7 +41,7 @@ int main(int argc, const char* argv[]) {
                  1000.0;  // Internally store times in seconds
   }
 
-  double time_to_disconnect = 0.0;
+  double time_to_disconnect = -1.0;
   if (args.flags.find("time") != args.flags.end()) {
     time_to_disconnect = std::stod(args.flags.at("time")) /
                          1000.0;  // Internally store times in seconds
@@ -128,8 +128,7 @@ int main(int argc, const char* argv[]) {
     std::cout << VariablesValuesDescription(state) << std::endl;
     state.Reset();
     client.ReadReset();
-  } while (std::chrono::duration<double>(std::chrono::system_clock::now() -
-                                         first_game_begin)
-               .count() < time_to_disconnect);
+  } while (time_to_disconnect < 0.0 ||
+           std::chrono::duration<double>(std::chrono::system_clock::now() - first_game_begin).count() < time_to_disconnect);
   return 0;
 }
