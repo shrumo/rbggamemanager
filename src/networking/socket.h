@@ -16,6 +16,11 @@ using asio::ip::tcp;
 std::string EncodeMove(const rbg::GameMove &move);
 rbg::GameMove DecodeMove(const std::string &message);
 
+inline void set_socket_options(tcp::socket &socket) {
+  socket.set_option(asio::ip::tcp::no_delay(true));
+  socket.set_option(asio::detail::socket_option::boolean<IPPROTO_TCP, TCP_QUICKACK>(true));
+}
+
 class StringSocket {
  public:
   explicit StringSocket(asio::io_service &service) : socket_(service) {}
