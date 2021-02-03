@@ -65,6 +65,7 @@ class Server {
         acceptor_.accept(socket);
         std::cout << "Got client number " << clients_sockets_.size()
                   << std::endl;
+        set_socket_options(socket);
         clients_sockets_.emplace_back(std::move(socket));
       }
 

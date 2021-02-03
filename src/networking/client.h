@@ -24,6 +24,7 @@ class Client {
         string_socket_(io_service_),
         assigned_player_{0} {
     asio::connect(string_socket_.socket(), endpoint_iterator_);
+    set_socket_options(string_socket_.socket());
     Initialize();
   }
 
