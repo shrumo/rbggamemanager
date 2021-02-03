@@ -18,8 +18,14 @@ rbg::GameMove DecodeMove(const std::string &message);
 
 class StringSocket {
  public:
-  explicit StringSocket(asio::io_service &service) : socket_(service) {}
-  explicit StringSocket(tcp::socket socket) : socket_(std::move(socket)) {}
+  explicit StringSocket(asio::io_service &service) : socket_(service) {
+      socket_.set_option(asio::ip::tcp::no_delay(true));
+      socket_.set_option(asio::detail::socket_option::boolean<IPPROTO_TCP, TCP_QUICKACK>(true));
+  }
+  explicit StringSocket(tcp::socket socket) : socket_(std::move(socket)) {
+      socket_.set_option(asio::ip::tcp::no_delay(true));
+      socket_.set_option(asio::detail::socket_option::boolean<IPPROTO_TCP, TCP_QUICKACK>(true));
+  }
 
   StringSocket(StringSocket &&other) noexcept
       : socket_(std::move(other.socket_)), buffer{} {
