@@ -25,7 +25,7 @@ def main():
     moves = state.Moves()
     if not moves:
         client.ReadReset()
-        state = CreateGameState(client.description())
+        state.Reset()
         moves = state.Moves()
 
 if __name__=="__main__":
