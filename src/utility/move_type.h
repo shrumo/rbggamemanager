@@ -5,20 +5,20 @@
 
 namespace rbg {
  enum class MoveType {
-    kShiftType,
-    kShiftTableType,
-    kArithmeticComparisonType,
-    kOffType,
-    kOnType,
-    kPlayerSwitchType,
-    kKeeperSwitchType,
-    kAssignmentType,
-    kPlayerCheck,
-    kConditionCheck,
-    kVisitedCheck,
-    kBackwardEmpty,
-    kForwardEmpty,
-    kNoop
+    kShiftType, // 0
+    kShiftTableType, // 1
+    kArithmeticComparisonType, // 2
+    kOffType, // 3
+    kOnType, // 4
+    kPlayerSwitchType, // 5
+    kKeeperSwitchType, // 6
+    kAssignmentType, // 7
+    kPlayerCheck, // 8
+    kConditionCheck, // 9
+    kVisitedCheck, // 10
+    kBackwardEmpty, // 11
+    kForwardEmpty, // 12
+    kNoop // 13
   };
 
   enum class NodeType {

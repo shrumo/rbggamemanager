@@ -5,17 +5,18 @@ server_process = subprocess.Popen(['./start_server', '../rbgGames/games/chess.rb
 
 print('Server waiting for clients. (Server:', server_process.stdout.readline(), ')')
 
-a_client_process = subprocess.Popen(['./start_random_client', 'localhost', '7981', '--seed', '0'], stdout=subprocess.DEVNULL)
+a_client_process = subprocess.Popen(['./start_random_client', 'localhost', '7981', '--seed', '0', '--time','0'], stdout=subprocess.DEVNULL)
 
 print('Server got client A. (Server:', server_process.stdout.readline(), ')')
 
-b_client_process = subprocess.Popen(['./start_random_client', 'localhost', '7981', '--seed', '0'], stdout=subprocess.DEVNULL)
+b_client_process = subprocess.Popen(['./start_random_client', 'localhost', '7981', '--seed', '0', '--time','0'], stdout=subprocess.DEVNULL)
 
 print('Server waiting for the second client. (Server:', server_process.stdout.readline(), ')')
 print('Server got client B. (Server:', server_process.stdout.readline(), ')')
 
 for line in server_process.stdout:
     line = str(line)
+    print(line)
     if 'turnCount' in line:
         print('Server is working, turn:', line.split(':')[1][:-3])
 
@@ -32,11 +33,11 @@ server_process = subprocess.Popen(['./start_server', '../rbgGames/games/ticTacTo
 
 print('Server waiting for clients. (Server:', server_process.stdout.readline(), ')')
 
-a_client_process = subprocess.Popen(['./start_random_client', 'localhost', '7981', '--seed', '0'], stdout=subprocess.DEVNULL)
+a_client_process = subprocess.Popen(['./start_random_client', 'localhost', '7981', '--seed', '0', '--time','0'], stdout=subprocess.DEVNULL)
 
 print('Server got client A. (Server:', server_process.stdout.readline(), ')')
 
-b_client_process = subprocess.Popen(['./start_random_client', 'localhost', '7981', '--seed', '0'], stdout=subprocess.DEVNULL)
+b_client_process = subprocess.Popen(['./start_random_client', 'localhost', '7981', '--seed', '0', '--time','0'], stdout=subprocess.DEVNULL)
 
 print('Server waiting for the second client. (Server:', server_process.stdout.readline(), ')')
 print('Server got client B. (Server:', server_process.stdout.readline(), ')')
