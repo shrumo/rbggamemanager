@@ -15,7 +15,7 @@ namespace rbg {
     uint nodes_count;
   };
 
-  PerftResult Perft(GameState &state, size_t depth) {
+  PerftResult Perft(GameState &state, uint depth) {
     if (depth == 0) {
       return {1, 1};
     }
