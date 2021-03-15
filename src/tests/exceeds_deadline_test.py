@@ -5,7 +5,7 @@ import os
 results_logging_filename = 'tmp_file_from_exceeds_deadline_test_' + datetime.datetime.now().strftime("%I_%M%p_%B_%d_%Y")
 
 print('ticTacToe')
-server_process = subprocess.Popen(['./start_server', '../rbgGames/games/ticTacToe.rbg', '7982', '--deadline', '100', '--log_results', results_logging_filename], stdout=subprocess.PIPE)
+server_process = subprocess.Popen(['./start_server', '../extern/rbgGames/games/ticTacToe.rbg', '7982', '--deadline', '100', '--log_results', results_logging_filename], stdout=subprocess.PIPE)
 
 print('Server waiting for clients. (Server:', server_process.stdout.readline(), ')')
 

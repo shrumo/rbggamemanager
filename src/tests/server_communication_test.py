@@ -1,7 +1,7 @@
 import subprocess
 
 print('Chess')
-server_process = subprocess.Popen(['./start_server', '../rbgGames/games/chess.rbg', '7981'], stdout=subprocess.PIPE)
+server_process = subprocess.Popen(['./start_server', '../extern/rbgGames/games/chess.rbg', '7981'], stdout=subprocess.PIPE)
 
 print('Server waiting for clients. (Server:', server_process.stdout.readline(), ')')
 
@@ -29,7 +29,7 @@ assert(b_client_process.poll() == 0)
 assert(server_process.poll() == 0)
 
 print('TicTacToe')
-server_process = subprocess.Popen(['./start_server', '../rbgGames/games/ticTacToe.rbg', '7981'], stdout=subprocess.PIPE)
+server_process = subprocess.Popen(['./start_server', '../extern/rbgGames/games/ticTacToe.rbg', '7981'], stdout=subprocess.PIPE)
 
 print('Server waiting for clients. (Server:', server_process.stdout.readline(), ')')
 

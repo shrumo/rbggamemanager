@@ -1,7 +1,7 @@
 import subprocess
 
 print('Chess')
-server_process = subprocess.Popen(['./start_server', '../rbgGames/games/gess.rbg', '7981'], stdout=subprocess.PIPE)
+server_process = subprocess.Popen(['./start_server', '../extern/rbgGames/games/gess.rbg', '7981'], stdout=subprocess.PIPE)
 
 print('Server waiting for clients. (Server:', server_process.stdout.readline(), ')')
 

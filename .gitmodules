@@ -1,12 +1,12 @@
-[submodule "rbgParser"]
-	path = rbgParser
+[submodule "extern/rbgParser"]
+	path = extern/rbgParser
 	url = https://github.com/uicus/rbgParser.git
-[submodule "pybind11"]
-	path = pybind11
+[submodule "extern/pybind11"]
+	path = extern/pybind11
 	url = https://github.com/pybind/pybind11.git
-[submodule "asio"]
-	path = asio
+[submodule "extern/asio"]
+	path = extern/asio
 	url = https://github.com/chriskohlhoff/asio.git
-[submodule "rbgGames"]
-	path = rbgGames
+[submodule "extern/rbgGames"]
+	path = extern/rbgGames
 	url = https://github.com/marekesz/rbgGames.git

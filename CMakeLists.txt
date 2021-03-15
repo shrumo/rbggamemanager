@@ -13,19 +13,20 @@ set(CMAKE_CXX_FLAGS "-Wall -Wextra -pipe -Ofast")
 set(CMAKE_CXX_FLAGS_DEBUG "-g -O0")
 set(CMAKE_CXX_FLAGS_RELEASE "-Ofast -march=native")
 
-add_subdirectory(rbgParser)
+add_subdirectory("extern/rbgParser")
 
 if (EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/pybind11/.git")
-    add_subdirectory(pybind11)
+    add_subdirectory(extern/pybind11)
 endif()
 
 find_package(Threads)
 
-include_directories(asio/asio/include)
+include_directories(extern/asio/asio/include)
 
 # Include the directories so that finding headers is easier
 include_directories(src)
 include_directories(.)
+include_directories(extern)
 
 set(GRAPH_FILES src/utility/graph.h src/stl_extension/range.h src/stl_extension/argparse.h src/stl_extension/utility.h src/stl_extension/iterator_transform.h)
 
