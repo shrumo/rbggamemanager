@@ -79,12 +79,12 @@ endif ()
 
 
 add_executable(benchmark ${GRAPH_FILES} ${PARSER_FILES}
-        ${CONSTRUCTION_FILES} ${GAMESTATE_FILES} src/benchmark.cc)
+        ${CONSTRUCTION_FILES} ${GAMESTATE_FILES} apps/benchmark.cc)
 
 target_link_libraries(benchmark rbgParser)
 
 add_executable(explain ${GRAPH_FILES} ${PARSER_FILES}
-        ${CONSTRUCTION_FILES} ${GAMESTATE_FILES} ${NETWORKING_FILES} src/explain.cc)
+        ${CONSTRUCTION_FILES} ${GAMESTATE_FILES} ${NETWORKING_FILES} apps/explain.cc)
 target_compile_options(explain PRIVATE "-g" "-O0")
 
 target_link_libraries(explain rbgParser)
@@ -92,23 +92,23 @@ target_link_libraries(explain pthread)
 
 
 add_executable(move_decoder ${GRAPH_FILES} ${PARSER_FILES}
-        ${CONSTRUCTION_FILES} ${GAMESTATE_FILES} ${NETWORKING_FILES} src/move_decoder.cc)
+        ${CONSTRUCTION_FILES} ${GAMESTATE_FILES} ${NETWORKING_FILES} apps/move_decoder.cc)
 
 target_link_libraries(move_decoder rbgParser)
 target_link_libraries(move_decoder pthread)
 
 add_executable(print ${GRAPH_FILES} ${PARSER_FILES}
-        ${CONSTRUCTION_FILES} ${GAMESTATE_FILES} ${NETWORKING_FILES} src/print.cc)
+        ${CONSTRUCTION_FILES} ${GAMESTATE_FILES} ${NETWORKING_FILES} apps/print.cc)
 
 target_link_libraries(print rbgParser)
 target_link_libraries(print pthread)
 
 
-add_executable(start_server ${NETWORKING_FILES} src/start_server.cc)
+add_executable(start_server ${NETWORKING_FILES} apps/start_server.cc)
 target_link_libraries(start_server rbgParser)
 target_link_libraries(start_server pthread)
 
-add_executable(start_random_client ${NETWORKING_FILES} src/start_random_client.cc)
+add_executable(start_random_client ${NETWORKING_FILES} apps/start_random_client.cc)
 target_link_libraries(start_random_client rbgParser)
 target_link_libraries(start_random_client pthread)
 
