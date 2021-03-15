@@ -9,11 +9,11 @@ server_process = subprocess.Popen(['./start_server', '../rbgGames/games/ticTacTo
 
 print('Server waiting for clients. (Server:', server_process.stdout.readline(), ')')
 
-a_client_process = subprocess.Popen(['./start_random_client', 'localhost', '7982','--seed', '0', '--sleep', '200'], stdout=subprocess.DEVNULL)
+a_client_process = subprocess.Popen(['./start_random_client', 'localhost', '7982','--seed', '0', '--sleep', '200', '--time','0'], stdout=subprocess.DEVNULL)
 
 print('Server got client A. (Server:', server_process.stdout.readline(), ')')
 
-b_client_process = subprocess.Popen(['./start_random_client', 'localhost', '7982','--seed', '0', '--sleep', '50'], stdout=subprocess.DEVNULL)
+b_client_process = subprocess.Popen(['./start_random_client', 'localhost', '7982','--seed', '0', '--sleep', '50', '--time','0'], stdout=subprocess.DEVNULL)
 
 print('Server waiting for the second client. (Server:', server_process.stdout.readline(), ')')
 print('Server got client B. (Server:', server_process.stdout.readline(), ')')

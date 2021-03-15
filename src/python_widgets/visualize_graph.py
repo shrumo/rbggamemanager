@@ -113,7 +113,7 @@ def create_nfa_visualization(root, game_text, pure=True):
     node_mapping = {}
     for node in nfa.graph.nodes():
         x, y = positions[node]
-        node_mapping[node] = graph.add_node_rel(x * 400, -y * 400)
+        node_mapping[node] = graph.add_node_rel(x * 400, -y * 400,text=str(node))
 
     def long_jump(a, b):
         dx = abs(a[0] - b[0])

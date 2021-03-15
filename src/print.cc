@@ -5,6 +5,7 @@
 #include <game_state/construction/game_state_creator.h>
 #include <stl_extension/argparse.h>
 #include <utility/calculate_perft.h>
+#include <utility/mark_redundant_dots.h>
 #include <utility/printer.h>
 #include <utility/shift_table_checker.h>
 
@@ -45,23 +46,21 @@ struct PrinterOptions {
       false;  // add dots after stars (ignored in conditionals)
   bool disable_adding_dots_in_shifttables =
       false;  // disables adding dots in shifttables
-  bool one_dot_or_modifier_per_concat =
-      false;  // there will be only one dot per concatenation
   bool dots_only_in_shifttables =
       false;  // dots will be added only in shifttables
 };
 
 class Printer : public AstFunction<std::string> {
  public:
-  Printer(const PrinterOptions &options, size_t indent = 0,
-          std::vector<const rbg_parser::game_move *> parents = {})
-      : options_(options), indent_(indent), parents_(parents) {}
+  Printer(
+      const PrinterOptions &options,
+      const unordered_set<const rbg_parser::game_move *> &moves_to_erase_ = {},
+      int indent = 0)
+      : options_(options), moves_to_erase_(moves_to_erase_), indent_(indent) {}
   std::string SumCase(const rbg_parser::sum &move) override {
-    std::vector<const rbg_parser::game_move *> new_parents = parents_;
-    new_parents.push_back(&move);
     if (move.get_content().size() == 1) {
-      return Printer(options_, indent_,
-                     new_parents)(*move.get_content().front());
+      return Printer(options_, moves_to_erase_,
+                     indent_)(*move.get_content().front());
     }
 
     std::string result;
@@ -79,24 +78,16 @@ class Printer : public AstFunction<std::string> {
         result += "\n" + times(kIndentChars, indent_ + 1);
       }
 
-      bool modifier_or_dot_exist =
-          ParserNodeType(*m) == NodeType::kMove && IsModifier(*m);
       if (options_.add_dots_in_alternatives &&
           (!options_.disable_adding_dots_in_shifttables ||
            !is_part_of_shift_table) &&
           (!options_.dots_only_in_shifttables || is_part_of_shift_table)) {
-        if (!options_.one_dot_or_modifier_per_concat ||
-            !modifier_or_dot_exist) {
-          result += " .";
-          modifier_or_dot_exist = true;
-        }
+        result += " .";
       }
 
-      result += Printer(options_, indent_ + 1, new_parents)(*m);
+      result += Printer(options_, moves_to_erase_, indent_ + 1)(*m);
 
       if (AddDotAfterSegment(*m) &&
-          (!options_.one_dot_or_modifier_per_concat ||
-           !modifier_or_dot_exist) &&
           (!options_.disable_adding_dots_in_shifttables ||
            !is_part_of_shift_table) &&
           (!options_.dots_only_in_shifttables || is_part_of_shift_table)) {
@@ -112,11 +103,9 @@ class Printer : public AstFunction<std::string> {
 
   std::string ConcatenationCase(
       const rbg_parser::concatenation &move) override {
-    std::vector<const rbg_parser::game_move *> new_parents = parents_;
-    new_parents.push_back(&move);
     if (move.get_content().size() == 1) {
-      return Printer(options_, indent_,
-                     new_parents)(*move.get_content().front());
+      return Printer(options_, moves_to_erase_,
+                     indent_)(*move.get_content().front());
     }
 
     std::string result;
@@ -124,13 +113,6 @@ class Printer : public AstFunction<std::string> {
     result += "( ";
 
     bool first = true;
-    bool modifier_or_dot_exist = false;
-
-    for (const auto &move : move.get_content()) {
-      if (ParserNodeType(*move) == NodeType::kMove && IsModifier(*move)) {
-        modifier_or_dot_exist = true;
-      }
-    }
 
     for (size_t i = 0; i < move.get_content().size(); i++) {
       const auto &m = move.get_content()[i];
@@ -139,7 +121,7 @@ class Printer : public AstFunction<std::string> {
       } else {
         result += " ";
       }
-      result += Printer(options_, indent_, new_parents)(*m);
+      result += Printer(options_, moves_to_erase_, indent_)(*m);
 
       if (AddDotAfterSegment(*m)) {
         bool is_previous_part_of_shift_table = ContainsOnlyShifts(*m);
@@ -153,11 +135,7 @@ class Printer : public AstFunction<std::string> {
             (!options_.dots_only_in_shifttables ||
              (is_previous_part_of_shift_table &&
               is_next_part_of_shift_table))) {
-          if (!options_.one_dot_or_modifier_per_concat ||
-              !modifier_or_dot_exist) {
-            result += " .";
-            modifier_or_dot_exist = true;
-          }
+          result += " .";
         }
       }
     }
@@ -167,15 +145,9 @@ class Printer : public AstFunction<std::string> {
     return result;
   }
   std::string StarCase(const rbg_parser::star_move &move) override {
-    std::vector<const rbg_parser::game_move *> new_parents = parents_;
-    new_parents.push_back(&move);
-
     bool is_part_of_shift_table = ContainsOnlyShifts(move);
     std::string result;
 
-    bool modifier_or_dot_exist =
-        ParserNodeType(*move.get_content()) == NodeType::kMove &&
-        IsModifier(*move.get_content());
     bool add_before = options_.add_dots_in_stars &&
                       (!options_.disable_adding_dots_in_shifttables ||
                        !is_part_of_shift_table);
@@ -185,25 +157,19 @@ class Printer : public AstFunction<std::string> {
          !is_part_of_shift_table) &&
         (!options_.dots_only_in_shifttables || is_part_of_shift_table);
 
-    bool adding_parantheses =
-        (add_before || add_after) &&
-        (!options_.one_dot_or_modifier_per_concat || !modifier_or_dot_exist);
+    bool adding_parantheses = add_before || add_after;
     if (adding_parantheses) {
       result += "(";
     }
 
-    if (add_before &&
-        (!options_.one_dot_or_modifier_per_concat || !modifier_or_dot_exist)) {
+    if (add_before) {
       result += ". ";
-      modifier_or_dot_exist = true;
     }
 
-    result += Printer(options_, indent_, new_parents)(*move.get_content());
+    result += Printer(options_, moves_to_erase_, indent_)(*move.get_content());
 
-    if (add_after &&
-        (!options_.one_dot_or_modifier_per_concat || !modifier_or_dot_exist)) {
+    if (add_after) {
       result += ". ";
-      modifier_or_dot_exist = true;
     }
 
     if (adding_parantheses) {
@@ -219,8 +185,8 @@ class Printer : public AstFunction<std::string> {
     std::string prefix = move.is_negated() ? "{!" : "{?";
 
     return prefix + "\n" + times(kIndentChars, indent_ + 1) +
-           Printer({}, indent_ + 1)(*move.get_content()) + "\n" +
-           times(kIndentChars, indent_) + "}";
+           Printer({}, moves_to_erase_, indent_ + 1)(*move.get_content()) +
+           "\n" + times(kIndentChars, indent_) + "}";
   }
 
   std::string ArithmeticExpressionCase(
@@ -236,7 +202,12 @@ class Printer : public AstFunction<std::string> {
     return result + trim(move.to_rbg(rbg_parser::options{}));
   }
 
-  std::string NoopCase(const rbg_parser::noop &) override { return "."; }
+  std::string NoopCase(const rbg_parser::noop &move) override {
+    if (moves_to_erase_.find(&move) != moves_to_erase_.end()) {
+      return "";
+    }
+    return ".";
+  }
 
   bool AddDotAfterSegment(const rbg_parser::game_move &move) {
     if (ParserNodeType(move) == NodeType::kStar &&
@@ -252,8 +223,8 @@ class Printer : public AstFunction<std::string> {
 
  private:
   const PrinterOptions &options_;
+  const std::unordered_set<const rbg_parser::game_move *> moves_to_erase_;
   size_t indent_;
-  std::vector<const rbg_parser::game_move *> parents_;
 };
 
 int main(int argc, const char *argv[]) {
@@ -268,7 +239,7 @@ int main(int argc, const char *argv[]) {
                  "[--add_dots_in_stars true|false]"
                  "[--add_dots_after_alternatives true|false]"
                  "[--add_dots_after_stars true|false]"
-                 "[--one_dot_or_modifier_per_concat true|false]"
+                 "[--erase_redundant_dots true|false]"
               << std::endl;
     return 0;
   }
@@ -277,7 +248,12 @@ int main(int argc, const char *argv[]) {
   std::stringstream buffer;
   buffer << file_stream.rdbuf();
 
-  auto parsed_game = ParseGame(buffer.str());
+  std::unique_ptr<rbg_parser::parsed_game> parsed_game;
+  try {
+    parsed_game = ParseGame(buffer.str());
+  } catch (rbg_parser::message m) {
+    std::cout << m.as_warning() << std::endl;
+  }
 
   PrinterOptions printer_options;
 
@@ -311,18 +287,31 @@ int main(int argc, const char *argv[]) {
         args.flags.at("add_dots_after_stars") == "true";
   }
 
-  if (args.flags.find("one_dot_or_modifier_per_concat") != args.flags.end()) {
-    printer_options.one_dot_or_modifier_per_concat =
-        args.flags.at("one_dot_or_modifier_per_concat") == "true";
-  }
-
   if (args.flags.find("dots_only_in_shifttables") != args.flags.end()) {
     printer_options.dots_only_in_shifttables =
         args.flags.at("dots_only_in_shifttables") == "true";
   }
 
-  std::cout << "#board = " << parsed_game->get_board().to_rbg(true) << "\n";
-  std::cout << parsed_game->get_declarations().to_rbg() << "\n";
-  std::cout << "#rules = "
-            << Printer(printer_options)(*parsed_game->get_moves()) << std::endl;
+  std::stringstream result;
+
+  result << "#board = " << parsed_game->get_board().to_rbg(true) << "\n";
+  result << parsed_game->get_declarations().to_rbg() << "\n";
+  result << "#rules = " << Printer(printer_options)(*parsed_game->get_moves())
+         << std::endl;
+
+  if (args.flags.find("erase_redundant_dots") != args.flags.end() &&
+      args.flags.at("erase_redundant_dots") == "true") {
+    parsed_game = ParseGame(result.str());
+
+    result.str("");
+
+    result << "#board = " << parsed_game->get_board().to_rbg(true) << "\n";
+    result << parsed_game->get_declarations().to_rbg() << "\n";
+    result << "#rules = "
+           << Printer({}, RedundantNoopsInGame(parsed_game.get()))(
+                  *parsed_game->get_moves())
+           << std::endl;
+  }
+
+  std::cout << result.str();
 }

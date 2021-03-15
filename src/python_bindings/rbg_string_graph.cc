@@ -66,7 +66,7 @@ Nfa<std::string> translate(const Nfa<std::unique_ptr<Move>> &nfa,
 Nfa<std::string> CreateStringNfa(const std::string &game_text) {
   auto pg = ParseGame(game_text);
   auto decl = Declarations(*pg);
-  return translate(CreateNfa(*pg->get_moves(), decl), decl);
+  return translate(CreateNfa(*pg->get_moves(), decl, false), decl);
 }
 
 void RemoveVisitedQueries(Nfa<std::string> *nfa) {

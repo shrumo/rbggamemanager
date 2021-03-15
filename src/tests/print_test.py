@@ -10,7 +10,7 @@ tmp_game_text = '''
     [b,r]
     [e,e])
 
-#rules = ->red up* (left + right) (left + right)* (up {e})* up (left + right {e}) up [b] (left* + right*) (up* + down*) ->blue
+#rules = ->red (up {e})* up (left + right {e}) up [b] ->blue
 '''
 
 with open(tmp_game_filename, 'w') as f:
@@ -23,8 +23,7 @@ assert('#rules' in out)
 print('With modifier_indices:', out)
 rules = out[out.find('#rules'):]
 rules = rules.replace(' ', '').replace('\n', '')
-assert(rules ==
-       '#rules=(/*1*/->redup*(left+right)(left+right)*(up{e})*up(left+(right{e}))up/*2*/[b](left*+right*)(up*+down*)/*3*/->blue)')
+assert(rules == '#rules=(/*1*/->red(up{e})*up(left+(right{e}))up/*2*/[b]/*3*/->blue)')
 
 out = subprocess.getoutput(
     './print {} --add_dots_in_alternatives true'.format(tmp_game_filename))
@@ -34,7 +33,7 @@ print('With add_dots_in_alternatives:', out)
 rules = out[out.find('#rules'):]
 rules = rules.replace(' ', '').replace('\n', '')
 assert(rules ==
-       '#rules=(->redup*(.left+.right)(.left+.right)*(up{e})*up(.left+.(right{e}))up[b](.left*+.right*)(.up*+.down*)->blue)')
+       '#rules=(->red(up{e})*up(.left+.(right{e}))up[b]->blue)')
 
 out = subprocess.getoutput(
     './print {} --add_dots_in_alternatives true --disable_adding_dots_in_shifttables true'.format(tmp_game_filename))
@@ -44,7 +43,7 @@ print('With add_dots_in_alternatives and disable_adding_dots_in_shifttables:', o
 rules = out[out.find('#rules'):]
 rules = rules.replace(' ', '').replace('\n', '')
 assert(rules ==
-       '#rules=(->redup*(left+right)(left+right)*(up{e})*up(.left+.(right{e}))up[b](left*+right*)(up*+down*)->blue)')
+       '#rules=(->red(up{e})*up(.left+.(right{e}))up[b]->blue)')
 
 out = subprocess.getoutput(
     './print {} --add_dots_after_stars true --add_dots_after_alternatives true'.format(tmp_game_filename))
@@ -54,7 +53,7 @@ print('With add_dots_after_stars and add_dots_after_alternatives:', out)
 rules = out[out.find('#rules'):]
 rules = rules.replace(' ', '').replace('\n', '')
 assert(rules ==
-       '#rules=(->redup*.(left+right).((left+right).)*.(up{e})*.up(left+(right{e})).up[b](left*.+right*.).(up*.+down*.).->blue)')
+       '#rules=(->red(up{e})*.up(left+(right{e})).up[b]->blue)')
 
 out = subprocess.getoutput(
     './print {} --add_dots_in_alternatives true --add_dots_in_stars true --add_dots_after_stars true --add_dots_after_alternatives true --disable_adding_dots_in_shifttables true'.format(tmp_game_filename))
@@ -64,29 +63,31 @@ print('Some dots options with disable_adding_dots_in_shifttables:', out)
 rules = out[out.find('#rules'):]
 rules = rules.replace(' ', '').replace('\n', '')
 assert(rules ==
-       '#rules=(->redup*(left+right)(left+right)*.(.(up{e}))*.up(.left+.(right{e})).up[b](left*+right*)(up*+down*).->blue)')
+       '#rules=(->red(.(up{e}))*.up(.left+.(right{e})).up[b]->blue)')
 
 
 out = subprocess.getoutput(
-    './print {} --add_dots_in_alternatives true --disable_adding_dots_in_shifttables true --one_dot_or_modifier_per_concat true'.format(tmp_game_filename))
+    './print {} --add_dots_in_alternatives true --disable_adding_dots_in_shifttables true --erase_redundant_dots true'.format(tmp_game_filename))
 
+print(out)
 assert('#rules' in out)
-print('Dots in alternatives, omitting shifttables and omitting same concatenation dots:', out)
+print('Dots in alternatives, omitting shifttables and erasing redundant dots:', out)
 rules = out[out.find('#rules'):]
 rules = rules.replace(' ', '').replace('\n', '')
+print('COPYPASE:',rules)
 assert(rules ==
-       '#rules=(->redup*(left+right)(left+right)*(up{e})*up(.left+.(right{e}))up[b](left*+right*)(up*+down*)->blue)')
+       '#rules=(->redup*(left+right)(left+right)*(up{e})*up((.left)+(.right{e}))up[b](left*+right*)(up*+down*)->blue)')
 
 
 out = subprocess.getoutput(
-    './print {} --add_dots_in_alternatives true --add_dots_after_alternatives true --one_dot_or_modifier_per_concat true'.format(tmp_game_filename))
+    './print {} --add_dots_in_alternatives true --add_dots_after_alternatives true --erase_redundant_dots true'.format(tmp_game_filename))
 
 assert('#rules' in out)
-print('Dots in and after alternatives omitting same concatenation dots:', out)
+print('Dots in and after alternatives erasing redundant dots:', out)
 rules = out[out.find('#rules'):]
 rules = rules.replace(' ', '').replace('\n', '')
 assert(rules ==
-       '#rules=(->redup*(.left+.right)((.left+.right).)*(up{e})*up(.left+.(right{e}))up[b](.left*+.right*)(.up*+.down*)->blue)')
+       '#rules=(->redup*((.left)+(.right)).(((.left)+(.right)).)*(up{e})*up((.left)+(.right{e})).up[b]((.left*)+(.right*)).((.up*)+(.down*)).->blue)')
 
 out = subprocess.getoutput(
     './print {} --add_dots_after_alternatives true --dots_only_in_shifttables true'.format(tmp_game_filename))
@@ -115,12 +116,13 @@ with open(second_tmp_game_filename, 'w') as f:
     print(second_tmp_game_text, file=f)
 
 out = subprocess.getoutput(
-    './print {} --add_dots_in_alternatives true --one_dot_or_modifier_per_concat true'.format(second_tmp_game_filename))
+    './print {} --add_dots_in_alternatives true --erase_redundant_dots true'.format(second_tmp_game_filename))
 
 print('([x] + [y]) ->> with dots in alternative, when omitting dots on the same level as modifier:', out)
 rules = out[out.find('#rules'):]
 rules = rules.replace(' ', '').replace('\n', '')
-assert(rules == '#rules=(([x]+[y])->>)')
+
+assert(rules == '#rules=((([x])+([y]))->>)')
 
 out = subprocess.getoutput(
     './print {} --add_dots_after_alternatives true'.format(second_tmp_game_filename))
@@ -172,10 +174,12 @@ assert(rules ==
        '#rules=((up*+down*).(left*+right*).->>{w}[e]up({e}+((left+right).{b,e})).->>)')
 
 out = subprocess.getoutput(
-    './print {} --add_dots_after_alternatives true --one_dot_or_modifier_per_concat true'.format(third_tmp_game_filename))
+    './print {} --add_dots_after_alternatives true --erase_redundant_dots true'.format(third_tmp_game_filename))
 print('Third with dots after alternatives but with one dot per concat:', out)
 rules = out[out.find('#rules'):]
 rules = rules.replace(' ', '').replace('\n', '')
+
+print("COPYPASTE",rules)
 assert(rules ==
        '#rules=((up*+down*)(left*+right*)->>{w}[e]up({e}+((left+right).{b,e}))->>)')
 

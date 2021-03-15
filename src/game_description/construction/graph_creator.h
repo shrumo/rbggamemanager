@@ -60,12 +60,13 @@ class NfaBoardProduct : public Graph<edge_id_t> {
 
   std::unordered_map<node_t, std::unique_ptr<NfaBoardProduct>> sub_graphs_;
   std::unordered_map<VertexNode, node_t, VertexNodeHash> node_mapping_;
+  // This is the translation between nodes of the nfa board graph to vertex node pairs
   std::unordered_map<node_t, VertexNode> reverse_node_mapping_;
 };
 
 Nfa<std::unique_ptr<Move>> CreateNfa(const rbg_parser::game_move &rbg_move,
                                      const Declarations &declarations,
-                                     bool erase_noops = true);
+                                     bool optimize = true);
 std::vector<node_t> GetNoops(const Nfa<std::unique_ptr<Move>> &nfa);
 }  // namespace rbg
 

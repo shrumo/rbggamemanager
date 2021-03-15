@@ -72,7 +72,7 @@ class MoveVisitor {
 
 class Move {
  public:
-  explicit Move(MoveType type) : type_(type) {}
+  explicit Move(MoveType type) : type_(type), original_move_(nullptr) {}
 
   MoveType type() const { return type_; }
 
