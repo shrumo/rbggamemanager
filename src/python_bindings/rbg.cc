@@ -8,6 +8,7 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
+#include "utility/calculate_sim.h"
 #include "networking/client.h"
 
 using namespace rbg;

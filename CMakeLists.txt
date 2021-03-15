@@ -15,7 +15,9 @@ set(CMAKE_CXX_FLAGS_RELEASE "-Ofast -march=native")
 
 add_subdirectory("extern/rbgParser")
 
-if (EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/pybind11/.git")
+find_package(Python3 COMPONENTS Interpreter Development)
+
+if (EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/extern/pybind11/.git")
     add_subdirectory(extern/pybind11)
 endif()
 
@@ -56,10 +58,8 @@ set(GAMESTATE_FILES ${PARSER_FILES} ${GRAPH_FILES} src/game_description/names_re
 
 set(NETWORKING_FILES ${GAMESTATE_FILES} src/networking/server.h src/networking/socket.h src/networking/client.h src/networking/socket.cc)
 
-find_package(Python3 COMPONENTS Interpreter Development)
-
 # Targets requiring python bindings
-if (EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/pybind11/.git" AND ${Python3_FOUND})
+if (EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/extern/pybind11/.git" AND ${Python3_FOUND})
     pybind11_add_module(rbg_string_graph src/python_bindings/rbg_string_graph.cc ${GAMESTATE_FILES})
     target_link_libraries(rbg_string_graph PRIVATE rbgParser)
 
@@ -70,7 +70,7 @@ if (EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/pybind11/.git" AND ${Python3_FOUND})
 
     pybind11_add_module(rbg src/python_bindings/rbg.cc ${GAMESTATE_FILES} ${CONSTRUCTION_FILES} ${NETWORKING_FILES})
   add_custom_target(start_random_python_client ALL
-              COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/src/start_random_python_client.py ${CMAKE_CURRENT_BINARY_DIR}/start_random_python_client.py
+              COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/apps/start_random_python_client.py ${CMAKE_CURRENT_BINARY_DIR}/start_random_python_client.py
               DEPENDS rbg)
     target_link_libraries(rbg PRIVATE rbgParser)
 else()
@@ -182,7 +182,7 @@ add_executable(board_test src/game_description/board.h src/game_description/boar
 add_test(board_test board_test)
 
 # Tests requiring the python bindings
-if (EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/pybind11/.git" AND ${Python3_FOUND})
+if (EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/extern/pybind11/.git" AND ${Python3_FOUND})
     add_custom_target(string_graph_python_bindings_test ALL COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/tests/string_graph_python_bindings_test.py ${CMAKE_CURRENT_BINARY_DIR}/string_graph_python_bindings_test.py
             DEPENDS rbg_string_graph)
     add_test(string_graph_python_bindings_test ${Python3_EXECUTABLE} string_graph_python_bindings_test.py)
@@ -191,7 +191,7 @@ if (EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/pybind11/.git" AND ${Python3_FOUND})
     add_test(python_bindings_perft_test ${Python3_EXECUTABLE} python_bindings_perft_test.py)
     add_custom_target(python_bindings_server_communication_test ALL 
             COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/tests/python_bindings_server_communication_test.py ${CMAKE_CURRENT_BINARY_DIR}/python_bindings_server_communication_test.py
-            COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/src/start_random_python_client.py ${CMAKE_CURRENT_BINARY_DIR}/start_random_python_client.py)
+            COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/apps/start_random_python_client.py ${CMAKE_CURRENT_BINARY_DIR}/start_random_python_client.py)
     add_test(python_bindings_server_communication_test ${Python3_EXECUTABLE} python_bindings_server_communication_test.py)
 endif ()
 
