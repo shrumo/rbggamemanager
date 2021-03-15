@@ -80,5 +80,8 @@ PYBIND11_MODULE(rbg, m) {
   m.def("CreateGameState", &CreateGameState,
         R"pbdoc(Returns the GameState object.)pbdoc");
 
+  m.def("RandomSimulations", &RandomSimulations,
+        R"pbdoc(Runs random simulations for an initial game state.)pbdoc");
+        
   m.attr("__version__") = "dev";
 }
