@@ -97,11 +97,11 @@ add_executable(move_decoder ${GRAPH_FILES} ${PARSER_FILES}
 target_link_libraries(move_decoder rbgParser)
 target_link_libraries(move_decoder pthread)
 
-add_executable(print ${GRAPH_FILES} ${PARSER_FILES}
-        ${CONSTRUCTION_FILES} ${GAMESTATE_FILES} ${NETWORKING_FILES} apps/print.cc)
+add_executable(add_dots ${GRAPH_FILES} ${PARSER_FILES}
+        ${CONSTRUCTION_FILES} ${GAMESTATE_FILES} ${NETWORKING_FILES} apps/add_dots.cc)
 
-target_link_libraries(print rbgParser)
-target_link_libraries(print pthread)
+target_link_libraries(add_dots rbgParser)
+target_link_libraries(add_dots pthread)
 
 
 add_executable(start_server ${NETWORKING_FILES} apps/start_server.cc)
@@ -227,7 +227,6 @@ if (${Python3_Interpreter_FOUND})
     add_custom_target(player_long_compilation_test ALL COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/tests/player_long_compilation_test.py ${CMAKE_CURRENT_BINARY_DIR}/player_long_compilation_test.py)
     add_test(player_long_compilation_test ${Python3_EXECUTABLE} player_long_compilation_test.py)
 
-#     This is currently broken and subject to discussion. Some options work so keeping the binary.
-#     add_custom_target(print_test ALL COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/tests/print_test.py ${CMAKE_CURRENT_BINARY_DIR}/print_test.py)
-#     add_test(print_test ${Python3_EXECUTABLE} print_test.py)
+    add_custom_target(add_dots_test ALL COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/tests/add_dots_test.py ${CMAKE_CURRENT_BINARY_DIR}/add_dots_test.py)
+    add_test(add_dots_test ${Python3_EXECUTABLE} add_dots_test.py)
 endif ()
