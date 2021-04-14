@@ -16,7 +16,7 @@ def main():
 
   games_to_play = args.games_to_play
   moves = state.Moves()
-  while moves and games_to_play > 0:
+  while moves and games_to_play != 0:
     if state.current_player() == player:
       client.ReadDeadline()
       move = moves[random.randint(0,len(moves)-1)]
