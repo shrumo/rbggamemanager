@@ -9,9 +9,9 @@
 
 namespace std_ext {
 class identity {
- public:
+public:
   template <typename U>
-  constexpr auto operator()(U&& v) const noexcept
+  constexpr auto operator()(U &&v) const noexcept
       -> decltype(std::forward<U>(v)) {
     return std::forward<U>(v);
   }
@@ -19,24 +19,24 @@ class identity {
 
 template <typename Iterator, typename UnaryFunction = identity>
 class transform_iterator : public Iterator {
- public:
+public:
   transform_iterator(Iterator it, UnaryFunction function = UnaryFunction())
       : Iterator(it), function_(function) {}
 
   typename std::remove_reference<std::result_of_t<UnaryFunction(
-      typename std::iterator_traits<Iterator>::value_type&)>>::type*
+      typename std::iterator_traits<Iterator>::value_type &)>>::type *
   operator->() {
     return &function_(Iterator::operator*());
   }
   typename std::result_of<UnaryFunction(
-      typename std::iterator_traits<Iterator>::value_type&)>::type&
+      typename std::iterator_traits<Iterator>::value_type &)>::type &
   operator*() {
     return function_(Iterator::operator*());
   }
 
- private:
+private:
   UnaryFunction function_;
 };
-}  // namespace std_ext
+} // namespace std_ext
 
-#endif  // RBGGAMEMANAGER_ITERATOR_TRANSFORM_H
+#endif // RBGGAMEMANAGER_ITERATOR_TRANSFORM_H

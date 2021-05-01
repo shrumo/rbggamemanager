@@ -26,7 +26,7 @@ class BlocksCollection;
 class SearchStepsPoint;
 
 struct SearchStepsInformation;
-}  // namespace rbg
+} // namespace rbg
 
 namespace rbg {
 struct ModifierApplication {
@@ -45,7 +45,7 @@ struct ActionRevertInfo {
 };
 
 class Block {
- public:
+public:
   virtual void Run(GameState *) = 0;
 
   virtual bool RunAndApplyFirst(GameState *state,
@@ -53,12 +53,14 @@ class Block {
                                 vertex_id_t application_vertex) = 0;
 
   virtual bool RunAndFindEnd(GameState *) = 0;
+
+  virtual ~Block(){};
 };
 
 enum class BranchKind { kNone, kSingle, kMultiple };
 
 class BranchEmpty {
- public:
+public:
   static constexpr BranchKind kind = BranchKind::kNone;
 
   void AddNext(Block *step) {
@@ -76,7 +78,7 @@ class BranchEmpty {
 };
 
 class BranchSingle {
- public:
+public:
   BranchSingle() = default;
 
   static constexpr BranchKind kind = BranchKind::kSingle;
@@ -102,12 +104,12 @@ class BranchSingle {
 
   const Block *next() const { return next_; }
 
- private:
+private:
   Block *next_;
 };
 
 class BranchMultiple {
- public:
+public:
   BranchMultiple() = default;
 
   static constexpr BranchKind kind = BranchKind::kMultiple;
@@ -133,50 +135,44 @@ class BranchMultiple {
 
   bool RunNextAndFindEnd(GameState *state) {
     for (Block *next_step : nexts_) {
-      if (next_step->RunAndFindEnd(state)) return true;
+      if (next_step->RunAndFindEnd(state))
+        return true;
     }
     return false;
   }
 
   const std::vector<Block *> &nexts() const { return nexts_; }
 
- private:
+private:
   std::vector<Block *> nexts_;
 };
 
-template <typename T>
-struct IsBranchType {
+template <typename T> struct IsBranchType {
   static constexpr bool value = false;
 };
 
-template <>
-struct IsBranchType<BranchEmpty> {
+template <> struct IsBranchType<BranchEmpty> {
   static constexpr bool value = true;
 };
 
-template <>
-struct IsBranchType<BranchSingle> {
+template <> struct IsBranchType<BranchSingle> {
   static constexpr bool value = true;
 };
 
-template <>
-struct IsBranchType<BranchMultiple> {
+template <> struct IsBranchType<BranchMultiple> {
   static constexpr bool value = true;
 };
 
-template <std::size_t I, typename T>
-struct ActionBlockContentGet;
+template <std::size_t I, typename T> struct ActionBlockContentGet;
 
-template <typename... BlockElements>
-class ActionsBlockContent {};
+template <typename... BlockElements> class ActionsBlockContent {};
 
-template <typename Branch>
-class ActionsBlockContent<Branch> {
- public:
+template <typename Branch> class ActionsBlockContent<Branch> {
+public:
   using branch_type = Branch;
 
   explicit ActionsBlockContent(Branch branch) : branch_(std::move(branch)) {
-    static_assert(IsBranchType<Branch>::value &&
+    static_assert(IsBranchType<Branch>::value,
                   "The last element of the block should be a branch type.");
   }
 
@@ -196,17 +192,17 @@ class ActionsBlockContent<Branch> {
 
   const branch_type *branch() const { return &branch_; }
 
- private:
+private:
   Branch branch_;
 };
 
 template <typename Action, typename... BlockElements>
 class ActionsBlockContent<Action, BlockElements...> {
- public:
+public:
   using branch_type =
       typename ActionsBlockContent<BlockElements...>::branch_type;
 
-  explicit ActionsBlockContent(Action action, BlockElements &&...actions)
+  explicit ActionsBlockContent(Action action, BlockElements &&... actions)
       : action_(std::move(action)),
         next_elements_(std::forward<BlockElements>(actions)...) {}
 
@@ -215,7 +211,8 @@ class ActionsBlockContent<Action, BlockElements...> {
   template <ActionTypeTrait ActionKind = Action::kind>
   typename std::enable_if<ActionKind == ActionTypeTrait::kCheck, void>::type
   Run(GameState *state) {
-    if (action_.Check(state)) next_elements_.Run(state);
+    if (action_.Check(state))
+      next_elements_.Run(state);
   }
 
   template <ActionTypeTrait ActionKind = Action::kind>
@@ -232,7 +229,8 @@ class ActionsBlockContent<Action, BlockElements...> {
   template <ActionTypeTrait ActionKind = Action::kind>
   typename std::enable_if<ActionKind == ActionTypeTrait::kCheck, bool>::type
   RunAndFindEnd(GameState *state) {
-    if (action_.Check(state)) return next_elements_.RunAndFindEnd(state);
+    if (action_.Check(state))
+      return next_elements_.RunAndFindEnd(state);
     return false;
   }
 
@@ -405,14 +403,13 @@ class ActionsBlockContent<Action, BlockElements...> {
     return &next_elements_;
   }
 
- protected:
+protected:
   Action action_;
   ActionsBlockContent<BlockElements...> next_elements_;
 };
 
-template <typename BlockContent>
-class ActionsBlockPointer : public Block {
- public:
+template <typename BlockContent> class ActionsBlockPointer : public Block {
+public:
   explicit ActionsBlockPointer(BlockContent *elements) : elements_(elements) {}
 
   void Run(GameState *state) override { elements_->Run(state); }
@@ -429,7 +426,7 @@ class ActionsBlockPointer : public Block {
 
   const BlockContent &content() const { return *elements_; }
 
- private:
+private:
   BlockContent *elements_;
 };
 
@@ -438,8 +435,8 @@ struct ActionBlockContentGet<0, ActionsBlockContent<First, Rest...>> {
   using FirstElementType = First;
   using SubBlockType = ActionsBlockContent<First, Rest...>;
 
-  static auto GetSubContent(
-      ActionsBlockContent<First, Rest...> *block_content) {
+  static auto
+  GetSubContent(ActionsBlockContent<First, Rest...> *block_content) {
     return block_content;
   }
 };
@@ -451,17 +448,16 @@ struct ActionBlockContentGet<I, ActionsBlockContent<First, Rest...>> {
   using SubBlockType = typename ActionBlockContentGet<
       I - 1, ActionsBlockContent<Rest...>>::SubBlockType;
 
-  static auto GetSubContent(
-      ActionsBlockContent<First, Rest...> *block_content) {
+  static auto
+  GetSubContent(ActionsBlockContent<First, Rest...> *block_content) {
     return ActionBlockContentGet<I - 1, ActionsBlockContent<Rest...>>::
         GetSubContent(block_content->next_elements());
   }
 };
 
-template <typename... BlockElements>
-class ActionsBlock : public Block {
- public:
-  explicit ActionsBlock(BlockElements &&...elements)
+template <typename... BlockElements> class ActionsBlock : public Block {
+public:
+  explicit ActionsBlock(BlockElements &&... elements)
       : elements_(std::forward<BlockElements>(elements)...) {}
 
   void Run(GameState *state) override { elements_.Run(state); }
@@ -476,8 +472,7 @@ class ActionsBlock : public Block {
     return elements_.RunAndFindEnd(state);
   }
 
-  template <size_t I>
-  auto GetSubAbstractBlock() {
+  template <size_t I> auto GetSubAbstractBlock() {
     auto sub_block_pointer = ActionBlockContentGet<
         I, ActionsBlockContent<BlockElements...>>::GetSubContent(&elements_);
     sub_pointers_.push_back(
@@ -487,8 +482,7 @@ class ActionsBlock : public Block {
     return sub_pointers_.back().get();
   }
 
-  template <size_t I>
-  auto GetAction() {
+  template <size_t I> auto GetAction() {
     return ActionBlockContentGet<I, ActionsBlockContent<BlockElements...>>::
         GetSubContent(&elements_)
             ->action();
@@ -500,17 +494,17 @@ class ActionsBlock : public Block {
     return elements_;
   }
 
- private:
+private:
   ActionsBlockContent<BlockElements...> elements_;
   std::vector<std::unique_ptr<Block>> sub_pointers_;
 };
 
 template <typename... BlockElements>
-std::unique_ptr<ActionsBlock<BlockElements...>> CreateBlockUniquePtr(
-    BlockElements... elements) {
+std::unique_ptr<ActionsBlock<BlockElements...>>
+CreateBlockUniquePtr(BlockElements... elements) {
   return std::make_unique<ActionsBlock<BlockElements...>>(
       std::move(elements)...);
 }
-}  // namespace rbg
+} // namespace rbg
 
-#endif  // RBGGAMEMANAGER_SEARCHSTEP_H
+#endif // RBGGAMEMANAGER_SEARCHSTEP_H

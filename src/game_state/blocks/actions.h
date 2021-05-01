@@ -20,12 +20,12 @@ class GameState;
 class BlocksCollection;
 
 class SearchStepsPoint;
-}  // namespace rbg
+} // namespace rbg
 
 namespace rbg {
 
 class VisitedCheckTest {
- public:
+public:
   static constexpr ActionTypeTrait kind = ActionTypeTrait::kCheck;
 
   explicit VisitedCheckTest(ResetableBitArrayStackChunk bit_array_stack_chunk)
@@ -37,12 +37,12 @@ class VisitedCheckTest {
     return !result;
   }
 
- private:
+private:
   ResetableBitArrayStackChunk stack_chunk_;
 };
 
 class ConditionVisitedCheckTest {
- public:
+public:
   static constexpr ActionTypeTrait kind = ActionTypeTrait::kSpecial;
 
   explicit ConditionVisitedCheckTest(
@@ -75,13 +75,13 @@ class ConditionVisitedCheckTest {
     return result;
   }
 
- private:
+private:
   ResetableBitArrayStackChunk stack_chunk_;
   ResetableBitArrayStackChunk results_chunk_;
 };
 
 class ShiftAction {
- public:
+public:
   static constexpr ActionTypeTrait kind = ActionTypeTrait::kApplication;
   using revert_info_t = vertex_id_t;
 
@@ -98,12 +98,12 @@ class ShiftAction {
     state->current_pos_ = previous_vertex;
   }
 
- private:
+private:
   shift_edge_id edge_id_;
 };
 
 class OutOfBoundsTest {
- public:
+public:
   static constexpr ActionTypeTrait kind = ActionTypeTrait::kCheck;
 
   inline bool Check(GameState *state) const {
@@ -113,7 +113,7 @@ class OutOfBoundsTest {
 };
 
 class OnTest {
- public:
+public:
   static constexpr ActionTypeTrait kind = ActionTypeTrait::kCheck;
 
   explicit OnTest(std::vector<bool> pieces) : pieces_(std::move(pieces)) {}
@@ -122,12 +122,12 @@ class OnTest {
     return pieces_[state->board_.at(state->current_pos_)];
   }
 
- private:
+private:
   std::vector<bool> pieces_;
 };
 
 class PlayerTest {
- public:
+public:
   static constexpr ActionTypeTrait kind = ActionTypeTrait::kCheck;
 
   explicit PlayerTest(player_id_t player) : player_(player) {}
@@ -136,12 +136,12 @@ class PlayerTest {
     return state->current_player_ == player_;
   }
 
- private:
+private:
   player_id_t player_;
 };
 
 class LessEqualComparisonTest {
- public:
+public:
   static constexpr ActionTypeTrait kind = ActionTypeTrait::kCheck;
 
   explicit LessEqualComparisonTest(std::unique_ptr<ArithmeticOperation> left,
@@ -152,12 +152,12 @@ class LessEqualComparisonTest {
     return left_->Value(*state) <= right_->Value(*state);
   }
 
- private:
+private:
   std::unique_ptr<ArithmeticOperation> left_, right_;
 };
 
 class LessComparisonTest {
- public:
+public:
   static constexpr ActionTypeTrait kind = ActionTypeTrait::kCheck;
 
   explicit LessComparisonTest(std::unique_ptr<ArithmeticOperation> left,
@@ -168,12 +168,12 @@ class LessComparisonTest {
     return left_->Value(*state) < right_->Value(*state);
   }
 
- private:
+private:
   std::unique_ptr<ArithmeticOperation> left_, right_;
 };
 
 class EqualComparisonTest {
- public:
+public:
   static constexpr ActionTypeTrait kind = ActionTypeTrait::kCheck;
 
   explicit EqualComparisonTest(std::unique_ptr<ArithmeticOperation> left,
@@ -184,12 +184,12 @@ class EqualComparisonTest {
     return left_->Value(*state) == right_->Value(*state);
   }
 
- private:
+private:
   std::unique_ptr<ArithmeticOperation> left_, right_;
 };
 
 class NotEqualComparisonTest {
- public:
+public:
   static constexpr ActionTypeTrait kind = ActionTypeTrait::kCheck;
 
   explicit NotEqualComparisonTest(std::unique_ptr<ArithmeticOperation> left,
@@ -200,12 +200,12 @@ class NotEqualComparisonTest {
     return left_->Value(*state) != right_->Value(*state);
   }
 
- private:
+private:
   std::unique_ptr<ArithmeticOperation> left_, right_;
 };
 
 class ConditionCheckTest {
- public:
+public:
   static constexpr ActionTypeTrait kind = ActionTypeTrait::kCheck;
 
   explicit ConditionCheckTest(Block *steps_point)
@@ -218,12 +218,12 @@ class ConditionCheckTest {
     return result;
   }
 
- private:
+private:
   Block *steps_point_;
 };
 
 class NegatedConditionCheckTest {
- public:
+public:
   static constexpr ActionTypeTrait kind = ActionTypeTrait::kCheck;
 
   explicit NegatedConditionCheckTest(Block *steps_point)
@@ -236,12 +236,12 @@ class NegatedConditionCheckTest {
     return result;
   }
 
- private:
+private:
   Block *steps_point_;
 };
 
 class OffApplication : public ModifyingApplication {
- public:
+public:
   static constexpr ActionTypeTrait kind = ActionTypeTrait::kModifier;
   using revert_info_t = piece_id_t;
 
@@ -258,12 +258,12 @@ class OffApplication : public ModifyingApplication {
     state->board_.set(state->current_pos_, previous_piece);
   }
 
- private:
+private:
   piece_id_t piece_id_;
 };
 
 class PlayerSwitchApplication : public ModifyingApplication {
- public:
+public:
   static constexpr ActionTypeTrait kind = ActionTypeTrait::kSwitch;
   using revert_info_t = player_id_t;
 
@@ -280,20 +280,19 @@ class PlayerSwitchApplication : public ModifyingApplication {
     state->current_player_ = previous_player;
   }
 
- private:
+private:
   player_id_t player_id_;
 };
 
 class AssignmentAction : public ModifyingApplication {
- public:
+public:
   static constexpr ActionTypeTrait kind = ActionTypeTrait::kModifier;
   using revert_info_t = variable_value_t;
 
   explicit AssignmentAction(variable_id_t variable_id,
                             std::unique_ptr<ArithmeticOperation> value,
                             uint index)
-      : ModifyingApplication(index),
-        variable_id_(variable_id),
+      : ModifyingApplication(index), variable_id_(variable_id),
         value_(std::move(value)) {}
 
   revert_info_t Apply(GameState *state) const override {
@@ -306,13 +305,13 @@ class AssignmentAction : public ModifyingApplication {
     state->variables_values_[variable_id_] = previous_value;
   }
 
- private:
+private:
   variable_id_t variable_id_;
   std::unique_ptr<ArithmeticOperation> value_;
 };
 
 class VariableBoundsTest {
- public:
+public:
   static constexpr ActionTypeTrait kind = ActionTypeTrait::kCheck;
 
   explicit VariableBoundsTest(variable_id_t variable_id)
@@ -323,9 +322,9 @@ class VariableBoundsTest {
            state->declarations().variable_bound(variable_id_);
   }
 
- private:
+private:
   variable_id_t variable_id_;
 };
-}  // namespace rbg
+} // namespace rbg
 
-#endif  // RBGGAMEMANAGER_ACTIONS_H
+#endif // RBGGAMEMANAGER_ACTIONS_H

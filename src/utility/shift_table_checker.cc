@@ -4,7 +4,7 @@
 
 namespace rbg {
 class ContainsOnlyShiftsFn : public AstFunction<bool> {
- public:
+public:
   bool DefaultCase() override { return false; }
 
   bool ShiftCase(const rbg_parser::shift &) override { return true; }
@@ -36,4 +36,4 @@ class ContainsOnlyShiftsFn : public AstFunction<bool> {
 bool ContainsOnlyShifts(const rbg_parser::game_move &move) {
   return ContainsOnlyShiftsFn()(move);
 }
-}  // namespace rbg
+} // namespace rbg

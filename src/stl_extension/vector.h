@@ -8,10 +8,10 @@
 #include <vector>
 
 namespace std_ext {
-template <typename T>
-class rigid_vector {
- public:
-  static_assert(std::is_trivial<T>::value);
+template <typename T> class rigid_vector {
+public:
+  static_assert(std::is_trivial<T>::value,
+                "The rigid vector must have only trivial values.");
 
   explicit rigid_vector(std::size_t size) : data_(size), position_(0) {}
 
@@ -24,16 +24,16 @@ class rigid_vector {
 
   void reserve(std::size_t size) { data_.resize(size); }
 
-  T& operator[](std::size_t i) { return data_[i]; }
+  T &operator[](std::size_t i) { return data_[i]; }
 
   T operator[](std::size_t i) const { return data_[i]; }
 
   std::size_t size() const { return position_; }
 
- private:
+private:
   std::vector<T> data_;
   std::size_t position_;
 };
-}  // namespace std_ext
+} // namespace std_ext
 
-#endif  // RBGGAMEMANAGER_VECTOR_H
+#endif // RBGGAMEMANAGER_VECTOR_H

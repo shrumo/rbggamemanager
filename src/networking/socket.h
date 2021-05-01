@@ -18,11 +18,12 @@ rbg::GameMove DecodeMove(const std::string &message);
 
 inline void set_socket_options(tcp::socket &socket) {
   socket.set_option(asio::ip::tcp::no_delay(true));
-  socket.set_option(asio::detail::socket_option::boolean<IPPROTO_TCP, TCP_QUICKACK>(true));
+  socket.set_option(
+      asio::detail::socket_option::boolean<IPPROTO_TCP, TCP_QUICKACK>(true));
 }
 
 class StringSocket {
- public:
+public:
   explicit StringSocket(asio::io_service &service) : socket_(service) {}
   explicit StringSocket(tcp::socket socket) : socket_(std::move(socket)) {}
 
@@ -45,8 +46,7 @@ class StringSocket {
     return ExtractNextStringFromBuffer();
   }
 
-  template <typename Handler>
-  void AsyncReadString(Handler handler) {
+  template <typename Handler> void AsyncReadString(Handler handler) {
     asio::async_read_until(socket_, buffer, '\0', handler);
   }
 
@@ -56,23 +56,21 @@ class StringSocket {
 
   tcp::socket &socket() { return socket_; }
 
- private:
+private:
   tcp::socket socket_;
   asio::streambuf buffer;
 };
-}  // namespace rbg
+} // namespace rbg
 
 namespace std {
-template <>
-struct hash<rbg::ModifierApplication> {
+template <> struct hash<rbg::ModifierApplication> {
   std::size_t operator()(const rbg::ModifierApplication &m) const {
     return (m.vertex) * 83 + m.modifier_index;
     ;
   }
 };
 
-template <>
-struct hash<rbg::GameMove> {
+template <> struct hash<rbg::GameMove> {
   std::size_t operator()(const rbg::GameMove &m) const {
     std::size_t result = 0;
     for (const auto &mod_application : m) {
@@ -82,6 +80,6 @@ struct hash<rbg::GameMove> {
     return result;
   }
 };
-}  // namespace std
+} // namespace std
 
-#endif  // RBGGAMEMANAGER_SOCKET_H
+#endif // RBGGAMEMANAGER_SOCKET_H

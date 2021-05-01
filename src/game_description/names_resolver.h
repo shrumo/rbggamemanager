@@ -14,7 +14,7 @@ namespace rbg {
 using name_id_t = uint;
 
 class NamesResolver {
- public:
+public:
   NamesResolver() = default;
 
   // Adds the name to the names resolver.
@@ -39,12 +39,12 @@ class NamesResolver {
     return names_ids_.find(name) != names_ids_.end();
   }
 
- private:
+private:
   std::vector<std::string> names_;
   std::unordered_map<std::string, name_id_t> names_ids_;
 };
-}  // namespace rbg
+} // namespace rbg
 
 std::ostream &operator<<(std::ostream &o, const rbg::NamesResolver &res);
 
-#endif  // RBGGAMEMANAGER_NAMES_RESOLVER_H
+#endif // RBGGAMEMANAGER_NAMES_RESOLVER_H

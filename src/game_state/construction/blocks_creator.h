@@ -15,7 +15,7 @@
 namespace rbg {
 
 class BlocksCollection {
- public:
+public:
   BlocksCollection(uint visited_checks_count, uint condition_checks_count,
                    uint board_size)
       : visited_info_stack_(std::make_unique<ResettableBitArrayStack>(
@@ -30,13 +30,13 @@ class BlocksCollection {
     return search_steps_.size() - 1;
   }
 
-  Block* GetBlockPointer(uint index) { return search_steps_[index].get(); }
+  Block *GetBlockPointer(uint index) { return search_steps_[index].get(); }
 
   ResetableBitArrayStackChunk GetVisitedArrayChunk(uint index) {
-    return {
-        visited_info_stack_.get(),
-        index * visited_info_stack_->bit_array_size() / visited_checks_count_,
-        visited_info_stack_->bit_array_size() / visited_checks_count_};
+    return {visited_info_stack_.get(),
+            index * visited_info_stack_->bit_array_size() /
+                visited_checks_count_,
+            visited_info_stack_->bit_array_size() / visited_checks_count_};
   }
 
   ResetableBitArrayStackChunk GetConditionsResultsArrayChunk(uint index) {
@@ -66,40 +66,40 @@ class BlocksCollection {
   void PopVisitedStack() { visited_info_stack_->Pop(); }
 
   void RegisterModifier(uint modifier_index,
-                        const ModifyingApplication* application) {
+                        const ModifyingApplication *application) {
     modifiers_[modifier_index] = application;
   }
 
-  void RegisterSwitch(uint modifier_index, Block* block) {
+  void RegisterSwitch(uint modifier_index, Block *block) {
     switches_[modifier_index] = block;
   }
 
-  const ModifyingApplication* Modifier(uint modifier_index) {
+  const ModifyingApplication *Modifier(uint modifier_index) {
     return modifiers_.at(modifier_index);
   }
 
-  Block* Switch(uint modifier_index) { return switches_.at(modifier_index); }
+  Block *Switch(uint modifier_index) { return switches_.at(modifier_index); }
 
-  Block* initial() { return search_steps_[initial_index_].get(); }
+  Block *initial() { return search_steps_[initial_index_].get(); }
 
   void set_initial(uint initial_block_index) {
     initial_index_ = initial_block_index;
   }
 
- private:
+private:
   std::vector<std::unique_ptr<Block>> search_steps_;
   std::unique_ptr<ResettableBitArrayStack> visited_info_stack_;
   std::unique_ptr<ResettableBitArrayStack> conditions_results_;
   uint visited_checks_count_;
   uint condition_results_count_;
 
-  std::unordered_map<uint, const ModifyingApplication*> modifiers_;
-  std::unordered_map<uint, Block*> switches_;
+  std::unordered_map<uint, const ModifyingApplication *> modifiers_;
+  std::unordered_map<uint, Block *> switches_;
   uint initial_index_;
 };
 
-BlocksCollection CreateSearchSteps(const Nfa<std::unique_ptr<Move>>& nfa,
-                                   const Declarations& declarations);
-}  // namespace rbg
+BlocksCollection CreateSearchSteps(const Nfa<std::unique_ptr<Move>> &nfa,
+                                   const Declarations &declarations);
+} // namespace rbg
 
-#endif  // RBGGAMEMANAGER_BLOCKS_CREATOR_H
+#endif // RBGGAMEMANAGER_BLOCKS_CREATOR_H

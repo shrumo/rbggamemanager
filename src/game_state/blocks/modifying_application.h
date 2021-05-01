@@ -19,7 +19,7 @@ enum class ActionTypeTrait {
 };
 
 class ModifyingApplication {
- public:
+public:
   explicit ModifyingApplication(uint index) : index_(index) {}
 
   virtual name_id_t Apply(GameState *state) const = 0;
@@ -29,7 +29,7 @@ class ModifyingApplication {
 
   uint index() const { return index_; }
 
- public:
+public:
   void PushVisitedStackAndAddToApplied(GameState *state) const;
   void PopVisitedStackAndAddToApplied(GameState *state) const;
 
@@ -37,6 +37,6 @@ class ModifyingApplication {
 
   uint index_;
 };
-}  // namespace rbg
+} // namespace rbg
 
-#endif  // RBGGAMEMANAGER_MODIFYING_APPLICATION_H
+#endif // RBGGAMEMANAGER_MODIFYING_APPLICATION_H

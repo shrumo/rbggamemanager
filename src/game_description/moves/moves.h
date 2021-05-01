@@ -40,7 +40,7 @@ class EmptyForward;
 class Noop;
 
 class MoveVisitor {
- public:
+public:
   virtual void Visit(const Shift &) = 0;
 
   virtual void Visit(const ShiftTable &) = 0;
@@ -71,7 +71,7 @@ class MoveVisitor {
 };
 
 class Move {
- public:
+public:
   explicit Move(MoveType type) : type_(type), original_move_(nullptr) {}
 
   MoveType type() const { return type_; }
@@ -88,26 +88,26 @@ class Move {
 
   const rbg_parser::game_move *original_move() const { return original_move_; }
 
- private:
+private:
   MoveType type_;
   const rbg_parser::game_move *original_move_;
 };
 
 class IndexedMove : public Move {
- public:
+public:
   explicit IndexedMove(MoveType type, uint index) : Move(type), index_(index) {}
 
   uint index() const { return index_; }
 
   bool indexed() const override { return true; }
 
- private:
+private:
   uint index_;
 };
 
 // Shift changes the current position on board.
 class Shift : public IndexedMove {
- public:
+public:
   explicit Shift(edge_id_t edge_id, uint index)
       : IndexedMove(MoveType::kShiftType, index), edge_id_(edge_id) {}
 
@@ -116,13 +116,13 @@ class Shift : public IndexedMove {
 
   void Accept(MoveVisitor &visitor) const override { visitor.Visit(*this); }
 
- private:
+private:
   edge_id_t edge_id_;
 };
 
 // Shift changes the current position on board.
 class ShiftTable : public IndexedMove {
- public:
+public:
   explicit ShiftTable(std::vector<std::vector<vertex_id_t>> table, uint index)
       : IndexedMove(MoveType::kShiftTableType, index),
         table_(std::move(table)) {
@@ -130,7 +130,8 @@ class ShiftTable : public IndexedMove {
       std::vector<vertex_id_t> new_row;
       new_row.reserve(row.size());
       for (long element : row) {
-        if (element != -1) new_row.push_back(element);
+        if (element != -1)
+          new_row.push_back(element);
       }
       row = std::move(new_row);
       row.shrink_to_fit();
@@ -142,13 +143,13 @@ class ShiftTable : public IndexedMove {
 
   void Accept(MoveVisitor &visitor) const override { visitor.Visit(*this); }
 
- private:
+private:
   std::vector<std::vector<vertex_id_t>> table_;
 };
 
 // On checks if one of the pieces is on the current position on board.
 class On : public IndexedMove {
- public:
+public:
   // Parameter pieces should contain true for token ids of pieces names that the
   // on accepts.
   explicit On(std::vector<bool> pieces, uint index)
@@ -160,14 +161,15 @@ class On : public IndexedMove {
   std::vector<piece_id_t> pieces() const {
     std::vector<piece_id_t> result;
     for (piece_id_t i = 0; i < pieces_.size(); i++) {
-      if (pieces_[i]) result.push_back(i);
+      if (pieces_[i])
+        result.push_back(i);
     }
     return result;
   }
 
   void Accept(MoveVisitor &visitor) const override { visitor.Visit(*this); }
 
- private:
+private:
   std::vector<bool> pieces_;
 };
 
@@ -182,13 +184,12 @@ enum class ComparisonType {
 
 // Check arithmetic comparison
 class ArithmeticComparison : public IndexedMove {
- public:
+public:
   ArithmeticComparison(std::unique_ptr<ArithmeticOperation> left,
                        std::unique_ptr<ArithmeticOperation> right,
                        ComparisonType type, uint index)
       : IndexedMove(MoveType::kArithmeticComparisonType, index),
-        left_(std::move(left)),
-        right_(std::move(right)),
+        left_(std::move(left)), right_(std::move(right)),
         comparison_type_(type) {}
 
   const ArithmeticOperation &left() const { return *left_; }
@@ -207,14 +208,14 @@ class ArithmeticComparison : public IndexedMove {
 
   void Accept(MoveVisitor &visitor) const override { visitor.Visit(*this); }
 
- private:
+private:
   std::unique_ptr<ArithmeticOperation> left_, right_;
   ComparisonType comparison_type_;
 };
 
 // Off places specified piece on the current position in game state.
 class Off : public IndexedMove {
- public:
+public:
   explicit Off(piece_id_t piece, unsigned int index)
       : IndexedMove(MoveType::kOffType, index), piece_(piece) {}
 
@@ -222,13 +223,13 @@ class Off : public IndexedMove {
 
   void Accept(MoveVisitor &visitor) const override { visitor.Visit(*this); }
 
- private:
+private:
   piece_id_t piece_;
 };
 
 // PlayerSwitch changes the player to the one specified.
 class PlayerSwitch : public IndexedMove {
- public:
+public:
   explicit PlayerSwitch(player_id_t player, unsigned int index)
       : IndexedMove(MoveType::kPlayerSwitchType, index), player_(player) {}
 
@@ -236,32 +237,31 @@ class PlayerSwitch : public IndexedMove {
 
   void Accept(MoveVisitor &visitor) const override { visitor.Visit(*this); }
 
- private:
+private:
   player_id_t player_;
 };
 
 // KeeperSwitch changes the player to the special keeper player
 class KeeperSwitch : public IndexedMove {
- public:
+public:
   explicit KeeperSwitch(player_id_t keeper_id, uint index)
-      : IndexedMove(MoveType::kKeeperSwitchType, index),
-        keeper_id_(keeper_id) {}
+      : IndexedMove(MoveType::kKeeperSwitchType, index), keeper_id_(keeper_id) {
+  }
 
   void Accept(MoveVisitor &visitor) const override { visitor.Visit(*this); }
 
   player_id_t keeper_id() const { return keeper_id_; }
 
- private:
+private:
   player_id_t keeper_id_;
 };
 
 // Assignment assigns a value to the variable.
 class Assignment : public IndexedMove {
- public:
+public:
   Assignment(size_t variable, std::unique_ptr<ArithmeticOperation> value,
              uint index)
-      : IndexedMove(MoveType::kAssignmentType, index),
-        variable_(variable),
+      : IndexedMove(MoveType::kAssignmentType, index), variable_(variable),
         value_(std::move(value)) {}
 
   variable_id_t get_variable() const { return variable_; }
@@ -274,18 +274,17 @@ class Assignment : public IndexedMove {
 
   void Accept(MoveVisitor &visitor) const override { visitor.Visit(*this); }
 
- private:
+private:
   variable_id_t variable_;
   std::unique_ptr<ArithmeticOperation> value_;
 };
 
 // Condition is true if there is a legal path from initial to final.
 class Condition : public IndexedMove {
- public:
+public:
   Condition(std::unique_ptr<Nfa<std::unique_ptr<Move>>> nfa, bool negated,
             uint index)
-      : IndexedMove(MoveType::kConditionCheck, index),
-        nfa_(std::move(nfa)),
+      : IndexedMove(MoveType::kConditionCheck, index), nfa_(std::move(nfa)),
         negated_(negated) {}
 
   const Nfa<std::unique_ptr<Move>> &nfa() const { return *nfa_; }
@@ -296,13 +295,13 @@ class Condition : public IndexedMove {
 
   void Accept(MoveVisitor &visitor) const override { visitor.Visit(*this); }
 
- private:
+private:
   std::unique_ptr<Nfa<std::unique_ptr<Move>>> nfa_;
   bool negated_;
 };
 
 class PlayerCheck : public IndexedMove {
- public:
+public:
   explicit PlayerCheck(player_id_t player, uint index)
       : IndexedMove(MoveType::kPlayerCheck, index), player_(player) {}
 
@@ -310,37 +309,37 @@ class PlayerCheck : public IndexedMove {
 
   player_id_t player() const { return player_; }
 
- private:
+private:
   player_id_t player_;
 };
 
 class VisitedQuery : public Move {
- public:
+public:
   explicit VisitedQuery() : Move(MoveType::kVisitedCheck) {}
 
   void Accept(MoveVisitor &visitor) const override { visitor.Visit(*this); }
 };
 
 class EmptyBackward : public Move {
- public:
+public:
   EmptyBackward() : Move(MoveType::kBackwardEmpty) {}
 
   void Accept(MoveVisitor &visitor) const override { visitor.Visit(*this); }
 };
 
 class EmptyForward : public Move {
- public:
+public:
   EmptyForward() : Move(MoveType::kForwardEmpty) {}
 
   void Accept(MoveVisitor &visitor) const override { visitor.Visit(*this); }
 };
 
 class Noop : public Move {
- public:
+public:
   Noop() : Move(MoveType::kNoop) {}
 
   void Accept(MoveVisitor &visitor) const override { visitor.Visit(*this); }
 };
-}  // namespace rbg
+} // namespace rbg
 
-#endif  // RBGGAMEMANAGER_MOVES_H
+#endif // RBGGAMEMANAGER_MOVES_H

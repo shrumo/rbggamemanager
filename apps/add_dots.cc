@@ -45,6 +45,7 @@ DotsInShifttables dotsInShiftTablesOptionFromString(const std::string &text) {
   if (text == "exclude") {
     return DotsInShifttables::kExclude;
   }
+  return DotsInShifttables::kWhatever;
 }
 
 struct PrinterOptions {

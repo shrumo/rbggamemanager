@@ -13,7 +13,7 @@ using namespace std;
 
 class ArithmeticCreator
     : public AstFunction<unique_ptr<rbg::ArithmeticOperation>> {
- public:
+public:
   explicit ArithmeticCreator(const Declarations &declarations)
       : declarations_(declarations) {}
 
@@ -40,32 +40,32 @@ class ArithmeticCreator
       elements.push_back(ArithmeticCreator(declarations_)(*subexpr));
     }
     switch (expression.get_operation()) {
-      case rbg_parser::addition:
-        return make_unique<SumValue>(std::move(elements));
-      case rbg_parser::subtraction:
-        return make_unique<SubtractionValue>(std::move(elements));
-      case rbg_parser::multiplication:
-        return make_unique<ProductValue>(std::move(elements));
-      case rbg_parser::division:
-        return make_unique<DivisionValue>(std::move(elements));
+    case rbg_parser::addition:
+      return make_unique<SumValue>(std::move(elements));
+    case rbg_parser::subtraction:
+      return make_unique<SubtractionValue>(std::move(elements));
+    case rbg_parser::multiplication:
+      return make_unique<ProductValue>(std::move(elements));
+    case rbg_parser::division:
+      return make_unique<DivisionValue>(std::move(elements));
     }
     return nullptr;
   }
 
- private:
+private:
   const Declarations &declarations_;
 };
 
 class ArithmeticCopyCreator
     : public ArithmeticOperationFunction<std::unique_ptr<ArithmeticOperation>> {
- public:
-  unique_ptr<ArithmeticOperation> VariableCase(
-      const VariableValue &variable_value) override {
+public:
+  unique_ptr<ArithmeticOperation>
+  VariableCase(const VariableValue &variable_value) override {
     return make_unique<VariableValue>(variable_value.variable_id());
   }
 
-  unique_ptr<ArithmeticOperation> ConstantCase(
-      const ConstantValue &constant_value) override {
+  unique_ptr<ArithmeticOperation>
+  ConstantCase(const ConstantValue &constant_value) override {
     return make_unique<ConstantValue>(constant_value.value());
   }
 
@@ -77,8 +77,8 @@ class ArithmeticCopyCreator
     return make_unique<SumValue>(std::move(new_children));
   }
 
-  unique_ptr<ArithmeticOperation> SubtractionCase(
-      const SubtractionValue &subtraction_value) override {
+  unique_ptr<ArithmeticOperation>
+  SubtractionCase(const SubtractionValue &subtraction_value) override {
     vector<unique_ptr<ArithmeticOperation>> new_children;
     for (const auto &child : subtraction_value.elements()) {
       new_children.push_back(ArithmeticCopyCreator()(*child));
@@ -86,8 +86,8 @@ class ArithmeticCopyCreator
     return make_unique<SubtractionValue>(std::move(new_children));
   }
 
-  unique_ptr<ArithmeticOperation> ProductCase(
-      const ProductValue &product_value) override {
+  unique_ptr<ArithmeticOperation>
+  ProductCase(const ProductValue &product_value) override {
     vector<unique_ptr<ArithmeticOperation>> new_children;
     for (const auto &child : product_value.factors()) {
       new_children.push_back(ArithmeticCopyCreator()(*child));
@@ -95,8 +95,8 @@ class ArithmeticCopyCreator
     return make_unique<ProductValue>(std::move(new_children));
   }
 
-  unique_ptr<ArithmeticOperation> DivisionCase(
-      const DivisionValue &division_value) override {
+  unique_ptr<ArithmeticOperation>
+  DivisionCase(const DivisionValue &division_value) override {
     vector<unique_ptr<ArithmeticOperation>> new_children;
     for (const auto &child : division_value.elements()) {
       new_children.push_back(ArithmeticCopyCreator()(*child));
@@ -104,12 +104,12 @@ class ArithmeticCopyCreator
     return make_unique<DivisionValue>(std::move(new_children));
   }
 
-  unique_ptr<ArithmeticOperation> PieceCountCase(
-      const PieceCountValue &piececount_value) override {
+  unique_ptr<ArithmeticOperation>
+  PieceCountCase(const PieceCountValue &piececount_value) override {
     return make_unique<PieceCountValue>(piececount_value.piece());
   }
 };
-}  // namespace
+} // namespace
 
 unique_ptr<rbg::ArithmeticOperation> rbg::CreateArithmeticOperation(
     const rbg_parser::arithmetic_expression &expression,
@@ -117,7 +117,7 @@ unique_ptr<rbg::ArithmeticOperation> rbg::CreateArithmeticOperation(
   return ArithmeticCreator(declarations)(expression);
 }
 
-std::unique_ptr<rbg::ArithmeticOperation> rbg::CreateArithmeticOperation(
-    const ArithmeticOperation &arithmeticOperation) {
+std::unique_ptr<rbg::ArithmeticOperation>
+rbg::CreateArithmeticOperation(const ArithmeticOperation &arithmeticOperation) {
   return ArithmeticCopyCreator()(arithmeticOperation);
 }

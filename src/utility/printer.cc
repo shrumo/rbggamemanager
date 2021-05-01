@@ -19,7 +19,7 @@ using namespace rbg;
 
 class ArithmeticOperationPrinter
     : public ArithmeticOperationFunction<std::string> {
- public:
+public:
   explicit ArithmeticOperationPrinter(const Declarations &declarations)
       : declarations_(declarations) {}
 
@@ -44,8 +44,8 @@ class ArithmeticOperationPrinter
     return result;
   }
 
-  std::string SubtractionCase(
-      const SubtractionValue &subtaction_value) override {
+  std::string
+  SubtractionCase(const SubtractionValue &subtaction_value) override {
     std::string result;
     for (size_t i = 0; i < subtaction_value.elements().size(); i++) {
       if (i != 0) {
@@ -81,30 +81,30 @@ class ArithmeticOperationPrinter
     return result;
   }
 
- private:
+private:
   const Declarations &declarations_;
 };
 
 std::string comparison_symbol(ComparisonType type) {
   switch (type) {
-    case ComparisonType::kLess:
-      return "<";
-    case ComparisonType::kLessEqual:
-      return "<=";
-    case ComparisonType::kEqual:
-      return "==";
-    case ComparisonType::kNotEqual:
-      return "!=";
-    case ComparisonType::kGreater:
-      return ">";
-    case ComparisonType::kGreaterEqual:
-      return ">=";
+  case ComparisonType::kLess:
+    return "<";
+  case ComparisonType::kLessEqual:
+    return "<=";
+  case ComparisonType::kEqual:
+    return "==";
+  case ComparisonType::kNotEqual:
+    return "!=";
+  case ComparisonType::kGreater:
+    return ">";
+  case ComparisonType::kGreaterEqual:
+    return ">=";
   }
   assert(false && "Not supported type");
 }
 
 class MovePrinter : public MoveFunction<std::string> {
- public:
+public:
   explicit MovePrinter(const Declarations &declarations)
       : declarations_(declarations) {}
 
@@ -131,8 +131,8 @@ class MovePrinter : public MoveFunction<std::string> {
     return stream.str();
   }
 
-  std::string ArithmeticComparisonCase(
-      const ArithmeticComparison &move) override {
+  std::string
+  ArithmeticComparisonCase(const ArithmeticComparison &move) override {
     return "{$" + ArithmeticOperationPrinter(declarations_)(move.left()) +
            comparison_symbol(move.comparison_type()) +
            ArithmeticOperationPrinter(declarations_)(move.right()) + "}";
@@ -194,7 +194,7 @@ class MovePrinter : public MoveFunction<std::string> {
 
   std::string EmptyForwardCase(const EmptyForward &) override { return "e_f"; }
 
- private:
+private:
   const Declarations &declarations_;
 };
 
@@ -203,8 +203,8 @@ std::string rbg::MoveDescription(const Move &move,
   return MovePrinter(declarations)(move);
 }
 
-std::unordered_map<uint, std::string> rbg::ActionsDescriptionsMap(
-    const std::string &game_text) {
+std::unordered_map<uint, std::string>
+rbg::ActionsDescriptionsMap(const std::string &game_text) {
   std::unordered_map<uint, std::string> result;
   auto game = ParseGame(ParseGame(game_text)->to_rbg(rbg_parser::options{}));
   Declarations declarations = Declarations(*game);

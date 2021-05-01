@@ -22,6 +22,6 @@ bool IsNoopRedundant(const Nfa<std::unique_ptr<Move>> &nfa,
                      const NfaBoardProduct &board_product, node_t nfa_noop_node,
                      size_t vertices_count);
 
-std::unordered_set<const rbg_parser::game_move *> RedundantNoopsInGame(
-    const rbg_parser::parsed_game *parsed_game);
-}  // namespace rbg
+std::unordered_set<const rbg_parser::game_move *>
+RedundantNoopsInGame(const rbg_parser::parsed_game *parsed_game);
+} // namespace rbg

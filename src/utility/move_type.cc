@@ -5,7 +5,7 @@
 namespace rbg {
 
 class GetNodeTypeFn : public AstFunction<NodeType> {
- public:
+public:
   NodeType SumCase(const rbg_parser::sum &) override { return NodeType::kSum; }
   NodeType ConcatenationCase(const rbg_parser::concatenation &) override {
     return NodeType::kConcat;
@@ -13,13 +13,13 @@ class GetNodeTypeFn : public AstFunction<NodeType> {
   NodeType StarCase(const rbg_parser::star_move &) override {
     return NodeType::kStar;
   }
-  NodeType GameMoveCase(const rbg_parser::game_move &) {
+  NodeType GameMoveCase(const rbg_parser::game_move &) override {
     return NodeType::kMove;
   }
 };
 
 class GetMoveTypeFn : public AstFunction<MoveType> {
- public:
+public:
   MoveType ShiftCase(const rbg_parser::shift &) override {
     return MoveType::kShiftType;
   }
@@ -48,8 +48,8 @@ class GetMoveTypeFn : public AstFunction<MoveType> {
     return MoveType::kConditionCheck;
   }
 
-  MoveType ArithmeticComparisonCase(
-      const rbg_parser::arithmetic_comparison &) override {
+  MoveType
+  ArithmeticComparisonCase(const rbg_parser::arithmetic_comparison &) override {
     return MoveType::kArithmeticComparisonType;
   }
 };
@@ -64,17 +64,17 @@ MoveType ParserMoveType(const rbg_parser::game_move &move) {
 
 bool IsModifier(MoveType type) {
   switch (type) {
-    case MoveType::kOffType:
-    case MoveType::kKeeperSwitchType:
-    case MoveType::kPlayerSwitchType:
-    case MoveType::kAssignmentType:
-      return true;
-    default:
-      return false;
+  case MoveType::kOffType:
+  case MoveType::kKeeperSwitchType:
+  case MoveType::kPlayerSwitchType:
+  case MoveType::kAssignmentType:
+    return true;
+  default:
+    return false;
   }
 }
 
 bool IsModifier(const rbg_parser::game_move &move) {
   return IsModifier(ParserMoveType(move));
 }
-}  // namespace rbg
+} // namespace rbg

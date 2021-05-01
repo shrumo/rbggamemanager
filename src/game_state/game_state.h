@@ -20,7 +20,7 @@ struct MoveRevertInformation {
 };
 
 class GameState {
- public:
+public:
   friend class VisitedCheckTest;
 
   friend class ShiftAction;
@@ -54,13 +54,11 @@ class GameState {
   friend class ModifyingApplication;
 
   GameState(const Declarations &declarations, BlocksCollection steps)
-      : declarations_(declarations),
-        current_pos_(1),
+      : declarations_(declarations), current_pos_(1),
         variables_values_(declarations.variables_resolver().size(), 0),
         current_player_(declarations.keeper_id()),
         board_(declarations.initial_board().initial_content()),
-        blocks_(std::move(steps)),
-        current_block_(blocks_.initial()),
+        blocks_(std::move(steps)), current_block_(blocks_.initial()),
         moves_calculated(false) {
     applied_modifiers_.reserve(10);
     moves_.reserve(10);
@@ -140,9 +138,9 @@ class GameState {
     MakeKeeperClosure(initial_keeper_step_revert_information);
   }
 
- private:
-  void MakeKeeperClosure(
-      std::vector<ActionRevertInfo> &steps_revert_information) {
+private:
+  void
+  MakeKeeperClosure(std::vector<ActionRevertInfo> &steps_revert_information) {
     bool exists = true;
     while (exists && current_player_ == declarations_.keeper_id()) {
       applied_modifiers_.clear();
@@ -170,6 +168,6 @@ class GameState {
   std::vector<std::vector<ModifierApplication>> moves_;
   bool moves_calculated;
 };
-}  // namespace rbg
+} // namespace rbg
 
-#endif  // RBGGAMEMANAGER_GAME_STATE_H
+#endif // RBGGAMEMANAGER_GAME_STATE_H

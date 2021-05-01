@@ -16,24 +16,24 @@ using namespace std;
 
 ComparisonType comparison_type(rbg_parser::kind kind) {
   switch (kind) {
-    case rbg_parser::eq:
-      return ComparisonType::kEqual;
-    case rbg_parser::neq:
-      return ComparisonType::kNotEqual;
-    case rbg_parser::le:
-      return ComparisonType::kLess;
-    case rbg_parser::leq:
-      return ComparisonType::kLessEqual;
-    case rbg_parser::ge:
-      return ComparisonType::kGreater;
-    case rbg_parser::geq:
-      return ComparisonType::kGreaterEqual;
+  case rbg_parser::eq:
+    return ComparisonType::kEqual;
+  case rbg_parser::neq:
+    return ComparisonType::kNotEqual;
+  case rbg_parser::le:
+    return ComparisonType::kLess;
+  case rbg_parser::leq:
+    return ComparisonType::kLessEqual;
+  case rbg_parser::ge:
+    return ComparisonType::kGreater;
+  case rbg_parser::geq:
+    return ComparisonType::kGreaterEqual;
   }
   assert(false && "Not supported kind of comparison.");
 }
 
 class MovesCreator : public AstFunction<unique_ptr<Move>> {
- public:
+public:
   explicit MovesCreator(const Declarations &declarations)
       : declarations_(declarations) {}
 
@@ -74,8 +74,8 @@ class MovesCreator : public AstFunction<unique_ptr<Move>> {
     return result;
   }
 
-  unique_ptr<Move> PlayerSwitchCase(
-      const rbg_parser::player_switch &move) override {
+  unique_ptr<Move>
+  PlayerSwitchCase(const rbg_parser::player_switch &move) override {
     auto result = make_unique<PlayerSwitch>(
         declarations_.players_resolver().Id(move.get_player().to_string()),
         move.index_in_expression());
@@ -83,8 +83,8 @@ class MovesCreator : public AstFunction<unique_ptr<Move>> {
     return result;
   }
 
-  unique_ptr<Move> KeeperSwitchCase(
-      const rbg_parser::keeper_switch &move) override {
+  unique_ptr<Move>
+  KeeperSwitchCase(const rbg_parser::keeper_switch &move) override {
     auto result = make_unique<KeeperSwitch>(declarations_.keeper_id(),
                                             move.index_in_expression());
     result->set_original_move(&move);
@@ -108,10 +108,10 @@ class MovesCreator : public AstFunction<unique_ptr<Move>> {
     return result;
   }
 
- private:
+private:
   const Declarations &declarations_;
 };
-}  // namespace
+} // namespace
 
 unique_ptr<Move> rbg::CreateMove(const rbg_parser::game_move &move,
                                  const Declarations &declarations) {

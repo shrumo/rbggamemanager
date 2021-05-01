@@ -29,7 +29,7 @@ class DivisionValue;
 class PieceCountValue;
 
 class ArithmeticOperationVisitor {
- public:
+public:
   virtual void Visit(const VariableValue &) = 0;
 
   virtual void Visit(const ConstantValue &) = 0;
@@ -46,7 +46,7 @@ class ArithmeticOperationVisitor {
 };
 
 class ArithmeticOperation {
- public:
+public:
   virtual variable_value_t Value(const GameState &s) const = 0;
 
   virtual void Accept(ArithmeticOperationVisitor &) const = 0;
@@ -55,7 +55,7 @@ class ArithmeticOperation {
 };
 
 class VariableValue : public ArithmeticOperation {
- public:
+public:
   explicit VariableValue(variable_id_t variable_id)
       : variable_id_(variable_id) {}
 
@@ -67,12 +67,12 @@ class VariableValue : public ArithmeticOperation {
 
   variable_id_t variable_id() const { return variable_id_; }
 
- private:
+private:
   variable_id_t variable_id_;
 };
 
 class ConstantValue : public ArithmeticOperation {
- public:
+public:
   explicit ConstantValue(variable_value_t value) : value_(value) {}
 
   variable_value_t Value(const GameState &) const override;
@@ -83,12 +83,12 @@ class ConstantValue : public ArithmeticOperation {
 
   variable_value_t value() const { return value_; }
 
- private:
+private:
   variable_value_t value_;
 };
 
 class SumValue : public ArithmeticOperation {
- public:
+public:
   explicit SumValue(std::vector<std::unique_ptr<ArithmeticOperation>> summands)
       : summands_(std::move(summands)) {}
 
@@ -102,12 +102,12 @@ class SumValue : public ArithmeticOperation {
     return summands_;
   }
 
- private:
+private:
   std::vector<std::unique_ptr<ArithmeticOperation>> summands_;
 };
 
 class SubtractionValue : public ArithmeticOperation {
- public:
+public:
   explicit SubtractionValue(
       std::vector<std::unique_ptr<ArithmeticOperation>> elements)
       : elements_(std::move(elements)) {}
@@ -122,12 +122,12 @@ class SubtractionValue : public ArithmeticOperation {
     return elements_;
   }
 
- private:
+private:
   std::vector<std::unique_ptr<ArithmeticOperation>> elements_;
 };
 
 class ProductValue : public ArithmeticOperation {
- public:
+public:
   explicit ProductValue(
       std::vector<std::unique_ptr<ArithmeticOperation>> factors)
       : factors_(std::move(factors)) {}
@@ -142,12 +142,12 @@ class ProductValue : public ArithmeticOperation {
     return factors_;
   }
 
- private:
+private:
   std::vector<std::unique_ptr<ArithmeticOperation>> factors_;
 };
 
 class DivisionValue : public ArithmeticOperation {
- public:
+public:
   explicit DivisionValue(
       std::vector<std::unique_ptr<ArithmeticOperation>> elements)
       : elements_(std::move(elements)) {}
@@ -162,12 +162,12 @@ class DivisionValue : public ArithmeticOperation {
     return elements_;
   }
 
- private:
+private:
   std::vector<std::unique_ptr<ArithmeticOperation>> elements_;
 };
 
 class PieceCountValue : public ArithmeticOperation {
- public:
+public:
   explicit PieceCountValue(piece_id_t piece) : piece_(piece) {}
 
   variable_value_t Value(const GameState &s) const override;
@@ -178,10 +178,10 @@ class PieceCountValue : public ArithmeticOperation {
 
   piece_id_t piece() const { return piece_; }
 
- private:
+private:
   piece_id_t piece_;
 };
 
-}  // namespace rbg
+} // namespace rbg
 
-#endif  // RBGGAMEMANAGER_ARITHMETIC_OPERATION_H
+#endif // RBGGAMEMANAGER_ARITHMETIC_OPERATION_H

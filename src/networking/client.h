@@ -17,22 +17,21 @@ namespace rbg {
 using asio::ip::tcp;
 
 class Client {
- public:
-  Client(const std::string& host, const std::string& port)
+public:
+  Client(const std::string &host, const std::string &port)
       : resolver_(io_service_),
         endpoint_iterator_(resolver_.resolve({host, port})),
-        string_socket_(io_service_),
-        assigned_player_{0} {
+        string_socket_(io_service_), assigned_player_{0} {
     asio::connect(string_socket_.socket(), endpoint_iterator_);
     set_socket_options(string_socket_.socket());
     Initialize();
   }
 
-  void Write(const rbg::GameMove& move) {
+  void Write(const rbg::GameMove &move) {
     string_socket_.WriteString(EncodeMove(move));
   }
 
-  const std::string& description() const { return game_description_; }
+  const std::string &description() const { return game_description_; }
 
   player_id_t player() const { return assigned_player_; }
 
@@ -52,7 +51,7 @@ class Client {
 
   void ReadReset() { string_socket_.ReadString(); }
 
- private:
+private:
   void Initialize() {
     auto preparation_time_seconds_str = string_socket_.ReadString();
     preparation_time_seconds_ = std::stod(preparation_time_seconds_str.c_str());
@@ -69,8 +68,7 @@ class Client {
 
   std::string game_description_;
   player_id_t assigned_player_;
-  double deadline_seconds_;
   double preparation_time_seconds_;
 };
-}  // namespace rbg
-#endif  // RBGGAMEMANAGER_CLIENT_H
+} // namespace rbg
+#endif // RBGGAMEMANAGER_CLIENT_H

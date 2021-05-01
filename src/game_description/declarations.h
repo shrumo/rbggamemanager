@@ -17,7 +17,7 @@ using player_id_t = name_id_t;
 using variable_value_t = uint;
 
 class Declarations {
- public:
+public:
   explicit Declarations(const rbg_parser::parsed_game &game)
       : variables_bounds_(game.get_declarations().get_legal_variables().size() +
                           game.get_declarations().get_legal_players().size()),
@@ -92,7 +92,7 @@ class Declarations {
 
   player_id_t keeper_id() const { return keeper_id_; }
 
- private:
+private:
   NamesResolver pieces_resolver_;
   NamesResolver variables_resolver_;
   NamesResolver players_resolver_;
@@ -100,6 +100,6 @@ class Declarations {
   Board initial_board_;
   player_id_t keeper_id_;
 };
-}  // namespace rbg
+} // namespace rbg
 
-#endif  // RBGGAMEMANAGER_DECLARATIONS_H
+#endif // RBGGAMEMANAGER_DECLARATIONS_H

@@ -4,8 +4,8 @@
 
 #include "parser_wrapper.h"
 
-std::unique_ptr<rbg_parser::parsed_game> rbg::ParseGame(
-    const std::string &game_text) {
+std::unique_ptr<rbg_parser::parsed_game>
+rbg::ParseGame(const std::string &game_text) {
   rbg_parser::messages_container msg;
 
   std::unique_ptr<rbg_parser::parsed_game> pg;

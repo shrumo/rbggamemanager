@@ -20,4 +20,4 @@
 #include "rbgParser/src/switch.hpp"
 #include "rbgParser/src/variable_arithmetic.hpp"
 
-#endif  // RBGGAMEMANAGER_PARSER_ACTIONS_H
+#endif // RBGGAMEMANAGER_PARSER_ACTIONS_H

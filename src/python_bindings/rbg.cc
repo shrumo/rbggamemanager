@@ -8,7 +8,6 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
-#include "utility/calculate_sim.h"
 #include "networking/client.h"
 #include "utility/calculate_sim.h"
 
@@ -27,7 +26,7 @@ PYBIND11_MODULE(rbg, m) {
     )pbdoc";
 
   pybind11::class_<Client>(m, "Client")
-      .def(py::init<const std::string&, const std::string&>())
+      .def(py::init<const std::string &, const std::string &>())
       .def("Write", &Client::Write)
       .def("description", &Client::description)
       .def("player", &Client::player)
@@ -84,6 +83,6 @@ PYBIND11_MODULE(rbg, m) {
 
   m.def("RandomSimulations", &RandomSimulations,
         R"pbdoc(Runs random simulations for an initial game state.)pbdoc");
-        
+
   m.attr("__version__") = "dev";
 }

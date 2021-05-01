@@ -9,12 +9,12 @@
 #include <parser/parser_wrapper.h>
 
 namespace rbg {
-std::unique_ptr<rbg::ArithmeticOperation> CreateArithmeticOperation(
-    const rbg_parser::arithmetic_expression &expression,
-    const Declarations &declarations);
+std::unique_ptr<rbg::ArithmeticOperation>
+CreateArithmeticOperation(const rbg_parser::arithmetic_expression &expression,
+                          const Declarations &declarations);
 
-std::unique_ptr<rbg::ArithmeticOperation> CreateArithmeticOperation(
-    const ArithmeticOperation &arithmeticOperation);
-}  // namespace rbg
+std::unique_ptr<rbg::ArithmeticOperation>
+CreateArithmeticOperation(const ArithmeticOperation &arithmeticOperation);
+} // namespace rbg
 
-#endif  // RBGGAMEMANAGER_ARITHMETIC_CREATOR_H
+#endif // RBGGAMEMANAGER_ARITHMETIC_CREATOR_H

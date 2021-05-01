@@ -15,7 +15,7 @@ using shift_edge_id = name_id_t;
 using piece_id_t = name_id_t;
 
 class BoardContent {
- public:
+public:
   BoardContent(uint vertices_count, uint piece_count)
       : fields_(vertices_count, 0), pieces_counts_(piece_count) {
     // The piece on the <out> field (index 0) shouldn't be counted
@@ -34,13 +34,13 @@ class BoardContent {
 
   uint piece_count(piece_id_t piece) const { return pieces_counts_[piece]; }
 
- private:
+private:
   std::vector<piece_id_t> fields_;
   std::vector<uint> pieces_counts_;
 };
 
 class Board {
- public:
+public:
   Board(uint vertices_count, uint edges_count, uint piece_count)
       : neighbours_(vertices_count,
                     std::vector<vertex_id_t>(edges_count, vertices_count)),
@@ -84,15 +84,15 @@ class Board {
 
   BoardContent &initial_content() { return initial_content_; }
 
- private:
+private:
   NamesResolver vertices_resolver_;
   NamesResolver edges_resolver_;
   std::vector<std::vector<vertex_id_t>> neighbours_;
   uint edges_count_;
   BoardContent initial_content_;
 };
-}  // namespace rbg
+} // namespace rbg
 
 std::ostream &operator<<(std::ostream &o, const rbg::Board &res);
 
-#endif  // RBGGAMEMANAGER_BOARD_H
+#endif // RBGGAMEMANAGER_BOARD_H
