@@ -53,7 +53,6 @@ set(GAMESTATE_FILES ${PARSER_FILES} ${GRAPH_FILES} src/game_description/names_re
         src/game_description/moves/arithmetic_operation.cc src/game_description/moves/arithmetic_operation.h
         src/game_description/board.cc src/game_state/blocks/block.h src/game_state/construction/game_state_creator.h
         src/game_state/construction/game_state_creator.cc
-        src/utility/mark_redundant_dots.h src/utility/mark_redundant_dots.cc
         )
 
 set(NETWORKING_FILES ${GAMESTATE_FILES} src/networking/server.h src/networking/socket.h src/networking/client.h src/networking/socket.cc)
@@ -99,6 +98,11 @@ target_link_libraries(move_decoder pthread)
 
 add_executable(add_dots ${GRAPH_FILES} ${PARSER_FILES}
         ${CONSTRUCTION_FILES} ${GAMESTATE_FILES} ${NETWORKING_FILES} apps/add_dots.cc)
+
+
+# add_executable(move_illegal_dots ${GRAPH_FILES} ${PARSER_FILES}
+# ${CONSTRUCTION_FILES} ${GAMESTATE_FILES} ${NETWORKING_FILES} apps/move_illegal_dots.cc)
+
 
 target_link_libraries(add_dots rbgParser)
 target_link_libraries(add_dots pthread)

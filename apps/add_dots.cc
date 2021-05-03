@@ -5,7 +5,6 @@
 #include <game_state/construction/game_state_creator.h>
 #include <stl_extension/argparse.h>
 #include <utility/calculate_perft.h>
-#include <utility/mark_redundant_dots.h>
 #include <utility/printer.h>
 #include <utility/shift_table_checker.h>
 

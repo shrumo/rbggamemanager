@@ -68,7 +68,7 @@ private:
 Nfa<std::unique_ptr<Move>> CreateNfa(const rbg_parser::game_move &rbg_move,
                                      const Declarations &declarations,
                                      bool optimize = true);
-std::vector<node_t> GetNoops(const Nfa<std::unique_ptr<Move>> &nfa);
+std::vector<edge_id_t> GetNoops(const Nfa<std::unique_ptr<Move>> &nfa);
 } // namespace rbg
 
 #endif // RBGGAMEMANAGER_GRAPH_CREATOR_H
