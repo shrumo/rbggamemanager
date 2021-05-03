@@ -230,7 +230,7 @@ std::vector<edge_id_t> rbg::GetNoops(const Nfa<std::unique_ptr<Move>> &nfa) {
 NfaBoardProduct::NfaBoardProduct(const Nfa<std::unique_ptr<Move>> &nfa,
                                  const Board &board,
                                  const std::vector<vertex_id_t> &initials)
-    : original_nfa(&nfa) {
+    : original_nfa_(&nfa) {
   queue<VertexNode> to_visit;
   for (vertex_id_t begin_vertex : initials) {
     to_visit.push({begin_vertex, nfa.initial});

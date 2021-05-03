@@ -66,12 +66,11 @@ class Printer : public AstFunction<std::string> {
 public:
   Printer(
       const PrinterOptions &options,
-      const unordered_set<const rbg_parser::game_move *> &moves_to_erase_ = {},
       int indent = 0)
-      : options_(options), moves_to_erase_(moves_to_erase_), indent_(indent) {}
+      : options_(options), indent_(indent) {}
   std::string SumCase(const rbg_parser::sum &move) override {
     if (move.get_content().size() == 1) {
-      return Printer(options_, moves_to_erase_,
+      return Printer(options_,
                      indent_)(*move.get_content().front());
     }
 
@@ -98,7 +97,7 @@ public:
         result += " .";
       }
 
-      result += Printer(options_, moves_to_erase_, indent_ + 1)(*m);
+      result += Printer(options_, indent_ + 1)(*m);
 
       if (AddDotAfterSegment(*m) &&
           (options_.dots_in_shifttables != DotsInShifttables::kExclude ||
@@ -118,7 +117,7 @@ public:
   std::string
   ConcatenationCase(const rbg_parser::concatenation &move) override {
     if (move.get_content().size() == 1) {
-      return Printer(options_, moves_to_erase_,
+      return Printer(options_,
                      indent_)(*move.get_content().front());
     }
 
@@ -135,7 +134,7 @@ public:
       } else {
         result += " ";
       }
-      result += Printer(options_, moves_to_erase_, indent_)(*m);
+      result += Printer(options_, indent_)(*m);
 
       if (AddDotAfterSegment(*m)) {
         bool is_previous_part_of_shift_table = ContainsOnlyShifts(*m);
@@ -182,7 +181,7 @@ public:
       result += ". ";
     }
 
-    result += Printer(options_, moves_to_erase_, indent_)(*move.get_content());
+    result += Printer(options_, indent_)(*move.get_content());
 
     if (add_after) {
       result += ". ";
@@ -201,7 +200,7 @@ public:
     std::string prefix = move.is_negated() ? "{!" : "{?";
 
     return prefix + "\n" + times(kIndentChars, indent_ + 1) +
-           Printer({}, moves_to_erase_, indent_ + 1)(*move.get_content()) +
+           Printer({}, indent_ + 1)(*move.get_content()) +
            "\n" + times(kIndentChars, indent_) + "}";
   }
 
@@ -218,10 +217,7 @@ public:
     return result + trim(move.to_rbg(rbg_parser::options{}));
   }
 
-  std::string NoopCase(const rbg_parser::noop &move) override {
-    if (moves_to_erase_.find(&move) != moves_to_erase_.end()) {
-      return "";
-    }
+  std::string NoopCase(const rbg_parser::noop &) override {
     return ".";
   }
 
@@ -239,7 +235,6 @@ public:
 
 private:
   const PrinterOptions &options_;
-  const std::unordered_set<const rbg_parser::game_move *> moves_to_erase_;
   size_t indent_;
 };
 

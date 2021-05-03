@@ -42,6 +42,10 @@ public:
     return *sub_graphs_.at(condition_initial_node);
   }
 
+  const Nfa<std::unique_ptr<Move>>* original_nfa() const {
+    return original_nfa_;
+  }
+
 private:
   struct VertexNode {
     vertex_id_t vertex;
@@ -63,7 +67,7 @@ private:
   // This is the translation between nodes of the nfa board graph to vertex node
   // pairs
   std::unordered_map<node_t, VertexNode> reverse_node_mapping_;
-  const Nfa<std::unique_ptr<Move>>* original_nfa;
+  const Nfa<std::unique_ptr<Move>>* original_nfa_;
 };
 
 Nfa<std::unique_ptr<Move>> CreateNfa(const rbg_parser::game_move &rbg_move,

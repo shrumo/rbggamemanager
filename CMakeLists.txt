@@ -97,16 +97,13 @@ target_link_libraries(move_decoder rbgParser)
 target_link_libraries(move_decoder pthread)
 
 add_executable(add_dots ${GRAPH_FILES} ${PARSER_FILES}
-        ${CONSTRUCTION_FILES} ${GAMESTATE_FILES} ${NETWORKING_FILES} apps/add_dots.cc)
-
-
-# add_executable(move_illegal_dots ${GRAPH_FILES} ${PARSER_FILES}
-# ${CONSTRUCTION_FILES} ${GAMESTATE_FILES} ${NETWORKING_FILES} apps/move_illegal_dots.cc)
-
-
+        ${CONSTRUCTION_FILES} ${GAMESTATE_FILES} apps/add_dots.cc)
 target_link_libraries(add_dots rbgParser)
 target_link_libraries(add_dots pthread)
 
+add_executable(mark_illegal_dots ${GRAPH_FILES} ${PARSER_FILES} ${CONSTRUCTION_FILES} ${GAMESTATE_FILES} apps/mark_illegal_dots.cc)
+target_link_libraries(mark_illegal_dots rbgParser)
+target_link_libraries(mark_illegal_dots pthread)
 
 add_executable(start_server ${NETWORKING_FILES} apps/start_server.cc)
 target_link_libraries(start_server rbgParser)
@@ -233,4 +230,7 @@ if (${Python3_Interpreter_FOUND})
 
     add_custom_target(add_dots_test ALL COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/tests/add_dots_test.py ${CMAKE_CURRENT_BINARY_DIR}/add_dots_test.py)
     add_test(add_dots_test ${Python3_EXECUTABLE} add_dots_test.py)
+
+    add_custom_target(mark_illegal_dots_test ALL COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/tests/mark_illegal_dots_test.py ${CMAKE_CURRENT_BINARY_DIR}/mark_illegal_dots_test.py)
+    add_test(mark_illegal_dots_test ${Python3_EXECUTABLE} mark_illegal_dots_test.py)
 endif ()
