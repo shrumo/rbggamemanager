@@ -10,7 +10,7 @@ tmp_game_text = '''
     [b,r]
     [e,e])
 
-#rules = ->red (left + .left) ->blue
+#rules = ->red (right + .right) ->blue
 '''
 
 with open(tmp_game_filename, 'w') as f:

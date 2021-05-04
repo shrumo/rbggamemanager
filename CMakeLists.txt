@@ -1,7 +1,6 @@
 cmake_minimum_required(VERSION 3.5.0)
 project(rbggamemanager)
 
-
 # Build in release by default
 if (NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release)
