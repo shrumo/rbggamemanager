@@ -317,7 +317,6 @@ NfaBoardProduct::NfaBoardProduct(const Nfa<std::unique_ptr<Move>> &nfa,
       EraseNode(node);
       VertexNode vertex_node = reverse_node_mapping_.at(node);
       node_mapping_.erase(vertex_node);
-      std::cout << "ERASED!" << std::endl;
     }
   }
 }
