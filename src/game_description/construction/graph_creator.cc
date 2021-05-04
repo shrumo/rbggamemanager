@@ -300,6 +300,26 @@ NfaBoardProduct::NfaBoardProduct(const Nfa<std::unique_ptr<Move>> &nfa,
         vector<vertex_id_t>(condition_initial.second.begin(),
                             condition_initial.second.end()));
   }
+
+  // Cleanup nodes that don't lead to the final node
+
+  bool change = true;
+  while (change) {
+    change = false;
+    std::vector<node_t> nodes_to_erase;
+    for (node_t node : nodes()) {
+      if (EdgesFrom(node).size() == 0 && node != nfa.final) {
+        nodes_to_erase.push_back(node);
+      }
+    }
+    for (node_t node : nodes_to_erase) {
+      change = true;
+      EraseNode(node);
+      VertexNode vertex_node = reverse_node_mapping_.at(node);
+      node_mapping_.erase(vertex_node);
+      reverse_node_mapping_.erase(node);
+    }
+  }
 }
 
 Nfa<std::unique_ptr<Move>> rbg::CreateNfa(const rbg_parser::game_move &rbg_move,

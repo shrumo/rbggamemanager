@@ -194,6 +194,8 @@ public:
 
   std::string EmptyForwardCase(const EmptyForward &) override { return "e_f"; }
 
+  std::string NoopCase(const Noop&) override { return "."; }
+
 private:
   const Declarations &declarations_;
 };
