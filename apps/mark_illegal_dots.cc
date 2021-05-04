@@ -56,24 +56,6 @@ void FindIllegalNoopEdgesRec(const NfaBoardProduct &board_product,
 
   for (const Edge</*nfa*/ edge_id_t> &edge :
        board_product.EdgesFrom(current_node)) {
-#if 0
-    std::cout << "Node: " << current_node
-              << " v:" << board_product.vertex_node(current_node).first
-              << " n:" << board_product.vertex_node(current_node).second
-              << std::endl;
-    std::cout << "\tEdge:"
-              << (board_product.original_nfa()
-                              ->graph.GetEdge(edge.content())
-                              .content()
-                              ->original_move() == nullptr
-                      ? "eps"
-                      : board_product.original_nfa()
-                            ->graph.GetEdge(edge.content())
-                            .content()
-                            ->original_move()
-                            ->to_rbg(rbg_parser::options()))
-              << " " << edge.to() << std::endl;
-#endif
 
     shared_ptr<vector<pair<int, /*board_product*/ edge_id_t>>>
         previous_dots_applications = dfa_state.current_dots_applications;
@@ -110,25 +92,6 @@ void FindIllegalNoopEdgesRec(const NfaBoardProduct &board_product,
           &other_dots_applications =
               dfa_state.visited_dot_applications.at(edge.to());
 
-#if 0
-      std::cout << "Got from " << current_node << " to " << edge.to()
-                << " the second time." << std::endl;
-      std::cout << "The dots I now have are: "
-                << dfa_state.current_dots_applications.get() << std::endl;
-      for (const pair<int, /*board_product*/ edge_id_t> dot_application :
-           *dfa_state.current_dots_applications) {
-        std::cout << dot_application.first << " " << dot_application.second
-                  << std::endl;
-      }
-      std::cout << "The dots I've seen before there were "
-                << dfa_state.current_dots_applications.get() << std::endl;
-      for (const pair<int, /*board_product*/ edge_id_t> dot_application :
-           *other_dots_applications) {
-        std::cout << dot_application.first << " " << dot_application.second
-                  << std::endl;
-      }
-#endif
-
       if (other_dots_applications != dfa_state.current_dots_applications) {
         for (const pair<int, /*board_product*/ edge_id_t> &dot_application :
              *other_dots_applications) {
@@ -163,81 +126,6 @@ FindIllegalNoops(const Nfa<std::unique_ptr<Move>> &nfa,
 
   NfaBoardProduct board_product(nfa, declarations.initial_board(),
                                 /*initials=*/{/*vertex_id=*/1});
-#if 0
-  cout << "Nfa board product created starting with vertex: "
-       << declarations.initial_board().vertices_names().Name(/* vertex_id= */ 1)
-       << endl;
-  node_t initial = board_product.node(
-      /* vertex_id= */ 1,
-      nfa.initial); // Corresponding to place A in initial vertex (left up)
-  cout << "Initial node in NfaBoardGraph: " << initial << endl;
-  cout << "Initial and final node in original graph: " << nfa.initial << " "
-       << nfa.final << endl;
-
-  assert(board_product.edges_ids_from(initial).size() == 1);
-  assert(
-      nfa.graph
-          .GetEdge(board_product
-                       .GetEdge(board_product.edges_ids_from(initial).front())
-                       .content())
-          .content()
-          ->type() == MoveType::kPlayerSwitchType);
-
-  cout << "Original graph has " << nfa.graph.nodes().size() << " nodes."
-       << endl;
-  cout << "Board graph has " << board_product.nodes().size() << " nodes."
-       << endl;
-
-  unordered_set<node_t> originals_visited;
-  queue<node_t> originals_to_visit;
-  originals_to_visit.push(nfa.initial);
-  originals_visited.insert(nfa.initial);
-  while (!originals_to_visit.empty()) {
-    node_t node = originals_to_visit.front();
-    originals_to_visit.pop();
-    unordered_set<edge_id_t> original_outs(
-        nfa.graph.edges_ids_from(node).begin(),
-        nfa.graph.edges_ids_from(node).end());
-
-    cout << "Original node " << node << endl;
-    cout << "Original out edges: " << endl;
-    for (auto &edge : nfa.graph.EdgesFrom(node)) {
-      cout << MoveDescription(*edge.content(), declarations) << " to "
-           << edge.to() << endl;
-
-      if (originals_visited.find(edge.to()) == originals_visited.end()) {
-        originals_to_visit.push(edge.to());
-        originals_visited.insert(edge.to());
-      }
-    }
-    cout << "Correponding board graph nodes: " << endl;
-    for (vertex_id_t vertex = 1;
-         vertex < declarations.initial_board().vertices_count(); vertex++) {
-      if (board_product.vertex_node_exists(vertex, node)) {
-        node_t board_product_vertex = board_product.node(vertex, node);
-        cout << "\t" << board_product_vertex << " ("
-             << declarations.initial_board().vertices_names().Name(vertex)
-             << ", " << node << ")\n";
-        cout << "\tWith outs:" << endl;
-        for (auto &edge : board_product.EdgesFrom(board_product_vertex)) {
-          assert(original_outs.find(edge.content()) != original_outs.end());
-          auto vertex_node_to = board_product.vertex_node(edge.to());
-          cout << "\t\t"
-               << MoveDescription(*nfa.graph.GetEdge(edge.content()).content(),
-                                  declarations)
-               << " to " << edge.to() << " ("
-               << declarations.initial_board().vertices_names().Name(
-                      vertex_node_to.first)
-               << ", " << vertex_node_to.second << ") " << endl;
-        }
-      } else {
-        cout << "\tnone (" << vertex << ", " << node << ")\n";
-      }
-    }
-    cout << endl;
-  }
-
-#endif
 
   unordered_set<const rbg_parser::game_move *> result;
   unordered_set<node_t> explored_nodes;
