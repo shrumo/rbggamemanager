@@ -155,4 +155,5 @@ FindIllegalNoops(const Nfa<unique_ptr<Move>> &nfa,
 
   return result;
 }
+
 } // namespace rbg
