@@ -1,7 +1,5 @@
 // We define an illegal dot as a dot in the rules that would increase the number
-// of moves if it was treated as a modifier. This app will move each such dot
-// in given rules to the next (to the right) possible legal space.  An example
-// of a space that is always legal is the one next to a modifier.
+// of moves if it was treated as a modifier. This app will mark such dots.
 #include "game_state/construction/game_state_creator.h"
 #include "stl_extension/argparse.h"
 #include "utility/printer.h"
@@ -149,7 +147,6 @@ int main(int argc, const char *argv[]) {
   }
 
   Declarations declarations = Declarations(*parsed_game);
-  glob_declarations = &declarations;
   auto nfa =
       CreateNfa(*parsed_game->get_moves(), declarations, /*optimize=*/false);
   unordered_set<const rbg_parser::game_move *> illegal_noop_moves =

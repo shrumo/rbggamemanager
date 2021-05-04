@@ -9,6 +9,12 @@
 namespace rbg {
 
 using namespace std;
+
+// Algorithm used here is starting a DFS from each modifier in the board product
+// graph. It remembers the dots encountered and saves them for each vertex node
+// of the board product. If it encounters a node that can be reached with two
+// different sets of dots, then those dots must be illegal.
+
 // This is the dfa state used for the FindIllegalNoopEdgesRec function.
 struct DfaState {
   unordered_set<node_t> finished;
@@ -23,8 +29,6 @@ struct DfaState {
 
   unordered_set<edge_id_t> result;
 };
-
-Declarations *glob_declarations;
 
 void FindIllegalNoopEdgesRec(const NfaBoardProduct &board_product,
                              /*board_product*/ node_t current_node,

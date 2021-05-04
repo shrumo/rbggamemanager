@@ -47,7 +47,7 @@ A message is a **null terminated string**. (A sequence of characters ending with
 
 The first message is sent by manager to the player. It contains time (in seconds) the player will have for preparation to start playing.
 Then a message containing **low level RBG language game** is sent.
-The last preparation message contains a numer that represents the player the client is representing. (1 means the first player that appears in `#player` macro)
+The last preparation message contains a number that represents the player the client is representing. (1 means the first player that appears in `#player` macro)
 
 The server then waits for clients to send `ready` message. 
 If it arrives too late (`time_for_player_preparation`), the server ignores that and just starts the game.
