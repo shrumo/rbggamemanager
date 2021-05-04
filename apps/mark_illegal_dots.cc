@@ -144,7 +144,12 @@ void FindIllegalNoopEdgesRec(const NfaBoardProduct &board_product,
       }
     }
 
-    FindIllegalNoopEdgesRec(board_product, edge.to(), dfa_state);
+    if (!IsModifier(board_product.original_nfa()
+                        ->graph.GetEdge(edge.content())
+                        .content()
+                        ->type())) {
+      FindIllegalNoopEdgesRec(board_product, edge.to(), dfa_state);
+    }
 
   cleanup:
     dfa_state.current_dots_applications = previous_dots_applications;
@@ -233,16 +238,44 @@ FindIllegalNoops(const Nfa<std::unique_ptr<Move>> &nfa,
   }
 
 #endif
+
+  unordered_set<const rbg_parser::game_move *> result;
+  unordered_set<node_t> explored_nodes;
+
+  // Explore starting from the initial node explictly
   node_t initial_board_product_node =
       board_product.node(/*vertex=*/1, nfa.initial);
 
   DfaState dfa_state;
   FindIllegalNoopEdgesRec(board_product, initial_board_product_node, dfa_state);
 
-  unordered_set<const rbg_parser::game_move *> result;
   for (edge_id_t edge : dfa_state.result) {
     result.insert(nfa.graph.GetEdge(edge).content()->original_move());
   }
+
+  explored_nodes.insert(initial_board_product_node);
+
+  // Explore starting from each modifier (as the dfs stops at modifiers)
+  for (/*board_product*/ node_t node : board_product.nodes()) {
+    for (const Edge<edge_id_t> &edge : board_product.EdgesTo(node)) {
+      if (IsModifier(board_product.original_nfa()
+                         ->graph.GetEdge(edge.content())
+                         .content()
+                         ->type())) {
+        if (explored_nodes.find(node) != explored_nodes.end()) {
+          continue;
+        }
+        DfaState dfa_state;
+        FindIllegalNoopEdgesRec(board_product, node, dfa_state);
+
+        for (edge_id_t edge : dfa_state.result) {
+          result.insert(nfa.graph.GetEdge(edge).content()->original_move());
+        }
+        explored_nodes.insert(node);
+      }
+    }
+  }
+
   return result;
 }
 
