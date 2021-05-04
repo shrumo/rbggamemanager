@@ -1,5 +1,7 @@
 # rbggamemanager
 
+[![Build Status](https://travis-ci.com/shrumo/rbggamemanager.svg?branch=master)](https://travis-ci.com/shrumo/rbggamemanager)
+
 This is a game manager that can be used to play games written in regular board games language as described in
 [rbgParser](https://github.com/uicus/rbgParser).
 
