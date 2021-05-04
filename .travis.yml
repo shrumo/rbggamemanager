@@ -1,0 +1,16 @@
+dist: bionic
+language: cpp
+compiler: gcc
+
+addons:
+        apt:
+            sources:
+                - ubuntu-toolchain-r-test    
+            packages:
+                - cmake
+
+install:
+    - cmake --version
+
+script:
+    - scripts/test.sh
