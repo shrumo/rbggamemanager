@@ -1,5 +1,4 @@
 #include "utility/illegal_dots.h"
-#include "utility/printer.h"
 
 #include <cassert>
 #include <chrono>

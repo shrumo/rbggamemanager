@@ -245,6 +245,14 @@ public:
     return nodes_;
   }
 
+  using EdgesRange = std_ext::range<std_ext::transform_iterator<
+      typename std::unordered_map<edge_id_t, Edge<EdgeContent>>::const_iterator,
+      std_ext::first_of_pair<const edge_id_t, Edge<EdgeContent>>>>;
+
+  EdgesRange edges_ids() const {
+    return EdgesRange(edges_.begin(), edges_.end(), edges_.size());
+  }
+
   const std::unordered_map<edge_id_t, Edge<EdgeContent>> &edges_map() const {
     return edges_;
   }

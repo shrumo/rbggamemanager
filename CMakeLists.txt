@@ -53,6 +53,7 @@ set(GAMESTATE_FILES ${PARSER_FILES} ${GRAPH_FILES} src/game_description/names_re
         src/game_description/board.cc src/game_state/blocks/block.h src/game_state/construction/game_state_creator.h
         src/game_state/construction/game_state_creator.cc
         src/utility/illegal_dots.cc src/utility/illegal_dots.h
+        src/utility/redundant_dots.cc src/utility/redundant_dots.h
         )
 
 set(NETWORKING_FILES ${GAMESTATE_FILES} src/networking/server.h src/networking/socket.h src/networking/client.h src/networking/socket.cc)
@@ -108,6 +109,10 @@ target_link_libraries(mark_illegal_dots pthread)
 add_executable(move_illegal_dots ${GRAPH_FILES} ${PARSER_FILES} ${CONSTRUCTION_FILES} ${GAMESTATE_FILES} apps/move_illegal_dots.cc)
 target_link_libraries(move_illegal_dots rbgParser)
 target_link_libraries(move_illegal_dots pthread)
+
+add_executable(mark_redundant_dots ${GRAPH_FILES} ${PARSER_FILES} ${CONSTRUCTION_FILES} ${GAMESTATE_FILES} apps/mark_redundant_dots.cc)
+target_link_libraries(mark_redundant_dots rbgParser)
+target_link_libraries(mark_redundant_dots pthread)
 
 add_executable(start_server ${NETWORKING_FILES} apps/start_server.cc)
 target_link_libraries(start_server rbgParser)
@@ -240,4 +245,7 @@ if (${Python3_Interpreter_FOUND})
 
     add_custom_target(move_illegal_dots_test ALL COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/tests/move_illegal_dots_test.py ${CMAKE_CURRENT_BINARY_DIR}/move_illegal_dots_test.py)
     add_test(move_illegal_dots_test ${Python3_EXECUTABLE} move_illegal_dots_test.py)
+
+    add_custom_target(mark_redundant_dots_test ALL COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/tests/mark_redundant_dots_test.py ${CMAKE_CURRENT_BINARY_DIR}/mark_redundant_dots_test.py)
+    add_test(mark_redundant_dots_test ${Python3_EXECUTABLE} mark_redundant_dots_test.py)
 endif ()
