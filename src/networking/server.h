@@ -40,10 +40,9 @@ struct ServerOptions {
 };
 
 class Server {
- public:
+public:
   explicit Server(ServerOptions options)
-      : options_(std::move(options)),
-        io_context_{},
+      : options_(std::move(options)), io_context_{},
         acceptor_(io_context_, tcp::endpoint(tcp::v4(), options_.port)),
         state_(CreateGameState(options_.game_text)) {
     actions_translator_ = ActionsDescriptionsMap(options_.game_text);
@@ -85,7 +84,7 @@ class Server {
                   << " to client " << i << std::endl;
         clients_sockets_[i].WriteString(std::to_string(client_player_id(i)));
       }
-    }  // mutex unlock
+    } // mutex unlock
     bool exceeded_initial_deadline = false;
     if (!WaitForReady()) {
       for (uint i = 0; i < clients_sockets_.size(); i++) {
@@ -240,10 +239,10 @@ class Server {
       std::cout << "Players played for "
                 << std::chrono::duration<double>(play_end - play_start).count()
                 << "s" << std::endl;
-    }  // mutex unlock
+    } // mutex unlock
   }
 
- private:
+private:
   static player_id_t client_player_id(uint client_socket_index) {
     return client_socket_index + 1;
   }
@@ -264,15 +263,16 @@ class Server {
               HandleReady(size, i, error, time_sent);
             });
       }
-    }  // unlock mutex for io_context to run
+    } // unlock mutex for io_context to run
     io_context_.run();
     std::lock_guard<std::mutex> guard(mutex_);
     return players_ready_.size() == clients_sockets_.size();
   }
 
-  void HandleReady(
-      std::size_t message_size, uint player, const asio::error_code &error,
-      std::chrono::time_point<std::chrono::system_clock> time_sent) {
+  void
+  HandleReady(std::size_t message_size, uint player,
+              const asio::error_code &error,
+              std::chrono::time_point<std::chrono::system_clock> time_sent) {
     std::lock_guard<std::mutex> guard(mutex_);
     if (error || message_size != 6 /* size of string "ready" + null char */) {
       std::cout << "Something went wrong when receiving ready from player "
@@ -307,6 +307,6 @@ class Server {
   std::unordered_map<uint, std::string> actions_translator_;
 };
 
-}  // namespace rbg
+} // namespace rbg
 
 #endif

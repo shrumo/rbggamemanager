@@ -23,7 +23,8 @@ def _bezier(points, percent=None, accuracy=12):
     for alpha in alphas:
         current = points
         while len(current) > 1:
-            next = [_add(_mult(1 - alpha, a), _mult(alpha, b)) for a, b in zip(current, current[1:])]
+            next = [_add(_mult(1 - alpha, a), _mult(alpha, b))
+                    for a, b in zip(current, current[1:])]
             current = next
         result += current
     return result if percent is None else result[0]
@@ -64,14 +65,17 @@ class Graph(Canvas):
             previous_edge = self._nodes_edges[(a, b)]
             text = self._edges[previous_edge][3] + ', ' + text
             self._delete_edge(previous_edge)
-        edge_id = self.create_line(self._edge_points(a, b), smooth=True, arrow="last", **kwargs)
-        edge_label = self.create_text(*self._edge_text_point(a, b), text=text, tags='text')
+        edge_id = self.create_line(self._edge_points(
+            a, b), smooth=True, arrow="last", **kwargs)
+        edge_label = self.create_text(
+            *self._edge_text_point(a, b), text=text, tags='text')
         self._nodes_edges[a] |= {edge_id}
         self._nodes_edges[b] |= {edge_id}
         self._nodes_edges[(a, b)] = edge_id
         self._edges[edge_id] = (a, b, edge_label, text, kwargs)
         if refresh_paired and (b, a) in self._nodes_edges:
-            self._recreate_edge(self._nodes_edges[(b, a)], refresh_paired=False)
+            self._recreate_edge(
+                self._nodes_edges[(b, a)], refresh_paired=False)
 
     def set_node_clicked_callback(self, callback):
         self._node_clicked_callback = callback
@@ -121,11 +125,14 @@ class Graph(Canvas):
         bend_shift = (self._node_size() * 2 ** (1 / 2), 0)
 
         if paired:
-            begin_shift = (2 ** (1 / 2) / 2 * self._node_size() / 2, 2 ** (1 / 2) / 2 * self._node_size() / 2)
+            begin_shift = (2 ** (1 / 2) / 2 * self._node_size() / 2,
+                           2 ** (1 / 2) / 2 * self._node_size() / 2)
             bend_shift = (self._node_size(), self._node_size())
 
-        a = self.coords(a_id)[0] + self._node_size() / 2, self.coords(a_id)[1] + self._node_size() / 2
-        b = self.coords(b_id)[0] + self._node_size() / 2, self.coords(b_id)[1] + self._node_size() / 2
+        a = self.coords(a_id)[0] + self._node_size() / \
+            2, self.coords(a_id)[1] + self._node_size() / 2
+        b = self.coords(b_id)[0] + self._node_size() / \
+            2, self.coords(b_id)[1] + self._node_size() / 2
         if b[0] > a[0]:
             return [_add(a, (begin_shift[0], -begin_shift[1])),
                     (a[0] + bend_shift[0], a[1] - bend_shift[1]),
@@ -145,8 +152,10 @@ class Graph(Canvas):
     def _edge_text_point(self, a_id, b_id):
         a = self.coords(a_id)
         b = self.coords(b_id)
-        mid_point_first = _bezier(self._edge_control_points(a_id, b_id), percent=0.48)
-        mid_point_second = _bezier(self._edge_control_points(a_id, b_id), percent=0.52)
+        mid_point_first = _bezier(
+            self._edge_control_points(a_id, b_id), percent=0.48)
+        mid_point_second = _bezier(
+            self._edge_control_points(a_id, b_id), percent=0.52)
         direction = _add(mid_point_first, _mult(-1, mid_point_second))
         direction = _mult(1 / _dist((0, 0), direction), direction)
         perpendicular = (-direction[1], direction[0])
@@ -167,7 +176,8 @@ class Graph(Canvas):
         return True
 
     def _grab_node(self, event):
-        event_canv_pos = (event_canv_x, event_canv_y) = self._canvas_pos((event.x, event.y))
+        event_canv_pos = (event_canv_x, event_canv_y) = self._canvas_pos(
+            (event.x, event.y))
         ids = self.find_overlapping(event_canv_x - self._node_size() / 2,
                                     event_canv_y - self._node_size() / 2,
                                     event_canv_x + self._node_size() / 2,
@@ -202,7 +212,8 @@ class Graph(Canvas):
 
     def _drag_node(self, event):
         if self.grabbed_item:
-            self._move_node(self.grabbed_item, self._canvas_pos((event.x, event.y)))
+            self._move_node(self.grabbed_item,
+                            self._canvas_pos((event.x, event.y)))
             for edge in self._nodes_edges[self.grabbed_item]:
                 self._recreate_edge(edge)
             return True
@@ -261,7 +272,8 @@ def main():
     label = Label(root, text="Nothing selected")
     label.grid(column=1, row=0)
 
-    graph.set_node_clicked_callback(lambda x: label.configure(text="Selected " + str(x)))
+    graph.set_node_clicked_callback(
+        lambda x: label.configure(text="Selected " + str(x)))
 
     last_node_label = None
 

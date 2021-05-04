@@ -52,6 +52,7 @@ set(GAMESTATE_FILES ${PARSER_FILES} ${GRAPH_FILES} src/game_description/names_re
         src/game_description/moves/arithmetic_operation.cc src/game_description/moves/arithmetic_operation.h
         src/game_description/board.cc src/game_state/blocks/block.h src/game_state/construction/game_state_creator.h
         src/game_state/construction/game_state_creator.cc
+        src/utility/illegal_dots.cc src/utility/illegal_dots.h
         )
 
 set(NETWORKING_FILES ${GAMESTATE_FILES} src/networking/server.h src/networking/socket.h src/networking/client.h src/networking/socket.cc)

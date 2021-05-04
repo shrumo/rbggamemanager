@@ -18,8 +18,8 @@
 #include "parser_actions.h"
 
 namespace rbg {
-std::unique_ptr<rbg_parser::parsed_game> ParseGame(
-    const std::string &game_text);
+std::unique_ptr<rbg_parser::parsed_game>
+ParseGame(const std::string &game_text);
 
 // This is a visitor class for the abstract syntax tree that is returned by the
 // parser. This allows to write functions that operate on the tree. It can be
@@ -30,7 +30,7 @@ std::unique_ptr<rbg_parser::parsed_game> ParseGame(
 // chosen.
 template <typename ResultType>
 class AstFunction : private rbg_parser::abstract_dispatcher {
- public:
+public:
   virtual ResultType SumCase(const rbg_parser::sum &move) {
     return GameMoveCase(move);
   }
@@ -75,28 +75,28 @@ class AstFunction : private rbg_parser::abstract_dispatcher {
     return GameMoveCase(move);
   }
 
-  virtual ResultType ArithmeticComparisonCase(
-      const rbg_parser::arithmetic_comparison &move) {
+  virtual ResultType
+  ArithmeticComparisonCase(const rbg_parser::arithmetic_comparison &move) {
     return GameMoveCase(move);
   }
 
-  virtual ResultType IntegerArithmeticCase(
-      const rbg_parser::integer_arithmetic &expression) {
+  virtual ResultType
+  IntegerArithmeticCase(const rbg_parser::integer_arithmetic &expression) {
     return ArithmeticExpressionCase(expression);
   }
 
-  virtual ResultType VariableArithmeticCase(
-      const rbg_parser::variable_arithmetic &expression) {
+  virtual ResultType
+  VariableArithmeticCase(const rbg_parser::variable_arithmetic &expression) {
     return ArithmeticExpressionCase(expression);
   }
 
-  virtual ResultType ArithmeticOperationCase(
-      const rbg_parser::arithmetic_operation &expression) {
+  virtual ResultType
+  ArithmeticOperationCase(const rbg_parser::arithmetic_operation &expression) {
     return ArithmeticExpressionCase(expression);
   }
 
-  virtual ResultType ArithmeticExpressionCase(
-      const rbg_parser::arithmetic_expression &) {
+  virtual ResultType
+  ArithmeticExpressionCase(const rbg_parser::arithmetic_expression &) {
     return DefaultCase();
   }
 
@@ -106,8 +106,7 @@ class AstFunction : private rbg_parser::abstract_dispatcher {
 
   virtual ResultType DefaultCase() { return ResultType(); }
 
-  template <typename NodeType>
-  ResultType operator()(const NodeType &move) {
+  template <typename NodeType> ResultType operator()(const NodeType &move) {
     move.accept(*this);
     assert(result_exists_ &&
            "You cannot reuse the result. Extraction of the result can happen "
@@ -116,7 +115,7 @@ class AstFunction : private rbg_parser::abstract_dispatcher {
     return std::move(result_);
   }
 
- private:
+private:
   void dispatch(const rbg_parser::sum &m) override {
     result_ = SumCase(m);
     result_exists_ = true;
@@ -195,6 +194,6 @@ class AstFunction : private rbg_parser::abstract_dispatcher {
   bool result_exists_ = false;
   ResultType result_;
 };
-}  // namespace rbg
+} // namespace rbg
 
-#endif  // RBGGAMEMANAGER_PARSER_VISITOR_H
+#endif // RBGGAMEMANAGER_PARSER_VISITOR_H

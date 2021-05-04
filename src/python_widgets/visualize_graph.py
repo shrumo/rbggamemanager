@@ -103,17 +103,18 @@ def nodes_positions(nfa):
 def create_nfa_visualization(root, game_text, pure=True):
     graph = Graph(root)
 
-    nfa=None
+    nfa = None
     if pure:
-      nfa = rbg.create_string_nfa_pure(game_text)
+        nfa = rbg.create_string_nfa_pure(game_text)
     else:
-      nfa = rbg.create_string_nfa(game_text)
+        nfa = rbg.create_string_nfa(game_text)
     positions = nodes_positions(nfa)
 
     node_mapping = {}
     for node in nfa.graph.nodes():
         x, y = positions[node]
-        node_mapping[node] = graph.add_node_rel(x * 400, -y * 400,text=str(node))
+        node_mapping[node] = graph.add_node_rel(
+            x * 400, -y * 400, text=str(node))
 
     def long_jump(a, b):
         dx = abs(a[0] - b[0])
@@ -136,8 +137,9 @@ def create_nfa_visualization(root, game_text, pure=True):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("game_path", help="The path to the rbg game that should be visualized.")
-    parser.add_argument("--pure",default=True,type=bool)
+    parser.add_argument(
+        "game_path", help="The path to the rbg game that should be visualized.")
+    parser.add_argument("--pure", default=True, type=bool)
     args = parser.parse_args()
 
     root = Tk()
@@ -149,7 +151,8 @@ def main():
     Grid.rowconfigure(root, 0, weight=1)
     Grid.columnconfigure(root, 0, weight=1)
 
-    graph = create_nfa_visualization(root, open(args.game_path).read(), args.pure)
+    graph = create_nfa_visualization(
+        root, open(args.game_path).read(), args.pure)
     graph.grid(column=0, row=0, sticky=N + S + E + W)
 
     root.mainloop()
