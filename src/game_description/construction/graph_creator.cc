@@ -308,7 +308,7 @@ NfaBoardProduct::NfaBoardProduct(const Nfa<std::unique_ptr<Move>> &nfa,
     change = false;
     std::vector<node_t> nodes_to_erase;
     for (node_t node : nodes()) {
-      if (EdgesFrom(node).size() == 0 && node != nfa.final) {
+      if (edges_ids_from(node).size() == 0 && vertex_node(node).second != nfa.final) {
         nodes_to_erase.push_back(node);
       }
     }
@@ -317,7 +317,7 @@ NfaBoardProduct::NfaBoardProduct(const Nfa<std::unique_ptr<Move>> &nfa,
       EraseNode(node);
       VertexNode vertex_node = reverse_node_mapping_.at(node);
       node_mapping_.erase(vertex_node);
-      reverse_node_mapping_.erase(node);
+      std::cout << "ERASED!" << std::endl;
     }
   }
 }
