@@ -114,6 +114,10 @@ add_executable(mark_redundant_dots ${GRAPH_FILES} ${PARSER_FILES} ${CONSTRUCTION
 target_link_libraries(mark_redundant_dots rbgParser)
 target_link_libraries(mark_redundant_dots pthread)
 
+add_executable(remove_redundant_dots ${GRAPH_FILES} ${PARSER_FILES} ${CONSTRUCTION_FILES} ${GAMESTATE_FILES} apps/remove_redundant_dots.cc)
+target_link_libraries(remove_redundant_dots rbgParser)
+target_link_libraries(remove_redundant_dots pthread)
+
 add_executable(start_server ${NETWORKING_FILES} apps/start_server.cc)
 target_link_libraries(start_server rbgParser)
 target_link_libraries(start_server pthread)
@@ -248,4 +252,8 @@ if (${Python3_Interpreter_FOUND})
 
     add_custom_target(mark_redundant_dots_test ALL COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/tests/mark_redundant_dots_test.py ${CMAKE_CURRENT_BINARY_DIR}/mark_redundant_dots_test.py)
     add_test(mark_redundant_dots_test ${Python3_EXECUTABLE} mark_redundant_dots_test.py)
+
+    add_custom_target(remove_redundant_dots_test ALL COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/tests/remove_redundant_dots_test.py ${CMAKE_CURRENT_BINARY_DIR}/remove_redundant_dots_test.py)
+    add_test(remove_redundant_dots_test ${Python3_EXECUTABLE} remove_redundant_dots_test.py)
+
 endif ()
