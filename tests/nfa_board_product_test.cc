@@ -19,7 +19,7 @@ const char *kSmallGame = R"LIM(
     [e,e]
     [e,e])
 //     A     B                     
-#rules= ->red ( up + down )* [$ turn = turn+1] (up + right + left)* ->blue
+#rules= ->red ( up + down )* [$ turn = turn+1] (up + right + left)* down ->blue
 )LIM";
 
 int main() {

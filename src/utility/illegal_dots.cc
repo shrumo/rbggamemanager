@@ -1,4 +1,5 @@
 #include "utility/illegal_dots.h"
+#include "utility/printer.h"
 
 #include <cassert>
 #include <chrono>
@@ -10,6 +11,14 @@ namespace rbg {
 
 using namespace std;
 
+struct PairHash
+{
+    template <class T1, class T2>
+    std::size_t operator() (const std::pair<T1, T2> &pair) const {
+        return std::hash<T1>()(pair.first) ^ std::hash<T2>()(pair.second);
+    }
+};
+
 // Algorithm used here is starting a DFS from each modifier in the board product
 // graph. It remembers the dots encountered and saves them for each vertex node
 // of the board product. If it encounters a node that can be reached with two
@@ -19,12 +28,12 @@ using namespace std;
 struct DfaState {
   unordered_set<node_t> finished;
   unordered_map<node_t, int> visited_in_times;
-  unordered_map<node_t,
-                shared_ptr<vector<pair<int, /*board_product*/ edge_id_t>>>>
+  unordered_map<
+      node_t, shared_ptr<unordered_set<pair<int, /*board_product*/ edge_id_t>, PairHash>>>
       visited_dot_applications;
-  shared_ptr<vector<pair<int, /*board_product*/ edge_id_t>>>
+  shared_ptr<unordered_set<pair<int, /*board_product*/ edge_id_t>, PairHash>>
       current_dots_applications =
-          make_shared<vector<pair<int, /*board_product*/ edge_id_t>>>();
+          make_shared<unordered_set<pair<int, /*board_product*/ edge_id_t>, PairHash>>();
   int current_time = 0;
 
   unordered_set<edge_id_t> result;
@@ -46,7 +55,7 @@ void FindIllegalNoopEdgesRec(const NfaBoardProduct &board_product,
   for (const Edge</*nfa*/ edge_id_t> &edge :
        board_product.EdgesFrom(current_node)) {
 
-    shared_ptr<vector<pair<int, /*board_product*/ edge_id_t>>>
+    shared_ptr<unordered_set<pair<int, /*board_product*/ edge_id_t>, PairHash>>
         previous_dots_applications = dfa_state.current_dots_applications;
 
     if (board_product.original_nfa()
@@ -54,10 +63,10 @@ void FindIllegalNoopEdgesRec(const NfaBoardProduct &board_product,
             .content()
             ->type() == MoveType::kNoop) {
       dfa_state.current_dots_applications =
-          make_shared<vector<pair<int, /*board_product*/ edge_id_t>>>(
+          make_shared<unordered_set<pair<int, /*board_product*/ edge_id_t>, PairHash>>(
               dfa_state.current_dots_applications->begin(),
               dfa_state.current_dots_applications->end());
-      dfa_state.current_dots_applications->push_back(
+      dfa_state.current_dots_applications->insert(
           {dfa_state.visited_in_times[current_node], edge.id()});
     }
 
@@ -77,20 +86,28 @@ void FindIllegalNoopEdgesRec(const NfaBoardProduct &board_product,
         goto cleanup;
       }
 
-      shared_ptr<vector<pair<int, /*board_product*/ edge_id_t>>>
+      shared_ptr<unordered_set<pair<int, /*board_product*/ edge_id_t>, PairHash>>
           &other_dots_applications =
               dfa_state.visited_dot_applications.at(edge.to());
 
       if (other_dots_applications != dfa_state.current_dots_applications) {
+        // We need to calculate unique elements in both sets (symmetric
+        // difference)
         for (const pair<int, /*board_product*/ edge_id_t> &dot_application :
              *other_dots_applications) {
-          dfa_state.result.insert(
-              board_product.GetEdge(dot_application.second).content());
+          if (dfa_state.current_dots_applications->find(dot_application) ==
+              dfa_state.current_dots_applications->end()) {
+            dfa_state.result.insert(
+                board_product.GetEdge(dot_application.second).content());
+          }
         }
         for (const pair<int, /*board_product*/ edge_id_t> dot_application :
              *dfa_state.current_dots_applications) {
-          dfa_state.result.insert(
-              board_product.GetEdge(dot_application.second).content());
+          if (other_dots_applications->find(dot_application) ==
+              other_dots_applications->end()) {
+            dfa_state.result.insert(
+                board_product.GetEdge(dot_application.second).content());
+          }
         }
         goto cleanup;
       }
