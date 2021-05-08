@@ -9,7 +9,8 @@
 
 namespace rbg {
 
-bool IsLeftDetermined(const NfaBoardProduct &board_product, node_t node) {
+bool IsLeftDetermined(const NfaBoardProduct &board_product, node_t node,
+                      bool modifiers_as_dots = true) {
   while (board_product.EdgesTo(node).size() == 1) {
     MoveType edge_type =
         board_product.original_nfa()
@@ -17,7 +18,8 @@ bool IsLeftDetermined(const NfaBoardProduct &board_product, node_t node) {
             .content()
             ->type();
 
-    if (IsModifier(edge_type) || edge_type == MoveType::kNoop) {
+    if ((modifiers_as_dots && IsModifier(edge_type)) ||
+        edge_type == MoveType::kNoop) {
       return true;
     }
     node = board_product.EdgesTo(node).begin()->from();
@@ -26,14 +28,16 @@ bool IsLeftDetermined(const NfaBoardProduct &board_product, node_t node) {
   return board_product.EdgesTo(node).size() <= 1;
 }
 
-bool IsRightDetermined(const NfaBoardProduct &board_product, node_t node) {
+bool IsRightDetermined(const NfaBoardProduct &board_product, node_t node,
+                       bool modifiers_as_dots = true) {
   while (board_product.EdgesFrom(node).size() == 1) {
     MoveType edge_type =
         board_product.original_nfa()
             ->graph.GetEdge(board_product.EdgesFrom(node).begin()->content())
             .content()
             ->type();
-    if (IsModifier(edge_type) || edge_type == MoveType::kNoop) {
+    if ((modifiers_as_dots && IsModifier(edge_type)) ||
+        edge_type == MoveType::kNoop) {
       return true;
     }
     node = board_product.EdgesFrom(node).begin()->to();
@@ -43,7 +47,7 @@ bool IsRightDetermined(const NfaBoardProduct &board_product, node_t node) {
 
 std::unordered_map<const rbg_parser::game_move *, NoopDeterminedState>
 FindRedundantNoops(const Nfa<std::unique_ptr<Move>> &nfa,
-                   const Declarations &declarations) {
+                   const Declarations &declarations, bool modifiers_as_dots) {
   NfaBoardProduct board_product(nfa, declarations.initial_board(),
                                 /*initials=*/{/*vertex_id=*/1});
 
@@ -59,12 +63,14 @@ FindRedundantNoops(const Nfa<std::unique_ptr<Move>> &nfa,
       bool locally_left_determined = true;
       if (board_product.vertex_node_exists(vertex_id, nfa_edge.from())) {
         locally_left_determined = IsLeftDetermined(
-            board_product, board_product.node(vertex_id, nfa_edge.from()));
+            board_product, board_product.node(vertex_id, nfa_edge.from()),
+            modifiers_as_dots);
       }
       bool locally_right_determined = true;
       if (board_product.vertex_node_exists(vertex_id, nfa_edge.to())) {
         locally_right_determined = IsRightDetermined(
-            board_product, board_product.node(vertex_id, nfa_edge.to()));
+            board_product, board_product.node(vertex_id, nfa_edge.to()),
+            modifiers_as_dots);
       }
       left_determined = left_determined && locally_left_determined;
       right_determined = right_determined && locally_right_determined;

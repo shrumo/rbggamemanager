@@ -142,9 +142,9 @@ int main(int argc, const char *argv[]) {
 
   if (args.positional_args.size() != 1) {
     std::cout << "Usage: " << argv[0]
-              << " <game_file> [--state_to_erase left|right]"
+              << " <game_file> [--state_to_erase left|right] [--modifiers_as_dots true|false]"
               << "\n"
-              << "The default erased state is left." << std::endl;
+              << "The default erased state is left and we treaate modifiers as dots by default." << std::endl;
     return 0;
   }
 
@@ -154,6 +154,14 @@ int main(int argc, const char *argv[]) {
       state_to_erase = NoopDeterminedState::RIGHT_DETERMINED;
     }
   }
+
+  bool modifiers_as_dots = true;
+  if (args.flags.find("modifiers_as_dots") != args.flags.end()) {
+    if (args.flags.at("modifiers_as_dots") == "false") {
+      modifiers_as_dots = false;
+    }
+  }
+
 
   std::ifstream file_stream(args.positional_args[0]);
   std::stringstream buffer;
@@ -170,7 +178,7 @@ int main(int argc, const char *argv[]) {
   auto nfa =
       CreateNfa(*parsed_game->get_moves(), declarations, /*optimize=*/false);
   std::unordered_map<const rbg_parser::game_move *, NoopDeterminedState>
-      noops_determined_state = FindRedundantNoops(nfa, declarations);
+      noops_determined_state = FindRedundantNoops(nfa, declarations, modifiers_as_dots);
 
   std::stringstream result;
 

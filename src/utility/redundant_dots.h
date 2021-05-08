@@ -25,7 +25,7 @@ enum class NoopDeterminedState {
 //        FindRedundantNoops(nfa, declarations);
 std::unordered_map<const rbg_parser::game_move *, NoopDeterminedState>
 FindRedundantNoops(const Nfa<std::unique_ptr<Move>> &nfa,
-                    const Declarations &declarations);
+                    const Declarations &declarations, bool modifiers_as_dots=true);
 } // namespace rbg
 
 #endif // RBGGAMEMANAGER__UTILITY_REDUNDANT_DOTS_H
