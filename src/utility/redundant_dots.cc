@@ -19,6 +19,7 @@ bool IsLeftDetermined(const NfaBoardProduct &board_product, node_t node,
             ->type();
 
     if ((modifiers_as_dots && IsModifier(edge_type)) ||
+        IsSwitch(edge_type) ||
         edge_type == MoveType::kNoop) {
       return true;
     }
@@ -37,6 +38,7 @@ bool IsRightDetermined(const NfaBoardProduct &board_product, node_t node,
             .content()
             ->type();
     if ((modifiers_as_dots && IsModifier(edge_type)) ||
+        IsSwitch(edge_type) ||
         edge_type == MoveType::kNoop) {
       return true;
     }

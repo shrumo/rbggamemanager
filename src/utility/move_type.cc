@@ -77,4 +77,18 @@ bool IsModifier(MoveType type) {
 bool IsModifier(const rbg_parser::game_move &move) {
   return IsModifier(ParserMoveType(move));
 }
+
+bool IsSwitch(MoveType type) {
+  switch (type) {
+  case MoveType::kKeeperSwitchType:
+  case MoveType::kPlayerSwitchType:
+    return true;
+  default:
+    return false;
+  }
+}
+
+bool IsSwitch(const rbg_parser::game_move &move) {
+  return IsSwitch(ParserMoveType(move));
+}
 } // namespace rbg
