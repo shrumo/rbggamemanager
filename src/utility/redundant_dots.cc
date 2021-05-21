@@ -17,6 +17,12 @@ bool IsLeftDetermined(const NfaBoardProduct &board_product, node_t node,
             ->graph.GetEdge(board_product.EdgesTo(node).begin()->content())
             .content()
             ->type();
+    
+    if (board_product.EdgesFrom(node).size() > 1) {
+      // This means we can walk around the dot
+      return false;
+    }
+
 
     if ((modifiers_as_dots && IsModifier(edge_type)) ||
         IsSwitch(edge_type) ||
@@ -26,10 +32,6 @@ bool IsLeftDetermined(const NfaBoardProduct &board_product, node_t node,
 
     node = board_product.EdgesTo(node).begin()->from();
 
-    if (board_product.EdgesFrom(node).size() > 1) {
-      // This means we can walk around the dot
-      return false;
-    }
   }
 
   return board_product.EdgesTo(node).size() <= 1;
@@ -43,17 +45,19 @@ bool IsRightDetermined(const NfaBoardProduct &board_product, node_t node,
             ->graph.GetEdge(board_product.EdgesFrom(node).begin()->content())
             .content()
             ->type();
+
+    if (board_product.EdgesTo(node).size() > 1) {
+      // This means we can walk around the dot
+      return false;
+    }
+    
     if ((modifiers_as_dots && IsModifier(edge_type)) ||
         IsSwitch(edge_type) ||
         edge_type == MoveType::kNoop) {
       return true;
     }
+
     node = board_product.EdgesFrom(node).begin()->to();
-    
-    if (board_product.EdgesTo(node).size() > 1) {
-      // This means we can walk around the dot
-      return false;
-    }
   }
   return board_product.EdgesFrom(node).size() <= 1;
 }

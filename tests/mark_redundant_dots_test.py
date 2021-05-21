@@ -71,7 +71,7 @@ with open(tmp_game_filename, 'w') as f:
     print(tmp_game_text, file=f)
 
 out = subprocess.getoutput(
-    './mark_redundant_dots {} --modifiers_as_dots false'.format(tmp_game_filename))
+    './mark_redundant_dots {}'.format(tmp_game_filename))
 # assert('#rules' in out)
 print(out)
 print('Tricky case, should not be redundant:')
