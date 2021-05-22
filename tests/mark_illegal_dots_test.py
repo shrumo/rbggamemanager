@@ -280,7 +280,7 @@ tmp_game_text = '''
     [e,e,e,e,e,e]
     [e,e,e,e,e,e])
 
-#rules = ->red (. right + . right down + . right down^2 + . right down^2 left + . left
+#rules = (left* + right*) (up* + down*) ->red (. right + . right down + . right down^2 + . right down^2 left + . left
 + . left down + . left down^2 + . left right) ->blue
 '''
 
@@ -295,5 +295,5 @@ print(out)
 rules = out[out.find('#rules'):]
 rules = rules.replace(' ', '').replace('\n', '')
 print(rules)
-assert(rules=="#rules=(->red((.right)+(.rightdown)+(.rightdowndown)+(.rightdowndownleft)+(.left)+(.leftdown)+(.leftdowndown)+(.leftright))->blue)")
+assert(rules=="#rules=((left*+right*)(up*+down*)->red((.right)+(.rightdown)+(.rightdowndown)+(.rightdowndownleft)+(.left)+(.leftdown)+(.leftdowndown)+(.leftright))->blue)")
 
