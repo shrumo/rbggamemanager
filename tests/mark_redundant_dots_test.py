@@ -33,9 +33,9 @@ tmp_game_text = '''
 #pieces = e, r, b
 #variables = turn(10)
 #board = rectangle(up, down, left, right,
-    [b,r,e]
-    [e,e,e]
-    [e,e,e])
+    [b,r,e,e,e,e]
+    [e,e,e,e,e,e]
+    [e,e,e,e,e,e])
 
 #rules = ->red . (up + down + left + right)* [r] . {r} . (up + down + left + right)* . right . (up + down) . ->blue
 '''
@@ -59,9 +59,9 @@ tmp_game_text = '''
 #pieces = e, r, b
 #variables = turn(10)
 #board = rectangle(up, down, left, right,
-    [b,r,e]
-    [e,e,e]
-    [e,e,e])
+    [b,r,e,e,e,e]
+    [e,e,e,e,e,e]
+    [e,e,e,e,e,e])
 
 #anySquare = (left* + right*) (up* + down*)
 #rules = ->> anySquare [e] (. left left* + . right right*) [e] ->>
@@ -87,9 +87,9 @@ tmp_game_text = '''
 #pieces = e, r, b
 #variables = turn(10)
 #board = rectangle(up, down, left, right,
-    [b,r,e]
-    [e,e,e]
-    [e,e,e])
+    [b,r,e,e,e]
+    [e,e,e,e,e]
+    [e,e,e,e,e])
 
 #anySquare = (left* + right*) (up* + down*)
 #rules = ->> anySquare [e] (. left left + . right right) [e] ->>
@@ -99,12 +99,12 @@ with open(tmp_game_filename, 'w') as f:
     print(tmp_game_text, file=f)
 
 out = subprocess.getoutput(
-    './mark_redundant_dots {} --modifiers_as_dots false'.format(tmp_game_filename))
+    './mark_redundant_dots {} --modifiers_as_dots true'.format(tmp_game_filename))
 # assert('#rules' in out)
 print(out)
-print('Tricky case, should be right redundant:')
+print('Tricky case I think those are not redundant:')
 print(out)
 rules = out[out.find('#rules'):]
 rules = rules.replace(' ', '').replace('\n', '')
-assert(rules == "#rules=(->>(left*+right*)(up*+down*)[e]((/*R*/.leftleft)+(/*R*/.rightright))[e]->>)")
+assert(rules == "#rules=(->>(left*+right*)(up*+down*)[e]((.leftleft)+(.rightright))[e]->>)")
 
