@@ -213,7 +213,7 @@ rbg::ActionsDescriptionsMap(const std::string &game_text) {
   auto nfa = CreateNfa(*game->get_moves(), declarations);
   for (node_t node : nfa.graph.nodes()) {
     for (const auto &edge : nfa.graph.EdgesFrom(node)) {
-      if (edge.content()->indexed()) {
+      if (edge.content()->indexed() && IsModifier(edge.content()->type())) {
         const auto &indexed_edge =
             dynamic_cast<const IndexedMove &>(*edge.content());
         result[indexed_edge.index()] =
