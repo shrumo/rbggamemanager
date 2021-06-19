@@ -102,9 +102,8 @@ out = subprocess.getoutput(
     './mark_redundant_dots {} --modifiers_as_dots true'.format(tmp_game_filename))
 # assert('#rules' in out)
 print(out)
-print('Tricky case I think those are not redundant:')
+print('Those are redundant, because right redundancy changed:')
 print(out)
 rules = out[out.find('#rules'):]
 rules = rules.replace(' ', '').replace('\n', '')
-assert(rules == "#rules=(->>(left*+right*)(up*+down*)[e]((.leftleft)+(.rightright))[e]->>)")
-
+assert(rules == "#rules=(->>(left*+right*)(up*+down*)[e]((/*R*/.leftleft)+(/*R*/.rightright))[e]->>)")
