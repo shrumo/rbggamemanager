@@ -22,7 +22,8 @@ assert('#rules' in out)
 print('With modifier_indices:', out)
 rules = out[out.find('#rules'):]
 rules = rules.replace(' ', '').replace('\n', '')
-assert(rules == '#rules=(/*1*/->red(up{e})*up(left+(right{e}))up/*2*/[b]/*3*/->blue)')
+assert(
+    rules == '#rules=(/*1*/->red(up{e})*up(left+(right{e}))up/*2*/[b]/*3*/->blue)')
 
 out = subprocess.getoutput(
     './add_dots {} --add_dots_in_alternatives true'.format(tmp_game_filename))
@@ -98,5 +99,36 @@ rules = out[out.find('#rules'):]
 rules = rules.replace(' ', '').replace('\n', '')
 assert(rules ==
        '#rules=((up*+down*).(left*+right*).->>{w}[e]up({e}+((left+right).{b,e})).->>)')
+
+os.remove(third_tmp_game_filename)
+
+third_tmp_game_filename = 'tmp_weird_game.rbg'
+third_tmp_game_text = '''
+#players = red(100), blue(50)
+#pieces = e, w, b
+#variables = turn(10)
+#board = rectangle(up, down, left, right,
+    [w,b]
+    [e,e])
+
+#rules = ->>
+(
+     left {? left} +
+     right {? right} 
+     )
+    ->>
+'''
+
+with open(third_tmp_game_filename, 'w') as f:
+    print(third_tmp_game_text, file=f)
+
+out = subprocess.getoutput(
+    './add_dots {} --add_dots_in_alternatives true --dots_in_shifttables exclusively'.format(third_tmp_game_filename))
+print('Dots in alternatives, with shift table containing move checks:', out)
+rules = out[out.find('#rules'):]
+rules = rules.replace(' ', '').replace('\n', '')
+print(rules)
+assert(rules ==
+       '#rules=(->>(.(left{?left})+.(right{?right}))->>)')
 
 os.remove(third_tmp_game_filename)

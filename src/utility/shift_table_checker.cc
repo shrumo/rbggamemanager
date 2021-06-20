@@ -11,6 +11,13 @@ public:
 
   bool NoopCase(const rbg_parser::noop &) override { return true; }
 
+  bool MoveCheckCase(const rbg_parser::move_check & move_check) {
+    if(ContainsOnlyShiftsFn{}(*move_check.get_content())) {
+      return true;
+    }
+    return false;
+  }
+
   bool SumCase(const rbg_parser::sum &move) override {
     for (const auto &m : move.get_content()) {
       if (!ContainsOnlyShiftsFn()(*m)) {
