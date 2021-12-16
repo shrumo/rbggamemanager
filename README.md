@@ -1,5 +1,7 @@
 # rbggamemanager
 
+This is a part of the Regular Boardgames General Game Playing system. See the official repository: <https://github.com/marekesz/rbg>.
+
 [![Build Status](https://travis-ci.com/shrumo/rbggamemanager.svg?branch=master)](https://travis-ci.com/shrumo/rbggamemanager)
 
 This is a game manager that can be used to play games written in regular board games language as described in
